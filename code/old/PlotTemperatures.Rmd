@@ -1,0 +1,206 @@
+---
+title: "Temperature Plot"
+author: "Jason Conner"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+### Begin Here!
+You should execute this code by opening *G:\\EBSother\\EBS2019\\HeatMapR\\PlotTemperatures.Rmd* and either running the specified chunks in Rstudio or simply re-knitting it to PDF.
+
+### Requirements
+You need these packages:  
+1.  tidyverse  
+2.  sp  
+3.  rgdal  
+4.  raster  
+5.  broom  
+6.  maps (note: this package masks a function in tidyverse)  
+
+### Configuration
+Execute the **setup** chunk below. In this chunk, we create a function to load and format ArcGIS shapefiles for use with ggplot2.
+
+```{r setup, echo=T, message=F, warning=F}
+
+setwd('G:/EBSother/EBS2021/HeatMapR/')
+#devtools::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = TRUE)
+
+library(akgfmaps)
+library(tidyverse)
+library(broom)
+library(rgdal)
+library(maps)
+library(sp)
+library(raster)
+#library(googlesheets)
+library(googledrive)
+library(bindrcpp)
+library(dplyr)
+
+drive_deauth()
+drive_auth()
+1
+
+
+# sessionInfo()
+
+# Packages and versions - use unloadNamespace("Package") to clear package if need to 
+# install earlier version
+
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#  [1] bindrcpp_0.2       googlesheets_0.3.0 raster_2.8-19      maps_3.3.0         rgdal_1.4-3       
+#  [6] sp_1.3-1           broom_0.4.3        forcats_0.4.0      stringr_1.4.0      dplyr_0.8.0       
+# [11] purrr_0.2.4        readr_1.1.1        tidyr_0.8.3        tibble_2.1.1       ggplot2_3.1.0     
+# [16] tidyverse_1.2.1 
+# 
+# '''
+
+# Function to prepare shapefile objects for maps
+importEBSgrid <- function(dir, shp) {
+  shapefile <- rgdal::readOGR(dir,shp, verbose=F)
+  # Mess around to get StationID on the tidy dataframe
+  stationIds <- data.frame(STATION_ID=shapefile@data$STATION_ID)
+  stationIds$id <- as.character(seq(0,nrow(stationIds)-1))
+  shape.df <- broom::tidy(shapefile)
+  latLon <- cbind.data.frame(lon=shape.df$long, lat=shape.df$lat)
+  coordinates(latLon) <- ~ lon+lat
+  projection(latLon) <- sp::proj4string(shapefile)
+  latLon <- spTransform(latLon, CRS("+proj=longlat"))  %>%
+    data.frame()
+  ShapeUTM <- cbind(latLon,
+                    shape.df[,3:7])
+  names(ShapeUTM) <- c("long","lat", "order", "hole","piece", "group", "id")
+  shapeStations <- dplyr::inner_join(ShapeUTM,stationIds, by='id')
+  
+  return(shapeStations)
+}
+
+```
+
+
+### Input New Data
+Next, use Excel to update heatLog.csv in the folder *G:\\EBSother\\EBS2019\\HeatMapR\\* with the new data, filling Station (same format as RACEBASE) and bottom temperature. Surface temperatures are optional. You may want to re-sort these by Station to make sure there are no duplicates, although this shouldn't crash the script. **Do not** change column names or file names.
+
+### Create New Temperature Map
+Now execute the **heatPlot** chunk below. This will create a preview in this Rmarkdown document, and save a PNG image file in the *G:\\EBSother\\EBS2019\\HeatMapR\\* directory named "*HeatPlotMM-DD-YYYY.png*", where MM-DD-YYYY is the current date. If you need to generate separate heat maps on the same day, manually change the filename prior to the next run.
+
+
+```{r heatPlot, results="asis", echo=T, message=F, warning=F}
+
+# Prepare map objects
+# Repalced shapefile "EBSgrid" with "NBSgrid". Latter includes NBS+EBS grids
+
+NEBSgrid <- importEBSgrid(dir = paste0(getwd(),'/shapefiles'), 
+                          shp = 'NEBSgrid')
+
+AKmap <- maps::map("world", region=c('russia', 'usa:alaska'), fill=T, plot=F) %>%
+  broom::tidy()
+
+# Break temps into factors
+tempBreaks <- c(-2,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,18,21,30.4)
+tempLabels <- c("<= -1.0°",
+                "> -1.0° to -0.5°",
+                "> -0.5° to 0°",
+                "> 0.0° to 0.5°",
+                "> 0.5° to 1.0°",
+                "> 1.0° to 1.5°",
+                "> 1.5° to 2.0°",
+                "> 2.0° to 2.5°",
+                "> 2.5° to 3.0°",
+                "> 3.0° to 3.5°",
+                "> 3.5° to 4.0°",
+                "> 4.0° to 4.5°",
+                "> 4.5° to 5.0°",
+                "> 5.0° to 5.5°",
+                "> 5.5° to 6.0°",
+                "> 6.0°", 
+                "EBS station 5/29 to 8/3", 
+                "NBS station 8/4 to 8/27")
+
+# Break temps into factors
+#tempBreaks <- c(-Inf,-1,0,1,2,3,4,5,6,Inf)
+#tempLabels <- c("< -1°","-1° - 0°","0° - 1°","1° - 2°","2° - 3°","3° - 4°","4° - 5°","5° - 6°","> 6°")
+drive_download("heatLog.csv", type = "csv", overwrite = T)
+# Load data from Google Sheet
+heatLog <-  read_csv("heatLog.csv") %>%
+  #gs_title("heatLog.csv") %>%
+  # gs_read() %>% 
+  dplyr::filter(!is.na(BottomTemp)) %>%
+  dplyr::right_join(NEBSgrid, by=c('Station'='STATION_ID')) %>%
+  dplyr::mutate(binTemp = cut(BottomTemp,
+                              breaks=tempBreaks,
+                              labels=tempLabels,
+                              right = F
+  )
+  )
+
+SEBS <- get_base_layers(select.region = "bs.south", set.crs = "auto")
+ggPlot <- ggplot() +
+    geom_sf(data = SEBS$akland) +
+    geom_sf(data = SEBS$bathymetry) +
+    geom_sf(data = SEBS$survey.area, fill = NA) +
+    geom_sf(data = SEBS$graticule, color = "grey70", alpha = 0.5) +
+    coord_sf(xlim = SEBS$plot.boundary$x, 
+             ylim = SEBS$plot.boundary$y) +
+    scale_x_continuous(name = "Longitude", 
+                       breaks = SEBS$lon.breaks) + 
+    scale_y_continuous(name = "Latitude", 
+                       breaks = SEBS$lat.breaks) + 
+    theme_bw()+
+
+# Make ggplot!
+#ggPlot <- ggplot() +
+  geom_polygon(data=heatLog,
+               aes(x=long, y=lat, group=group, fill=binTemp),
+               color="black") +
+  scale_fill_manual(name = 'Bottom\nTemperature (°C)',
+                    values = c("#8000ff","#3700ff","#0012ff","#005bff","#00a4ff","#00C8ff",
+                               "#00FFED","#00ff92","#00ff00","#80ff00","#C8ff00","#FFff00",
+                               "#ffB600","#ff8000","#ff4900","#FF0000","#dbfbdc","#cbfcfb"),
+                    labels = tempLabels,
+                    drop = F,
+                    na.translate = F
+  ) +
+  
+  #theme_bw(base_size=10) +
+  theme(legend.position="right",
+        legend.direction="vertical",
+        legend.justification="left",
+        legend.title=element_text(size=8),
+        legend.key.size=(unit(.3,"cm"))
+  ) +
+  
+  
+#  geom_map(data=AKmap, map=AKmap, aes(map_id=region), color="black", fill="gray",
+#          show.legend=F) +
+#  coord_map(projection="albers",
+           # lat0=55, lat1=62,
+            #xlim=c(-178, -157), ylim=c(54,66.5)) +
+  
+  annotate("text", x = -159, y = 62, label = "Alaska" ,color = "black", size = 6) +
+  annotate("text", x = -176, y = 54.4, label = "Date created\n" ,color = "black", size = 2) #+
+#  xlab(NULL) +
+#  ylab(NULL)  +
+  #scale_y_continuous(breaks = seq(54,66,2), labels = paste0(seq(54,66,2),"°N"), expand = c(0, 0)) +
+#  scale_x_continuous(breaks = seq(-180,-155,5), labels = paste0(seq(-180,-155,5), "°W"), expand = c(0, 0))
+
+# Save plot as PNG, with date appended
+# Can change "png" to "pdf" to save as pdf file
+
+ggsave(paste0(getwd(),'/results/HeatPlot',Sys.Date(),'.png'), plot=ggPlot, device="png")
+
+ggPlot
+```
+
+
+```{r GsheetsTest}
+heatlogG <- gs_title("heatLog.csv")
+gs_browse(heatlogG)
+
+heatLog <- gs_read(heatlogG) %>%
+  dplyr::right_join(NEBSgrid, by=c('Station'='STATION_ID'))
+```
+
