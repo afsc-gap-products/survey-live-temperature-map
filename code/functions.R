@@ -381,7 +381,8 @@ create_vargridplots <- function(
                                 override.aes = list(fill = c("grey30", "grey60"), 
                                                     size = 2)) , 
           shape = guide_legend(order = 3, # planned stations
-                               override.aes = list(fill = "white"))
+                               override.aes = list(fill = "grey95", 
+                                                   linetype = c("blank")))
         )
       
     } else {

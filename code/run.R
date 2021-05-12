@@ -25,16 +25,18 @@ if (FALSE) { # so you don't unnecessarially run this each time
 
 # *** google drive ------------------------------------------------------------
 
-drive_deauth()
-drive_auth()
-1
-
-# Load data from Google Sheet
-# https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
-drive_download("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE", #"heatLog.csv",
-               type = "csv",
-               overwrite = T)
-
+if (FALSE) { # so you don't unnecessarially run this each time
+  
+  drive_deauth()
+  drive_auth()
+  1
+  
+  # Load data from Google Sheet
+  # https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
+  drive_download("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE", #"heatLog.csv",
+                 type = "csv",
+                 overwrite = T)
+}
 
 # Run maps ---------------------------------------------------------------------
 
