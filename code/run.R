@@ -33,7 +33,7 @@ if (FALSE) { # so you don't unnecessarially run this each time
   
   # Load data from Google Sheet
   # https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
-  drive_download("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE", #"heatLog.csv",
+  drive_download(as_id("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"), #"heatLog.csv",
                  type = "csv",
                  overwrite = T)
 }
@@ -49,6 +49,8 @@ drive_auth()
 
 # What year are these temperatures from?
 yr <- 2021 #CHANGE
+EBS_proposed_dates<-"(May 25-Aug 04)"
+NBS_proposed_dates<-"(Aug 02-Aug 28)"
 
 # Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
 region_akgfmaps <- "bs.all" #CHANGE
@@ -100,6 +102,8 @@ create_vargridplots(yr = yr,
                plot_title = paste0(yr, ' Bottom Temperature (°C)'),
                legend_temp = 'Bottom\nTemperature (°C)',
                dates = "latest", # "all", #"2021-06-05", 
+               EBS_proposed_dates = EBS_proposed_dates,
+               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "daily",
@@ -123,6 +127,8 @@ create_vargridplots(yr = yr,
                                    ')'),
                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
                dates = "latest", # "all", #"2021-06-05", 
+               EBS_proposed_dates = EBS_proposed_dates,
+               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "anom",
@@ -156,6 +162,8 @@ create_vargridplots(yr = yr,
                plot_title = paste0(yr, ' Survey Bottom Temperature (°C)'),
                legend_temp = 'Bottom\nTemperature (°C)',
                dates = "latest", # "all", #"2021-06-05", 
+               EBS_proposed_dates = EBS_proposed_dates,
+               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "daily",
@@ -177,11 +185,12 @@ create_vargridplots(yr = yr,
                                           text_list(x = unique(dat_nbs$year))),
                                    ')'),
                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
-               dates = "latest", # "all", #"2021-06-05", 
+               dates = "latest", # "all", #"2021-06-05",
+               EBS_proposed_dates = EBS_proposed_dates,
+               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "anom",
                dir_out = here::here("results", yr, "anomalies"))
-
 
 

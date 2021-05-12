@@ -151,7 +151,9 @@ create_vargridplots <- function(
   dates = "latest",
   region_akgfmaps = "bs.all", 
   region_grid, 
-  height = 8, 
+  EBS_proposed_dates="",
+  NBS_proposed_dates="",
+  height = 8.5, 
   width = 10.5,
   file_end = "",
   dir_out = "./", 
@@ -248,7 +250,7 @@ create_vargridplots <- function(
                           paste(format(vess_date, # "%a %b %d"
                                        "%b %d"), collapse = "-"))
       dat_planned$lab[dat_planned$vess %in% vess]<-
-        paste0(vess, " (", vess_date, ")")
+        paste0(vess, "\n(", vess_date, ")")
       
     }
     
@@ -355,8 +357,8 @@ create_vargridplots <- function(
       scale_color_manual(name = "Survey Region", 
                          values = c(alpha("grey30",0.7), 
                                     alpha("grey60",0.7)), 
-                         breaks = c("NEBS", "SEBS"), 
-                         labels = c("NBS", "EBS")) 
+                         breaks = c("SEBS", "NEBS"), 
+                         labels = c(paste0("EBS ", EBS_proposed_dates), paste0("NBS ", NBS_proposed_dates))) 
     
     
     # if there are planned dates
@@ -368,12 +370,12 @@ create_vargridplots <- function(
         ) +
         scale_shape_manual(
           name = "Planned Stations",
-          values = unique(dat_planned$var),
-          breaks = unique(dat_planned$var), 
-          labels = unique(dat_planned$lab)) +
+          values = sort(unique(dat_planned$var)),
+          breaks = sort(unique(dat_planned$var)), 
+          labels = sort(unique(dat_planned$lab))) +
         
         guides(
-          fill = guide_legend(ncol=1, # tempartures # in case you want to have 2+ columns for the legend!
+          fill = guide_legend(ncol=1, # tempertures # in case you want to have 2+ columns for the legend!
                               override.aes = list(colour = c("white"),
                                                   size = 0),
                               order = 1),
