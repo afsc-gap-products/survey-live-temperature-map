@@ -39,11 +39,14 @@ These plots will be used to create pages like this on the AFSC website: https://
 
 With this script, we pull temperature content from google drive and then push the maps to google drive for the comms team. 
 
-# Example files
+## Example files
 
-Notes: Values are made up. 
+Note: Values are made up. 
+
+### Daily Plot
 
 ![Daily Temperatrues](./test/2021-06-04_daily.png)
 
+### Anomaly Plot
 
 ![Anomaly Temperatrues](./test/2021-06-04_anom.png)
