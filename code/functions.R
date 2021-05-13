@@ -150,7 +150,7 @@ create_vargridplots <- function(
   legend_temp = 'Bottom\nTemperature (°C)',
   dates = "latest",
   region_akgfmaps = "bs.all", 
-  region_grid, 
+  region_grid = "NEBSgrid", 
   height = 8.5, 
   width = 10.5,
   file_end = "",
@@ -169,7 +169,7 @@ create_vargridplots <- function(
   # set Base Layers
   
   # Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
-  survey_area <- get_base_layers(select.region = "bs.all", 
+  survey_area <- get_base_layers(select.region = region_akgfmaps, 
                                  set.crs = "auto")
   # survey_area$graticule <- spTransform(survey_area$graticule, 
   #                                      crs(survey_area$akland))
@@ -313,11 +313,17 @@ create_vargridplots <- function(
     BSgrid0$binTemp[BSgrid0$date>max_date]<-NA  # only use dates including this date and before this date
     #MACARONI I think we only need one plot to be produced for the max_date, not multiple plot for each date of temp entries.
     
+    survey_reg_col <- gray.colors(length(unique(dat$reg_shapefile))+2)
+    survey_reg_col<-survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
+    
+    
     gg <- ggplot() +
       # AK Map (thanks {akgfmaps}!)
       geom_sf(data = survey_area$akland, fill = "white") +
       # geom_sf(data = survey_area$bathymetry) +
-      geom_sf(data = survey_area$graticule, color = "grey70", alpha = 0.5) +
+      geom_sf(data = survey_area$graticule, 
+              color = "grey70", 
+              alpha = 0.5) +
       coord_sf(xlim = survey_area$plot.boundary$x, 
                ylim = survey_area$plot.boundary$y) +
       scale_x_continuous(name = "Longitude", 
@@ -331,7 +337,7 @@ create_vargridplots <- function(
       geom_sf(data = BSgrid0, 
               aes(group = STATION_ID, 
                   fill = binTemp), 
-              colour = "grey80",
+              colour = "grey50",
               show.legend = legend_temp) +
       
       geom_sf(data = survey_area$survey.area, 
@@ -350,12 +356,12 @@ create_vargridplots <- function(
                         na.translate = F
       ) +
       scale_color_manual(name = "Survey Region", 
-                         values = c(alpha(gray.colors(length(unique(dat$reg_shapefile))),
+                         values = c(alpha(survey_reg_col,
                                           0.7)), 
                          breaks = sort(unique(dat$reg_shapefile), decreasing = TRUE), 
                          labels = sort(unique(dat$reg_lab), decreasing = TRUE))
     
-    
+
     # if there are planned dates
     if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
       gg <- gg +
@@ -374,7 +380,7 @@ create_vargridplots <- function(
                                                   size = 0),
                               order = 1),
           colour = guide_legend(order = 2, # survey regions
-                                override.aes = list(fill = gray.colors(length(unique(dat$reg_shapefile))),                                                     size = 2)) , 
+                                override.aes = list(fill = survey_reg_col,                                                     size = 2)) , 
           shape = guide_legend(order = 3, # planned stations
                                override.aes = list(fill = "grey95", 
                                                    linetype = c("blank")))
@@ -390,12 +396,14 @@ create_vargridplots <- function(
                               order = 1),
           # survey regions
           colour = guide_legend(order = 2, 
-                                override.aes = list(fill = gray.colors(length(unique(dat$reg_shapefile))), 
+                                override.aes = list(fill = survey_reg_col, 
                                                     size = 2))) 
     }
     
     gg <- gg +
       theme( 
+        panel.background = element_rect(fill = "grey90"#, colour = "lightblue"
+                                        ),
         plot.title = element_text(size=20), 
         plot.subtitle = element_text(size=14), 
         legend.text=element_text(size=16), 
