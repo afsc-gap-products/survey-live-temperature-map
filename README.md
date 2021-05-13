@@ -9,19 +9,12 @@
 
 **Emily Markowitz** (Emily.Markowitz AT noaa.gov)
 
-Research Fisheries Biologist, 
-
-Alaska Fisheries Science Center, 
-
-National Marine Fisheries Service, 
-
-National Oceanic and Atmospheric Administration,
-
-Seattle, WA 98195
+Research Fisheries Biologist
 
 **Liz Dawson** (Liz.Dawson AT noaa.gov)
 
-Fisheries Biologist, 
+Fisheries Biologist
+
 
 Alaska Fisheries Science Center, 
 
@@ -41,7 +34,7 @@ With this script, we pull temperature content from google drive and then push th
 
 ## Example files
 
-Note: Values are made up. 
+> Note: Values are made up. 
 
 ### Daily Plot
 
