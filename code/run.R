@@ -49,7 +49,6 @@ drive_deauth()
 drive_auth()
 1
 
-
 # *** During the Survey --------------------------------------------------------
 
 # What year are these temperatures from?

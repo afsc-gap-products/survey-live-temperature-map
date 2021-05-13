@@ -43,7 +43,7 @@ With this script, we pull temperature content from google drive and then push th
 
 Notes: Values are made up. 
 
-![Daily Temperatrues](./resulsts/test/daily/2021-06-04_daily.png)
+![Daily Temperatrues](./test/2021-06-04_daily.png)
 
 
-![Anomaly Temperatrues](./resulsts/test/anom/2021-06-04_anom.png)
+![Anomaly Temperatrues](./test/2021-06-04_anom.png)

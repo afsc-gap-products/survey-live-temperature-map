@@ -164,7 +164,7 @@ create_vargridplots <- function(
   # Create Directories
   dir.create(path = here::here("results"), showWarnings = FALSE)
   dir.create(path = dir_out, showWarnings = FALSE)
-  dir.create(path = paste(dir_out, "/", file_end), showWarnings = FALSE)
+  # dir.create(path = paste(dir_out, "/", file_end), showWarnings = FALSE)
   
   # set Base Layers
   
