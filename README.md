@@ -38,3 +38,12 @@ These scripts create the daily tempertaure and anomaly plots as NOAA Fisheries' 
 These plots will be used to create pages like this on the AFSC website: https://www.fisheries.noaa.gov/feature-story/2019-southeastern-bering-sea-shelf-bottom-trawl-survey-gets-underway
 
 With this script, we pull temperature content from google drive and then push the maps to google drive for the comms team. 
+
+# Example files
+
+Notes: Values are made up. 
+
+![Daily Temperatrues](./resulsts/test/daily/2021-06-04_daily.png)
+
+
+![Anomaly Temperatrues](./resulsts/test/anom/2021-06-04_anom.png)

@@ -20,7 +20,6 @@ dat_survreg0 <- data.frame(reg_shapefile = c("SEBS", "NEBS"),
                           region = c("EBS", "NBS"))
 
 
-
 # *** Oracle -------------------------------------------------------------------
 
 if (FALSE) { # so you don't unnecessarially run this each time
@@ -126,7 +125,7 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "daily",
-               dir_out = here::here("results", yr, "daily") )
+               dir_out = here::here("results", yr))
 
 
 # The bottom temperature anomaly between this year and past years
@@ -149,7 +148,7 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "anom",
-               dir_out = here::here("results", yr, "anomalies"))
+               dir_out = here::here("results", yr))
 
 # *** Previous years --------------------------------------------------
 
@@ -196,7 +195,7 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "daily",
-               dir_out = here::here("results", yr, "daily") )
+               dir_out = here::here("results", yr))
 
 # The bottom temperature anomaly between this year and past years
 create_vargridplots(yr = yr, 
@@ -218,6 +217,6 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "anom",
-               dir_out = here::here("results", yr, "anomalies"))
+               dir_out = here::here("results", yr))
 
 

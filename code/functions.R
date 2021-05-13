@@ -163,8 +163,8 @@ create_vargridplots <- function(
   
   # Create Directories
   dir.create(path = here::here("results"), showWarnings = FALSE)
-  dir.create(path = here::here("results", yr), showWarnings = FALSE)
   dir.create(path = dir_out, showWarnings = FALSE)
+  dir.create(path = paste(dir_out, "/", file_end), showWarnings = FALSE)
   
   # set Base Layers
   
@@ -352,8 +352,6 @@ create_vargridplots <- function(
       scale_color_manual(name = "Survey Region", 
                          values = c(alpha(gray.colors(length(unique(dat$reg_shapefile))),
                                           0.7)), 
-                           # c(alpha("grey30",0.7), 
-                           #          alpha("grey60",0.7)), 
                          breaks = sort(unique(dat$reg_shapefile), decreasing = TRUE), 
                          labels = sort(unique(dat$reg_lab), decreasing = TRUE))
     
@@ -405,7 +403,6 @@ create_vargridplots <- function(
         legend.direction="vertical",
         legend.justification="left",
         legend.title=element_text(size=16),
-        # legend.key = element_rect(colour = NA, fill = NA), 
         legend.box.background = element_blank(),
         legend.key = element_blank(), 
         legend.key.size=(unit(.3,"cm"))
@@ -425,7 +422,7 @@ create_vargridplots <- function(
     
     # Save plots
   
-    filename0 <- paste0(dir_out, '/TempPlot',paste(max_date), 
+    filename0 <- paste0(dir_out, '/',paste(max_date), 
                         ifelse(file_end=="", "", paste0("_", file_end)))
     
     ggsave(paste0(filename0,'.png'),
