@@ -15,6 +15,12 @@ dat_vess <- data.frame(var = c("v", "V", "a", "A"),
                        vess = c("F/V Vesteraalen", "F/V Vesteraalen", 
                                    "F/V Alaska Knight", "F/V Alaska Knight"))
 
+dat_survreg0 <- data.frame(reg_shapefile = c("SEBS", "NEBS"), 
+                           region_long = c("Eastern Bering Sea", "Northern Bering Sea"), 
+                          region = c("EBS", "NBS"))
+
+
+
 # *** Oracle -------------------------------------------------------------------
 
 if (FALSE) { # so you don't unnecessarially run this each time
@@ -49,8 +55,14 @@ drive_auth()
 
 # What year are these temperatures from?
 yr <- 2021 #CHANGE
-EBS_proposed_dates<-"(May 25-Aug 04)"
-NBS_proposed_dates<-"(Aug 02-Aug 28)"
+
+# What are your survey dates and for what regions?
+dat_survreg <- dat_survreg0 %>%
+  dplyr::left_join(x = ., 
+                   y = data.frame(reg_dates = c("(May 25-Aug 04)", # CHANGE
+                                                "(Aug 02-Aug 28)"), # CHANGE
+                                  region = c("EBS", "NBS")), 
+                   by = "region")
 
 # Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
 region_akgfmaps <- "bs.all" #CHANGE
@@ -62,13 +74,22 @@ heatLog0 <- read_csv(here::here("data", "heatLog.csv"))
 heatLog0 <- heatLog0[!(is.na(heatLog0$region)),]
 
 heatLog <- heatLog0 %>%
+  # Select data for this year
   dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
-                  dplyr::rename("var" = paste0(yr, "_bt"), 
-                                "date" = paste0(yr, "_date")) 
+  dplyr::rename("var" = paste0(yr, "_bt"), 
+                "date" = paste0(yr, "_date")) %>%
+  # add survey region data and planned survey dates
+  dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
+  dplyr::mutate(reg_lab = paste0(region, " ", reg_dates))
+
+# add survey vessel data
 if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
   heatLog <- heatLog %>%
     dplyr::left_join(x = ., y = dat_vess, by = "var") 
 } 
+
+# breaks = c("SEBS", "NEBS"), 
+# labels = c(paste0("EBS ", EBS_proposed_dates), paste0("NBS ", NBS_proposed_dates))) 
 
 anom_firstyr_nbs<-2010
 anom_firstyr_ebs<-1987
@@ -102,8 +123,6 @@ create_vargridplots(yr = yr,
                plot_title = paste0(yr, ' Bottom Temperature (°C)'),
                legend_temp = 'Bottom\nTemperature (°C)',
                dates = "latest", # "all", #"2021-06-05", 
-               EBS_proposed_dates = EBS_proposed_dates,
-               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "daily",
@@ -127,8 +146,6 @@ create_vargridplots(yr = yr,
                                    ')'),
                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
                dates = "latest", # "all", #"2021-06-05", 
-               EBS_proposed_dates = EBS_proposed_dates,
-               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "anom",
@@ -138,10 +155,24 @@ create_vargridplots(yr = yr,
 
 yr<-2019
 
+# What are your survey dates and for what regions?
+dat_survreg <- dat_survreg0 %>%
+  dplyr::left_join(x = ., 
+                   y = data.frame(reg_dates = c("(May 25-Aug 04)", # CHANGE
+                                                "(Aug 02-Aug 28)"), # CHANGE
+                                  region = c("EBS", "NBS")), 
+                   by = "region")
+
 heatLog <- heatLog0 %>%
+  # Select data for this year
   dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
   dplyr::rename("var" = paste0(yr, "_bt"), 
-                "date" = paste0(yr, "_date")) 
+                "date" = paste0(yr, "_date")) %>%
+  # add survey region data and planned survey dates
+  dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
+  dplyr::mutate(reg_lab = paste0(region, " ", reg_dates))
+
+# add survey vessel data
 if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
   heatLog <- heatLog %>%
     dplyr::left_join(x = ., y = dat_vess, by = "var") 
@@ -162,8 +193,6 @@ create_vargridplots(yr = yr,
                plot_title = paste0(yr, ' Survey Bottom Temperature (°C)'),
                legend_temp = 'Bottom\nTemperature (°C)',
                dates = "latest", # "all", #"2021-06-05", 
-               EBS_proposed_dates = EBS_proposed_dates,
-               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "daily",
@@ -186,8 +215,6 @@ create_vargridplots(yr = yr,
                                    ')'),
                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
                dates = "latest", # "all", #"2021-06-05",
-               EBS_proposed_dates = EBS_proposed_dates,
-               NBS_proposed_dates = NBS_proposed_dates,
                region_akgfmaps = region_akgfmaps, 
                region_grid = region_grid, 
                file_end = "anom",

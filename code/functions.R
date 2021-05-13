@@ -151,8 +151,6 @@ create_vargridplots <- function(
   dates = "latest",
   region_akgfmaps = "bs.all", 
   region_grid, 
-  EBS_proposed_dates="",
-  NBS_proposed_dates="",
   height = 8.5, 
   width = 10.5,
   file_end = "",
@@ -177,7 +175,7 @@ create_vargridplots <- function(
   #                                      crs(survey_area$akland))
   
   # Prepare map objects
-  # Repalced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
+  # Replaced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
   BSgrid0 <- rgdal::readOGR('./shapefiles',
                             "NEBSgrid", 
                             verbose=F)
@@ -222,7 +220,7 @@ create_vargridplots <- function(
   # select the data you care about
   dat <- heatLog %>%
     janitor::clean_names() %>% 
-    dplyr::filter(!is.na(var)) %>%
+    dplyr::filter(!is.na(region)) %>%
     dplyr::mutate(year = yr) %>%
     dplyr::mutate(date = strptime(x = paste0("0", date, "/", yr), 
                                   format = "%m/%d/%Y")) 
@@ -231,7 +229,7 @@ create_vargridplots <- function(
   if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
     
     # planned stations
-    BSgrid_center <- cbind.data.frame(BSgrid0$STATION_ID, coordinates(BSgrid0))
+    BSgrid_center <- cbind.data.frame(BSgrid0$STATION_ID, sp::coordinates(BSgrid0))
     names(BSgrid_center) <- c("station", "lon", "lat")
     
     dat_planned<-dat[grep(x = dat$var, pattern = "[A-Za-z]"),] %>%
@@ -258,8 +256,8 @@ create_vargridplots <- function(
     dat$date[grep(x = dat$var, pattern = "[A-Za-z]")]<-NA
     dat$var[grep(x = dat$var, pattern = "[A-Za-z]")]<-''
     dat <- dat %>%
-      dplyr::mutate(var = as.numeric(var)) %>% 
-      dplyr::select("region", "station", "var", "date") 
+      dplyr::mutate(var = as.numeric(var))# %>% 
+      # dplyr::select("region", "station", "var", "date") 
   }
   
   # combine temperture data with anomaly data?
@@ -329,7 +327,8 @@ create_vargridplots <- function(
       ggtitle(label = plot_title, 
               subtitle = plot_subtitle) +
       
-      geom_sf(data = BSgrid0,       # Add temperature squares
+      # Add temperature squares
+      geom_sf(data = BSgrid0, 
               aes(group = STATION_ID, 
                   fill = binTemp), 
               colour = "grey80",
@@ -346,19 +345,17 @@ create_vargridplots <- function(
                         extent(BSgrid)[4])) +
       scale_fill_manual(name = legend_temp,
                         values = varColour, 
-                        # TOLEDO - not color-blind friendly!
-                        # values = c("#8000ff","#3700ff","#0012ff","#005bff","#00a4ff","#00C8ff",
-                        #            "#00FFED","#00ff92","#00ff00","#80ff00","#C8ff00","#FFff00",
-                        #            "#ffB600","#ff8000","#ff4900","#FF0000","#dbfbdc","#cbfcfb"),
                         labels = varLabels,
                         drop = F,
                         na.translate = F
       ) +
       scale_color_manual(name = "Survey Region", 
-                         values = c(alpha("grey30",0.7), 
-                                    alpha("grey60",0.7)), 
-                         breaks = c("SEBS", "NEBS"), 
-                         labels = c(paste0("EBS ", EBS_proposed_dates), paste0("NBS ", NBS_proposed_dates))) 
+                         values = c(alpha(gray.colors(length(unique(dat$reg_shapefile))),
+                                          0.7)), 
+                           # c(alpha("grey30",0.7), 
+                           #          alpha("grey60",0.7)), 
+                         breaks = sort(unique(dat$reg_shapefile), decreasing = TRUE), 
+                         labels = sort(unique(dat$reg_lab), decreasing = TRUE))
     
     
     # if there are planned dates
@@ -366,8 +363,7 @@ create_vargridplots <- function(
       gg <- gg +
         geom_point(data = dat_planned, 
                    mapping = aes(x = lon, y = lat, shape = factor(var)), 
-                   size = 4#, show.legend = TRUE
-        ) +
+                   size = 4) +
         scale_shape_manual(
           name = "Planned Stations",
           values = sort(unique(dat_planned$var)),
@@ -380,8 +376,7 @@ create_vargridplots <- function(
                                                   size = 0),
                               order = 1),
           colour = guide_legend(order = 2, # survey regions
-                                override.aes = list(fill = c("grey30", "grey60"), 
-                                                    size = 2)) , 
+                                override.aes = list(fill = gray.colors(length(unique(dat$reg_shapefile))),                                                     size = 2)) , 
           shape = guide_legend(order = 3, # planned stations
                                override.aes = list(fill = "grey95", 
                                                    linetype = c("blank")))
@@ -397,7 +392,7 @@ create_vargridplots <- function(
                               order = 1),
           # survey regions
           colour = guide_legend(order = 2, 
-                                override.aes = list(fill = c("grey30", "grey60"), 
+                                override.aes = list(fill = gray.colors(length(unique(dat$reg_shapefile))), 
                                                     size = 2))) 
     }
     
