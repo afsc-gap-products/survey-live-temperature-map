@@ -177,7 +177,7 @@ create_vargridplots <- function(
   # Prepare map objects
   # Replaced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
   BSgrid0 <- rgdal::readOGR('./shapefiles',
-                            "NEBSgrid", 
+                            region_grid, 
                             verbose=F)
   
   
