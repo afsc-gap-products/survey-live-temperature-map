@@ -133,7 +133,7 @@ text_list<-function(x, oxford = TRUE) {
 #' @param legend_temp A string of the temperature legend header. 
 #' @param dates A string of either the date to be plotted to ("YYYY-MM-DD"), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted. Default = "latest". 
 #' @param region_akgfmaps Inherited from the akgfmaps package. "bs.south" plots the EBS region, "bs.all" plots EBS and NBS regions. See the "select.region" argument under '?get_base_layers'. Default = "bs.all"
-#' @param region_grid Select the shapefile you want to use for the grids. "EBSgrid" plots the EBS region and "NEBSgrid_df" plots EBS and NBS regions. Default = "NEBSgrid".
+#' @param region_grid Select the shapefile you want to use for the grids. "Egrid_stations" plots the EBS region and "NEgrid_stations_df" plots EBS and NBS regions. Default = "NEgrid_stations".
 #' @param height Numeric height of the figure in inches. default = 8.
 #' @param width Numeric width of the figure in inches. default = 10.5.
 #' @param file_end String. Will appear after "_" in the file name. 
@@ -150,7 +150,7 @@ create_vargridplots <- function(
   legend_temp = 'Bottom\nTemperature (°C)',
   dates = "latest",
   region_akgfmaps = "bs.all", 
-  region_grid = "NEBSgrid", 
+  region_grid = "NEgrid_stations", 
   height = 8.5, 
   width = 10.5,
   file_end = "",
@@ -169,19 +169,19 @@ create_vargridplots <- function(
   # set Base Layers
   
   # Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
-  survey_area <- get_base_layers(select.region = region_akgfmaps, 
+  survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, 
                                  set.crs = "auto")
   # survey_area$graticule <- spTransform(survey_area$graticule, 
   #                                      crs(survey_area$akland))
   
   # Prepare map objects
-  # Replaced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
-  BSgrid0 <- rgdal::readOGR('./shapefiles',
+  # Replaced shapefile "Egrid_stations" with "NEgrid_stations_df". Latter includes NBS+EBS grids
+  grid_stations0 <- rgdal::readOGR('./shapefiles',
                             region_grid, 
-                            verbose=F)
+                            verbose=F) 
   
   
-  BSgrid0 <- spTransform(BSgrid0,
+  grid_stations0 <- spTransform(grid_stations0,
                          "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") # crs(survey_area))
   
   # Break temps into factors
@@ -229,11 +229,11 @@ create_vargridplots <- function(
   if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
     
     # planned stations
-    BSgrid_center <- cbind.data.frame(BSgrid0$STATION_ID, sp::coordinates(BSgrid0))
-    names(BSgrid_center) <- c("station", "lon", "lat")
+    grid_stations_center <- cbind.data.frame(grid_stations0$STATION_ID, sp::coordinates(grid_stations0))
+    names(grid_stations_center) <- c("station", "lon", "lat")
     
     dat_planned<-dat[grep(x = dat$var, pattern = "[A-Za-z]"),] %>%
-      dplyr::left_join(x = ., y = BSgrid_center, "station") %>%
+      dplyr::left_join(x = ., y = grid_stations_center, "station") %>%
       dplyr::mutate(var = toupper(var)) %>%
       dplyr::mutate(lab = "") #%>% 
       # dplyr::select("region", "station", "var", "date", "vess", "lab") 
@@ -281,19 +281,20 @@ create_vargridplots <- function(
     # dplyr::select("region", "station", "var", "date", "bintemp", "year") 
   
   
-  BSgrid <- sp::merge(x = BSgrid0, 
+  grid_stations <- sp::merge(x = grid_stations0, 
                       y = dat, 
                       by.x = "STATION_ID", 
                       by.y = "station") 
   
   
-  BSgrid<-st_as_sf(BSgrid)
+  grid_stations<-st_as_sf(grid_stations) %>%
+    dplyr::filter(!(STATION_ID %in% c("DD-09", "AA-10")))
   
   # Create new temperature maps
   
   # This will create a preview in this Rmarkdown document, and save a PNG image file in the *G:\\EBSother\\EBS2019\\HeatMapR\\* directory named "*HeatPlotMM-DD-YYYY.png*", where MM-DD-YYYY is the date of trawl. 
   
-  date_entered<-sort(unique(BSgrid$date))
+  date_entered<-sort(unique(grid_stations$date))
   date_entered<-date_entered[!is.na(date_entered)]
   
   fig_list<-list()
@@ -309,8 +310,8 @@ create_vargridplots <- function(
   for (i in iterate) { 
     
     max_date <- date_entered[i]
-    BSgrid0<-BSgrid
-    BSgrid0$binTemp[BSgrid0$date>max_date]<-NA  # only use dates including this date and before this date
+    grid_stations0<-grid_stations
+    grid_stations0$binTemp[grid_stations0$date>max_date]<-NA  # only use dates including this date and before this date
     #MACARONI I think we only need one plot to be produced for the max_date, not multiple plot for each date of temp entries.
     
     survey_reg_col <- gray.colors(length(unique(dat$reg_shapefile))+2)
@@ -334,7 +335,7 @@ create_vargridplots <- function(
               subtitle = plot_subtitle) +
       
       # Add temperature squares
-      geom_sf(data = BSgrid0, 
+      geom_sf(data = grid_stations0, 
               aes(group = STATION_ID, 
                   fill = binTemp), 
               colour = "grey50",
@@ -345,10 +346,10 @@ create_vargridplots <- function(
               fill = NA, 
               size = 2,
               show.legend = "") +
-      coord_sf(xlim = c(extent(BSgrid)[1], 
-                        extent(BSgrid)[2]),
-               ylim = c(extent(BSgrid)[3] , 
-                        extent(BSgrid)[4])) +
+      coord_sf(xlim = c(extent(grid_stations)[1], 
+                        extent(grid_stations)[2]),
+               ylim = c(extent(grid_stations)[3] , 
+                        extent(grid_stations)[4])) +
       scale_fill_manual(name = legend_temp,
                         values = varColour, 
                         labels = varLabels,
@@ -417,13 +418,13 @@ create_vargridplots <- function(
       ) +
       # Annotations
       annotate("text", 
-               x = quantile(extent(BSgrid)[1]:extent(BSgrid)[2], .9), 
-               y = quantile(extent(BSgrid)[3]:extent(BSgrid)[4], .7), 
+               x = quantile(extent(grid_stations)[1]:extent(grid_stations)[2], .9), 
+               y = quantile(extent(grid_stations)[3]:extent(grid_stations)[4], .7), 
                label = "Alaska", 
                color = "black", size = 10) +
       annotate("text", 
-               x = quantile(extent(BSgrid)[1]:extent(BSgrid)[2], .1), 
-               y = quantile(extent(BSgrid)[3]:extent(BSgrid)[4], .1), 
+               x = quantile(extent(grid_stations)[1]:extent(grid_stations)[2], .1), 
+               y = quantile(extent(grid_stations)[3]:extent(grid_stations)[4], .1), 
                label = paste0("Date created:\n", format(Sys.Date(), "%B %d, %Y"), 
                               "\nRecorded as of:\n", format(max_date, "%B %d, %Y")), 
                color = "black", size = 4) 

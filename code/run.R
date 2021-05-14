@@ -50,7 +50,7 @@ drive_auth()
 1
 
 # *** During the Survey --------------------------------------------------------
-
+plot_subtitle = "Recorded during the NOAA Fisheries Southeastern Bering Sea\nBottom Trawl Survey"
 # What year are these temperatures from?
 yr <- 2021 #CHANGE
 
@@ -119,6 +119,7 @@ create_vargridplots(yr = yr,
                anom = NULL, 
                heatLog = heatLog, 
                plot_title = paste0(yr, ' Bottom Temperature (°C)'),
+               plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom\nTemperature (°C)',
                dates = "latest", # "all", #"2021-06-05", 
                region_akgfmaps = region_akgfmaps, 
@@ -142,6 +143,7 @@ create_vargridplots(yr = yr,
                                                 collapse = "-"),
                                           text_list(x = unique(dat_nbs$year))),
                                    ')'),
+               plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
                dates = "latest", # "all", #"2021-06-05", 
                region_akgfmaps = region_akgfmaps, 
@@ -189,6 +191,7 @@ create_vargridplots(yr = yr,
                anom = NULL, 
                heatLog = heatLog, 
                plot_title = paste0(yr, ' Survey Bottom Temperature (°C)'),
+               plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom\nTemperature (°C)',
                dates = "latest", # "all", #"2021-06-05", 
                region_akgfmaps = region_akgfmaps, 
@@ -211,6 +214,7 @@ create_vargridplots(yr = yr,
                                                 collapse = "-"),
                                           text_list(x = unique(dat_nbs$year))),
                                    ')'),
+               plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
                dates = "latest", # "all", #"2021-06-05",
                region_akgfmaps = region_akgfmaps, 
