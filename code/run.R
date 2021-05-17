@@ -50,8 +50,54 @@ drive_deauth()
 drive_auth()
 1
 
-# *** During the Survey --------------------------------------------------------
+
+# *** Blank Grid (no survey data) ----------------------------------------------
+
+yr <- 2021 #CHANGE
+
 plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
+
+# Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
+region_akgfmaps <- "bs.all" #CHANGE
+
+# Repalced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
+region_grid <- "NEBSgrid" #CHANGE
+
+# What are your survey dates and for what regions?
+dat_survreg <- dat_survreg0 %>%
+  dplyr::left_join(x = ., 
+                   y = data.frame(reg_dates = c("\n(May 25-Aug 04)", # CHANGE
+                                                "\n(Aug 02-Aug 28)"), # CHANGE
+                                  region = c("EBS", "NBS")), 
+                   by = "region")
+
+heatLog0 <- read_csv(here::here("data", "heatLog.csv"))
+heatLog0 <- heatLog0[!(is.na(heatLog0$region)),]
+
+heatLog <- heatLog0 %>%
+  # Select data for this year
+  dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
+  dplyr::rename("var" = paste0(yr, "_bt"), 
+                "date" = paste0(yr, "_date")) %>%
+  # add survey region data and planned survey dates
+  dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
+  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
+
+# Just the empty grid
+create_vargridplots(yr = yr, 
+                    anom = NULL, 
+                    heatLog = heatLog, 
+                    plot_title = "Survey Grid",
+                    plot_subtitle = plot_subtitle,
+                    dates = "none", # "all", #"2021-06-05", 
+                    region_akgfmaps = region_akgfmaps, 
+                    region_grid = region_grid, 
+                    file_end = "grid",
+                    gif = FALSE, 
+                    dir_out = here::here("results", yr))
+
+
+# *** During the Survey --------------------------------------------------------
 # What year are these temperatures from?
 yr <- 2021 #CHANGE
 
@@ -63,13 +109,8 @@ dat_survreg <- dat_survreg0 %>%
                                   region = c("EBS", "NBS")), 
                    by = "region")
 
-# Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
-region_akgfmaps <- "bs.all" #CHANGE
 
-# Repalced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
-region_grid <- "NEBSgrid" #CHANGE
-
-heatLog0 <- read_csv(here::here("data", "heatLog.csv"))
+heatLog0 <- read_csv(here::here("data", "heatLog3.csv"))
 heatLog0 <- heatLog0[!(is.na(heatLog0$region)),]
 
 heatLog <- heatLog0 %>%
@@ -153,66 +194,66 @@ create_vargridplots(yr = yr,
                dir_out = here::here("results", yr))
 
 # *** Previous years --------------------------------------------------
-
-yr<-2019
-
-heatLog <- heatLog0 %>%
-  # Select data for this year
-  dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
-  dplyr::rename("var" = paste0(yr, "_bt"), 
-                "date" = paste0(yr, "_date")) %>%
-  # add survey region data and planned survey dates
-  dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
-  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
-
-# add survey vessel data
-if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
-  heatLog <- heatLog %>%
-    dplyr::left_join(x = ., y = dat_vess, by = "var") 
-} 
-         
-anom <- anom_create(
-  dat_nbs = dat_nbs, 
-  dat_ebs = dat_ebs, 
-  yr_first = anom_firstyr_ebs, 
-  yr_last = yr-1, 
-  var = "GEAR_TEMPERATURE",
-  save = TRUE)
-
-# The bottom temperatures for this "yr"
-create_vargridplots(yr = yr, 
-               anom = NULL, 
-               heatLog = heatLog, 
-               plot_title = paste0(yr, ' Survey Bottom Temperature (°C)'),
-               plot_subtitle = plot_subtitle,
-               legend_temp = 'Bottom\nTemperature (°C)',
-               dates = "latest", # "all", #"2021-06-05", 
-               region_akgfmaps = region_akgfmaps, 
-               region_grid = region_grid, 
-               file_end = "daily",
-               dir_out = here::here("results", yr))
-
-# The bottom temperature anomaly between this year and past years
-create_vargridplots(yr = yr, 
-               anom = anom, 
-               heatLog = heatLog, 
-               plot_title = paste0(yr, ' Bottom Temperature Anomaly\n(EBS: ',
-                                   ifelse(length(unique(dat_ebs$year))>3,
-                                          paste(range(as.numeric(unique(dat_ebs$year))),
-                                                collapse = "-"),
-                                          text_list(x = unique(dat_ebs$year))),
-                                   '; NBS: ',
-                                   ifelse(length(unique(dat_nbs$year))>3,
-                                          paste(range(as.numeric(unique(dat_nbs$year))),
-                                                collapse = "-"),
-                                          text_list(x = unique(dat_nbs$year))),
-                                   ')'),
-               plot_subtitle = plot_subtitle,
-               legend_temp = 'Bottom Temperature\nAnomaly (°C)',
-               dates = "latest", # "all", #"2021-06-05",
-               region_akgfmaps = region_akgfmaps, 
-               region_grid = region_grid, 
-               file_end = "anom",
-               dir_out = here::here("results", yr))
-
+# 
+# yr<-2019
+# 
+# heatLog <- heatLog0 %>%
+#   # Select data for this year
+#   dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
+#   dplyr::rename("var" = paste0(yr, "_bt"), 
+#                 "date" = paste0(yr, "_date")) %>%
+#   # add survey region data and planned survey dates
+#   dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
+#   dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
+# 
+# # add survey vessel data
+# if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
+#   heatLog <- heatLog %>%
+#     dplyr::left_join(x = ., y = dat_vess, by = "var") 
+# } 
+#          
+# anom <- anom_create(
+#   dat_nbs = dat_nbs, 
+#   dat_ebs = dat_ebs, 
+#   yr_first = anom_firstyr_ebs, 
+#   yr_last = yr-1, 
+#   var = "GEAR_TEMPERATURE",
+#   save = TRUE)
+# 
+# # The bottom temperatures for this "yr"
+# create_vargridplots(yr = yr, 
+#                anom = NULL, 
+#                heatLog = heatLog, 
+#                plot_title = paste0(yr, ' Survey Bottom Temperature (°C)'),
+#                plot_subtitle = plot_subtitle,
+#                legend_temp = 'Bottom\nTemperature (°C)',
+#                dates = "latest", # "all", #"2021-06-05", 
+#                region_akgfmaps = region_akgfmaps, 
+#                region_grid = region_grid, 
+#                file_end = "daily",
+#                dir_out = here::here("results", yr))
+# 
+# # The bottom temperature anomaly between this year and past years
+# create_vargridplots(yr = yr, 
+#                anom = anom, 
+#                heatLog = heatLog, 
+#                plot_title = paste0(yr, ' Bottom Temperature Anomaly\n(EBS: ',
+#                                    ifelse(length(unique(dat_ebs$year))>3,
+#                                           paste(range(as.numeric(unique(dat_ebs$year))),
+#                                                 collapse = "-"),
+#                                           text_list(x = unique(dat_ebs$year))),
+#                                    '; NBS: ',
+#                                    ifelse(length(unique(dat_nbs$year))>3,
+#                                           paste(range(as.numeric(unique(dat_nbs$year))),
+#                                                 collapse = "-"),
+#                                           text_list(x = unique(dat_nbs$year))),
+#                                    ')'),
+#                plot_subtitle = plot_subtitle,
+#                legend_temp = 'Bottom Temperature\nAnomaly (°C)',
+#                dates = "latest", # "all", #"2021-06-05",
+#                region_akgfmaps = region_akgfmaps, 
+#                region_grid = region_grid, 
+#                file_end = "anom",
+#                dir_out = here::here("results", yr))
+# 
 
