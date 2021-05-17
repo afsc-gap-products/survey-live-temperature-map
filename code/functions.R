@@ -17,6 +17,12 @@ PKG <- c(
   "raster", 
   "rgeos",
   
+  #logo
+  "png",
+  "grid",
+  "cowplot",
+  "magick", 
+  
   # color managment (color blind friendly!)
   # "viridis", 
   "colorRamps",
@@ -160,6 +166,13 @@ create_vargridplots <- function(
   plot_title <- ifelse(plot_title == "", 
                        paste0(yr, " Temperature °C"), 
                        plot_title)
+  
+  
+  # Get the logo
+  # logo <- readPNG(source = here::here("img", "noaa-50th-logo.png"))
+  # g <- rasterGrob(img)
+  # size = unit(2, "cm")
+  
   
   # Create Directories
   dir.create(path = here::here("results"), showWarnings = FALSE)
@@ -407,14 +420,17 @@ create_vargridplots <- function(
                                         ),
         plot.title = element_text(size=20), 
         plot.subtitle = element_text(size=14), 
-        legend.text=element_text(size=16), 
+          legend.text=element_text(size=13), 
         legend.position="right",
         legend.direction="vertical",
         legend.justification="left",
+        legend.background = element_blank(),
         legend.title=element_text(size=16),
         legend.box.background = element_blank(),
         legend.key = element_blank(), 
-        legend.key.size=(unit(.3,"cm"))
+        legend.key.size=(unit(.3,"cm")), 
+        axis.text = element_text(size=14), 
+        axis.title=element_text(size=14)
       ) +
       # Annotations
       annotate("text", 
@@ -428,6 +444,12 @@ create_vargridplots <- function(
                label = paste0("Date created:\n", format(Sys.Date(), "%B %d, %Y"), 
                               "\nRecorded as of:\n", format(max_date, "%B %d, %Y")), 
                color = "black", size = 4) 
+ 
+    gg <- ggdraw(gg) +
+      draw_image(image = here::here("img", "noaa-50th-logo.png"), 
+                 x = 0, y = 0,
+                 hjust = -5.2, vjust = -.46,
+                 width = .15)
     
     # Save plots
   

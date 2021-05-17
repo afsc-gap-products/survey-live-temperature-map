@@ -50,15 +50,15 @@ drive_auth()
 1
 
 # *** During the Survey --------------------------------------------------------
-plot_subtitle = "Recorded during the NOAA Fisheries Southeastern Bering Sea\nBottom Trawl Survey"
+plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
 # What year are these temperatures from?
 yr <- 2021 #CHANGE
 
 # What are your survey dates and for what regions?
 dat_survreg <- dat_survreg0 %>%
   dplyr::left_join(x = ., 
-                   y = data.frame(reg_dates = c("(May 25-Aug 04)", # CHANGE
-                                                "(Aug 02-Aug 28)"), # CHANGE
+                   y = data.frame(reg_dates = c("\n(May 25-Aug 04)", # CHANGE
+                                                "\n(Aug 02-Aug 28)"), # CHANGE
                                   region = c("EBS", "NBS")), 
                    by = "region")
 
@@ -78,7 +78,7 @@ heatLog <- heatLog0 %>%
                 "date" = paste0(yr, "_date")) %>%
   # add survey region data and planned survey dates
   dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
-  dplyr::mutate(reg_lab = paste0(region, " ", reg_dates))
+  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
 
 # add survey vessel data
 if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
@@ -155,14 +155,6 @@ create_vargridplots(yr = yr,
 
 yr<-2019
 
-# What are your survey dates and for what regions?
-dat_survreg <- dat_survreg0 %>%
-  dplyr::left_join(x = ., 
-                   y = data.frame(reg_dates = c("(May 25-Aug 04)", # CHANGE
-                                                "(Aug 02-Aug 28)"), # CHANGE
-                                  region = c("EBS", "NBS")), 
-                   by = "region")
-
 heatLog <- heatLog0 %>%
   # Select data for this year
   dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
@@ -170,7 +162,7 @@ heatLog <- heatLog0 %>%
                 "date" = paste0(yr, "_date")) %>%
   # add survey region data and planned survey dates
   dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
-  dplyr::mutate(reg_lab = paste0(region, " ", reg_dates))
+  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
 
 # add survey vessel data
 if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
