@@ -36,6 +36,11 @@ With this script, we pull temperature content from google drive and then push th
 
 > Note: Values are made up. 
 
+
+### Blank, Grid-only Plot
+
+![Daily Temperatrues](./test/_grid.png)
+
 ### Daily Plot
 
 ![Daily Temperatrues](./test/2021-06-04_daily.png)
