@@ -52,13 +52,13 @@ for (p in PKG) {
 
 # Configuration ----------------------------------------------------------------
 
-con <- file("notes.log")
-sink(con, append=TRUE)
-
-sessionInfo()
-
-# Restore output to console
-sink() 
+# con <- file("notes.log")
+# sink(con, append=TRUE)
+# 
+# sessionInfo()
+# 
+# # Restore output to console
+# sink() 
 
 # And look at the log...
 # cat(readLines("notes.log"), sep="\n")
@@ -94,7 +94,7 @@ anom_create<-function(dat_nbs,
   
   if (isTRUE(save)){
     write_csv(x = dat_anom, 
-              file = here::here("data", paste0("dat_anom_nebs_", yr_last, ".csv")))
+              file = paste0(dir_in, "data/", paste0("dat_anom_nebs_", yr_last, ".csv")))
   }
   
   return(dat_anom)
@@ -163,6 +163,7 @@ create_vargridplots <- function(
   file_end = "",
   gif = TRUE,
   dir_out = "./", 
+  dir_in = "C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/",
   upload_googledrive = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb")) {
 
   
@@ -171,7 +172,7 @@ create_vargridplots <- function(
                        plot_title)
   
   # Create Directories
-  dir.create(path = here::here("results"), showWarnings = FALSE)
+  dir.create(path = paste0(dir_in, "results/"), showWarnings = FALSE)
   dir.create(path = dir_out, showWarnings = FALSE)
   # dir.create(path = paste(dir_out, "/", file_end), showWarnings = FALSE)
   
@@ -185,7 +186,7 @@ create_vargridplots <- function(
   
   # Prepare map objects
   # Replaced shapefile "Egrid_stations" with "NEgrid_stations_df". Latter includes NBS+EBS grids
-  grid_stations0 <- rgdal::readOGR('./shapefiles',
+  grid_stations0 <- rgdal::readOGR(paste0(dir_in, '/shapefiles'),
                             region_grid, 
                             verbose=F) 
   
@@ -483,23 +484,10 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
                       extent(grid_stations)[4]))
  
     gg <- ggdraw(gg) +
-      draw_image(image = here::here("img", "noaa-50th-logo.png"), 
+      draw_image(image = paste0(dir_in, "img/noaa-50th-logo.png"), 
                  x = 0, y = 0,
                  hjust = -4.25, vjust = -.46,
                  width = .18)
-    
-    # gg <- ggdraw(gg) +
-    #   draw_image(image = here::here("img", "noaa-50th-logo.png"), 
-    #              x = 0, y = 0,
-    #              hjust = -4.75, vjust = -.46,
-    #              width = .17)
-    
-    
-    # gg <- ggdraw(gg) +
-    #   draw_image(image = here::here("img", "noaa-50th-logo.png"), 
-    #              x = 0, y = 0,
-    #              hjust = -5.2, vjust = -.45,
-    #              width = .15)
     
     # Save plots
   
