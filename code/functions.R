@@ -370,10 +370,9 @@ create_vargridplots <- function(
                         na.translate = F
       ) +
       scale_color_manual(name = "Survey Region", 
-                         values = c(alpha(survey_reg_col,
-                                          0.7)), 
-                         breaks = sort(unique(dat$reg_shapefile), decreasing = TRUE), 
-                         labels = sort(unique(dat$reg_lab), decreasing = TRUE))
+                         values = c(alpha(survey_reg_col, 0.7)), 
+                         breaks = rev(unique(dat$reg_shapefile)), 
+                         labels = rev(unique(dat$reg_lab)))
     
 
     # if there are planned dates
