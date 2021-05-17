@@ -143,6 +143,7 @@ text_list<-function(x, oxford = TRUE) {
 #' @param height Numeric height of the figure in inches. default = 8.
 #' @param width Numeric width of the figure in inches. default = 10.5.
 #' @param file_end String. Will appear after "_" in the file name. 
+#' @param gif Logical. Default = TRUE means that a gif of lastest and past files will be created.  
 #' @param dir_out String. A path for the files to be saved to when the funciton is complete.
 #' @param upload_googledrive Upload documents to google drive. Here, enter the path on google drive where these files should be saved or "NULL" if you do not want it saved to google drive. Default = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb"). https://drive.google.com/drive/folders/1iZKhka07guho68WVUn2TJ7iI521mdWEb?usp=sharing
 #'
@@ -160,19 +161,14 @@ create_vargridplots <- function(
   height = 8.5, 
   width = 10.5,
   file_end = "",
+  gif = TRUE,
   dir_out = "./", 
   upload_googledrive = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb")) {
 
+  
   plot_title <- ifelse(plot_title == "", 
                        paste0(yr, " Temperature °C"), 
                        plot_title)
-  
-  
-  # Get the logo
-  # logo <- readPNG(source = here::here("img", "noaa-50th-logo.png"))
-  # g <- rasterGrob(img)
-  # size = unit(2, "cm")
-  
   
   # Create Directories
   dir.create(path = here::here("results"), showWarnings = FALSE)
@@ -321,6 +317,8 @@ create_vargridplots <- function(
   }
   
   for (i in iterate) { 
+    # print(i)
+    # print(iterate[i])
     
     max_date <- date_entered[i]
     grid_stations0<-grid_stations
@@ -376,7 +374,8 @@ create_vargridplots <- function(
     
 
     # if there are planned dates
-    if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
+    if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0 & 
+        i == iterate) {
       gg <- gg +
         geom_point(data = dat_planned, 
                    mapping = aes(x = lon, y = lat, shape = factor(var)), 
@@ -467,7 +466,12 @@ create_vargridplots <- function(
            plot=gg, 
            device="pdf") # pdfs are great for editing later
     
-    
+    if (gif) {
+    create_vargridplots_gif(yr = yr, 
+                            file_end = file_end, 
+                            max_date = max_date,
+                            dir_out = dir_out)
+    }
     if (!(is.null(upload_googledrive))) {
       
     drive_upload(
@@ -479,11 +483,19 @@ create_vargridplots <- function(
       media = paste0(filename0,'.pdf'), 
       path = upload_googledrive, 
       overwrite = TRUE)
+    
+    # change each day of the survey
+    if (gif) {
+    drive_upload(
+      media = paste0(filename0,'.gif'), 
+      path = upload_googledrive, 
+      overwrite = TRUE)
+    }
 }
     
 
-    fig_list<-c(fig_list, list(gg))
-    names(fig_list)[length(fig_list)] <- paste(max_date)
+    # fig_list<-c(fig_list, list(gg))
+    # names(fig_list)[length(fig_list)] <- paste(max_date)
     
   }
   
@@ -494,3 +506,44 @@ create_vargridplots <- function(
   # save(HeatPlot_all, file = paste0(dir_out, '/HeatPlot_all.RData'))
   
 }
+
+
+create_vargridplots_gif<-function(yr, file_end, max_date, dir_out) {
+  
+  imgs <- list.files(path = dir_out, 
+                         pattern = paste0(file_end, ".png"), 
+                     full.names = TRUE)
+  
+  imgs<-sort(imgs)
+
+  as.numeric(strsplit(imgs, '\\/')[[1]][-1])
+  
+  dates_ploted <- gsub(pattern = paste0("_", file_end, ".png"), 
+       replacement = "", 
+       x = unlist(lapply(
+    lapply(imgs, function(x) 
+    (strsplit(x, '\\/')[[1]][-1])), tail, n = 1L)))
+  dates_ploted <- strptime(x = dates_ploted, format = "%Y-%m-%d")
+  max_date1 <- strptime(x = max_date, format = "%Y-%m-%d")
+  
+  dates_ploted_idx <- which(dates_ploted <= max_date1)
+  
+  img_list <- lapply(imgs[dates_ploted_idx], image_read)
+  
+  ## join the images together
+  img_joined <- image_join(img_list)
+  
+  ## animate at 2 frames per second
+  img_animated <- image_animate(img_joined, fps = 2)
+  
+  ## view animated image
+  # img_animated
+  
+  ## save to disk
+  image_write(image = img_animated,
+              path = paste0(dir_out, "/", max_date1, "_", 
+                            file_end, ".gif") )
+  
+}
+
+

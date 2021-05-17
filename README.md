@@ -45,3 +45,8 @@ With this script, we pull temperature content from google drive and then push th
 
 ![Anomaly Temperatrues](./test/2021-06-04_anom.png)
 
+
+### GIF of maps as they progressed over time
+
+![GIF of Daily Temperatrues](./test/2021-06-04_daily.gif)
+

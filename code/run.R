@@ -40,7 +40,8 @@ if (FALSE) { # so you don't unnecessarially run this each time
   # https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
   drive_download(as_id("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"), #"heatLog.csv",
                  type = "csv",
-                 overwrite = T)
+                 overwrite = T, 
+                 path = here::here("data", "heatLog.csv"))
 }
 
 # Run maps ---------------------------------------------------------------------
