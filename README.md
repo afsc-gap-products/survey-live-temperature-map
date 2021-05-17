@@ -43,5 +43,5 @@ With this script, we pull temperature content from google drive and then push th
 
 ### Anomaly Plot
 
-![Anomaly Temperatrues](./test/2019-08-20_anom.png)
+![Anomaly Temperatrues](./test/2021-06-04_anom.png)
 
