@@ -153,7 +153,7 @@ create_vargridplots <- function(
   anom = NULL, 
   heatLog = NULL, 
   plot_title = "",
-  plot_subtitle = "Recorded during the NOAA Fisheries Southeastern Bering Sea\nBottom Trawl Survey",
+  plot_subtitle = "",
   legend_temp = "",
   dates = "latest",
   region_akgfmaps = "bs.all", 
@@ -163,7 +163,7 @@ create_vargridplots <- function(
   file_end = "",
   gif = TRUE,
   dir_out = "./", 
-  dir_in = "C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/",
+  dir_in = "./",
   upload_googledrive = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb")) {
 
   
@@ -231,7 +231,7 @@ create_vargridplots <- function(
   
   
   # select the data you care about
-  dat <- heatLog %>%
+  dat <- dat00 <- heatLog %>%
     janitor::clean_names() %>% 
     dplyr::filter(!is.na(region)) %>%
     dplyr::mutate(year = yr) %>%
@@ -343,10 +343,13 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
       
     if (dates != "none") { # If you are not using any data from heatLog.csv
       max_date <- date_entered[i]
+      if (length(max_date)==0) {
+        max_date <- (min(dat00$date, na.rm = TRUE)-1) # The earliest planned date
+        # max_date <- format(max_date, "%Y-%m-%d")
+      }
       grid_stations0$binTemp[grid_stations0$date>max_date]<-NA  # only use dates including this date and before this date
-      #MACARONI I think we only need one plot to be produced for the max_date, not multiple plot for each date of temp entries.
     } else {
-      max_date <- NULL
+      max_date <- NA
       grid_stations0$binTemp<-NA  # only use dates including this date and before this date
       
     }
@@ -401,12 +404,12 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
       annotate("text", 
                x = quantile(extent(grid_stations)[1]:extent(grid_stations)[2], .1), 
                y = quantile(extent(grid_stations)[3]:extent(grid_stations)[4], .1), 
-               label = ifelse(is.null(max_date), 
+               label = ifelse(is.na(max_date), 
                           "", 
                           paste0("Date created:\n", 
                                  format(Sys.Date(), "%B %d, %Y"), 
                               "\nRecorded as of:\n", 
-                              format(max_date, "%B %d, %Y"))), 
+                              format(x = max_date, format = "%B %d, %Y"))), 
                color = "black", size = 4) 
     # Add temperature squares
  
@@ -486,13 +489,14 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_in, "img/noaa-50th-logo.png"), 
                  x = 0, y = 0,
-                 hjust = -4.25, vjust = -.46,
-                 width = .18)
+                 hjust = -4.12, vjust = -.45,
+                 width = .19)
     
     # Save plots
   
     filename0 <- paste0(dir_out, '/',
-                        ifelse(dates == "none", "", paste(max_date)), 
+                        ifelse(dates == "none", "", 
+                               paste(format(max_date, "%Y-%m-%d"))), 
                         ifelse(file_end=="", "", paste0("_", file_end)))
     
     ggsave(paste0(filename0,'.png'),

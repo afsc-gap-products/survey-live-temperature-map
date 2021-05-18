@@ -30,7 +30,7 @@ if (FALSE) { # so you don't unnecessarially run this each time
 
 }
 
-# *** google drive ------------------------------------------------------------
+# *** Google Drive ------------------------------------------------------------
 
 # if (FALSE) { # so you don't unnecessarially run this each time
   
@@ -46,16 +46,30 @@ if (FALSE) { # so you don't unnecessarially run this each time
                  path = paste0(dir_in, "data/heatLog.csv"))
 # }
 
-# Run maps ---------------------------------------------------------------------
+# Map Prep ---------------------------------------------------------------------
 
+  
+# *** Log into Google Drive ----------------------------------------------------
+  
 drive_deauth()
 drive_auth()
 1
 
+# How to set up the task scheduler: 
+# https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
 
-# *** Blank Grid (no survey data) ----------------------------------------------
+# Where the files will be saved to: 
+# https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
+
+# *** General Variables to Change Annually -------------------------------------
 
 yr <- 2021 #CHANGE
+
+anom_firstyr_nbs<-2010
+anom_firstyr_ebs<-1987
+anom_lastyr <- 2019
+
+dir_out <-  paste0(dir_in, "results/", yr)
 
 plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
 
@@ -73,44 +87,7 @@ dat_survreg <- dat_survreg0 %>%
                                   region = c("EBS", "NBS")), 
                    by = "region")
 
-heatLog0 <- read_csv(paste0(dir_in, "data/heatLog.csv"))
-heatLog0 <- heatLog0[!(is.na(heatLog0$region)),]
-
-heatLog <- heatLog0 %>%
-  # Select data for this year
-  dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
-  dplyr::rename("var" = paste0(yr, "_bt"), 
-                "date" = paste0(yr, "_date")) %>%
-  # add survey region data and planned survey dates
-  dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
-  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
-
-# Just the empty grid
-create_vargridplots(yr = yr, 
-                    anom = NULL, 
-                    heatLog = heatLog, 
-                    plot_title = "Survey Grid",
-                    plot_subtitle = plot_subtitle,
-                    dates = "none", # "all", #"2021-06-05", 
-                    region_akgfmaps = region_akgfmaps, 
-                    region_grid = region_grid, 
-                    file_end = "grid",
-                    gif = FALSE, 
-                    dir_out = paste0(dir_in, "results/", yr))
-
-
-# *** During the Survey --------------------------------------------------------
-# What year are these temperatures from?
-yr <- 2021 #CHANGE
-
-# What are your survey dates and for what regions?
-dat_survreg <- dat_survreg0 %>%
-  dplyr::left_join(x = .,
-                   y = data.frame(reg_dates = c("\n(May 25-Aug 04)", # CHANGE
-                                                "\n(Aug 02-Aug 28)"), # CHANGE
-                                  region = c("EBS", "NBS")),
-                   by = "region")
-
+# *** Create Analysis-Specific Data --------------------------------------------
 
 heatLog0 <- read_csv(paste0(dir_in, "data/heatLog.csv"))
 heatLog0 <- heatLog0[!(is.na(heatLog0$region)),]
@@ -130,24 +107,17 @@ if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
     dplyr::left_join(x = ., y = dat_vess, by = "var")
 }
 
-# breaks = c("SEBS", "NEBS"),
-# labels = c(paste0("EBS ", EBS_proposed_dates), paste0("NBS ", NBS_proposed_dates)))
-
-anom_firstyr_nbs<-2010
-anom_firstyr_ebs<-1987
-anom_lastyr <- 2019
-
 dat_nbs <- read_csv(file =
                       paste0(dir_in, "data/",
-                                 paste0("dat_nbs_",
-                                        anom_firstyr_nbs,"-",
-                                        anom_lastyr, ".csv")))
+                             paste0("dat_nbs_",
+                                    anom_firstyr_nbs,"-",
+                                    anom_lastyr, ".csv")))
 
 dat_ebs <- read_csv(file =
                       paste0(dir_in, "data/",
-                                 paste0("dat_ebs_",
-                                        anom_firstyr_ebs,"-",
-                                        anom_lastyr, ".csv")))
+                             paste0("dat_ebs_",
+                                    anom_firstyr_ebs,"-",
+                                    anom_lastyr, ".csv")))
 
 anom <- anom_create(
   dat_nbs = dat_nbs,
@@ -157,6 +127,26 @@ anom <- anom_create(
   var = "GEAR_TEMPERATURE", # so you can also do SST if you need...
   save = TRUE)
 
+# Run maps ---------------------------------------------------------------------
+
+# *** Blank Grid (no survey data) ----------------------------------------------
+
+# Just the empty grid
+create_vargridplots(yr = yr, 
+                    anom = NULL, 
+                    heatLog = heatLog, 
+                    plot_title = "Survey Grid",
+                    plot_subtitle = plot_subtitle,
+                    dates = "none", # latest # "all", #"2021-06-05", 
+                    region_akgfmaps = region_akgfmaps, 
+                    region_grid = region_grid, 
+                    file_end = "grid",
+                    gif = FALSE, 
+                    dir_in = dir_in, 
+                    dir_out = dir_out)
+
+
+# *** During the Survey --------------------------------------------------------
 
 # The bottom temperatures for this "yr"
 create_vargridplots(yr = yr,
@@ -169,7 +159,8 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps,
                region_grid = region_grid,
                file_end = "daily",
-               dir_out = paste0(dir_in, "results/", yr))
+               dir_in = dir_in, 
+               dir_out = dir_out)
 
 
 # The bottom temperature anomaly between this year and past years
@@ -193,7 +184,8 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps,
                region_grid = region_grid,
                file_end = "anom",
-               dir_out = paste0(dir_in, "results/", yr))
+               dir_in = dir_in, 
+               dir_out = dir_out)
 
 # *** Previous years --------------------------------------------------
 #
@@ -233,6 +225,7 @@ create_vargridplots(yr = yr,
 #                region_akgfmaps = region_akgfmaps,
 #                region_grid = region_grid,
 #                file_end = "daily",
+# dir_in = dir_in, 
 # dir_out = paste0(dir_in, "results/", yr))
 #
 # # The bottom temperature anomaly between this year and past years
@@ -256,6 +249,7 @@ create_vargridplots(yr = yr,
 #                region_akgfmaps = region_akgfmaps,
 #                region_grid = region_grid,
 #                file_end = "anom",
+# dir_in = dir_in, 
 # dir_out = paste0(dir_in, "results/", yr))
 #
 
