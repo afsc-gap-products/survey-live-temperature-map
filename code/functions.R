@@ -34,7 +34,7 @@ PKG <- c(
   "bindrcpp", 
   "janitor", 
   
-  "taskscheduleR",
+  # "taskscheduleR",
   
   # tidyverse, 
   "broom", 
@@ -300,8 +300,6 @@ create_vargridplots <- function(
     # dplyr::select("region", "station", "var", "date", "bintemp", "year") 
 
   
-  
-  
   grid_stations <- sp::merge(x = grid_stations0, 
                       y = dat, 
                       by.x = "STATION_ID", 
@@ -336,7 +334,7 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
     # print(iterate[i])
     
     survey_reg_col <- gray.colors(length(unique(dat$reg_shapefile))+2)
-    survey_reg_col<-survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
+    survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
     
     
       grid_stations0<-grid_stations
@@ -370,7 +368,7 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
       ggtitle(label = plot_title, 
               subtitle = plot_subtitle) +
       geom_sf(data = survey_area$survey.area, 
-              aes(color = survey_area$survey.area$SURVEY_REG), 
+              aes(color = survey_area$survey.area$SURVEY), 
               fill = NA, 
               size = 2,
               show.legend = "") +
@@ -414,7 +412,7 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
     # Add temperature squares
  
       
-    if (dates != "none") { # If you are not using any data from heatLog.csv
+    if (dates != "none") { # If you are using any data from heatLog.csv
     gg <- gg +
       geom_sf(data = grid_stations0, 
               aes(group = STATION_ID, 
