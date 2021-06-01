@@ -5,12 +5,11 @@
 #' purpose: run script
 #' ---------------------------
 
-<<<<<<< HEAD
+
 dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-=======
-dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
+#dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
->>>>>>> 308dcd253fcf490dbf09aabcbdea98ed304fdb14
+
 
 source(file = paste0(dir_in,"code/functions.R"))
 
