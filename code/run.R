@@ -5,7 +5,12 @@
 #' purpose: run script
 #' ---------------------------
 
+<<<<<<< HEAD
 dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+=======
+dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
+# dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
+>>>>>>> 308dcd253fcf490dbf09aabcbdea98ed304fdb14
 
 source(file = paste0(dir_in,"code/functions.R"))
 
@@ -17,7 +22,7 @@ dat_vess <- data.frame(var = c("v", "V", "a", "A"),
                        vess = c("F/V Vesteraalen", "F/V Vesteraalen", 
                                    "F/V Alaska Knight", "F/V Alaska Knight"))
 
-dat_survreg0 <- data.frame(reg_shapefile = c("SEBS", "NEBS"), 
+dat_survreg0 <- data.frame(reg_shapefile = c("EBS_SHELF", "NBS_SHELF"), 
                            region_long = c("Eastern Bering Sea", "Northern Bering Sea"), 
                           region = c("EBS", "NBS"))
 
