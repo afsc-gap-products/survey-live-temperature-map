@@ -392,6 +392,11 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
         legend.key.size=(unit(.3,"cm")), 
         axis.text = element_text(size=14), 
         axis.title=element_text(size=14)
+        # line = element_line(colour = "green"),
+        # rect = element_rect(fill = NA, 
+        #                             colour = "red")
+        # rect = element_rect(colour = "c8c8c8", fill = "NA", size = 5)
+        # panel.border = element_rect(colour = "#c8c8c8", fill=NA, size=5)
       )  +
       # Annotations
       annotate("text", 
@@ -446,7 +451,9 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
                                                   size = 0),
                               order = 1),
           colour = guide_legend(order = 2, # survey regions
-                                override.aes = list(fill = survey_reg_col,                                                     size = 2)) , 
+                                override.aes = list(fill = survey_reg_col,
+                                                    size = 2, 
+                                                    color = "white")) , 
           shape = guide_legend(order = 3, # planned stations
                                override.aes = list(fill = "grey95", 
                                                    linetype = c("blank")))
@@ -463,7 +470,8 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
           # survey regions
           colour = guide_legend(order = 2, 
                                 override.aes = list(fill = survey_reg_col, 
-                                                    size = 2))) 
+                                                    size = 2, 
+                                                    color = "white"))) 
     }
     } else {
     
@@ -476,7 +484,8 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
         # survey regions
         colour = guide_legend(order = 2, 
                               override.aes = list(fill = survey_reg_col, 
-                                                  size = 2))) 
+                                                  size = 2, 
+                                                  color = "white"))) 
     }
   gg <- gg +
     coord_sf(xlim = c(extent(grid_stations)[1], 
@@ -568,24 +577,32 @@ create_vargridplots_gif<-function(yr, file_end, max_date, dir_out) {
     lapply(imgs, function(x) 
     (strsplit(x, '\\/')[[1]][-1])), tail, n = 1L)))
   dates_ploted <- strptime(x = dates_ploted, format = "%Y-%m-%d")
-  max_date1 <- strptime(x = max_date, format = "%Y-%m-%d")
+  max_date1 <- strptime(x = max_date, 
+                        format = "%Y-%m-%d")
   
   dates_ploted_idx <- which(dates_ploted <= max_date1)
   
-  img_list <- lapply(imgs[dates_ploted_idx], image_read)
+  img_list <- lapply(imgs[dates_ploted_idx], 
+                     image_read)
+  
+  img_list <- lapply(img_list, 
+         image_resize, 
+         geometry = "1280")
   
   ## join the images together
-  img_joined <- image_join(img_list)
+  img_joined <- magick::image_join(img_list)
   
   ## animate at 2 frames per second
-  img_animated <- image_animate(img_joined, fps = 2)
+  img_animated <- magick::image_animate(img_joined, 
+                                        fps = 2)
   
   ## view animated image
   # img_animated
   
   ## save to disk
-  image_write(image = img_animated,
-              path = paste0(dir_out, "/", max_date1, "_", 
+  magick::image_write(
+    image = img_animated, 
+    path = paste0(dir_out, "/", max_date1, "_", 
                             file_end, ".gif") )
   
 }
