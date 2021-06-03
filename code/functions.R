@@ -452,8 +452,9 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
                               order = 1),
           colour = guide_legend(order = 2, # survey regions
                                 override.aes = list(fill = survey_reg_col,
-                                                    size = 2, 
-                                                    color = "white")) , 
+                                                    size = 2#, 
+                                                    # color = "white"
+                                                    )) , 
           shape = guide_legend(order = 3, # planned stations
                                override.aes = list(fill = "grey95", 
                                                    linetype = c("blank")))
@@ -470,8 +471,9 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
           # survey regions
           colour = guide_legend(order = 2, 
                                 override.aes = list(fill = survey_reg_col, 
-                                                    size = 2, 
-                                                    color = "white"))) 
+                                                    size = 2#, 
+                                                    # color = "white"
+                                                    ))) 
     }
     } else {
     
@@ -484,8 +486,9 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
         # survey regions
         colour = guide_legend(order = 2, 
                               override.aes = list(fill = survey_reg_col, 
-                                                  size = 2, 
-                                                  color = "white"))) 
+                                                  size = 2#, 
+                                                  # color = "white"
+                                                  ))) 
     }
   gg <- gg +
     coord_sf(xlim = c(extent(grid_stations)[1], 
