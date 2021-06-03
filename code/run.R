@@ -5,8 +5,11 @@
 #' purpose: run script
 #' ---------------------------
 
-dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
+
+dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+#dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
+
 
 source(file = paste0(dir_in,"code/functions.R"))
 
@@ -132,7 +135,7 @@ anom <- anom_create(
 
 # *** Blank Grid (no survey data) ----------------------------------------------
 
-# Just the empty grid
+# Just the empty grid (comment this v out when running after beginning of survey)
 create_vargridplots(yr = yr, 
                     anom = NULL, 
                     heatLog = heatLog, 
