@@ -187,7 +187,7 @@ create_vargridplots(yr = yr,
                dates = "latest", # "all", #"2021-06-05",
                region_akgfmaps = region_akgfmaps,
                region_grid = region_grid,
-               file_end = "anom_test",
+               file_end = "anom",
                dir_in = dir_in, 
                dir_out = dir_out)
 
