@@ -137,18 +137,18 @@ anom <- anom_create(
 # *** Blank Grid (no survey data) ----------------------------------------------
 
 # Just the empty grid (comment this v out when running after beginning of survey)
-create_vargridplots(yr = yr, 
-                    anom = NULL, 
-                    heatLog = heatLog, 
-                    plot_title = "Survey Grid",
-                    plot_subtitle = plot_subtitle,
-                    dates = "none", # latest # "all", #"2021-06-05", 
-                    region_akgfmaps = region_akgfmaps, 
-                    region_grid = region_grid, 
-                    file_end = "grid",
-                    gif = FALSE, 
-                    dir_in = dir_in, 
-                    dir_out = dir_out)
+# create_vargridplots(yr = yr, 
+#                     anom = NULL, 
+#                     heatLog = heatLog, 
+#                     plot_title = "Survey Grid",
+#                     plot_subtitle = plot_subtitle,
+#                     dates = "none", # latest # "all", #"2021-06-05", 
+#                     region_akgfmaps = region_akgfmaps, 
+#                     region_grid = region_grid, 
+#                     file_end = "grid",
+#                     gif = FALSE, 
+#                     dir_in = dir_in, 
+#                     dir_out = dir_out)
 
 
 # *** During the Survey --------------------------------------------------------
@@ -164,7 +164,7 @@ create_vargridplots(yr = yr,
                region_akgfmaps = region_akgfmaps,
                region_grid = region_grid,
                file_end = "daily",
-               dir_in = dir_in, 
+               dir_in = dir_in,
                dir_out = dir_out)
 
 
