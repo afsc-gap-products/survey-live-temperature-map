@@ -83,14 +83,15 @@ anom_create<-function(dat_nbs,
                       save = FALSE){
   
   dat_anom <- rbind.data.frame(dat_nbs, dat_ebs) %>%
-    dplyr::mutate(year = substr(x = CRUISE, start = 1, stop = 4)) %>%
-    dplyr::filter(year <= yr_first | year >= yr_last) %>%
+    dplyr::mutate(year = as.numeric(substr(x = CRUISE, start = 1, stop = 4))) %>%
+    dplyr::filter(year >= yr_first | year <= yr_last) %>%
     dplyr::rename("var" = all_of(var)) %>%
-    dplyr::select(STATIONID, var) %>%
+    dplyr::select(STATIONID, var, year) %>%
     janitor::clean_names() %>% 
     dplyr::group_by(stationid) %>%
     dplyr::summarise(mean = mean(var, na.rm = TRUE)) %>%
-    dplyr::rename(station = stationid)
+    dplyr::rename(station = stationid) %>%
+    dplyr::filter(!(is.na(station)))
   
   if (isTRUE(save)){
     write_csv(x = dat_anom, 

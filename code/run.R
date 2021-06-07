@@ -6,8 +6,8 @@
 #' ---------------------------
 
 
-dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-#dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
+# dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
 
 
