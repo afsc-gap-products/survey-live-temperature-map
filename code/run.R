@@ -6,8 +6,8 @@
 #' ---------------------------
 
 
-# dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
+dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+#dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
 
 
@@ -185,7 +185,7 @@ create_vargridplots(yr = yr,
                                    ')'),
                plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom Temperature\nAnomaly (\u00B0C)',
-               dates = "all", # "all", #"2021-06-05",
+               dates = "latest", # "all", #"2021-06-05", #change to "latest" to only run current day's anom plot
                region_akgfmaps = region_akgfmaps,
                region_grid = region_grid,
                file_end = "anom",
