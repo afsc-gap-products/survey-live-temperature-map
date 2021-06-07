@@ -103,7 +103,8 @@ heatLog <- heatLog0 %>%
                 "date" = paste0(yr, "_date")) %>%
   # add survey region data and planned survey dates
   dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
-  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
+  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates)) %>%
+  dplyr::arrange((paste0(yr, "_bt")))
 
 # add survey vessel data
 if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
@@ -184,12 +185,13 @@ create_vargridplots(yr = yr,
                                    ')'),
                plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom Temperature\nAnomaly (\u00B0C)',
-               dates = "latest", # "all", #"2021-06-05",
+               dates = "all", # "all", #"2021-06-05",
                region_akgfmaps = region_akgfmaps,
                region_grid = region_grid,
                file_end = "anom",
                dir_in = dir_in, 
-               dir_out = dir_out)
+               dir_out = dir_out, 
+               planned_stations = FALSE)
 
 # *** Previous years --------------------------------------------------
 #

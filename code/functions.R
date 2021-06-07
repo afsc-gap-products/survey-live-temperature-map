@@ -146,6 +146,7 @@ text_list<-function(x, oxford = TRUE) {
 #' @param file_end String. Will appear after "_" in the file name. 
 #' @param gif Logical. Default = TRUE means that a gif of lastest and past files will be created.  
 #' @param dir_out String. A path for the files to be saved to when the funciton is complete.
+#' @param planned_stations Logical. Default = TURE. If FALSE, will not show planned stations. 
 #' @param upload_googledrive Upload documents to google drive. Here, enter the path on google drive where these files should be saved or "NULL" if you do not want it saved to google drive. Default = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb"). https://drive.google.com/drive/folders/1iZKhka07guho68WVUn2TJ7iI521mdWEb?usp=sharing
 #'
 #' @export
@@ -165,6 +166,7 @@ create_vargridplots <- function(
   gif = TRUE,
   dir_out = "./", 
   dir_in = "./",
+  planned_stations = TRUE,
   upload_googledrive = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb")) {
 
   
@@ -435,7 +437,7 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
       
     # if there are planned dates
     if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0 & 
-        i == iterate) {
+        i == iterate & planned_stations) {
       gg <- gg +
         geom_point(data = dat_planned, 
                    mapping = aes(x = lon, y = lat, shape = factor(var)), 
@@ -478,18 +480,20 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
     }
     } else {
     
-    gg <- gg +
-        geom_sf(data = grid_stations, 
-                aes(group = STATION_ID), 
-                fill = NA,
-                colour = "grey50") + 
-      guides(
-        # survey regions
-        colour = guide_legend(order = 2, 
-                              override.aes = list(fill = survey_reg_col, 
-                                                  size = 2#, 
-                                                  # color = "white"
-                                                  ))) 
+      if (planned_stations) {
+        gg <- gg +
+          geom_sf(data = grid_stations, 
+                  aes(group = STATION_ID), 
+                  fill = NA,
+                  colour = "grey50") + 
+          guides(
+            # survey regions
+            colour = guide_legend(order = 2, 
+                                  override.aes = list(fill = survey_reg_col, 
+                                                      size = 2#, 
+                                                      # color = "white"
+                                  ))) 
+      }
     }
   gg <- gg +
     coord_sf(xlim = c(extent(grid_stations)[1], 
