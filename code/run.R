@@ -4,7 +4,7 @@
 #' maintained: Emily Markowitz and Liz Dawson (May 2021)
 #' purpose: run script
 #' ---------------------------
-
+##NOTES: change for next year: switch legend orientation (hot on top, cold on bottom), remove borders from survey region legend
 
 dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
