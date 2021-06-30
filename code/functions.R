@@ -63,7 +63,7 @@ for (p in PKG) {
 # And look at the log...
 # cat(readLines("notes.log"), sep="\n")
 
-# Funcitons --------------------------------------------------------------------
+ # Funcitons --------------------------------------------------------------------
 
 
 #' Combine regional survey data to create the anomaly dataset

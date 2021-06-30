@@ -4,7 +4,7 @@
 #' maintained: Emily Markowitz and Liz Dawson (May 2021)
 #' purpose: run script
 #' ---------------------------
-##NOTES: change for next year: switch legend orientation (hot on top, cold on bottom), remove borders from survey region legend
+##NOTES: change for next year: switch legend orientation (hot on top, cold on bottom), remove borders from survey region legend, limit number of images that are stitched together in .gif to ensure that gifs don't hit the upper limit, anchor legends so they don't change format when only one vessel or neither vessel has planned stations for that day.
 
 dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
