@@ -1,4 +1,4 @@
-# GAP survey Temperature Maps
+# GAP Survey Temperature Maps
 
 <!-- badges: start -->
 <!-- badges: end -->
