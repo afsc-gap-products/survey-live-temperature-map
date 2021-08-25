@@ -26,11 +26,7 @@ Seattle, WA 98195
 
 ## Use
 
-These scripts create the daily tempertaure and anomaly plots as NOAA Fisheries' Alaska Fisheries Science Center conducts fisheries independant surveys in Alaska. 
-
-These plots will be used to create pages like this on the AFSC website: https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey
-
-With this script, we pull temperature content from google drive and then push the maps to google drive for the comms team. 
+These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website: https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey
 
 ## Example files
 
