@@ -33,7 +33,7 @@ These scripts create daily survey station daily temperature and anomaly plots as
 
 This was created using [this free online gif maker](https://gifmaker.me/)
 
-![NEBS 2021 Survey](./test/final_2021_nebs_daily.gif)
+![NEBS 2021 Survey](./test/final_2021_nebs_daily_400ms.gif)
 
 ## Example files
 
