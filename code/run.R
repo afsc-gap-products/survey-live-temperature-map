@@ -1,132 +1,103 @@
 #' ---------------------------
 #' title: Survey Daily and Anomally Temperature Plot
 #' OG author: Jason Conner
-#' maintained: Emily Markowitz and Liz Dawson (May 2021)
+#' maintained: Emily Markowitz and Liz Dawson (Jan 2022)
 #' purpose: run script
 #' ---------------------------
-##NOTES: change for next year: switch legend orientation (hot on top, cold on bottom), remove borders from survey region legend, limit number of images that are stitched together in .gif to ensure that gifs don't hit the upper limit, anchor legends so they don't change format when only one vessel or neither vessel has planned stations for that day.
 
-dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+# dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-
+dir_in<-paste0(getwd(), "/")
 
 source(file = paste0(dir_in,"code/functions.R"))
 
 # Load data --------------------------------------------------------------------
 
-# *** Static Data --------------------------------------------------------------
-
-dat_vess <- data.frame(var = c("v", "V", "a", "A"), 
-                       vess = c("F/V Vesteraalen", "F/V Vesteraalen", 
-                                   "F/V Alaska Knight", "F/V Alaska Knight"))
-
-dat_survreg0 <- data.frame(reg_shapefile = c("EBS_SHELF", "NBS_SHELF"), 
-                           region_long = c("Eastern Bering Sea", "Northern Bering Sea"), 
-                          region = c("EBS", "NBS"))
-
-
 # *** Oracle -------------------------------------------------------------------
 
 if (FALSE) { # so you don't unnecessarially run this each time
-
   source(file = paste0(dir_in, "code/data_dl.R"))
-
 }
 
+source(file = paste0(dir_in, "code/data.R"))
+
 # *** Google Drive ------------------------------------------------------------
-
-# if (FALSE) { # so you don't unnecessarially run this each time
-  
-  drive_deauth()
-  drive_auth()
-  1
-  
-  # Load data from Google Sheet
-  # https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
-  drive_download(as_id("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"), #"heatLog.csv",
-                 type = "csv",
-                 overwrite = T, 
-                 path = paste0(dir_in, "data/heatLog.csv"))
-# }
-
-# Map Prep ---------------------------------------------------------------------
-
-  
-# *** Log into Google Drive ----------------------------------------------------
   
 drive_deauth()
 drive_auth()
 1
+  
+# if (FALSE) { # so you don't unnecessarially run this each time
 
-# How to set up the task scheduler: 
-# https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
+  
+  # Load data from Google Sheet
+  # https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
+googledrive::drive_download(file = googledrive::as_id("16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"),  #"gap_survey_progression.csv",
+                              type = "xlsx", 
+                              overwrite = TRUE, 
+                              path = paste0(dir_in, "data/gap_survey_progression.xlsx"))
+  
+                              
+# }
 
-# Where the files will be saved to: 
-# https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
+# Make Map ---------------------------------------------------------------------
 
 # *** General Variables to Change Annually -------------------------------------
 
-yr <- 2021 #CHANGE
+  yr <- 2022 #CHANGE
 
-anom_firstyr_nbs<-2010
-anom_firstyr_ebs<-1987
-anom_lastyr <- 2019
+# NBS + EBS --------------------------------------------------------------------------
+SRVY <- "NEBS"
+plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
+region_akgfmaps <- "bs.all" # Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
+region_grid <- "NEBSgrid" # Repalced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
 
-dir_out <-  paste0(dir_in, "results/", yr)
-
-plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
-
-# Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
-region_akgfmaps <- "bs.all" #CHANGE
-
-# Repalced shapefile "EBSgrid" with "NEBSgrid_df". Latter includes NBS+EBS grids
-region_grid <- "NEBSgrid" #CHANGE
+dir_out <-  paste0(dir_in, "results/", yr, "_", SRVY)
 
 # What are your survey dates and for what regions?
-dat_survreg <- dat_survreg0 %>%
-  dplyr::left_join(x = ., 
-                   y = data.frame(reg_dates = c("\n(May 25-Aug 04)", # CHANGE
-                                                "\n(Aug 02-Aug 28)"), # CHANGE
-                                  region = c("EBS", "NBS")), 
-                   by = "region")
+# dat_survreg <- dat_survreg0 %>%
+#   dplyr::left_join(x = ., 
+#                    y = data.frame(reg_dates = c("\n(May 25-Aug 04)", # CHANGE
+#                                                 "\n(Aug 02-Aug 28)"), # CHANGE
+#                                   region = c("EBS", "NBS")), 
+#                    by = "region")
 
 # *** Create Analysis-Specific Data --------------------------------------------
 
-heatLog0 <- read_csv(paste0(dir_in, "data/heatLog.csv"))
-heatLog0 <- heatLog0[!(is.na(heatLog0$region)),]
+yr <- 2022
+reg <- "BS"
+case <- paste0(yr, "_", reg)
 
-heatLog <- heatLog0 %>%
+gap_survey_progression <- 
+  readxl::read_xlsx(path = paste0(dir_in, "data/gap_survey_progression.xlsx"), 
+                    sheet = case, skip = 1) %>%
+  dplyr::filter(!is.na(region)) %>% # remove rows of empty data
   # Select data for this year
-  dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
-  dplyr::rename("var" = paste0(yr, "_bt"),
-                "date" = paste0(yr, "_date")) %>%
+  dplyr::select(region, station, bt, date, vessel) %>%
+  dplyr::rename("var" = "bt") %>%
   # add survey region data and planned survey dates
-  dplyr::left_join(x = ., y = dat_survreg, by = "region") %>%
-  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates)) %>%
-  dplyr::arrange((paste0(yr, "_bt")))
-
-# add survey vessel data
-if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
-  heatLog <- heatLog %>%
-    dplyr::left_join(x = ., y = dat_vess, by = "var")
-}
+  dplyr::left_join(x = ., 
+                   y = dat_survreg, 
+                   by = "region") %>%
+  dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates), 
+                vessel_shape = vessel) %>%
+  dplyr::arrange("var") %>%
+  dplyr::left_join(x = ., 
+                   y = vessel_info %>% 
+                     dplyr::filter(year == yr), 
+                   by = c("region", "vessel_shape")) # add survey vessel data
 
 dat_nbs <- read_csv(file =
                       paste0(dir_in, "data/",
-                             paste0("dat_nbs_",
-                                    anom_firstyr_nbs,"-",
-                                    anom_lastyr, ".csv")))
+                             paste0("dat_nbs_2010-2021.csv")))
 
 dat_ebs <- read_csv(file =
                       paste0(dir_in, "data/",
-                             paste0("dat_ebs_",
-                                    anom_firstyr_ebs,"-",
-                                    anom_lastyr, ".csv")))
+                             paste0("dat_ebs_1984-2021.csv")))
 
 anom <- anom_create(
-  dat_nbs = dat_nbs,
-  dat_ebs = dat_ebs,
+  dat_nbs = list(dat_nbs, dat_ebs),
   yr_first = anom_firstyr_ebs,
   yr_last = yr-1,
   var = "GEAR_TEMPERATURE", # so you can also do SST if you need...
@@ -139,7 +110,7 @@ anom <- anom_create(
 # Just the empty grid (comment this v out when running after beginning of survey)
 # create_vargridplots(yr = yr, 
 #                     anom = NULL, 
-#                     heatLog = heatLog, 
+#                     gap_survey_progression = gap_survey_progression, 
 #                     plot_title = "Survey Grid",
 #                     plot_subtitle = plot_subtitle,
 #                     dates = "none", # latest # "all", #"2021-06-05", 
@@ -156,7 +127,7 @@ anom <- anom_create(
 # The bottom temperatures for this "yr"
 create_vargridplots(yr = yr,
                anom = NULL,
-               heatLog = heatLog,
+               gap_survey_progression = gap_survey_progression,
                plot_title = paste0(yr, ' Bottom Temperature (\u00B0C)'),
                plot_subtitle = plot_subtitle,
                legend_temp = 'Bottom\nTemperature (\u00B0C)',
@@ -171,7 +142,7 @@ create_vargridplots(yr = yr,
 # The bottom temperature anomaly between this year and past years
 create_vargridplots(yr = yr,
                anom = anom,
-               heatLog = heatLog,
+               gap_survey_progression = gap_survey_progression,
                plot_title = paste0(yr, ' Bottom Temperature Anomaly\n(EBS: ',
                                    ifelse(length(unique(dat_ebs$year))>3,
                                           paste(range(as.numeric(unique(dat_ebs$year))),
@@ -197,7 +168,7 @@ create_vargridplots(yr = yr,
 #
 # yr<-2019
 #
-# heatLog <- heatLog0 %>%
+# gap_survey_progression <- gap_survey_progression0 %>%
 #   # Select data for this year
 #   dplyr::select(region, station, paste0(yr, "_bt"), paste0(yr, "_date")) %>%
 #   dplyr::rename("var" = paste0(yr, "_bt"),
@@ -207,8 +178,8 @@ create_vargridplots(yr = yr,
 #   dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates))
 #
 # # add survey vessel data
-# if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0) {
-#   heatLog <- heatLog %>%
+# if (length(grep(x = gap_survey_progression$var, pattern = "[A-Za-z]"))>0) {
+#   gap_survey_progression <- gap_survey_progression %>%
 #     dplyr::left_join(x = ., y = dat_vess, by = "var")
 # }
 #
@@ -223,7 +194,7 @@ create_vargridplots(yr = yr,
 # # The bottom temperatures for this "yr"
 # create_vargridplots(yr = yr,
 #                anom = NULL,
-#                heatLog = heatLog,
+#                gap_survey_progression = gap_survey_progression,
 #                plot_title = paste0(yr, ' Survey Bottom Temperature (\u00B0C)'),
 #                plot_subtitle = plot_subtitle,
 #                legend_temp = 'Bottom\nTemperature (\u00B0C)',
@@ -237,7 +208,7 @@ create_vargridplots(yr = yr,
 # # The bottom temperature anomaly between this year and past years
 # create_vargridplots(yr = yr,
 #                anom = anom,
-#                heatLog = heatLog,
+#                gap_survey_progression = gap_survey_progression,
 #                plot_title = paste0(yr, ' Bottom Temperature Anomaly\n(EBS: ',
 #                                    ifelse(length(unique(dat_ebs$year))>3,
 #                                           paste(range(as.numeric(unique(dat_ebs$year))),
