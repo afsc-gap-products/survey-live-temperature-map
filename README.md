@@ -31,7 +31,7 @@ These scripts create daily survey station daily temperature and anomaly plots as
 
 How to set up the task scheduler:  https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
 
-Where the files will be saved to:  https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
+Where the files will be saved to:  https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq
 
 
 ## Final combined gif for the NEBS survey
