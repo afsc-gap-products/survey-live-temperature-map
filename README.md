@@ -15,6 +15,10 @@ Research Fisheries Biologist
 
 Fisheries Biologist
 
+**Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov)
+
+Research Fisheries Biologist
+
 
 Alaska Fisheries Science Center, 
 
