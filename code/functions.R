@@ -16,6 +16,7 @@ PKG <- c(
   "sp", 
   "raster", 
   "rgeos",
+  "sf",
   
   #logo
   "png",
@@ -63,7 +64,7 @@ for (p in PKG) {
 # And look at the log...
 # cat(readLines("notes.log"), sep="\n")
 
- # Funcitons --------------------------------------------------------------------
+# Funcitons --------------------------------------------------------------------
 
 
 #' Combine regional survey data to create the anomaly dataset
@@ -75,22 +76,20 @@ for (p in PKG) {
 #' @param yr_last The latest year (YYYY) of data that needs to be included in the anom dataset. 
 #' @param save Logical. TRUE saves a copy of this dataset to the "data" folder, FALSE does not save the data set anywhere. 
 #' @export
-anom_create<-function(dat_nbs, 
-                      dat_ebs, 
-                      yr_first, 
-                      yr_last,
+anom_create<-function(dat, 
+                      # dat_nbs, 
+                      # dat_ebs, 
+                      # yr_first, 
+                      # yr_last,
                       var = "GEAR_TEMPERATURE",
                       save = FALSE){
   
-  dat_anom <- rbind.data.frame(dat_nbs, dat_ebs) %>%
-    dplyr::mutate(year = as.numeric(substr(x = CRUISE, start = 1, stop = 4))) %>%
-    dplyr::filter(year >= yr_first | year <= yr_last) %>%
+  dat_anom <- dat %>% 
     dplyr::rename("var" = all_of(var)) %>%
-    dplyr::select(STATIONID, var, year) %>%
-    janitor::clean_names() %>% 
-    dplyr::group_by(stationid) %>%
-    dplyr::summarise(mean = mean(var, na.rm = TRUE)) %>%
+    # dplyr::select(stratum, stationid, var, year) %>%
     dplyr::rename(station = stationid) %>%
+    dplyr::group_by(SRVY, stratum, station, hauljoin) %>%
+    dplyr::summarise(mean = mean(var, na.rm = TRUE)) %>%
     dplyr::filter(!(is.na(station)))
   
   if (isTRUE(save)){
@@ -107,27 +106,36 @@ anom_create<-function(dat_nbs,
 #' This function alows you to take a string of words and combine them into a sentance list. For example, 'apples', 'oranges', 'pears' would become 'apples, oranges, and pears'. This function uses oxford commas.
 #' @param x Character strings you want in your string.
 #' @param oxford T/F: would you like to use an oxford comma? Default = TRUE
+#' @param sep string. default = ", " but "; " or " " might be what you need!
+#' @param sep_last string. default = " and " but " & " or " , " might be what you need!
 #' @keywords strings
 #' @export
-#' @examples text_list(c(1,2,"hello",4,"world",6))
-text_list<-function(x, oxford = TRUE) {
+#' @examples
+#' text_list(c(1,2,"hello",4,"world",6))
+#' text_list(c(1,"world"))
+#' text_list(c(1,2,"hello",4,"world",6), oxford = FALSE)
+#' paste0("here is a list of things: ",
+#'   text_list(paste0("list", 1:5), sep = " ", sep_last = ""))
+text_list<-function(x = "",
+                    oxford = TRUE,
+                    sep = ", ",
+                    sep_last = "and ") {
   x<-x[which(x!="")]
   # x<-x[which(!is.null(x))]
   x<-x[which(!is.na(x))]
   # x<-x[order(x)]
   if (length(x)==2) {
-    str1<-paste(x, collapse = " and ")
+    str1<-paste(x, collapse = paste0(" ", sep_last))
   } else if (length(x)>2) {
-    str1<-paste(x[1:(length(x)-1)], collapse = ", ")
+    str1<-paste(x[1:(length(x)-1)], collapse = paste0(sep))
     str1<-paste0(str1,
-                 ifelse(oxford == TRUE, ",", ""),
-                 " and ", x[length(x)])
+                 ifelse(oxford == TRUE, sep, " "),
+                 sep_last, x[length(x)])
   } else {
     str1<-x
   }
   return(str1)
 }
-
 
 
 #' Create temperature and anomaly plots
@@ -138,41 +146,41 @@ text_list<-function(x, oxford = TRUE) {
 #' @param plot_title A string of what the plot title should be. 
 #' @param plot_subtitle A string of what the plot subtitle should be. 
 #' @param legend_temp A string of the temperature legend header. 
-#' @param dates A string of either the date to be plotted to ("YYYY-MM-DD"), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will bbe printed. Default = "latest". 
+#' @param dates0 A string of either the date to be plotted to ("YYYY-MM-DD"), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will bbe printed. Default = "latest". 
 #' @param region_akgfmaps Inherited from the akgfmaps package. "bs.south" plots the EBS region, "bs.all" plots EBS and NBS regions. See the "select.region" argument under '?get_base_layers'. Default = "bs.all"
-#' @param region_grid Select the shapefile you want to use for the grids. "Egrid_stations" plots the EBS region and "NEgrid_stations_df" plots EBS and NBS regions. Default = "NEgrid_stations".
+#' @param shapefile Select the shapefile you want to use for the grids. "Egrid_stations" plots the EBS region and "NEgrid_stations_df" plots EBS and NBS regions. Default = "NEgrid_stations".
 #' @param height Numeric height of the figure in inches. default = 8.
 #' @param width Numeric width of the figure in inches. default = 10.5.
 #' @param file_end String. Will appear after "_" in the file name. 
 #' @param gif Logical. Default = TRUE means that a gif of lastest and past files will be created.  
 #' @param dir_out String. A path for the files to be saved to when the funciton is complete.
 #' @param planned_stations Logical. Default = TURE. If FALSE, will not show planned stations. 
-#' @param upload_googledrive Upload documents to google drive. Here, enter the path on google drive where these files should be saved or "NULL" if you do not want it saved to google drive. Default = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb"). https://drive.google.com/drive/folders/1iZKhka07guho68WVUn2TJ7iI521mdWEb?usp=sharing
+#' @param dir_googledrive_upload Upload documents to google drive. Here, enter the path on google drive where these files should be saved or "NULL" if you do not want it saved to google drive. Default = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb"). https://drive.google.com/drive/folders/1iZKhka07guho68WVUn2TJ7iI521mdWEb?usp=sharing
 #'
 #' @export
 create_vargridplots <- function(
-  yr = NULL, 
-  anom = NULL, 
-  heatLog = NULL, 
-  plot_title = "",
-  plot_subtitle = "",
-  legend_temp = "",
-  dates = "latest",
-  region_akgfmaps = "bs.all", 
-  region_grid = "NEgrid_stations", 
-  height = 8.5, 
-  width = 10.5,
-  file_end = "",
-  gif = TRUE,
-  dir_out = "./", 
-  dir_in = "./",
-  planned_stations = TRUE,
-  upload_googledrive = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb")) {
-
+    yr = NULL, 
+    anom = NULL, 
+    heatLog = NULL, 
+    plot_title = "",
+    plot_subtitle = "",
+    legend_temp = "",
+    dates0 = "latest",
+    region_akgfmaps = "bs.all", 
+    grid_stations, #  = "NEgrid_stations", 
+    height = 8.5, 
+    width = 10.5,
+    file_end = "",
+    gif = TRUE,
+    dir_out = "./", 
+    dir_in = "./",
+    planned_stations = TRUE,
+    dir_googledrive_upload) {
   
   plot_title <- ifelse(plot_title == "", 
                        paste0(yr, " Temperature °C"), 
                        plot_title)
+  # plot_subtitle = paste0("NOAA Fisheries ",text_list(unique(heatLog$region_long))," Bottom Trawl Survey")
   
   # Create Directories
   dir.create(path = paste0(dir_in, "results/"), showWarnings = FALSE)
@@ -183,22 +191,10 @@ create_vargridplots <- function(
   
   # Replace "bs.south" (EBS) with "bs.all" (EBS+NBS). See the "select.region" argument under '?get_base_layers'
   survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, 
-                                 set.crs = "auto")
+                                           set.crs = "auto")
   # survey_area$graticule <- spTransform(survey_area$graticule, 
   #                                      crs(survey_area$akland))
-  
-  # Prepare map objects
-  # Replaced shapefile "Egrid_stations" with "NEgrid_stations_df". Latter includes NBS+EBS grids
-  grid_stations0 <- rgdal::readOGR(paste0(dir_in, '/shapefiles'),
-                            region_grid, 
-                            verbose=F) 
-  
-  
-  grid_stations0 <- spTransform(grid_stations0,
-                         "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") # crs(survey_area))
-  
-  
-    
+
   # Break temps into factors
   if (is.null(anom)) { # if anom DOES NOT exist (straight temps!)
     varBreaks <- c(-10,
@@ -221,49 +217,38 @@ create_vargridplots <- function(
                    ))
   }
   
-  # varColour <- rainbow(n = length(varLabels), rev = FALSE, start = .8)
-  
   varColour <- colorRamps::matlab.like(length(varLabels))
-  #viridis::viridis(n = length(varLabels)) # color-blind friendly!
-  
-  #MACARONI ^ I added a "region" column to the heatLog.csv file to differentiate which station is EBS vs. NBS.  Maybe we could have those two shaded in grey or stripes? and designate colors/patterns those columns in the legend as "EBS station 5/23 to 8/1", 
-  #                 "NBS station 7/30 to 8/25"
   
   ### Input New Data
-  # Next, use Excel to update heatLog.csv in the folder *G:\\EBSother\\EBS2019\\HeatMapR\\* with the new data, filling Station (same format as RACEBASE) and bottom temperature. Surface temperatures are optional. You may want to re-sort these by Station to make sure there are no duplicates, although this shouldn't crash the script. **Do not** change column names or file names.
-  
-  
   # select the data you care about
   dat <- dat00 <- heatLog %>%
-    janitor::clean_names() %>% 
     dplyr::filter(!is.na(region)) %>%
-    dplyr::mutate(year = yr) %>%
-    dplyr::mutate(date = strptime(x = paste0("0", date, "/", yr), 
-                                  format = "%m/%d/%Y")) 
+    dplyr::mutate(date = as.character(date))
+    # dplyr::mutate(year = yr) %>%
+    # dplyr::mutate(date = strptime(dat00$date, format = "%m%d%Y"))
+                    # strptime(x = paste0("0", date, "/", yr), 
+                    #               format = "%m/%d/%Y")) 
   
-    
   # sepeate out the data for the temperature and planned stations if there are planned stations listed
   if (length(grep(x = heatLog$var, 
                   pattern = "[A-Za-z]"))>0) {
     
     # planned stations
-    grid_stations_center <- cbind.data.frame(grid_stations0$STATION_ID, sp::coordinates(grid_stations0))
+    grid_stations_center <- cbind.data.frame(grid_stations$STATION_ID, sp::coordinates(grid_stations))
     names(grid_stations_center) <- c("station", "lon", "lat")
     
     dat_planned<-dat[grep(x = dat$var, pattern = "[A-Za-z]"),] %>%
       dplyr::left_join(x = ., y = grid_stations_center, "station") %>%
       dplyr::mutate(var = toupper(var)) %>%
-      dplyr::mutate(lab = "") #%>% 
-      # dplyr::select("region", "station", "var", "date", "vess", "lab") 
-      
+      dplyr::mutate(lab = "") 
     
     for (i in 1:length(unique(dat_planned$vess))) {
       vess <- unique(dat_planned$vess)[i]
       vess_date <- range(dat_planned$date[dat_planned$vess %in% vess])
       vess_date <- ifelse(vess_date[1] == vess_date[2], 
-                          format(vess_date[1], # "%a %b %d"
+                          format(vess_date[1], 
                                  "%b %d"), 
-                          paste(format(vess_date, # "%a %b %d"
+                          paste(format(vess_date, 
                                        "%b %d"), collapse = "-"))
       dat_planned$lab[dat_planned$vess %in% vess]<-
         paste0(vess, "\n(", vess_date, ")")
@@ -275,24 +260,24 @@ create_vargridplots <- function(
     dat$var[grep(x = dat$var, pattern = "[A-Za-z]")]<-''
     dat <- dat %>%
       dplyr::mutate(var = as.numeric(var))# %>% 
-      # dplyr::select("region", "station", "var", "date") 
+    # dplyr::select("region", "station", "var", "date") 
   }
   
   
-  if (dates != "none") { # If you are not using any data from heatLog.csv
+  if (dates0 != "none") { # If you are not using any data from heatLog.csv
     
-  # combine temperture data with anomaly data?
-  if (!(is.null(anom))) { # if anom is extant
-    dat <- dat %>%
-      dplyr::left_join(x = ., y = anom, by = "station") %>%
-      dplyr::rename(var_orig = var) %>%
-      dplyr::mutate(var = var_orig - mean)
-  }
+    # combine temperture data with anomaly data?
+    if (!(is.null(anom))) { # if anom is extant
+      dat <- dat %>%
+        dplyr::left_join(x = ., y = anom, by = "station") %>%
+        dplyr::rename(var_orig = var) %>%
+        dplyr::mutate(var = var_orig - mean)
+    }
   }
   
   # prepare data for final prodcut
   dat <- dat %>%
-    dplyr::mutate(binTemp = base::cut(x = var,
+    dplyr::mutate(binTemp = base::cut(x = as.numeric(dat$var),
                                       breaks = varBreaks,
                                       labels = FALSE, #varLabels,
                                       include.lowest = TRUE,
@@ -300,36 +285,35 @@ create_vargridplots <- function(
     dplyr::mutate(binTemp = base::factor(x = varLabels[binTemp], 
                                          levels = varLabels, 
                                          labels = varLabels) ) #%>% 
-    # dplyr::select("region", "station", "var", "date", "bintemp", "year") 
+  # dplyr::select("region", "station", "var", "date", "bintemp", "year") 
+  
+  
+  grid_stations <- sp::merge(x = grid_stations, 
+                             y = dat %>%
+                               dplyr::select(station, stratum, binTemp, reg_shapefile, 
+                                             region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
+                               dplyr::distinct(), 
+                             all.x = TRUE) 
+  
 
-  
-  grid_stations <- sp::merge(x = grid_stations0, 
-                      y = dat, 
-                      by.x = "STATION_ID", 
-                      by.y = "station") 
-  
-  grid_stations<-st_as_sf(grid_stations) %>%
-    dplyr::filter(!(STATION_ID %in% c("DD-09", "AA-10")))
-  
   # Create new temperature maps
   
   # This will create a preview in this Rmarkdown document, and save a PNG image file in the *G:\\EBSother\\EBS2019\\HeatMapR\\* directory named "*HeatPlotMM-DD-YYYY.png*", where MM-DD-YYYY is the date of trawl. 
   
-  
-  if (dates != "none") { # If you are not using any data from heatLog.csv
+  if (dates0 != "none") { # If you are not using any data from heatLog.csv
     date_entered<-sort(unique(grid_stations$date))
     date_entered<-date_entered[!is.na(date_entered)]
   }
   
   fig_list<-list()
-if (dates == "none") { # If you are not using any data from heatLog.csv
-  iterate <- 1 
-  } else  if(dates == "all"){
+  if (dates0 == "none") { # If you are not using any data from heatLog.csv
+    iterate <- 1 
+  } else  if(dates0 == "all"){
     iterate <- 1:length(date_entered) # if you want to run all of plots for each date_entered: 
-  } else if (dates == "latest") {
+  } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
   } else { # if you want to run a specific date
-    iterate <- which(as.character(date_entered) == dates)
+    iterate <- which(as.character(date_entered) == dates0)
   }
   
   for (i in iterate) { 
@@ -340,9 +324,9 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
     survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
     
     
-      grid_stations0<-grid_stations
-      
-    if (dates != "none") { # If you are not using any data from heatLog.csv
+    grid_stations0<-grid_stations
+    
+    if (dates0 != "none") { # If you are not using any data from heatLog.csv
       max_date <- date_entered[i]
       if (length(max_date)==0) {
         max_date <- (min(dat00$date, na.rm = TRUE)-1) # The earliest planned date
@@ -354,7 +338,7 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
       grid_stations0$binTemp<-NA  # only use dates including this date and before this date
       
     }
-      
+    
     gg <- ggplot() +
       # AK Map (thanks {akgfmaps}!)
       geom_sf(data = survey_area$akland, fill = "white") +
@@ -411,75 +395,73 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
                x = quantile(extent(grid_stations)[1]:extent(grid_stations)[2], .1), 
                y = quantile(extent(grid_stations)[3]:extent(grid_stations)[4], .1), 
                label = ifelse(is.na(max_date), 
-                          "", 
-                          paste0("Date created:\n", 
-                                 format(Sys.Date(), "%B %d, %Y"), 
-                              "\nRecorded as of:\n", 
-                              format(x = max_date, format = "%B %d, %Y"))), 
+                              "", 
+                              paste0("Date created:\n", 
+                                     format(Sys.Date(), "%B %d, %Y"), 
+                                     "\nRecorded as of:\n", 
+                                     format(x = max_date, format = "%B %d, %Y"))), 
                color = "black", size = 4) 
-    # Add temperature squares
- 
-      
-    if (dates != "none") { # If you are using any data from heatLog.csv
-    gg <- gg +
-      geom_sf(data = grid_stations0, 
-              aes(group = STATION_ID, 
-                  fill = binTemp), 
-              colour = "grey50",
-              show.legend = legend_temp) +
-      
-      
-      scale_fill_manual(name = legend_temp,
-                        values = varColour, 
-                        labels = varLabels,
-                        drop = F,
-                        na.translate = F)
-      
-    # if there are planned dates
-    if (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0 & 
-        i == iterate & planned_stations) {
-      gg <- gg +
-        geom_point(data = dat_planned, 
-                   mapping = aes(x = lon, y = lat, shape = factor(var)), 
-                   size = 4) +
-        scale_shape_manual(
-          name = "Planned Stations",
-          values = sort(unique(dat_planned$var)),
-          breaks = sort(unique(dat_planned$var)), 
-          labels = sort(unique(dat_planned$lab))) +
-        
-        guides(
-          fill = guide_legend(ncol=1, # tempertures # in case you want to have 2+ columns for the legend!
-                              override.aes = list(colour = c("white"),
-                                                  size = 0),
-                              order = 1),
-          colour = guide_legend(order = 2, # survey regions
-                                override.aes = list(fill = survey_reg_col,
-                                                    size = 2#, 
-                                                    # color = "white"
-                                                    )) , 
-          shape = guide_legend(order = 3, # planned stations
-                               override.aes = list(fill = "grey95", 
-                                                   linetype = c("blank")))
-        )
-      
-    } else {
-      gg <- gg +
-        guides(
-          # tempartures # in case you want to have 2+ columns for the legend!
-          fill = guide_legend(ncol=1, 
-                              override.aes = list(colour = c("white"),
-                                                  size = 0),
-                              order = 1),
-          # survey regions
-          colour = guide_legend(order = 2, 
-                                override.aes = list(fill = survey_reg_col, 
-                                                    size = 2#, 
-                                                    # color = "white"
-                                                    ))) 
-    }
-    } else {
     
+    # Add temperature squares
+    if (dates0 != "none") { # If you are using any data from heatLog.csv
+      gg <- gg +
+        ggplot2::geom_sf(data = grid_stations %>% 
+                           dplyr::filter(stratum == "212"), 
+                aes(group = station, 
+                    fill = binTemp), 
+                colour = "grey50",
+                show.legend = legend_temp) +
+        ggplot2::scale_fill_manual(name = legend_temp,
+                          values = varColour, 
+                          labels = varLabels,
+                          drop = F,
+                          na.translate = F)
+      
+      # if there are planned dates
+      if (sum((!is.na(heatLog$vessel_shape) & is.na(heatLog$var)) & # (length(grep(x = heatLog$var, pattern = "[A-Za-z]"))>0 & 
+          i == iterate & planned_stations)>0) {
+        gg <- gg +
+          geom_point(data = dat_planned, 
+                     mapping = aes(x = lon, y = lat, shape = factor(var)), 
+                     size = 4) +
+          scale_shape_manual(
+            name = "Planned Stations",
+            values = sort(unique(dat_planned$var)),
+            breaks = sort(unique(dat_planned$var)), 
+            labels = sort(unique(dat_planned$lab))) +
+          
+          guides(
+            fill = guide_legend(ncol=1, # tempertures # in case you want to have 2+ columns for the legend!
+                                override.aes = list(colour = c("white"),
+                                                    size = 0),
+                                order = 1),
+            colour = guide_legend(order = 2, # survey regions
+                                  override.aes = list(fill = survey_reg_col,
+                                                      size = 2#, 
+                                                      # color = "white"
+                                  )) , 
+            shape = guide_legend(order = 3, # planned stations
+                                 override.aes = list(fill = "grey95", 
+                                                     linetype = c("blank")))
+          )
+        
+      } else {
+        gg <- gg +
+          guides(
+            # tempartures # in case you want to have 2+ columns for the legend!
+            fill = guide_legend(ncol=1, 
+                                override.aes = list(colour = c("white"),
+                                                    size = 0),
+                                order = 1),
+            # survey regions
+            colour = guide_legend(order = 2, 
+                                  override.aes = list(fill = survey_reg_col, 
+                                                      size = 2#, 
+                                                      # color = "white"
+                                  ))) 
+      }
+    } else {
+      
       if (planned_stations) {
         gg <- gg +
           geom_sf(data = grid_stations, 
@@ -495,12 +477,15 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
                                   ))) 
       }
     }
-  gg <- gg +
-    coord_sf(xlim = c(extent(grid_stations)[1], 
-                      extent(grid_stations)[2]),
-             ylim = c(extent(grid_stations)[3] , 
-                      extent(grid_stations)[4]))
- 
+    # gg <- gg +
+    #   coord_sf(xlim = extrap.box[1:2], 
+    #            ylim = extrap.box[3:4])
+    gg <- gg +
+    coord_sf(xlim = c(extent(grid_stations)[1],
+                    extent(grid_stations)[2]),
+           ylim = c(extent(grid_stations)[3] ,
+                    extent(grid_stations)[4]))
+    
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_in, "img/noaa-50th-logo.png"), 
                  x = 0, y = 0,
@@ -508,10 +493,10 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
                  width = .19)
     
     # Save plots
-  
+    
     filename0 <- paste0(dir_out, '/',
-                        ifelse(dates == "none", "", 
-                               paste(format(max_date, "%Y-%m-%d"))), 
+                        ifelse(dates0 == "none", "", 
+                               max_date), # paste(format(max_date, "%Y-%m-%d"))), 
                         ifelse(file_end=="", "", paste0("_", file_end)))
     
     ggsave(paste0(filename0,'.png'),
@@ -526,35 +511,35 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
            plot=gg, 
            device="pdf") # pdfs are great for editing later
     
-    if (gif | dates != "none") {
-    create_vargridplots_gif(yr = yr, 
-                            file_end = file_end, 
-                            max_date = max_date,
-                            dir_out = dir_out)
+    if (gif | dates0 != "none") {
+      create_vargridplots_gif(yr = yr, 
+                              file_end = file_end, 
+                              max_date = max_date,
+                              dir_out = dir_out)
     }
     
-    if (!(is.null(upload_googledrive))) {
+    if (!(is.null(dir_googledrive_upload))) {
       
-    drive_upload(
-      media = paste0(filename0,'.png'), 
-      path = upload_googledrive, 
-      overwrite = TRUE)
-    
-    drive_upload(
-      media = paste0(filename0,'.pdf'), 
-      path = upload_googledrive, 
-      overwrite = TRUE)
-    
-    # change each day of the survey
-    if (gif | dates != "none") {
       drive_upload(
-      media = paste0(filename0,'.gif'), 
-      path = upload_googledrive, 
-      overwrite = TRUE)
+        media = paste0(filename0,'.png'), 
+        path = dir_googledrive_upload, 
+        overwrite = TRUE)
+      
+      drive_upload(
+        media = paste0(filename0,'.pdf'), 
+        path = dir_googledrive_upload, 
+        overwrite = TRUE)
+      
+      # change each day of the survey
+      if (gif | dates0 != "none") {
+        drive_upload(
+          media = paste0(filename0,'.gif'), 
+          path = dir_googledrive_upload, 
+          overwrite = TRUE)
+      }
     }
-}
     
-
+    
     # fig_list<-c(fig_list, list(gg))
     # names(fig_list)[length(fig_list)] <- paste(max_date)
     
@@ -572,18 +557,18 @@ if (dates == "none") { # If you are not using any data from heatLog.csv
 create_vargridplots_gif<-function(yr, file_end, max_date, dir_out) {
   
   imgs <- list.files(path = dir_out, 
-                         pattern = paste0(file_end, ".png"), 
+                     pattern = paste0(file_end, ".png"), 
                      full.names = TRUE)
   
   imgs<-sort(imgs)
-
+  
   as.numeric(strsplit(imgs, '\\/')[[1]][-1])
   
   dates_ploted <- gsub(pattern = paste0("_", file_end, ".png"), 
-       replacement = "", 
-       x = unlist(lapply(
-    lapply(imgs, function(x) 
-    (strsplit(x, '\\/')[[1]][-1])), tail, n = 1L)))
+                       replacement = "", 
+                       x = unlist(lapply(
+                         lapply(imgs, function(x) 
+                           (strsplit(x, '\\/')[[1]][-1])), tail, n = 1L)))
   dates_ploted <- strptime(x = dates_ploted, format = "%Y-%m-%d")
   max_date1 <- strptime(x = max_date, 
                         format = "%Y-%m-%d")
@@ -594,8 +579,8 @@ create_vargridplots_gif<-function(yr, file_end, max_date, dir_out) {
                      image_read)
   
   img_list <- lapply(img_list, 
-         image_resize, 
-         geometry = "1280")
+                     image_resize, 
+                     geometry = "1280")
   
   ## join the images together
   img_joined <- magick::image_join(img_list)
@@ -611,7 +596,7 @@ create_vargridplots_gif<-function(yr, file_end, max_date, dir_out) {
   magick::image_write(
     image = img_animated, 
     path = paste0(dir_out, "/", max_date1, "_", 
-                            file_end, ".gif") )
+                  file_end, ".gif") )
   
 }
 
