@@ -9,9 +9,24 @@
 
 # This has a specific username and password because I DONT want people to have access to this!
 # source("C:/Users/emily.markowitz/Work/Projects/ConnectToOracle.R")
-# source("C:/Users/emily.markowitz/Documents/Projects/ConnectToOracle.R")
+source("C:/Users/emily.markowitz/Documents/Projects/ConnectToOracle.R")
 # source("Z:/Projects/ConnectToOracle.R")
-source(here::here("ConnectToOracle.R"))
+
+# I set up a ConnectToOracle.R that looks like this: 
+#   
+#   PKG <- c("RODBC")
+# for (p in PKG) {
+#   if(!require(p,character.only = TRUE)) {  
+#     install.packages(p)
+#     require(p,character.only = TRUE)}
+# }
+# 
+# channel<-odbcConnect(dsn = "AFSC",
+#                      uid = "USERNAME", # change
+#                      pwd = "PASSWORD", #change
+#                      believeNRows = FALSE)
+# 
+# odbcGetInfo(channel)
 
 locations<-c(
   "RACEBASE.HAUL", 
@@ -24,7 +39,7 @@ locations<-c(
 
 
 #sinks the data into connection as text file
-sink("./data/metadata.txt")
+sink("./data/oracle/metadata.txt")
 
 print(Sys.Date())
 
