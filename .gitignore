@@ -28,7 +28,7 @@ vignettes/*.pdf
 .Renviron
 .Rproj.user
 /data
-/results
+/output
 /notes
 /old
 /code/old

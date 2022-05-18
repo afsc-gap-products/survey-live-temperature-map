@@ -5,8 +5,11 @@
 #' purpose: download oracle data
 #' ---------------------------
 
-# Download data from oracle saved locally: -------------------------------------
+# Shapefiles -------------------------------------------------------------------
+# J:\RACE_GF\GOA\GOA 2021\Files for boats\ArcGIS\GOAGRID_2021
+# J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018
 
+# Download data from oracle saved locally: -------------------------------------
 a<-list.files(path = "./data/oracle/")
 for (i in 1:length(a)){
   b <- read_csv(file = paste0("./data/oracle/", a[i]))

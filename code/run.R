@@ -7,7 +7,7 @@
 
 # Knowns -----------------------------------------------------------------------
 
-maxyr <- yr <- 2022 #CHANGE
+maxyr <- 2022 #CHANGE
 googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
@@ -47,14 +47,14 @@ dat_survreg <- dplyr::bind_rows(dat_survreg,
 #                                           reg_dates = "\n(May 25-Aug 04)")) # CHANGE
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
-# This sign in needs to be here for the Task Scheduler, please do not comment out.
+## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
 googledrive::drive_deauth()
 googledrive::drive_auth()
 1
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
-# please don't use the here package - it actually causes issues with the tasks scheduler, 
-# which has no concept of a project root folder
+## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
+## which has no concept of a project root folder. 
 # dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 # dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
@@ -78,10 +78,10 @@ SRVY <- "BS"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
 dates0 <- "2022-06-01"
 planned_stations <- TRUE
-grid_stations0 <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles'),# Prepare map objects
+grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles'),# Prepare map objects
                                 layer = "NEBSgrid", 
                                 verbose=F) 
-grid_stations <- spTransform(grid_stations0,
+grid_stations <- spTransform(grid_stations,
                              "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") # crs(survey_area))
 grid_stations<-sf::st_as_sf(grid_stations) %>%
   dplyr::filter(!(STATION %in% c("DD-09", "AA-10"))) %>% 
@@ -93,37 +93,38 @@ grid_stations <- sp::merge(x = grid_stations,
                              dplyr::distinct(), 
                            all.x = TRUE) 
 region_akgfmaps = "bs.all"
-plot_subtitle = "NOAA Fisheries Bering Sea Bottom Trawl Survey"
+plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 
 ## AI --------------------------------------------------------------------------
-# var = "bt"
-# maxyr <- yr <- 2018 #CHANGE
-# SRVY <- "AI"
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-# dates0 <- "2018-06-10"
-# planned_stations <- FALSE
-# extrap.box <- c(xmn = -179.5, xmx = -130, ymn = 54, ymx = 60)
-# grid_stations0 <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),# Prepare map objects
-#                                  layer = "aigrid_trawable_thru2018", 
-#                                  verbose=F) 
-# grid_stations <- spTransform(grid_stations0,
-#                              "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") # crs(survey_area))
-# grid_stations<-st_as_sf(grid_stations) %>%
-#  dplyr::rename(station = ID,
-#                stratum = STRATUM)
-# grid_stations <- sp::merge(x = grid_stations,
-#                           y = goa_strata0 %>%
-#                             dplyr::mutate(regulatory_area_name = stringr::str_to_title(regulatory_area_name),
-#                                           regulatory_area_name = gsub(pattern = "Goa", replacement = "GOA", x = regulatory_area_name)) %>%
-#                             dplyr::select(stratum, regulatory_area_name) %>%
-#                             dplyr::distinct(),
-#                           all.x = TRUE)
-# region_akgfmaps = "ai"
-# plot_subtitle = "NOAA Fisheries Aluetian Islands Bottom Trawl Survey"
+var = "bt"
+maxyr <- 2018 #CHANGE
+SRVY <- "AI"
+dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
+dates0 <- "2018-06-10"
+planned_stations <- FALSE
+extrap.box <- c(xmn = -179.5, xmx = -130, ymn = 54, ymx = 60)
+grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),# Prepare map objects
+                                 layer = "aigrid_trawable_thru2018",
+                                 verbose=F)
+grid_stations <- spTransform(grid_stations,
+                             "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") 
+grid_stations<-st_as_sf(grid_stations) %>%
+ dplyr::rename(station = ID,
+               stratum = STRATUM)
+grid_stations <- sp::merge(x = grid_stations,
+                          y = goa_strata0 %>%
+                            dplyr::mutate(regulatory_area_name = stringr::str_to_title(regulatory_area_name),
+                                          regulatory_area_name = gsub(pattern = "Goa", replacement = "GOA", x = regulatory_area_name)) %>%
+                            dplyr::select(stratum, regulatory_area_name) %>%
+                            dplyr::distinct(),
+                          all.x = TRUE)
+region_akgfmaps = "ai"
+plot_subtitle = "NOAA Fisheries Aluetian Islands Bottom Trawl Survey"
 
 make_plot_warpper(maxyr = maxyr, 
                   SRVY = SRVY, 
                   haul = haul, 
+                  dat_survreg = dat_survreg, 
                   var = var,
                   dir_googledrive_upload = dir_googledrive_upload, 
                   dates0 = dates0, 

@@ -109,6 +109,7 @@ text_list<-function(x = "",
                     oxford = TRUE,
                     sep = ", ",
                     sep_last = "and ") {
+  
   x<-x[which(x!="")]
   # x<-x[which(!is.null(x))]
   x<-x[which(!is.na(x))]
@@ -127,10 +128,10 @@ text_list<-function(x = "",
 }
 
 
-
 make_plot_warpper <- function(maxyr, 
                               SRVY, 
                               haul, 
+                              dat_survreg, 
                               var = "bt", 
                               dir_googledrive_upload, 
                               dates0, 
@@ -143,16 +144,41 @@ make_plot_warpper <- function(maxyr,
   case <- paste0(maxyr, "_", SRVY)
   dir_out <- here::here("output", case)
   
-  if (var == "bt") {
-    plot_title = paste0(yr, ' Bottom Temperature (\u00B0C)')
-    legend_temp = 'Bottom\nTemperature (\u00B0C)'
-    var0 <- "gear_temperature"
-  } else if (var == "st") {
-    plot_title = paste0(yr, ' Surface Temperature (\u00B0C)')
-    legend_temp = 'Surface\nTemperature (\u00B0C)'
-    var0 <- "surface_temperature"
+  SRVY1 <- SRVY
+  if (SRVY == "BS") {
+    SRVY1 <- c("EBS", "NBS")
   }
   
+  # Define var
+  if (var == "bt") {
+    var00 = 'Bottom Temperature'
+    unit0 <- '(\u00B0C)'
+    var0 <- "gear_temperature"
+    varBreaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50) # if anom DOES NOT exist (straight temps!)
+  } else if (var == "st") {
+    var00 = 'Surface Temperature'
+    unit0 <- '(\u00B0C)'
+    var0 <- "surface_temperature"
+    varBreaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50) # if anom DOES NOT exist (straight temps!)
+  }
+  
+  # Prepare title
+  plot_title <- paste0(maxyr, " ", var00, " ", unit0)
+  legend_title <- paste0(gsub(pattern = " ", replacement = "\n", x = var00), " ", unit0)
+  anom_years <- temp <- haul[haul$SRVY %in% SRVY1, ] %>% 
+    dplyr::select(SRVY, year) %>% 
+    dplyr::distinct() %>%
+    dplyr::group_by(SRVY) %>% 
+    dplyr::summarize(min = min(year, na.rm = TRUE), 
+                     max = max(year, na.rm = TRUE), 
+                     nn = n()) %>% 
+    dplyr::mutate(range = paste0(min, "-", max, " (", nn, " years)"))
+  plot_title_anom <- paste0(maxyr,  " ", var00, ' Anomaly\n(',
+                           text_list(paste0(anom_years$SRVY, " ", anom_years$range), sep = ";"),
+                           ')')
+  legend_title_anom = paste0(var00, '\nAnomaly ', unit0)
+  
+  # Calculate var averages from pervious data
   dat_anom <- haul %>% 
     dplyr::rename(station = stationid) %>%
     dplyr::filter(!(is.na(station)) &
@@ -161,6 +187,7 @@ make_plot_warpper <- function(maxyr,
     dplyr::group_by(SRVY, stratum, station) %>% 
     dplyr::summarise(mean = mean(var, na.rm = TRUE))
   
+  # Temperature data from google drive
   dat <- 
     readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
                       sheet = case, skip = 1) %>%
@@ -168,12 +195,8 @@ make_plot_warpper <- function(maxyr,
     dplyr::rename("var" = all_of(var), 
                   "SRVY" = "srvy", 
                   "vessel_shape" = "vessel") %>%
-    dplyr::filter(!is.na(SRVY))  
-  
-  dat <- dat %>% # remove rows of empty data
-    # Select data for this year
+    dplyr::filter(!is.na(SRVY)) %>% 
     dplyr::select(SRVY, stratum, station, var, date, vessel_shape) %>% 
-    # add survey region data and planned survey dates
     dplyr::left_join(x = ., 
                      y = dat_survreg, 
                      by = c("SRVY", "vessel_shape")) %>%
@@ -187,19 +210,19 @@ make_plot_warpper <- function(maxyr,
     dplyr::filter(!is.na(SRVY)) %>%
     dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates), 
                   var = as.numeric(var), 
-                  anom = var-mean, 
+                  anom = var-mean, # calculate anomalies
                   date = as.character(date)) %>%
     dplyr::arrange("var")
   
   # Daily plot
-  anom = NULL
+  anom <- FALSE
   file_end = "daily"
   create_vargridplots(yr = yr,
-                      anom = anom,
                       dat = dat,
+                      varBreaks = varBreaks, 
                       plot_title = plot_title,
                       plot_subtitle = plot_subtitle,
-                      legend_temp = legend_temp,
+                      legend_title = legend_title,
                       dates0 = dates0, #"latest", # "all", #"2021-06-05",
                       region_akgfmaps = region_akgfmaps,
                       grid_stations = grid_stations,
@@ -211,14 +234,19 @@ make_plot_warpper <- function(maxyr,
                       planned_stations = planned_stations)
   
   # Anomaly plot
-  anom = dat_anom
+  dat <- dat %>% 
+    dplyr::rename(bt = var, 
+            var = anom)
+  varBreaks <- c(-10, seq(from = -2, to = 3, by = 0.5), 50) # for the anomaly data
   file_end = "anom"
+  plot_title <- plot_title_anom
+  legend_title = legend_title_anom
   create_vargridplots(yr = yr,
-                      anom = anom,
                       dat = dat,
+                      varBreaks = varBreaks, 
                       plot_title = plot_title,
                       plot_subtitle = plot_subtitle,
-                      legend_temp = legend_temp,
+                      legend_title = legend_title,
                       dates0 = dates0, #"latest", # "all", #"2021-06-05",
                       region_akgfmaps = region_akgfmaps,
                       grid_stations = grid_stations,
@@ -239,7 +267,7 @@ make_plot_warpper <- function(maxyr,
 #' @param dat The csv file from googledrive with data for the 'yr' being plotted or compared to in the anomally. 
 #' @param plot_title A string of what the plot title should be. 
 #' @param plot_subtitle A string of what the plot subtitle should be. 
-#' @param legend_temp A string of the temperature legend header. 
+#' @param legend_title A string of the temperature legend header. 
 #' @param dates0 A string of either the date to be plotted to ("YYYY-MM-DD"), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will bbe printed. Default = "latest". 
 #' @param region_akgfmaps Inherited from the akgfmaps package. "bs.south" plots the EBS region, "bs.all" plots EBS and NBS regions. See the "select.region" argument under '?get_base_layers'. Default = "bs.all"
 #' @param shapefile Select the shapefile you want to use for the grids. "Egrid_stations" plots the EBS region and "NEgrid_stations_df" plots EBS and NBS regions. Default = "NEgrid_stations".
@@ -254,16 +282,16 @@ make_plot_warpper <- function(maxyr,
 #' @export
 create_vargridplots <- function(
     yr = NULL, 
-    anom = NULL, 
     dat = NULL, 
+    varBreaks, 
     plot_title = "",
     plot_subtitle = "",
-    legend_temp = "",
+    legend_title = "",
     dates0 = "latest",
     region_akgfmaps = "bs.all", 
     grid_stations, #  = "NEgrid_stations", 
     height = 8.5, 
-    width = 10.5,
+    width = 10.25,
     file_end = "",
     gif = TRUE,
     dir_out = "./", 
@@ -272,21 +300,12 @@ create_vargridplots <- function(
     dir_googledrive_upload) {
   
   dat0 <- dat
-  plot_title <- ifelse(plot_title == "", paste0(yr, " Temperature °C"), plot_title)
-  # plot_subtitle = paste0("NOAA Fisheries ",text_list(unique(heatLog$region_long))," Bottom Trawl Survey")
   
   # Create Directories
   dir.create(path = dir_out, showWarnings = FALSE)
   
   # set Base Layers
   survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-  
-  # Break temps into factors
-  if (is.null(anom)) { # if anom DOES NOT exist (straight temps!)
-    varBreaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50)
-  } else { # for the anomaly data...
-    varBreaks <- c(-10, seq(from = -2, to = 3, by = 0.5), 50)
-  }
   
   varLabels <- c()
   for(i in 2:c(length(varBreaks))) {
@@ -338,31 +357,18 @@ create_vargridplots <- function(
     }
   }
   
-  
-  if (dates0 != "none") { # If you are not using any data from the temp data
-    
-    # combine temperture data with anomaly data?
-    if (!(is.null(anom))) { # if anom is extant
-      dat <- dat %>%
-        dplyr::left_join(x = ., y = anom, by = "station") %>%
-        dplyr::rename(var_orig = var) %>%
-        dplyr::mutate(var = var_orig - mean)
-    }
-  }
-  
-  # prepare data for final prodcut
+  # bin var
   dat <- dat %>%
     dplyr::mutate(binTemp = base::cut(x = as.numeric(dat$var),
                                       breaks = varBreaks,
-                                      labels = FALSE, #varLabels,
+                                      labels = FALSE, 
                                       include.lowest = TRUE,
                                       right = FALSE) ) %>%
     dplyr::mutate(binTemp = base::factor(x = varLabels[binTemp], 
                                          levels = varLabels, 
-                                         labels = varLabels) ) #%>% 
-  # dplyr::select("region", "station", "var", "date", "bintemp", "year") 
-  
-  
+                                         labels = varLabels) ) 
+
+  # bind dat to grid_stations for plotting
   grid_stations <- sp::merge(x = grid_stations, 
                              y = dat %>%
                                dplyr::select(station, stratum, binTemp, reg_shapefile, 
@@ -473,8 +479,8 @@ create_vargridplots <- function(
                          aes(group = station, 
                              fill = binTemp), 
                          colour = "grey50",
-                         show.legend = legend_temp) +
-        ggplot2::scale_fill_manual(name = legend_temp,
+                         show.legend = legend_title) +
+        ggplot2::scale_fill_manual(name = legend_title,
                                    values = varColour, 
                                    labels = varLabels,
                                    drop = F,
@@ -553,10 +559,10 @@ create_vargridplots <- function(
                         extent(grid_stations)[4]))
     
     gg <- ggdraw(gg) +
-      draw_image(image = paste0(dir_in, "img/noaa-50th-logo.png"), 
+      draw_image(image = paste0(dir_in, "img/noaa-fish-tall.png"), 
                  x = 0, y = 0,
                  hjust = -4.12, vjust = -.45,
-                 width = .19)
+                 width = .1)
     
     # Save plots
     filename0 <- paste0(dir_out, '/',
