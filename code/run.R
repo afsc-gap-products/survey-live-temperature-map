@@ -76,7 +76,7 @@ var = "bt"
 maxyr <- 2022 #CHANGE
 SRVY <- "BS"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-dates0 <- "2022-06-01" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <- "2022-06-01" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
 show_planned_stations <- TRUE
 grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles'),# Prepare map objects
                                 layer = "NEBSgrid", 
@@ -107,7 +107,7 @@ plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 #                                  layer = "aigrid_trawable_thru2018",
 #                                  verbose=F)
 # grid_stations <- spTransform(grid_stations,
-#                              "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") 
+#                              "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
 # grid_stations<-st_as_sf(grid_stations) %>%
 #  dplyr::rename(station = ID,
 #                stratum = STRATUM)

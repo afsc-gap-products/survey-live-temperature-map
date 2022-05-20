@@ -299,6 +299,18 @@ create_vargridplots <- function(
   
   # set Base Layers
   survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+  survey_reg_col <- gray.colors(length(unique(dat$SRVY))+2) # region colors
+  survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
+  survey_area$survey.area <- sp::merge(
+    x = survey_area$survey.area, 
+    y = dat %>% 
+      dplyr::select(reg_shapefile, region_long, reg_lab) %>% 
+      dplyr::filter(!is.na(reg_shapefile)) %>%
+      dplyr::distinct() %>% 
+      dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))) %>%
+      dplyr::rename(SURVEY = reg_shapefile), 
+    all.x = TRUE) %>% 
+    dplyr::arrange(desc(SURVEY))
   
   # define colors for var
   var_labels <- c()
@@ -332,7 +344,6 @@ create_vargridplots <- function(
                                dplyr::distinct(), 
                              all.x = TRUE) 
   
-  
   # Create new temperature maps
   if (as.character(dates0[1]) != "none") { # If you are not using any data from temp data
     if (length(dates0)) {
@@ -348,7 +359,7 @@ create_vargridplots <- function(
     iterate <- which(as.character(date_entered) %in% dates0)
   } else if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
-  } else  if(dates0 == "all"){
+  } else if (dates0 == "all") {
     iterate <- 1:length(date_entered) # if you want to run all of plots for each date_entered: 
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
@@ -359,9 +370,6 @@ create_vargridplots <- function(
   for (i in iterate) {
     
     start_time <- Sys.time()
-    
-    survey_reg_col <- gray.colors(length(unique(dat$SRVY))+2)
-    survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
     
     grid_stations_plot<-grid_stations
     dat_plot <- dat
@@ -374,13 +382,13 @@ create_vargridplots <- function(
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
       grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
-      # only use dates including 2 days before this date and before this date, so we can see the planned progression
-      if (i != iterate[length(iterate)]) {
-        dat_plot$vessel_shape[as.Date(dat_plot$date)>as.Date(max_date)+2]<-NA
-        dat_plot$date[as.Date(dat_plot$date)>as.Date(max_date)+2]<-NA
-        grid_stations_plot$vessel_shape[as.Date(grid_stations_plot$date) > as.Date(max_date)+2]<-NA
-        grid_stations_plot$date[as.Date(grid_stations_plot$date) > as.Date(max_date)+2]<-NA
-      }
+      # only use dates including 1 days before this date and before this date, so we can see the planned progression
+      # if (date_entered[i] != date_entered[length(date_entered)]) {
+        dat_plot$vessel_shape[as.Date(dat_plot$date)>as.Date(max_date)+1]<-NA
+        dat_plot$date[as.Date(dat_plot$date)>as.Date(max_date)+1]<-NA
+        grid_stations_plot$vessel_shape[as.Date(grid_stations_plot$date) > as.Date(max_date)+1]<-NA
+        grid_stations_plot$date[as.Date(grid_stations_plot$date) > as.Date(max_date)+1]<-NA
+      # }
     }
     
     # if (dates0 != "none") { # If you ARE using any data from temp data
@@ -451,7 +459,7 @@ create_vargridplots <- function(
                                           dplyr::mutate(vessel_shape = temp, 
                                                         vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% temp]),
                                                         planned = "N", 
-                                                        lab = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% temp], "\n")))
+                                                        lab = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% temp], "\n ")))
       }
       
     } else if (show_planned_stations) { # if we are sharing planned stations but there aren't any to share
@@ -463,7 +471,7 @@ create_vargridplots <- function(
                                 vessel_shape = unique(dat_plot$vessel_shape)[!is.na(unique(dat_plot$vessel_shape))], 
                                 vessel_name = unique(dat_plot$vessel_name)[!is.na(unique(dat_plot$vessel_name))], 
                                 date = NA, 
-                                lab = paste0(unique(dat_plot$vessel_name)[!is.na(unique(dat_plot$vessel_name))], "\n"))
+                                lab = paste0(unique(dat_plot$vessel_name)[!is.na(unique(dat_plot$vessel_name))], "\n "))
     }
     
     gg <- ggplot() +
@@ -519,13 +527,13 @@ create_vargridplots <- function(
       gg <- gg  +
         geom_sf(data = survey_area$survey.area, 
                 aes(color = survey_area$survey.area$SURVEY), 
-                fill = NA, 
+                # fill = NA, 
                 size = 2,
                 show.legend = TRUE) +
         scale_color_manual(name = "Survey Region", 
-                           values = c(alpha(survey_reg_col, 0.7)), 
-                           breaks = rev(unique(dat_plot$reg_shapefile)), 
-                           labels = rev(unique(dat_plot$reg_lab))) 
+                           values = survey_area$survey.area$survey_reg_col,  
+                           breaks = survey_area$survey.area$SURVEY, 
+                           labels = survey_area$survey.area$reg_lab) 
     }
     
     # Add temperature squares
@@ -564,8 +572,9 @@ create_vargridplots <- function(
                                                     size = 0),
                                 order = 1),
             colour = guide_legend(order = 2, # survey regions
-                                  override.aes = list(fill = survey_reg_col,
-                                                      size = 2#,
+                                  override.aes = list(#color = "white", 
+                                                      fill = survey_area$survey.area$survey_reg_col#,
+                                                      # size = 2#,
                                                       # color = "white"
                                   )) ,
             shape = guide_legend(order = 3, # planned stations
@@ -581,7 +590,7 @@ create_vargridplots <- function(
                                 order = 1),
             # survey regions
             colour = guide_legend(order = 2, 
-                                  override.aes = list(fill = survey_reg_col, 
+                                  override.aes = list(fill = survey_area$survey.area$survey_reg_col, 
                                                       size = 2#, 
                                                       # color = "white"
                                   ))) 
