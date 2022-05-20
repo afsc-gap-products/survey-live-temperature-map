@@ -41,7 +41,8 @@ PKG <- c(
   "broom", 
   "readr", 
   "dplyr", 
-  "glue"
+  "glue",
+  "ggplot2"
 )
 
 for (p in PKG) {
@@ -128,7 +129,7 @@ text_list<-function(x = "",
 }
 
 
-make_plot_warpper <- function(maxyr, 
+make_plot_wrapper <- function(maxyr, 
                               SRVY, 
                               haul, 
                               dat_survreg, 
@@ -142,7 +143,7 @@ make_plot_warpper <- function(maxyr,
                               show_planned_stations) {
   
   case <- paste0(maxyr, "_", SRVY)
-  dir_out <- here::here("output", case)
+  dir_out <- paste0("./output/", case, "/")
   
   SRVY1 <- SRVY
   if (SRVY == "BS") {

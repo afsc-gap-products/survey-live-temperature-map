@@ -12,6 +12,7 @@ googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
 dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
+#dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1HDKTMR8wPghIL6pUo2zv8OJF3Od8exev"
 
 # The surveys this script will be covering 
 dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF", 
@@ -76,7 +77,8 @@ var = "bt"
 maxyr <- 2022 #CHANGE
 SRVY <- "BS"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-dates0 <- "2022-06-01" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
+#dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
 show_planned_stations <- TRUE
 grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles'),# Prepare map objects
                                 layer = "NEBSgrid", 
@@ -125,7 +127,7 @@ plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 # dates0 <- as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 # dates0 <-"all"
 
-make_plot_warpper(maxyr = maxyr, 
+make_plot_wrapper(maxyr = maxyr, 
                   SRVY = SRVY, 
                   haul = haul, 
                   dat_survreg = dat_survreg, 
