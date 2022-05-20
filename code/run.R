@@ -20,7 +20,7 @@ dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF",
                           region = "BS", 
                           vessel_id = c(94, 162), # CHANGE
                           vessel_shape = c("V", "A"), # CHANGE
-                          reg_dates = "\n(May 25-Aug 04)") # CHANGE
+                          reg_dates = "\n(May 25-Aug 03)") # CHANGE
 dat_survreg <- dplyr::bind_rows(dat_survreg, 
                                 data.frame(reg_shapefile = "NBS_SHELF", 
                                            region_long = "Northern Bering Sea", 
@@ -28,7 +28,7 @@ dat_survreg <- dplyr::bind_rows(dat_survreg,
                                            region = "BS", 
                                            vessel_id = c(94, 162), # CHANGE
                                            vessel_shape = c("V", "A"), # CHANGE
-                                           reg_dates = "\n(Aug 02-Aug 28)")) # CHANGE
+                                           reg_dates = "\n(Aug 03-Aug 28)")) # CHANGE
 dat_survreg <- dplyr::bind_rows(dat_survreg, 
                                 data.frame(reg_shapefile = "AI",
                                            region_long = "Aleutian Islands",
