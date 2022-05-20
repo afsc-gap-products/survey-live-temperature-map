@@ -76,8 +76,8 @@ var = "bt"
 maxyr <- 2022 #CHANGE
 SRVY <- "BS"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-dates0 <- "2022-06-01"
-planned_stations <- TRUE
+dates0 <- "2022-06-01" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+show_planned_stations <- TRUE
 grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles'),# Prepare map objects
                                 layer = "NEBSgrid", 
                                 verbose=F) 
@@ -96,30 +96,34 @@ region_akgfmaps = "bs.all"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 
 ## AI --------------------------------------------------------------------------
-var = "bt"
-maxyr <- 2018 #CHANGE
-SRVY <- "AI"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-dates0 <- "2018-06-10"
-planned_stations <- FALSE
-extrap.box <- c(xmn = -179.5, xmx = -130, ymn = 54, ymx = 60)
-grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),# Prepare map objects
-                                 layer = "aigrid_trawable_thru2018",
-                                 verbose=F)
-grid_stations <- spTransform(grid_stations,
-                             "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") 
-grid_stations<-st_as_sf(grid_stations) %>%
- dplyr::rename(station = ID,
-               stratum = STRATUM)
-grid_stations <- sp::merge(x = grid_stations,
-                          y = goa_strata0 %>%
-                            dplyr::mutate(regulatory_area_name = stringr::str_to_title(regulatory_area_name),
-                                          regulatory_area_name = gsub(pattern = "Goa", replacement = "GOA", x = regulatory_area_name)) %>%
-                            dplyr::select(stratum, regulatory_area_name) %>%
-                            dplyr::distinct(),
-                          all.x = TRUE)
-region_akgfmaps = "ai"
-plot_subtitle = "NOAA Fisheries Aluetian Islands Bottom Trawl Survey"
+# var = "bt"
+# maxyr <- 2018 #CHANGE
+# SRVY <- "AI"
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
+# dates0 <- "2018-06-10" # latest # "all", #"2021-06-05",# Sys.Date()
+# show_planned_stations <- FALSE
+# extrap.box <- c(xmn = -179.5, xmx = -130, ymn = 54, ymx = 60)
+# grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),# Prepare map objects
+#                                  layer = "aigrid_trawable_thru2018",
+#                                  verbose=F)
+# grid_stations <- spTransform(grid_stations,
+#                              "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs") 
+# grid_stations<-st_as_sf(grid_stations) %>%
+#  dplyr::rename(station = ID,
+#                stratum = STRATUM)
+# grid_stations <- sp::merge(x = grid_stations,
+#                           y = goa_strata0 %>%
+#                             dplyr::mutate(regulatory_area_name = stringr::str_to_title(regulatory_area_name),
+#                                           regulatory_area_name = gsub(pattern = "Goa", replacement = "GOA", x = regulatory_area_name)) %>%
+#                             dplyr::select(stratum, regulatory_area_name) %>%
+#                             dplyr::distinct(),
+#                           all.x = TRUE)
+# region_akgfmaps = "ai"
+# plot_subtitle = "NOAA Fisheries Aluetian Islands Bottom Trawl Survey"
+
+
+# dates0 <- as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+# dates0 <-"all"
 
 make_plot_warpper(maxyr = maxyr, 
                   SRVY = SRVY, 
@@ -132,13 +136,25 @@ make_plot_warpper(maxyr = maxyr,
                   plot_subtitle = plot_subtitle, 
                   region_akgfmaps = region_akgfmaps, 
                   extrap.box = extrap.box, 
-                  planned_stations = planned_stations)
+                  show_planned_stations = show_planned_stations)
 
 
+# # *** Blank Grid (no survey data) ----------------------------------------------
+
+# Just the empty grid (comment this v out when running after beginning of survey)
 
 
-
-
+# create_vargridplots(maxyr = maxyr,
+#                     gap_survey_progression = gap_survey_progression,
+#                     plot_title = "Survey Grid",
+#                     plot_subtitle = plot_subtitle,
+#                     dates = "none", # latest # "all", #"2021-06-05",
+#                     region_akgfmaps = region_akgfmaps,
+#                     region_grid = region_grid,
+#                     file_end = "grid",
+#                     make_gifs = FALSE,
+#                     dir_in = dir_in,
+#                     dir_out = dir_out)
 
 
 
@@ -269,7 +285,7 @@ make_plot_warpper(maxyr = maxyr,
 #                file_end = "anom",
 #                dir_in = dir_in, 
 #                dir_out = dir_out, 
-#                planned_stations = FALSE)
+#                show_planned_stations = FALSE)
 # 
 # # *** Previous years --------------------------------------------------
 # #
