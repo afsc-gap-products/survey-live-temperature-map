@@ -1,0 +1,41 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+classoption: landscape
+mainfont: Arial
+---
+\fontsize{12}{22}
+\fontseries{b}
+\selectfont
+\pagenumbering{gobble}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+if (as.character(dates0[1]) == "none") {
+  fig_cap <- fig_alt <- paste0(
+  "NOAA Fisheries conducted the ", 
+  text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+  " surveys aboard the ",
+  text_list(x = paste0("F/V \\textit{",unique(dat$vessel_name[!is.na(dat$vessel_name)]),"}")),
+  ". This is a plot of 50 m, 100 m, and 200 m bathymetry and empty grid of stations. \\textit{Credit: NOAA Fisheries}")
+} else {
+fig_cap <- fig_alt <- paste0(
+  "NOAA Fisheries near-real time bottom ocean temperatures collected ", 
+  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+         paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
+         paste0("between ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                " and ", 
+                format(x = as.Date(max_date), format = "%B %d, %Y"))), 
+  " during the ",
+  text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+  " surveys daily aboard the ",
+  text_list(x = paste0("F/V \\textit{",unique(dat$vessel_name[!is.na(dat$vessel_name)]),"}")),
+  ". The final, validated, survey data, including temperature and species collected at each station among other observations, will be made publicly accessible about a month after the survey is complete on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. While we expect the data presented here will not need to be improved upon, it has not been through our robust data checking process and is technically 'unreviewed.' \\textit{Credit: NOAA Fisheries}")
+}
+```
+
+```{r, fig.alt = fig_alt, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 7}
+gg
+```
+

@@ -17,6 +17,7 @@ PKG <- c(
   "raster", 
   "rgeos",
   "sf",
+  "ggsn",
   
   #logo
   "png",
@@ -35,7 +36,7 @@ PKG <- c(
   "bindrcpp", 
   "janitor", 
   
-  # "taskscheduleR",
+  # "tinytex",
   
   # tidyverse, 
   "broom", 
@@ -51,7 +52,6 @@ for (p in PKG) {
     require(p,character.only = TRUE)}
 }
 
-
 # Configuration ----------------------------------------------------------------
 
 # con <- file("notes.log")
@@ -65,31 +65,7 @@ for (p in PKG) {
 # And look at the log...
 # cat(readLines("notes.log"), sep="\n")
 
-# Funcitons --------------------------------------------------------------------
-
-
-#' #' Combine regional survey data to create the anomaly dataset
-#' #'
-#' #' @param dat_nbs data.frame of quieried data from RACEBASE.HAUL for the NBS. 
-#' #' @param dat_ebs data.frame of quieried data from RACEBASE.HAUL for the EBS. 
-#' #' @param var String of the name of the column that needs to be summarized. 
-#' #' @param yr_first The earliest year (YYYY) of data that needs to be included in the anom dataset.
-#' #' @param yr_last The latest year (YYYY) of data that needs to be included in the anom dataset. 
-#' #' @param save Logical. TRUE saves a copy of this dataset to the "data" folder, FALSE does not save the data set anywhere. 
-#' #' @export
-#' anom_create<-function(dat, 
-#'                       var = "GEAR_TEMPERATURE"){
-#'   
-#'   dat_anom <- dat %>% 
-#'     dplyr::rename("var" = all_of(var)) %>%
-#'     dplyr::rename(station = stationid) %>%
-#'     dplyr::filter(!(is.na(station))) %>%
-#'     dplyr::group_by(SRVY, stratum, station) %>% 
-#'     dplyr::summarise(mean = mean(var, na.rm = TRUE))
-#'   
-#'   return(dat_anom)
-#' }
-
+# Functions --------------------------------------------------------------------
 
 #' Takes a string of words and combines them into a sentance that lists them.
 #'
@@ -132,15 +108,16 @@ text_list<-function(x = "",
 make_plot_wrapper <- function(maxyr, 
                               SRVY, 
                               haul, 
+                              dat = NULL,
                               dat_survreg, 
                               var = "bt", 
                               dir_googledrive_upload, 
                               dates0, 
-                              grid_stations, 
+                              survey_area, 
                               plot_subtitle = "", 
-                              region_akgfmaps, 
-                              extrap.box, 
-                              show_planned_stations) {
+                              show_planned_stations, 
+                              data_source = "gd", 
+                              plot_anom = TRUE) {
   
   case <- paste0(maxyr, "_", SRVY)
   dir_out <- paste0("./output/", case, "/")
@@ -187,16 +164,36 @@ make_plot_wrapper <- function(maxyr,
     dplyr::group_by(SRVY, stratum, station) %>% 
     dplyr::summarise(mean = mean(var, na.rm = TRUE))
   
-  # Temperature data from google drive
-  dat <- 
-    readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
-                      sheet = case, skip = 1) %>%
-    janitor::clean_names() %>% 
-    dplyr::rename("var" = all_of(var), 
-                  "SRVY" = "srvy", 
-                  "vessel_shape" = "vessel") %>%
-    dplyr::filter(!is.na(SRVY)) %>% 
-    dplyr::select(SRVY, stratum, station, var, date, vessel_shape) %>% 
+  if (data_source == "gd") { # Temperature data from google drive
+    dat <- 
+      readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
+                        sheet = case, skip = 1) %>%
+      janitor::clean_names() %>% 
+      dplyr::rename("var" = all_of(var), 
+                    "SRVY" = "srvy", 
+                    "vessel_shape" = "vessel") %>%
+      dplyr::filter(!is.na(SRVY) &
+                      SRVY %in% SRVY1) %>% 
+      dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
+  } else if (data_source == "haul") {
+    dat <- haul %>% 
+      dplyr::filter(year == maxyr &
+                      SRVY %in% SRVY1) %>% 
+      dplyr::select(SRVY, stratum, stationid, bottom_depth, start_time, vessel_id) %>% 
+      dplyr::rename(var = bottom_depth, 
+                    station = stationid, 
+                    date = start_time) %>% 
+      dplyr::left_join(
+        x = ., 
+        y = dat_survreg %>% 
+          dplyr::select(vessel_id, vessel_shape) %>% 
+          dplyr::distinct(), 
+        by = "vessel_id") %>% 
+      dplyr::select(-vessel_id) 
+    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+  }
+  
+  dat <- dat %>% 
     dplyr::left_join(x = ., 
                      y = dat_survreg, 
                      by = c("SRVY", "vessel_shape")) %>%
@@ -207,7 +204,6 @@ make_plot_wrapper <- function(maxyr,
       x = ., 
       y = dat_anom, 
       by = c("SRVY", "stratum", "station")) %>% 
-    dplyr::filter(!is.na(SRVY)) %>%
     dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates), 
                   var = as.numeric(var), 
                   anom = var-mean, # calculate anomalies
@@ -222,8 +218,7 @@ make_plot_wrapper <- function(maxyr,
                       plot_subtitle = plot_subtitle,
                       legend_title = legend_title,
                       dates0 = dates0, #"latest", # "all", #"2021-06-05",
-                      region_akgfmaps = region_akgfmaps,
-                      grid_stations = grid_stations,
+                      survey_area = survey_area,
                       file_end = file_end,
                       dir_in = dir_in,
                       dir_out = dir_out, 
@@ -231,6 +226,7 @@ make_plot_wrapper <- function(maxyr,
                       make_gifs = TRUE, 
                       show_planned_stations = show_planned_stations)
   
+  if (plot_anom) {
   # Anomaly plot
   dat <- dat %>% 
     dplyr::rename(bt = var, 
@@ -245,17 +241,112 @@ make_plot_wrapper <- function(maxyr,
                       plot_subtitle = plot_subtitle,
                       legend_title = legend_title,
                       dates0 = dates0, #"latest", # "all", #"2021-06-05",
-                      region_akgfmaps = region_akgfmaps,
-                      grid_stations = grid_stations,
+                      survey_area = survey_area,
                       file_end = file_end,
                       dir_in = dir_in,
                       dir_out = dir_out, 
                       dir_googledrive_upload = dir_googledrive_upload, 
                       make_gifs = TRUE, 
                       show_planned_stations = show_planned_stations)
-  
+  }
 }
 
+
+make_grid_wrapper<-function(maxyr, 
+                            SRVY, 
+                            haul, 
+                            dat_survreg, 
+                            var,
+                            dir_googledrive_upload,  
+                            survey_area, 
+                            plot_subtitle = "", 
+                            data_source = "gd") {
+  
+  file_end = "grid"
+  dates0 <- "none"
+  show_planned_stations = FALSE
+  make_gifs = FALSE
+  show_planned_stations = FALSE
+  case <- paste0(maxyr, "_", SRVY)
+  # dir_out <- paste0("./output/", case, "/")
+  SRVY1 <- SRVY
+  if (SRVY == "BS") {
+    SRVY1 <- c("EBS", "NBS")
+  }
+  
+  plot_title <- "Survey Grid"
+  legend_title <- ""
+  
+  if (data_source == "gd") { # Temperature data from google drive
+    dat <- 
+      readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
+                        sheet = case, skip = 1) %>%
+      janitor::clean_names() %>% 
+      dplyr::rename("var" = all_of(var), 
+                    "SRVY" = "srvy", 
+                    "vessel_shape" = "vessel") %>%
+      dplyr::filter(!is.na(SRVY) & 
+                      SRVY %in% SRVY1) %>% 
+      dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
+  } else if (data_source == "haul") {
+    dat <- haul %>% 
+      dplyr::filter(year == maxyr &
+                      SRVY %in% SRVY1) %>% 
+      dplyr::select(SRVY, stratum, stationid, bottom_depth, start_time, vessel_id) %>% 
+      dplyr::rename(var = bottom_depth, 
+                    station = stationid, 
+                    date = start_time) %>% 
+      dplyr::left_join(
+        x = ., 
+        y = dat_survreg %>% 
+          dplyr::select(vessel_id, vessel_shape) %>% 
+          dplyr::distinct(), 
+        by = "vessel_id") %>% 
+      dplyr::select(-vessel_id) 
+    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+  }
+  
+  
+  dat <- dat %>%
+    dplyr::filter(!is.na(SRVY))  %>% 
+    dplyr::left_join(x = ., 
+                     y = dat_survreg, 
+                     by = c("SRVY", "vessel_shape")) %>%
+    dplyr::left_join(x = ., 
+                     y = vessel_info, 
+                     by = c("vessel_id")) %>% # add survey vessel data
+    dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates), 
+                  var_bin = NA) %>%
+    dplyr::arrange(date)
+  
+  # region_akgfmaps = "bs.all"
+  # survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+  # survey_area$survey.grid <- survey_area$survey.grid %>% 
+  #   sf::st_transform(x = ., survey_area$crs$input) %>%
+  #   # dplyr::filter(!(STATION %in% c("DD-09", "AA-10"))) %>% 
+  #   dplyr::rename(station = STATIONID) %>%
+  #   sp::merge(x = ., 
+  #             y = haul %>%
+  #               dplyr::rename(station = stationid) %>% 
+  #               dplyr::select(station, stratum) %>% 
+  #               dplyr::distinct(), 
+  #             all.x = TRUE) 
+  
+  create_vargridplots(dat = dat,
+                      var_breaks = var_breaks, 
+                      plot_title = plot_title,
+                      plot_subtitle = plot_subtitle,
+                      legend_title = ,
+                      dates0 = dates0,
+                      survey_area = survey_area,
+                      file_end = file_end,
+                      dir_in = dir_in,
+                      dir_out = dir_out, 
+                      dir_googledrive_upload = dir_googledrive_upload, 
+                      make_gifs = make_gifs, 
+                      show_planned_stations = show_planned_stations)
+  
+}
 
 #' Create temperature and anomaly plots
 #'
@@ -264,7 +355,6 @@ make_plot_wrapper <- function(maxyr,
 #' @param plot_subtitle A string of what the plot subtitle should be. 
 #' @param legend_title A string of the temperature legend header. 
 #' @param dates0 A string of either the date to be plotted to ("YYYY-MM-DD"), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will bbe printed. Default = "latest". 
-#' @param region_akgfmaps Inherited from the akgfmaps package. "bs.south" plots the EBS region, "bs.all" plots EBS and NBS regions. See the "select.region" argument under '?get_base_layers'. Default = "bs.all"
 #' @param shapefile Select the shapefile you want to use for the grids. "Egrid_stations" plots the EBS region and "NEgrid_stations_df" plots EBS and NBS regions. Default = "NEgrid_stations".
 #' @param height Numeric height of the figure in inches. default = 8.
 #' @param width Numeric width of the figure in inches. default = 10.5.
@@ -282,8 +372,7 @@ create_vargridplots <- function(
     plot_subtitle = "",
     legend_title = "",
     dates0 = "latest",
-    region_akgfmaps = "bs.all", 
-    grid_stations, #  = "NEgrid_stations", 
+    survey_area, 
     height = 8.5, 
     width = 10.5,
     file_end = "",
@@ -293,13 +382,11 @@ create_vargridplots <- function(
     show_planned_stations = TRUE,
     dir_googledrive_upload) {
   
-  # dat0 <- dat
-  
   # Create Directories
   dir.create(path = dir_out, showWarnings = FALSE)
   
   # set Base Layers
-  survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+  # survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
   survey_reg_col <- gray.colors(length(unique(dat$SRVY))+2) # region colors
   survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
   survey_area$survey.area <- sp::merge(
@@ -313,6 +400,8 @@ create_vargridplots <- function(
     all.x = TRUE) %>% 
     dplyr::arrange(desc(SURVEY))
   
+  if (as.character(dates0[1]) != "none") {
+
   # define colors for var
   var_labels <- c()
   for(i in 2:c(length(var_breaks))) {
@@ -336,26 +425,25 @@ create_vargridplots <- function(
     dplyr::mutate(var_bin = base::factor(x = var_labels[var_bin], 
                                          levels = var_labels, 
                                          labels = var_labels) ) 
-
-  # bind dat to grid_stations for plotting
-  grid_stations <- sp::merge(x = grid_stations, 
-                             y = dat %>%
-                               dplyr::select(station, stratum, var_bin, reg_shapefile, 
-                                             region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
-                               dplyr::distinct(), 
-                             all.x = TRUE) 
   
   # Create new temperature maps
-  if (as.character(dates0[1]) != "none") { # If you are not using any data from temp data
-    if (length(dates0)) {
-    date_entered<-sort(unique(grid_stations$date))
+    # if (length(dates0)>1) {
+    date_entered<-sort(unique(dat$date))
     date_entered<-date_entered[!is.na(date_entered)]
-    } else {
-      date_entered <- dates0
-    }
+    # } else {
+    #   date_entered <- dates0
+    # }
   }
   
-  fig_list<-list()
+  # bind dat to survey_area$survey.grid for plotting
+  survey_area$survey.grid <- sp::merge(x = survey_area$survey.grid, 
+                                       y = dat %>%
+                                         dplyr::select(station, stratum, var_bin, reg_shapefile, 
+                                                       region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
+                                         dplyr::distinct(), 
+                                       all.x = TRUE) 
+
+  # fig_list<-list()
   if (length(dates0)>1) { # if there is a specific range of dates
     iterate <- which(as.character(date_entered) %in% dates0)
   } else if (dates0 == "none") { # If you are not using any data from temp data
@@ -372,12 +460,16 @@ create_vargridplots <- function(
     
     start_time <- Sys.time()
     
-    grid_stations_plot<-grid_stations
+    grid_stations_plot<-survey_area$survey.grid
     dat_plot <- dat
+    
     if (as.character(dates0[1]) == "none") { # If you ARE NOT using any data from temp data
+      
       max_date <- NA
       grid_stations_plot$var_bin<-NA  # only use dates including this date and before this date
-    } else { # If you ARE using any data from temp data
+      
+    } else {
+
       max_date <- date_entered[i]
 
       # only use dates including this date and before this date
@@ -390,21 +482,8 @@ create_vargridplots <- function(
         grid_stations_plot$vessel_shape[as.Date(grid_stations_plot$date) > as.Date(max_date)+1]<-NA
         grid_stations_plot$date[as.Date(grid_stations_plot$date) > as.Date(max_date)+1]<-NA
       # }
-    }
     
-    # if (dates0 != "none") { # If you ARE using any data from temp data
-    #   max_date <- date_entered[i]
-    #   if (length(max_date)==0) {
-    #     max_date <- (min(dat00$date, na.rm = TRUE)-1) # The earliest planned date
-    #     # max_date <- format(max_date, "%Y-%m-%d")
-    #   }
-    #   grid_stations_plot$var_bin[grid_stations_plot$date>max_date]<-NA  # only use dates including this date and before this date
-    # } else { # If you ARE NOT using any data from temp data
-    #   max_date <- NA
-    #   grid_stations_plot$var_bin<-NA  # only use dates including this date and before this date
-    # }
-    
-    
+
     # separate out the data for the temperature and planned stations if there are planned stations listed
     if (show_planned_stations & 
         sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) {
@@ -429,56 +508,51 @@ create_vargridplots <- function(
         dplyr::filter(!is.na(planned)) %>% 
         dplyr::mutate(lab = "")
       
-      for (i in 1:length(unique(dat_planned$vessel_name))) {
-        vess <- unique(dat_planned$vessel_name)[i]
-        vess_date <- as.Date(range(dat_planned$date[dat_planned$vessel_name %in% vess]))
-        vess_date <- ifelse(vess_date[1] == vess_date[2], 
-                            format(vess_date[1], 
-                                   "%b %d"), 
-                            paste(format(vess_date, 
-                                         "%b %d"), collapse = "-"))
-        dat_planned$lab[dat_planned$vessel_name %in% vess] <-
-          paste0(vess, "\n(", vess_date, ")")
-      }
-      
-      # if there are other vessels in the data than there are planned stations for, add a row back for that vessel so we can plot it
       all_vess <- unique(dat_plot$vessel_shape)
       all_vess <- all_vess[!is.na(all_vess)]
-      plan_vess <- unique(dat_planned$vessel_shape)
-      plan_vess <- plan_vess[!is.na(plan_vess)]
-      if (length(all_vess) != length(plan_vess)) {
-        # find which vessels are not represented in dat_planned
-        temp <- c(setdiff(all_vess, plan_vess), 
-                  setdiff(plan_vess, all_vess))
-        # temp <- all_vess[!is.na(temp)]
-        temp1 <- rep_len(x = NA, length.out = ncol(dat_planned))
-        names(temp1) <- names(dat_planned)
-        dat_planned <- dplyr::bind_rows(dat_planned, 
-                                        temp1 %>% 
-                                          t() %>%
-                                          data.frame() %>%
-                                          dplyr::mutate(vessel_shape = temp, 
-                                                        vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% temp]),
-                                                        planned = "N", 
-                                                        lab = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% temp], "\n ")))
+      for (ii in 1:length(all_vess)) {
+        vess <- all_vess[ii]
+        if (sum(unique(dat_planned$vessel_shape) %in% vess)==0) {
+          temp1 <- rep_len(x = NA, length.out = ncol(dat_planned))
+          names(temp1) <- names(dat_planned)
+          dat_planned <- dplyr::bind_rows(dat_planned, 
+                                          temp1 %>% 
+                                            t() %>%
+                                            data.frame() %>%
+                                            dplyr::mutate(vessel_shape = vess, 
+                                                          vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]), 
+                                                          lon = 5000000, 
+                                                          lat = 5000000,
+                                                          planned = "N")) 
+          vess_date <- paste0("\n ")
+        } else {
+          vess_date <- as.Date(range(as.Date(dat_planned$date[dat_planned$vessel_shape %in% vess])))
+          vess_date <- ifelse(vess_date[1] == vess_date[2],
+                              format(vess_date[1],
+                                     "%b %d"),
+                              paste(format(vess_date,
+                                           "%b %d"), collapse = "-"))
+          vess_date <- paste0("\n(", vess_date, ")")
+        }
+
+        dat_planned$lab[dat_planned$vessel_shape %in% vess] <-
+          paste0(unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]), vess_date)
       }
-      
     } else if (show_planned_stations) { # if we are sharing planned stations but there aren't any to share
       dat_planned <- data.frame(station = NA, 
                                 stratum = NA, 
-                                lon = 0, 
-                                lat = 0, 
+                                lon = 5000000, 
+                                lat = 5000000, 
                                 planned = "N", 
                                 vessel_shape = unique(dat_plot$vessel_shape)[!is.na(unique(dat_plot$vessel_shape))], 
                                 vessel_name = unique(dat_plot$vessel_name)[!is.na(unique(dat_plot$vessel_name))], 
                                 date = NA, 
                                 lab = paste0(unique(dat_plot$vessel_name)[!is.na(unique(dat_plot$vessel_name))], "\n "))
     }
+  }
     
     gg <- ggplot() +
-      # AK Map (thanks {akgfmaps}!)
-      geom_sf(data = survey_area$akland, fill = "white") +
-      # geom_sf(data = survey_area$bathymetry) +
+      geom_sf(data = survey_area$akland, fill = "white") + # AK Map (thanks {akgfmaps}!)
       geom_sf(data = survey_area$graticule, 
               color = "grey70", 
               alpha = 0.5) +
@@ -491,8 +565,7 @@ create_vargridplots <- function(
       ggtitle(label = plot_title, 
               subtitle = plot_subtitle)  +
       theme( 
-        panel.background = element_rect(fill = "grey90"#, colour = "lightblue"
-        ),
+        panel.background = element_rect(fill = "grey90"),
         plot.title = element_text(size=20), 
         plot.subtitle = element_text(size=14), 
         legend.text=element_text(size=13), 
@@ -505,42 +578,59 @@ create_vargridplots <- function(
         legend.key = element_blank(), 
         legend.key.size=(unit(.3,"cm")), 
         axis.text = element_text(size=14), 
-        axis.title=element_text(size=14) )  +
-      # Annotations
+        axis.title=element_text(size=14) )    +
       annotate("text", 
-               x = quantile(extent(grid_stations)[1]:extent(grid_stations)[2], .9), 
-               y = quantile(extent(grid_stations)[3]:extent(grid_stations)[4], .7), 
+               x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
+               y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
                label = "Alaska", 
                color = "black", size = 10) +
       annotate("text", 
-               x = quantile(extent(grid_stations)[1]:extent(grid_stations)[2], .1), 
-               y = quantile(extent(grid_stations)[3]:extent(grid_stations)[4], .1), 
+               x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .1), 
+               y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .15), 
                label = ifelse(is.na(max_date), 
                               "", 
-                              paste0("Date created:\n", 
-                                     format(Sys.Date(), "%B %d, %Y"), 
-                                     "\nRecorded as of:\n", 
-                                     format(x = as.Date(max_date), format = "%B %d, %Y"))), 
-               color = "black", size = 4) 
-    
-    # if there is more than one survey region on the plot, add survey region to the plot
-    if (length(dat_plot$reg_shapefile)>1) {
+                              ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                                     paste0(format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
+                                     paste0(format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                                            " \u2013\n", 
+                                            format(x = as.Date(max_date), format = "%B %d, %Y")))), 
+               color = "black", size = 6) 
+
+      
+    if (as.character(dates0[1]) == "none") {
+      temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
+
+      gg <- gg +
+        ggplot2::geom_sf(data = survey_area$survey.grid, 
+                         aes(group = station), 
+                         colour = "grey50",
+                         show.legend = legend_title) +
+        geom_sf(data = survey_area$bathymetry) +
+        # geom_text(data = temp, mapping = aes(x = x, y = y, label = lab), 
+        #           size = 4, hjust=0, vjust=1, fontface=2, angle = 90)
+        annotate(geom = "text", x = temp$x, y = temp$y, label = temp$lab,
+                 color = "black", fontface=2, angle = 0) +
+        guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
+    }
+
+    # if (length(dat_plot$reg_shapefile)>1) {
       gg <- gg  +
         geom_sf(data = survey_area$survey.area, 
-                aes(color = survey_area$survey.area$SURVEY), 
-                # fill = NA, 
+                aes(color = SURVEY), 
+                fill = NA,
                 size = 2,
                 show.legend = TRUE) +
         scale_color_manual(name = "Survey Region", 
                            values = survey_area$survey.area$survey_reg_col,  
                            breaks = survey_area$survey.area$SURVEY, 
                            labels = survey_area$survey.area$reg_lab) 
-    }
+    # }
     
     # Add temperature squares
-    if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
+    # } else 
+      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
       gg <- gg +
-        ggplot2::geom_sf(data = grid_stations_plot, # %>% 
+        ggplot2::geom_sf(data = survey_area$survey.grid, # %>% 
                            # dplyr::filter(stratum == "212"), 
                          aes(group = station, 
                              fill = var_bin), 
@@ -591,8 +681,8 @@ create_vargridplots <- function(
                                 order = 1),
             # survey regions
             colour = guide_legend(order = 2, 
-                                  override.aes = list(fill = survey_area$survey.area$survey_reg_col, 
-                                                      size = 2#, 
+                                  override.aes = list(fill = survey_area$survey.area$survey_reg_col#, 
+                                                      # size = 2#, 
                                                       # color = "white"
                                   ))) 
       }
@@ -613,26 +703,26 @@ create_vargridplots <- function(
     #                               ))) 
     #   }
     }
-    # gg <- gg +
-    #   coord_sf(xlim = extrap.box[1:2], 
-    #            ylim = extrap.box[3:4])
+
     gg <- gg +
-      coord_sf(xlim = c(extent(grid_stations)[1],
-                        extent(grid_stations)[2]),
-               ylim = c(extent(grid_stations)[3] ,
-                        extent(grid_stations)[4]))
+      ggspatial::coord_sf(
+        xlim = c(extent(survey_area$survey.grid)[1:2]),
+        ylim = c(extent(survey_area$survey.grid)[3:4])) +
+      ggsn::scalebar(data = survey_area$survey.grid,
+                     location = "bottomleft",
+                     dist = 100,
+                     dist_unit = "nm",
+                     transform = FALSE,
+                     # st.dist = 0.04,
+                     # height = 0.02,
+                     st.bottom = FALSE,
+                     # st.size = 3, # 2.5
+                     model = survey_area$crs) 
     
     gg <- ggdraw(gg) +
-      draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), 
-                 x = .35, y = .37, 
-                 scale = .15
-                 )
-    
-    # gg <- ggdraw(gg) +
-    #   draw_image(image = paste0(dir_in, "img/noaa-50th-logo.png"), 
-    #              x = 0, y = 0,
-    #              hjust = -4.12, vjust = -.45,
-    #              width = .19)
+      draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
+                 x = .35, y = .39, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
+                 scale = .15 )
     
     # Save plots
     filename0 <- paste0(dir_out, '/',
@@ -646,11 +736,15 @@ create_vargridplots <- function(
            plot=gg, 
            device="png") # pdfs are great for editing later
     
-    ggsave(paste0(filename0,'.pdf'),
-           height = height, 
-           width = width,
-           plot=gg, 
-           device="pdf") # pdfs are great for editing later
+    rmarkdown::render(paste0("./code/template.Rmd"),
+                      output_dir = dir_out,
+                      output_file = paste0(".", dir_out, filename0, ".pdf"))
+    
+    # ggsave(paste0(filename0,'.pdf'),
+    #        height = height, 
+    #        width = width,
+    #        plot=gg, 
+    #        device="pdf") # pdfs are great for editing later
     
     if (make_gifs | as.character(dates0[1]) != "none") {
       create_vargridplots_gif(file_end = file_end, 
