@@ -46,13 +46,16 @@ haul <- dplyr::left_join(
                     survey_definition_id == 47 ~ "GOA", 
                     survey_definition_id == 52 ~ "AI", 
                     survey_definition_id == 78 ~"BSS")  ) %>%
-  dplyr::filter(year <= maxyr &
+  dplyr::filter(#year <= maxyr &
                   year != 2020 & # no surveys happened this year because of COVID
-                  (year >= 1982 & SRVY %in% "EBS") | # 1982 BS inclusive - much more standardized after this year
-                     (year >= 2010 & SRVY %in% "NBS") | # 1982 BS inclusive - much more standardized after this year
-                     SRVY %in% "BSS" | # keep all years of the BSS
-                     (year >= 1991 & SRVY %in% c("AI", "GOA")) & # 1991 AI and GOA (1993) inclusive - much more standardized after this year
-                  !is.na(SRVY) & 
+                  ((year >= 1982 & SRVY == "EBS") | # 1982 BS inclusive - much more standardized after this year
+                  (year >= 2010 & SRVY == "NBS") | # 1982 BS inclusive - much more standardized after this year
+                  (year != 2018 & SRVY == "NBS") | # 2018 NBS was not a standard haul
+                     SRVY == "BSS" | # keep all years of the BSS
+                     (year >= 1991 & SRVY %in% c("AI", "GOA")))) %>% # 1991 AI and GOA (1993) inclusive - much more standardized after this year
+                  # !is.na(SRVY) & 
+  dplyr::filter(#SRVY %in% unique(dat_survreg$SRVY) &
+                  haul_type == 3 &
                   abundance_haul == "Y" &
                   performance >= 0 &
                   !(is.null(stationid)))

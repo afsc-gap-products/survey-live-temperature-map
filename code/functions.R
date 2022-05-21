@@ -159,6 +159,7 @@ make_plot_wrapper <- function(maxyr,
   dat_anom <- haul %>% 
     dplyr::rename(station = stationid) %>%
     dplyr::filter(!(is.na(station)) &
+                    year <= maxyr &
                     SRVY == ifelse(SRVY == "BS", c("EBS", "NBS"), SRVY)) %>%
     dplyr::rename("var" = dplyr::all_of(var0)) %>%
     dplyr::group_by(SRVY, stratum, station) %>% 
@@ -172,25 +173,35 @@ make_plot_wrapper <- function(maxyr,
       dplyr::rename("var" = all_of(var), 
                     "SRVY" = "srvy", 
                     "vessel_shape" = "vessel") %>%
-      dplyr::filter(!is.na(SRVY) &
-                      SRVY %in% SRVY1) %>% 
+      dplyr::filter(#!is.na(SRVY) &
+                      SRVY %in% SRVY1) %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
+    
   } else if (data_source == "haul") {
     dat <- haul %>% 
       dplyr::filter(year == maxyr &
-                      SRVY %in% SRVY1) %>% 
-      dplyr::select(SRVY, stratum, stationid, bottom_depth, start_time, vessel_id) %>% 
-      dplyr::rename(var = bottom_depth, 
+                      SRVY %in% SRVY1 &
+                      !is.na(dplyr::all_of(var))) %>% 
+      dplyr::rename(var = all_of(var0), 
                     station = stationid, 
-                    date = start_time) %>% 
+                    date = start_time) #%>% 
+      # dplyr::select(-vessel_id) 
+    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+    for (ii in 1:length(unique(dat$SRVY))){
+      temp <- unique(dat_survreg$SRVY)[ii]
+      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0("\n(", 
+                                    format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"),
+                                    " - ", 
+                                    format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"), ")")
+    }
+    dat <- dat %>% 
       dplyr::left_join(
         x = ., 
         y = dat_survreg %>% 
-          dplyr::select(vessel_id, vessel_shape) %>% 
+          dplyr::select(vessel_id, vessel_shape) %>%
           dplyr::distinct(), 
-        by = "vessel_id") %>% 
-      dplyr::select(-vessel_id) 
-    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+        by = "vessel_id")  %>% 
+      dplyr::select(SRVY, stratum, station, var, date, vessel_shape)
   }
   
   dat <- dat %>% 
@@ -256,19 +267,20 @@ make_grid_wrapper<-function(maxyr,
                             SRVY, 
                             haul, 
                             dat_survreg, 
-                            var,
                             dir_googledrive_upload,  
                             survey_area, 
                             plot_subtitle = "", 
                             data_source = "gd") {
+  
+  case <- paste0(maxyr, "_", SRVY)
+  dir_out <- paste0("./output/", case, "/")
   
   file_end = "grid"
   dates0 <- "none"
   show_planned_stations = FALSE
   make_gifs = FALSE
   show_planned_stations = FALSE
-  case <- paste0(maxyr, "_", SRVY)
-  # dir_out <- paste0("./output/", case, "/")
+
   SRVY1 <- SRVY
   if (SRVY == "BS") {
     SRVY1 <- c("EBS", "NBS")
@@ -282,28 +294,37 @@ make_grid_wrapper<-function(maxyr,
       readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
                         sheet = case, skip = 1) %>%
       janitor::clean_names() %>% 
-      dplyr::rename("var" = all_of(var), 
+      dplyr::rename(#"var" = all_of(var), 
                     "SRVY" = "srvy", 
-                    "vessel_shape" = "vessel") %>%
+                    "vessel_shape" = "vessel")  %>%
+      dplyr::mutate(var = NA) %>%
       dplyr::filter(!is.na(SRVY) & 
                       SRVY %in% SRVY1) %>% 
-      dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
+      dplyr::select(SRVY, stratum, station, date, vessel_shape) 
   } else if (data_source == "haul") {
     dat <- haul %>% 
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1) %>% 
-      dplyr::select(SRVY, stratum, stationid, bottom_depth, start_time, vessel_id) %>% 
-      dplyr::rename(var = bottom_depth, 
-                    station = stationid, 
-                    date = start_time) %>% 
+      dplyr::rename(station = stationid, 
+                    date = start_time) %>%
+      dplyr::mutate(var = NA)
+    # dplyr::select(-vessel_id) 
+    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+    for (ii in 1:length(unique(dat$SRVY))){
+      temp <- unique(dat_survreg$SRVY)[ii]
+      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0("\n(", 
+                                                                format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"),
+                                                                " - ", 
+                                                                format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"), ")")
+    }
+    dat <- dat %>% 
       dplyr::left_join(
         x = ., 
         y = dat_survreg %>% 
-          dplyr::select(vessel_id, vessel_shape) %>% 
+          dplyr::select(vessel_id, vessel_shape) %>%
           dplyr::distinct(), 
-        by = "vessel_id") %>% 
-      dplyr::select(-vessel_id) 
-    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+        by = "vessel_id")  %>% 
+      dplyr::select(SRVY, stratum, station, var, date, vessel_shape)
   }
   
   
@@ -590,11 +611,11 @@ create_vargridplots <- function(
                label = ifelse(is.na(max_date), 
                               "", 
                               ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                     paste0(format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
-                                     paste0(format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                                     paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
+                                     paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
                                             " \u2013\n", 
                                             format(x = as.Date(max_date), format = "%B %d, %Y")))), 
-               color = "black", size = 6) 
+               color = "black", size = 4, fontface=2) 
 
       
     if (as.character(dates0[1]) == "none") {
@@ -609,7 +630,7 @@ create_vargridplots <- function(
         # geom_text(data = temp, mapping = aes(x = x, y = y, label = lab), 
         #           size = 4, hjust=0, vjust=1, fontface=2, angle = 90)
         annotate(geom = "text", x = temp$x, y = temp$y, label = temp$lab,
-                 color = "black", fontface=2, angle = 0) +
+                 color = "darkblue", fontface="bold", angle = 0) +
         guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
     }
 
@@ -630,7 +651,7 @@ create_vargridplots <- function(
     # } else 
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
       gg <- gg +
-        ggplot2::geom_sf(data = survey_area$survey.grid, # %>% 
+        ggplot2::geom_sf(data = grid_stations_plot, # %>% 
                            # dplyr::filter(stratum == "212"), 
                          aes(group = station, 
                              fill = var_bin), 
@@ -658,7 +679,7 @@ create_vargridplots <- function(
             labels = sort(unique(dat_planned$lab))) +
           
           guides(
-            fill = guide_legend(ncol=ifelse(length(var_breaks)>15, 2, 1), # tempertures # in case you want to have 2+ columns for the legend!
+            fill = guide_legend(ncol=ifelse(length(var_breaks)>15, 2, 1), # temperatures # in case you want to have 2+ columns for the legend!
                                 override.aes = list(colour = c("white"),
                                                     size = 0),
                                 order = 1),
@@ -713,7 +734,7 @@ create_vargridplots <- function(
                      dist = 100,
                      dist_unit = "nm",
                      transform = FALSE,
-                     # st.dist = 0.04,
+                     st.dist = 0.04,
                      # height = 0.02,
                      st.bottom = FALSE,
                      # st.size = 3, # 2.5
@@ -739,6 +760,7 @@ create_vargridplots <- function(
     rmarkdown::render(paste0("./code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(".", dir_out, filename0, ".pdf"))
+    file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
     
     # ggsave(paste0(filename0,'.pdf'),
     #        height = height, 

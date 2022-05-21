@@ -112,12 +112,14 @@ make_grid_wrapper(maxyr = maxyr,
                   SRVY = SRVY, 
                   haul = haul, 
                   dat_survreg = dat_survreg, 
-                  var = var,
                   dir_googledrive_upload = dir_googledrive_upload, 
                   survey_area = survey_area, 
                   plot_subtitle = plot_subtitle)
 
 ### past years -----------------------------------------------------------------
+data_source = "haul"
+plot_anom = FALSE
+
 maxyr <- 2021
 dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW")
 make_plot_wrapper(maxyr = maxyr, 
@@ -130,8 +132,8 @@ make_plot_wrapper(maxyr = maxyr,
                   survey_area = survey_area, 
                   plot_subtitle = plot_subtitle, 
                   show_planned_stations = show_planned_stations, 
-                  data_source = "haul", 
-                  plot_anom = FALSE)
+                  data_source = data_source, 
+                  plot_anom = TRUE)
 
 maxyr <- 2019
 dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1S5FyXwWyFUgFkvDlGTC6cymtISyZdd9R")
@@ -145,8 +147,8 @@ make_plot_wrapper(maxyr = maxyr,
                   survey_area = survey_area, 
                   plot_subtitle = plot_subtitle, 
                   show_planned_stations = show_planned_stations, 
-                  data_source = "haul", 
-                  plot_anom = FALSE)
+                  data_source = data_source, 
+                  plot_anom = plot_anom)
 
 maxyr <- 2018
 SRVY <- "EBS"
@@ -175,8 +177,9 @@ make_plot_wrapper(maxyr = maxyr,
                   survey_area = survey_area, 
                   plot_subtitle = plot_subtitle, 
                   show_planned_stations = show_planned_stations, 
-                  data_source = "haul", 
-                  plot_anom = FALSE)
+                  data_source = data_source, 
+                  plot_anom = plot_anom)
+
 
 ## AI --------------------------------------------------------------------------
 # var = "bt"
