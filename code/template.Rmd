@@ -3,7 +3,11 @@ output:
   pdf_document:
     latex_engine: xelatex
 classoption: landscape
+geometry: margin=1cm
 mainfont: Arial
+header-includes:
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
 ---
 \fontsize{12}{22}
 \fontseries{b}
@@ -12,14 +16,77 @@ mainfont: Arial
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+```
+
+```{r write caption}
+
+vess <- text_list(x = paste0("F/V \\textit{",
+                             unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
+                                         x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
+
 if (as.character(dates0[1]) == "none") {
+  
   fig_cap <- fig_alt <- paste0(
   "NOAA Fisheries conducted the ", 
   text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
   " surveys aboard the ",
-  text_list(x = paste0("F/V \\textit{",unique(dat$vessel_name[!is.na(dat$vessel_name)]),"}")),
-  ". This is a plot of 50 m, 100 m, and 200 m bathymetry and empty grid of stations. \\textit{Credit: NOAA Fisheries}")
+  vess,
+  ". This is a plot of 50 m, 100 m, and 200 m bathymetry and empty grid of stations.")
+  
 } else {
+
+      loc <- dat_plot %>% 
+        dplyr::filter(!is.na(var) & 
+                        date == max_date) 
+      if (nrow(loc) == 0) {
+        stations1 <- "no stations were sampled "
+      } else {
+        
+      dat_max_date <- as(grid_stations_plot, 'Spatial') %>%
+        spTransform(x = ., CRS("+proj=longlat +datum=WGS84"))
+      
+      dat_max_date <- 
+        cbind.data.frame(station = dat_max_date$station, 
+                         stratum = dat_max_date$stratum, 
+                         sp::coordinates(dat_max_date)) %>% 
+        dplyr::rename(lon = "1", 
+                      lat = "2") %>%
+        data.frame() %>%
+        dplyr::left_join(y = ., 
+                         x = loc %>% 
+                           dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
+                         by = c("stratum", "station"))  %>%
+    dplyr::arrange(vessel_shape) %>% 
+        dplyr::mutate(lon = round(x = lon, digits = 3), 
+                      lat = round(x = lat, digits = 3))
+        
+
+  temp <- c()
+  for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
+    temp1 <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
+    temp <- c(temp, 
+              paste0(nrow(temp1), " station",
+                     ifelse(nrow(temp1)>1, "s", "")," with ",
+                     ifelse(nrow(temp1)>1, "", "a "), "station ID", ifelse(nrow(temp1)>1, "s", ""), " of ",
+                   text_list(x = paste0(temp1$station,
+                   " (near ",temp1$lat,"°N and ",temp1$lon,"°W with a temperature of ",temp1$var_bin,"°C)")), 
+                   " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
+                             gsub(pattern = "F/V ", replacement = "", fixed = TRUE,
+                                         x = unique(temp1$vessel_name[!is.na(temp1$vessel_name)])),"}") )
+  }
+
+  stations1 <- paste0(text_list(temp))
+  
+  if (length(dat_planned) == 0){
+    stations1 <- paste0(stations1, " and there are no stations planned for ", 
+                        format(x = (as.Date(max_date)+1), "%B %d"), ". ")
+  } else {
+    stations1 <- paste0(stations1, " and there are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
+                        format(x = (as.Date(max_date)+1), "%B %d"), ". ")
+  }
+  
+}
+  
 fig_cap <- fig_alt <- paste0(
   "NOAA Fisheries near-real time bottom ocean temperatures collected ", 
   ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
@@ -30,12 +97,21 @@ fig_cap <- fig_alt <- paste0(
   " during the ",
   text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
   " surveys daily aboard the ",
-  text_list(x = paste0("F/V \\textit{",unique(dat$vessel_name[!is.na(dat$vessel_name)]),"}")),
-  ". The final, validated, survey data, including temperature and species collected at each station among other observations, will be made publicly accessible about a month after the survey is complete on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. While we expect the data presented here will not need to be improved upon, it has not been through our robust data checking process and is technically 'unreviewed.' \\textit{Credit: NOAA Fisheries}")
+  vess,
+  ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
+  stations1, 
+  "The final, validated survey data, including temperature and species collected at each station among other observations, will be made publicly accessible about a month after the survey is complete on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. While we expect the data presented here will not need to be improved upon, it is raw and has not been through our robust data quality checking process.")
+
 }
+
+fig_cap <- fig_alt <- paste0(fig_cap, " \\textit{Credit: NOAA Fisheries}")
+
+fig_alt <- gsub(pattern = "\\textit{", replacement = "", x = fig_alt, fixed = TRUE)
+fig_alt <- gsub(pattern = "}", replacement = "", x = fig_alt, fixed = TRUE)
+
 ```
 
-```{r, fig.alt = fig_alt, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 7}
-gg
+```{r, fig.alt = fig_alt, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5}
+gg + labs(alt = fig_alt)
 ```
 

@@ -71,7 +71,7 @@ source(file = paste0(dir_in, "code/data.R"))
 # Map --------------------------------------------------------------------------
 
 ## NBS + EBS Maps --------------------------------------------------------------
-# maxyr <- 2022 #CHANGE
+maxyr <- 2022 #CHANGE
 SRVY <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
@@ -104,7 +104,6 @@ make_plot_wrapper(maxyr = maxyr,
                   survey_area = survey_area, 
                   plot_subtitle = plot_subtitle, 
                   show_planned_stations = show_planned_stations)
-
 
 # Blank Grid (no survey data) 
 # Just the empty grid (comment this v out when running after beginning of survey)
@@ -186,9 +185,9 @@ make_plot_wrapper(maxyr = maxyr,
 # maxyr <- 2018 #CHANGE
 # SRVY <- "AI"
 # dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-# dates0 <- "2018-06-10" # latest # "all", #"2021-06-05",# Sys.Date()
+# dates0 <- 'all' # latest # "all", #"2021-06-05",# Sys.Date()
 # show_planned_stations <- FALSE
-# extrap.box <- c(xmn = -179.5, xmx = -130, ymn = 54, ymx = 60)
+# # extrap.box <- c(xmn = -179.5, xmx = -130, ymn = 54, ymx = 60)
 # grid_stations <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),# Prepare map objects
 #                                  layer = "aigrid_trawable_thru2018",
 #                                  verbose=F)

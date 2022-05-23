@@ -615,7 +615,7 @@ create_vargridplots <- function(
                                      paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
                                             " \u2013\n", 
                                             format(x = as.Date(max_date), format = "%B %d, %Y")))), 
-               color = "black", size = 4, fontface=2) 
+               color = "black", size = 5, fontface=2) 
 
       
     if (as.character(dates0[1]) == "none") {
@@ -734,7 +734,7 @@ create_vargridplots <- function(
                      dist = 100,
                      dist_unit = "nm",
                      transform = FALSE,
-                     st.dist = 0.04,
+                     st.dist = 0.03,
                      # height = 0.02,
                      st.bottom = FALSE,
                      # st.size = 3, # 2.5
@@ -742,7 +742,7 @@ create_vargridplots <- function(
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
-                 x = .35, y = .39, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
+                 x = .37, y = .39, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                  scale = .15 )
     
     # Save plots
