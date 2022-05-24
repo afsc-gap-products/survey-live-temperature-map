@@ -27,87 +27,97 @@ vess <- text_list(x = paste0("F/V \\textit{",
 if (as.character(dates0[1]) == "none") {
   
   fig_cap <- fig_alt <- paste0(
-  "NOAA Fisheries conducted the ", 
-  text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
-  " surveys aboard the ",
-  vess,
-  ". This is a plot of ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry and empty grid of stations.")
+    "NOAA Fisheries conducted the ", 
+    text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+    " surveys aboard the ",
+    vess,
+    ". This is a plot of ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry and empty grid of stations.")
   
 } else {
-
-      loc <- dat_plot %>% 
-        dplyr::filter(!is.na(var) & 
-                        date == max_date) 
-      if (nrow(loc) == 0) {
-        stations1 <- "no stations were sampled "
-      } else {
-        
-      dat_max_date <- as(grid_stations_plot, 'Spatial') %>%
-        sp::spTransform(x = ., CRS("+proj=longlat +datum=WGS84"))
-      
-      dat_max_date <- 
-        cbind.data.frame(station = dat_max_date$station, 
-                         stratum = dat_max_date$stratum, 
-                         sp::coordinates(dat_max_date)) %>% 
-        dplyr::rename(lon = "1", 
-                      lat = "2") %>%
-        data.frame() %>%
-        dplyr::left_join(y = ., 
-                         x = loc %>% 
-                           dplyr::mutate(stratum = as.character(stratum)) %>% 
-                           dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
-                         by = c("stratum", "station"))  %>%
-    dplyr::arrange(vessel_shape) %>% 
-        dplyr::mutate(lon = round(x = lon, digits = 3), 
-                      lat = round(x = lat, digits = 3))
-        
-
-  temp <- c()
-  for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
-    temp1 <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
-    temp <- c(temp, 
-              paste0(nrow(temp1), " station",
-                     ifelse(nrow(temp1)>1, "s", "")," with ",
-                     ifelse(nrow(temp1)>1, "", "a "), "station ID", ifelse(nrow(temp1)>1, "s", ""), " of ",
-                   text_list(x = paste0(temp1$station,
-                   " (near ",temp1$lat,"°N and ",temp1$lon,"°W, measuring ",
-                   gsub(pattern = " ", replacement = "", x = temp1$var_bin, fixed = TRUE),"°C)")), 
-                   " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
-                             gsub(pattern = "F/V ", replacement = "", fixed = TRUE,
-                                         x = unique(temp1$vessel_name[!is.na(temp1$vessel_name)])),"}") )
-  }
-
-  stations1 <- paste0(text_list(temp))
   
-  if (exists("dat_planned")) {
-  if (length(dat_planned) == 0){
-    stations1 <- paste0(stations1, ". There are no stations planned for ", 
-                        format(x = (as.Date(max_date)+1), "%B %d"), ". ")
+  loc <- dat_plot %>% 
+    dplyr::filter(!is.na(var) & 
+                    date == max_date) 
+  if (nrow(loc) == 0) {
+    stations1 <- "no stations were sampled "
   } else {
-    stations1 <- paste0(stations1, ". There are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
-                        format(x = (as.Date(max_date)+1), "%B %d"), ". ")
+    
+    dat_max_date <- as(grid_stations_plot, 'Spatial') %>%
+      sp::spTransform(x = ., CRS("+proj=longlat +datum=WGS84"))
+    
+    dat_max_date <- 
+      cbind.data.frame(station = dat_max_date$station, 
+                       stratum = dat_max_date$stratum, 
+                       sp::coordinates(dat_max_date)) %>% 
+      dplyr::rename(lon = "1", 
+                    lat = "2") %>%
+      dplyr::mutate(stratum = as.character(stratum)) %>%
+      data.frame() %>%
+      dplyr::left_join(y = ., 
+                       x = loc %>% 
+                         dplyr::mutate(stratum = as.character(stratum)) %>% 
+                         dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
+                       by = c("stratum", "station"))  %>%
+      dplyr::arrange(vessel_shape) %>% 
+      dplyr::mutate(lon = round(x = lon, digits = 3), 
+                    lat = round(x = lat, digits = 3))
+    
+    
+    temp <- c()
+    for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
+      temp1 <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
+      temp <- c(temp, 
+                paste0(nrow(temp1), " station",
+                       ifelse(nrow(temp1)>1, "s", "")," with ",
+                       ifelse(nrow(temp1)>1, "", "a "), "station ID", ifelse(nrow(temp1)>1, "s", ""), " of ",
+                       text_list(x = paste0(temp1$station,
+                                            " (near ",temp1$lat,"°N and ",temp1$lon,"°W, measuring ",
+                                            gsub(pattern = " ", replacement = "", x = temp1$var_bin, fixed = TRUE),"°C)")), 
+                       " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
+                       gsub(pattern = "F/V ", replacement = "", fixed = TRUE,
+                            x = unique(temp1$vessel_name[!is.na(temp1$vessel_name)])),"}") )
+    }
+    
+    stations1 <- paste0(text_list(temp))
+    
+    if (exists("dat_planned")) {
+      if (length(dat_planned) == 0){
+        
+        if ((date_entered[length(date_entered)] == max_date & data_source == "haul")) {
+          stations1 <- paste0(stations1, ". This is the last day of the survey. ")
+        } else {
+          stations1 <- paste0(stations1, ". There are no stations planned for ", 
+                              format(x = (as.Date(max_date)+1), "%B %d"), ". ")
+        }
+      } else {
+        if ((date_entered[length(date_entered)] == max_date & sum(is.na(dat$var))>0)) {
+          stations1 <- paste0(stations1, ". This is the last day of the survey. ")
+        } else {
+          stations1 <- paste0(stations1, ". There are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
+                              format(x = (as.Date(max_date)+1), "%B %d"), ". ")
+        }
+      }
+    }
   }
-  }
-}
   
-fig_cap <- fig_alt <- paste0(
-  "NOAA Fisheries near-real time bottom ocean temperatures collected ", 
-  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-         paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
-         paste0("between ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
-                " and ", 
-                format(x = as.Date(max_date), format = "%B %d, %Y"))), 
-  " during the ",
-  text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
-  " surveys daily aboard the ",
-  vess,
-  ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
-  stations1, 
+  fig_cap <- fig_alt <- paste0(
+    "NOAA Fisheries near-real time bottom ocean temperatures collected ", 
+    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+           paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
+           paste0("between ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                  " and ", 
+                  format(x = as.Date(max_date), format = "%B %d, %Y"))), 
+    " during the ",
+    text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+    " surveys daily aboard the ",
+    vess,
+    ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
+    stations1, 
+    
+    ifelse(data_source == "gd", 
+           "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. ", 
+           "These data have been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), are publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. "))
   
-  ifelse(data_source == "gd", 
-  "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform.", 
-  "These data have been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), are publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform."))
-
 }
 
 fig_cap <- fig_alt <- paste0(fig_cap, " \\textit{Credit: NOAA Fisheries}")

@@ -126,7 +126,9 @@ make_plot_wrapper <- function(maxyr,
   create_vargridplots <- create_vargridplots_ai
   if (SRVY == "BS") {
     SRVY1 <- c("EBS", "NBS")
-    create_vargridplots_bs <- create_vargridplots
+  }
+  if (SRVY %in% c("BS", "EBS", "NBS")) {
+    create_vargridplots <- create_vargridplots_bs
   }
   
   # Define var
@@ -302,7 +304,9 @@ make_grid_wrapper<-function(maxyr,
   create_vargridplots <- create_vargridplots_ai
   if (SRVY == "BS") {
     SRVY1 <- c("EBS", "NBS")
-    create_vargridplots_bs <- create_vargridplots
+  }
+  if (SRVY %in% c("BS", "EBS", "NBS")) {
+    create_vargridplots <- create_vargridplots_bs
   }
   
   plot_title <- "Survey Grid"

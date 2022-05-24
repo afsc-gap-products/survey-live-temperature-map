@@ -120,7 +120,7 @@ make_grid_wrapper(maxyr = maxyr,
 ### past years -----------------------------------------------------------------
 data_source = "haul"
 plot_anom = FALSE
-dates0 <- "all"
+dates0 <- "latest"
 
 maxyr <- 2021
 dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW")
@@ -167,7 +167,8 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
               dplyr::select(station, stratum) %>% 
               dplyr::distinct(), 
             all.x = TRUE) %>% 
-  dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps)) 
+  dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  %>% 
+  dplyr::mutate(region = "Bering Sea")
 
 make_plot_wrapper(maxyr = maxyr, 
                   SRVY = SRVY, 
@@ -182,6 +183,16 @@ make_plot_wrapper(maxyr = maxyr,
                   data_source = data_source, 
                   plot_anom = plot_anom)
 
+# Blank Grid (no survey data) 
+# Just the empty grid (comment this v out when running after beginning of survey)
+make_grid_wrapper(maxyr = maxyr, 
+                  SRVY = SRVY, 
+                  haul = haul, 
+                  dat_survreg = dat_survreg, 
+                  dir_googledrive_upload = dir_googledrive_upload, 
+                  survey_area = survey_area, 
+                  data_source = data_source, 
+                  plot_subtitle = plot_subtitle)
 
 ## AI --------------------------------------------------------------------------
 maxyr <- 2018 #CHANGE
@@ -244,7 +255,7 @@ data_source = "haul"
 plot_anom = FALSE
 
 maxyr <- 2018
-dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW")
+dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
 make_plot_wrapper(maxyr = maxyr, 
                   SRVY = SRVY, 
                   haul = haul, 
