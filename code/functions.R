@@ -43,7 +43,8 @@ PKG <- c(
   "readr", 
   "dplyr", 
   "glue",
-  "ggplot2"
+  "ggplot2",
+  "rmarkdown"
 )
 
 for (p in PKG) {
