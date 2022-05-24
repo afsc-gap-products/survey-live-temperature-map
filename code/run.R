@@ -92,8 +92,8 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
               dplyr::rename(station = stationid) %>% 
               dplyr::select(station, stratum) %>% 
               dplyr::distinct(), 
-            all.x = TRUE) #+ 
-  # dplyr::mutate(region = "Bering Sea")
+            all.x = TRUE) %>% 
+  dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
 make_plot_wrapper(maxyr = maxyr, 
@@ -186,12 +186,13 @@ make_plot_wrapper(maxyr = maxyr,
 ## AI --------------------------------------------------------------------------
 maxyr <- 2018 #CHANGE
 SRVY <- "AI"
+plot_anom <- FALSE
 plot_subtitle = "NOAA Fisheries Aluetian Islands Bottom Trawl Survey"
 region_akgfmaps = "ai"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
 #dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 var = "bt"
-dates0 <- "2018-07-10" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 show_planned_stations <- FALSE
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 
@@ -209,8 +210,9 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),#
     y = goa_strata0 %>%
       dplyr::mutate(SRVY == "AI",
                     region = stringr::str_to_title(inpfc_area),
-                    region = gsub(pattern = "Goa", replacement = "GOA", x = region),
-                    region = gsub(pattern = "S ", replacement = "South ", x = region, ignore.case = FALSE)) %>%
+                    region = dplyr::case_when(
+                      region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians and Chirikof", 
+                      TRUE ~ region)) %>%
       dplyr::select(stratum, region) %>%
       dplyr::distinct(),
     all.x = TRUE, duplicateGeoms = TRUE)

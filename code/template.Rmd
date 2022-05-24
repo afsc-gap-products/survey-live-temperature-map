@@ -54,6 +54,7 @@ if (as.character(dates0[1]) == "none") {
         data.frame() %>%
         dplyr::left_join(y = ., 
                          x = loc %>% 
+                           dplyr::mutate(stratum = as.character(stratum)) %>% 
                            dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
                          by = c("stratum", "station"))  %>%
     dplyr::arrange(vessel_shape) %>% 
@@ -78,6 +79,7 @@ if (as.character(dates0[1]) == "none") {
 
   stations1 <- paste0(text_list(temp))
   
+  if (exists("dat_planned")) {
   if (length(dat_planned) == 0){
     stations1 <- paste0(stations1, ". There are no stations planned for ", 
                         format(x = (as.Date(max_date)+1), "%B %d"), ". ")
@@ -85,7 +87,7 @@ if (as.character(dates0[1]) == "none") {
     stations1 <- paste0(stations1, ". There are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
                         format(x = (as.Date(max_date)+1), "%B %d"), ". ")
   }
-  
+  }
 }
   
 fig_cap <- fig_alt <- paste0(
@@ -101,7 +103,10 @@ fig_cap <- fig_alt <- paste0(
   vess,
   ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
   stations1, 
-  "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. ")
+  
+  ifelse(data_source == "gd", 
+  "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform.", 
+  "These data have been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), are publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform."))
 
 }
 
