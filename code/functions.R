@@ -600,12 +600,11 @@ create_vargridplots <- function(
         axis.text = element_text(size=14), 
         axis.title=element_text(size=14) )
 
-      
     if (as.character(dates0[1]) == "none") {
       temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
       gg <- gg +
         ggplot2::geom_sf(data = survey_area$survey.grid, 
-                         aes(group = station), 
+                         # aes(group = station), 
                          colour = "grey50",
                          show.legend = legend_title) +
         geom_sf(data = survey_area$bathymetry) +
@@ -637,10 +636,10 @@ create_vargridplots <- function(
     # Add temperature squares
     # } else 
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
+        
       gg <- gg +
-        ggplot2::geom_sf(data = grid_stations_plot, # %>% 
-                           # dplyr::filter(stratum == "212"), 
-                         aes(group = station, 
+        ggplot2::geom_sf(data = grid_stations_plot, 
+                         aes(#group = region, 
                              fill = var_bin), 
                          colour = "grey50",
                          show.legend = legend_title) +
@@ -648,7 +647,43 @@ create_vargridplots <- function(
                                    values = var_color, 
                                    labels = var_labels,
                                    drop = F,
-                                   na.translate = F)
+                                   na.translate = F) +
+        ggspatial::coord_sf(
+          xlim = c(extent(grid_stations_plot)), # %in% c(213, 511),])[1:2]),
+          ylim = c(extent(grid_stations_plot))) #+ # %in% c(213, 511),])[3:4])) +
+      #   ggplot2::facet_wrap(~ region, ncol = 2)
+      # 
+      # library(tmap)
+      # 
+      # grid_stations_plot %>% 
+      #   group_by(region) %>% 
+      #   tm_shape() +
+      #   tm_polygons('var_bin',
+      #               title = legend_title,
+      #               style = 'cont', col = 2) +
+      #   tm_facets('region')
+      #   # tm_layout(legend.outside.position =  "bottom", # legend outside below
+      #   #           legend.position = c(.8, 1.1))        # manually position legend
+      # 
+      # 
+      # maps_shared <- map(.x = unique(grid_stations_plot$region), 
+      #                    .f = function(x) grid_stations_plot %>% 
+      #                      dplyr::filter(region == x) %>% 
+      #                      # st_join(acled) %>% 
+      #                      group_by(region) %>% 
+      #                      ggplot(aes(fill = var_bin)) +
+      #                      geom_sf(lwd = NA) #+
+      #                      # scale_fill_continuous(limits = levels(grid_stations_plot$var_bin)[c(1, length(levels(grid_stations_plot$var_bin)))],
+      #                      #                       name = 'PKO targeting\nevents (logged)') 
+      #                    ) #+
+      #                      # theme_rw() +
+      #                      # theme(axis.text = element_blank(),
+      #                      #       axis.ticks = element_blank()))
+      # 
+      # plot_grid(plotlist = c(map(.x = maps_shared,
+      #                            .f = function(x) x + theme(legend.position = 'none')),
+      #                        list(get_legend(maps_shared[[1]]))),
+      #           labels = LETTERS[1:5], label_size = 10, nrow = 2)
       
       # if we are showing planned stations
       if (show_planned_stations #& 
@@ -712,10 +747,19 @@ create_vargridplots <- function(
     #   }
     }
 
+      
+      # if (sum(names(grid_stations_plot) == "region")>0) {
+      #   for (i in 1:)
+      #   gg1 <- gg + grid_stations_plot
+      #     
+      # } else {
     gg <- gg +
       ggspatial::coord_sf(
         xlim = c(extent(survey_area$survey.grid)[1:2]),
-        ylim = c(extent(survey_area$survey.grid)[3:4])) +
+        ylim = c(extent(survey_area$survey.grid)[3:4])) 
+  # }
+  
+    gg <- gg +
       ggsn::scalebar(data = survey_area$survey.grid,
                      location = "bottomleft",
                      dist = 100,

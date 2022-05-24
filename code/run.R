@@ -92,7 +92,8 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
               dplyr::rename(station = stationid) %>% 
               dplyr::select(station, stratum) %>% 
               dplyr::distinct(), 
-            all.x = TRUE) 
+            all.x = TRUE) #+ 
+  # dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
 make_plot_wrapper(maxyr = maxyr, 
@@ -119,6 +120,7 @@ make_grid_wrapper(maxyr = maxyr,
 ### past years -----------------------------------------------------------------
 data_source = "haul"
 plot_anom = FALSE
+dates0 <- "all"
 
 maxyr <- 2021
 dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW")
@@ -201,12 +203,13 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),#
   dplyr::rename(station = ID, 
                 stratum = STRATUM) %>%
   dplyr::filter(stratum %in% unique(goa_strata0$stratum)) %>%
+  # dplyr::mutate(region = dplyr::case_when())
   sp::merge(
     x = .,
     y = goa_strata0 %>%
-      dplyr::mutate(SRVY == "AI", 
-                    region = stringr::str_to_title(regulatory_area_name),
-                    region = gsub(pattern = "Goa", replacement = "GOA", x = region), 
+      dplyr::mutate(SRVY == "AI",
+                    region = stringr::str_to_title(inpfc_area),
+                    region = gsub(pattern = "Goa", replacement = "GOA", x = region),
                     region = gsub(pattern = "S ", replacement = "South ", x = region, ignore.case = FALSE)) %>%
       dplyr::select(stratum, region) %>%
       dplyr::distinct(),
