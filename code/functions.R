@@ -326,8 +326,7 @@ make_grid_wrapper<-function(maxyr,
         by = "vessel_id")  %>% 
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape)
   }
-  
-  
+
   dat <- dat %>%
     dplyr::filter(!is.na(SRVY))  %>% 
     dplyr::left_join(x = ., 
@@ -474,7 +473,7 @@ create_vargridplots <- function(
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
   } else { # if you want to run a specific date
-    iterate <- which(as.character(date_entered) == dates0)
+    iterate <- which(as.character(date_entered) %in% as.character(dates0))
   }
   
   for (i in iterate) {
@@ -599,39 +598,27 @@ create_vargridplots <- function(
         legend.key = element_blank(), 
         legend.key.size=(unit(.3,"cm")), 
         axis.text = element_text(size=14), 
-        axis.title=element_text(size=14) )    +
-      annotate("text", 
-               x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
-               y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
-               label = "Alaska", 
-               color = "black", size = 10) +
-      annotate("text", 
-               x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .1), 
-               y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .15), 
-               label = ifelse(is.na(max_date), 
-                              "", 
-                              ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                     paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
-                                     paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
-                                            " \u2013\n", 
-                                            format(x = as.Date(max_date), format = "%B %d, %Y")))), 
-               color = "black", size = 5, fontface=2) 
+        axis.title=element_text(size=14) )
 
       
     if (as.character(dates0[1]) == "none") {
       temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
-
       gg <- gg +
         ggplot2::geom_sf(data = survey_area$survey.grid, 
                          aes(group = station), 
                          colour = "grey50",
                          show.legend = legend_title) +
         geom_sf(data = survey_area$bathymetry) +
+        guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
+      if (nrow(temp)>0) {
+        gg <- gg +
+       
         # geom_text(data = temp, mapping = aes(x = x, y = y, label = lab), 
         #           size = 4, hjust=0, vjust=1, fontface=2, angle = 90)
         annotate(geom = "text", x = temp$x, y = temp$y, label = temp$lab,
-                 color = "darkblue", fontface="bold", angle = 0) +
-        guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
+                 color = "darkblue", fontface="bold", angle = 0)
+      }
+        
     }
 
     # if (length(dat_plot$reg_shapefile)>1) {
@@ -738,11 +725,27 @@ create_vargridplots <- function(
                      # height = 0.02,
                      st.bottom = FALSE,
                      # st.size = 3, # 2.5
-                     model = survey_area$crs) 
+                     model = survey_area$crs)  +
+      annotate("text", 
+               x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
+               y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
+               label = "Alaska", 
+               color = "black", size = 10) +
+      annotate("text", 
+               x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .12), 
+               y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .15), 
+               label = ifelse(is.na(max_date), 
+                              "", 
+                              ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                                     paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
+                                     paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
+                                            " \u2013\n", 
+                                            format(x = as.Date(max_date), format = "%B %d, %Y")))), 
+               color = "black", size = 5, fontface=2) 
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
-                 x = .37, y = .39, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
+                 x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                  scale = .15 )
     
     # Save plots
@@ -757,16 +760,19 @@ create_vargridplots <- function(
            plot=gg, 
            device="png") # pdfs are great for editing later
     
+    if (file_end %in% c("grid", "daily")){
     rmarkdown::render(paste0("./code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(".", dir_out, filename0, ".pdf"))
     file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
     
-    # ggsave(paste0(filename0,'.pdf'),
-    #        height = height, 
-    #        width = width,
-    #        plot=gg, 
-    #        device="pdf") # pdfs are great for editing later
+    } else if (file_end == "anom"){ 
+    ggsave(paste0(filename0,'.pdf'),
+           height = height,
+           width = width,
+           plot=gg,
+           device="pdf") # pdfs are great for editing later
+    }
     
     if (make_gifs | as.character(dates0[1]) != "none") {
       create_vargridplots_gif(file_end = file_end, 

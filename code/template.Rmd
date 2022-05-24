@@ -4,7 +4,7 @@ output:
     latex_engine: xelatex
 classoption: landscape
 geometry: margin=1cm
-mainfont: Arial
+mainfont: Arial Narrow
 header-includes:
 - \usepackage{caption}
 - \captionsetup[figure]{labelformat=empty}
@@ -31,7 +31,7 @@ if (as.character(dates0[1]) == "none") {
   text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
   " surveys aboard the ",
   vess,
-  ". This is a plot of 50 m, 100 m, and 200 m bathymetry and empty grid of stations.")
+  ". This is a plot of ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry and empty grid of stations.")
   
 } else {
 
@@ -43,7 +43,7 @@ if (as.character(dates0[1]) == "none") {
       } else {
         
       dat_max_date <- as(grid_stations_plot, 'Spatial') %>%
-        spTransform(x = ., CRS("+proj=longlat +datum=WGS84"))
+        sp::spTransform(x = ., CRS("+proj=longlat +datum=WGS84"))
       
       dat_max_date <- 
         cbind.data.frame(station = dat_max_date$station, 
@@ -69,7 +69,8 @@ if (as.character(dates0[1]) == "none") {
                      ifelse(nrow(temp1)>1, "s", "")," with ",
                      ifelse(nrow(temp1)>1, "", "a "), "station ID", ifelse(nrow(temp1)>1, "s", ""), " of ",
                    text_list(x = paste0(temp1$station,
-                   " (near ",temp1$lat,"°N and ",temp1$lon,"°W with a temperature of ",temp1$var_bin,"°C)")), 
+                   " (near ",temp1$lat,"°N and ",temp1$lon,"°W, measuring ",
+                   gsub(pattern = " ", replacement = "", x = temp1$var_bin, fixed = TRUE),"°C)")), 
                    " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
                              gsub(pattern = "F/V ", replacement = "", fixed = TRUE,
                                          x = unique(temp1$vessel_name[!is.na(temp1$vessel_name)])),"}") )
@@ -78,10 +79,10 @@ if (as.character(dates0[1]) == "none") {
   stations1 <- paste0(text_list(temp))
   
   if (length(dat_planned) == 0){
-    stations1 <- paste0(stations1, " and there are no stations planned for ", 
+    stations1 <- paste0(stations1, ". There are no stations planned for ", 
                         format(x = (as.Date(max_date)+1), "%B %d"), ". ")
   } else {
-    stations1 <- paste0(stations1, " and there are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
+    stations1 <- paste0(stations1, ". There are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
                         format(x = (as.Date(max_date)+1), "%B %d"), ". ")
   }
   
@@ -100,7 +101,7 @@ fig_cap <- fig_alt <- paste0(
   vess,
   ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
   stations1, 
-  "The final, validated survey data, including temperature and species collected at each station among other observations, will be made publicly accessible about a month after the survey is complete on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. While we expect the data presented here will not need to be improved upon, it is raw and has not been through our robust data quality checking process.")
+  "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. ")
 
 }
 
