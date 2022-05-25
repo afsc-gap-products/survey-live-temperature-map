@@ -1,7 +1,5 @@
 ---
-output:
-  pdf_document:
-    latex_engine: xelatex
+output: pdf_document
 classoption: landscape
 geometry: margin=1cm
 mainfont: Arial Narrow
@@ -14,11 +12,15 @@ header-includes:
 \selectfont
 \pagenumbering{gobble}
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = FALSE, error = FALSE)
+# output:
+#   pdf_document:
+#     latex_engine: xelatex
 ```
 
-```{r write caption}
+```{r write_caption}
 
 vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
@@ -120,14 +122,14 @@ if (as.character(dates0[1]) == "none") {
   
 }
 
-fig_cap <- fig_alt <- paste0(fig_cap, " \\textit{Credit: NOAA Fisheries}")
+fig_cap <- fig_alt <- paste0(fig_cap, "\\textit{Credit: NOAA Fisheries}")
 
 fig_alt <- gsub(pattern = "\\textit{", replacement = "", x = fig_alt, fixed = TRUE)
 fig_alt <- gsub(pattern = "}", replacement = "", x = fig_alt, fixed = TRUE)
 
 ```
 
-```{r, fig.alt = fig_alt, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5}
-gg + labs(alt = fig_alt)
+```{r, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5}
+gg #+ labs(alt = fig_alt)
 ```
 

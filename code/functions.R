@@ -913,8 +913,8 @@ create_vargridplots_ai <- function(
     legend_title = "",
     dates0 = "latest",
     survey_area, 
-    height = 8, 
-    width = 11,
+    height = 6, 
+    width = 10.5,
     file_end = "",
     make_gifs = TRUE,
     dir_out = "./", 
@@ -1105,18 +1105,18 @@ create_vargridplots_ai <- function(
                          breaks = survey_area$lat.breaks)  +
       theme( 
         panel.background = element_rect(fill = "grey90"),
-        plot.title = element_text(size=20),
-        plot.subtitle = element_text(size=14),
-        legend.text=element_text(size=13), 
+        plot.title = element_text(size=20), 
+        plot.subtitle = element_text(size=14), 
+        legend.text=element_text(size=10), 
         legend.position="right",
         legend.direction="vertical",
         legend.justification="left",
         legend.background = element_blank(),
-        legend.title=element_text(size=16),
+        legend.title=element_text(size=12),
         legend.box.background = element_blank(),
         legend.key = element_blank(), 
         legend.key.size=(unit(.3,"cm")), 
-        axis.text = element_text(size=14), 
+        axis.text = element_text(size=9), 
         axis.title=element_text(size=14) )
 
     if (as.character(dates0[1]) == "none") {
@@ -1151,7 +1151,8 @@ create_vargridplots_ai <- function(
           ggplot2::geom_sf(data = grid_stations_plot1, 
                            aes(#group = region, 
                              fill = var_bin), 
-                           colour = "grey50",
+                           colour = "black", 
+                           size = .05,
                            show.legend = FALSE) +
           ggplot2::scale_fill_manual(name = legend_title,
                                      values = var_color, 
@@ -1163,20 +1164,21 @@ create_vargridplots_ai <- function(
             ylim = c(extent(grid_stations_plot1)[3:4])) +
         ggtitle(x)  +
           ggsn::scalebar(data = grid_stations_plot1,
-                         location = "topleft",
-                         dist = 50,
+                         location = ifelse(x == "Western Aleutians and Chirikof", "topright", "topleft"),
+                         dist = 25,
                          dist_unit = "nm",
                          transform = FALSE,
-                         # st.dist = 0.06,
-                         # height = 0.02,
+                         st.dist = 0.06,
+                         border.size = .25,
+                         height = 0.03,
                          st.bottom = TRUE,
-                         st.size = 1, # 2.5
+                         st.size = 3, 
                          model = survey_area$crs) +
         theme(
-          plot.title = element_text(size = 8, face = "bold"), 
-          axis.text = element_text(size=5),
-          axis.title = element_blank() ,
-          plot.margin=unit(c(0.1,0.1,0.1,0.1), "cm"))
+          plot.title = element_text(size = 10, face = "bold"), 
+          # axis.text = element_text(size=9),
+          axis.title = element_blank(),
+          plot.margin=unit(c(0,0,0,0), "cm"))
 
       }) -> region_list
       
@@ -1195,7 +1197,9 @@ create_vargridplots_ai <- function(
                                      values = var_color, 
                                      labels = var_labels,
                                      drop = F,
-                                     na.translate = F) 
+                                     na.translate = F) +
+          theme(
+            axis.text = element_text(size=5))
         
         
         # now mimic facet_wrap layout with grid.arrange
@@ -1231,7 +1235,9 @@ create_vargridplots_ai <- function(
         a <- extent(grid_stations_plot1)
         b <- data.frame(t(matrix(a)))
         names(b) <- c("xmin", "xmax", "ymin", "ymax")
-        b$lab <- x
+        b$lab <- gsub(pattern = "and\n", replacement = "and ", 
+                      x = gsub(pattern = " ", replacement = "\n", x = x, fixed = TRUE), 
+                      fixed = TRUE)
         b$x <- mean(a[1:2])
         b$y <- a[4]
         bb <- rbind.data.frame(bb, b)
@@ -1245,26 +1251,27 @@ create_vargridplots_ai <- function(
           st_as_sfc()
         
         gg_insert <- gg_insert + 
-          geom_sf(data = poly, fill = NA, color = "black", size = 1)#+ 
+          geom_sf(data = poly, fill = NA, color = "black", size = .5)#+ 
           # geom_text(mapping = aes(x = mean(a[1:2]), y = a[4]+10000, label = x))
           
       }
       
       gg_insert <- gg_insert + 
         geom_text(data = bb, 
-                  mapping = aes(x = x, y = y+50000, label = lab), 
+                  mapping = aes(x = x, y = y+200000, label = lab), 
                   size = 3) +
         ggspatial::coord_sf(
           xlim = c(extent(grid_stations_plot)[1:2]),
-          ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+90000)) + 
+          ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+400000)) + 
         ggtitle(gsub(pattern = "\n", replacement = "", x = unique(survey_area$survey.area$reg_lab), fixed = TRUE)) +
         theme_minimal() + 
         theme(
           panel.border = element_rect(colour = "grey50", fill=NA, size=1), 
-          #   axis.text = element_blank(), 
           plot.title = element_text(size = 8, face = "bold"), 
-          axis.text = element_text(size = 5),
-          axis.title = element_blank() ) # + 
+          # axis.text.x = element_text(size=9),
+          axis.text.y = element_blank(),
+          axis.title = element_blank(),
+          plot.margin=unit(c(0,0,0,0), "cm") ) # + 
         # annotate(geom = "text",
         #          x = quantile(extent(grid_stations_plot)[1]:extent(grid_stations_plot)[2], .5), 
         #          y = quantile(extent(grid_stations_plot)[3]:extent(grid_stations_plot)[4], 1), 
@@ -1298,77 +1305,43 @@ create_vargridplots_ai <- function(
       
       subtitle_row <- cowplot::ggdraw() + 
         draw_label(
-          paste0(plot_subtitle, 
-                 ifelse(is.na(max_date), 
-                        "", 
-                        ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+          paste0(plot_subtitle, "\n", 
+                   ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                                paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
                                paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
-                                      " \u2013\n", 
-                                      format(x = as.Date(max_date), format = "%B %d, %Y"))))),
+                                      " \u2013 ", 
+                                      format(x = as.Date(max_date), format = "%B %d, %Y")))),
           fontface = 'bold',
           x = 0,
           hjust = 0, 
           size = 14) +
         theme(# add margin on the left of the drawing canvas,
           plot.margin = margin(0, 0, 0, 7)) # so title is aligned with left edge of first plot
-
-      top_row <- cowplot::plot_grid(
-        region_list[[1]], region_list[[2]], cowplot::get_legend(legend_temp),
-        rel_widths = c(1, 1, 1),
-        nrow = 1
+      
+      side_bar <- cowplot::plot_grid(
+        cowplot::get_legend(legend_temp), gg_insert, 
+        rel_heights = c(1.25, .75),
+        nrow = 2, align = "v", axis = "r"
       )
       
-      bottom_row <- cowplot::plot_grid(
-        region_list[[3]], region_list[[4]], gg_insert,
-        rel_widths = c(1, 1, 1),
-        nrow = 1
-      )
+      gg <- cowplot::plot_grid(
+        region_list[[1]], region_list[[2]], region_list[[3]], region_list[[4]],
+                      ncol = 2, nrow = 2, greedy = TRUE, rel_widths = c(1.5, 1.5)) +
+        draw_label("Longitude", x = 0.25, y = 0, vjust = -0.5, angle = 0) +
+        draw_label("Latitude", x = 0, y = 0.5, vjust = 1.5, angle = 90)
       
-      gg <- plot_grid(title_row, subtitle_row, top_row, bottom_row, 
-                      ncol = 1, greedy = TRUE, rel_heights = c(0.1, 0.1, 1, 1))
       
-        # gg <- gg +
-        #   guides(
-        #     # tempartures # in case you want to have 2+ columns for the legend!
-        #     fill = guide_legend(ncol=1, 
-        #                         override.aes = list(colour = c("white"),
-        #                                             size = 0),
-        #                         order = 1),
-        #     # survey regions
-        #     colour = guide_legend(order = 2, 
-        #                           override.aes = list(fill = survey_area$survey.area$survey_reg_col#, 
-        #                                               # size = 2#, 
-        #                                               # color = "white"
-        #                           ))) 
+      gg <- cowplot::plot_grid(
+        gg, NULL, side_bar, 
+        ncol = 3, greedy = TRUE, rel_widths = c(1, .05, .5))
+      
+      gg <- cowplot::plot_grid(
+        title_row, 
+        subtitle_row, 
+        gg, 
+        nrow = 3, greedy = TRUE, rel_heights = c(0.1, 0.2, 2))
+      
       }
-
-    # gg <- gg  + 
-      # ggtitle(label = plot_title, 
-      #         subtitle = paste0(plot_subtitle, 
-      #                           ifelse(is.na(max_date), 
-      #                                  "", 
-      #                                  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-      #                                         paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
-      #                                         paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
-      #                                                " \u2013\n", 
-      #                                                format(x = as.Date(max_date), format = "%B %d, %Y"))))))#  +
-      # annotate("text", 
-      #          x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
-      #          y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
-      #          label = "Alaska", 
-      #          color = "black", size = 10) +
-      # annotate("text", 
-      #          x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .12), 
-      #          y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .15), 
-      #          label = ifelse(is.na(max_date), 
-      #                         "", 
-      #                         ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-      #                                paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
-      #                                paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
-      #                                       " \u2013\n", 
-      #                                       format(x = as.Date(max_date), format = "%B %d, %Y")))), 
-      #          color = "black", size = 5, fontface=2) 
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
