@@ -1,5 +1,5 @@
 #' ---------------------------
-#' title: Survey Daily and Anomally Temperature Plot
+#' title: Survey Daily and Anomaly Temperature Plot
 #' OG author: Jason Conner
 #' maintained: Emily Markowitz and Liz Dawson (Jan 2022)
 #' purpose: run script
@@ -198,7 +198,7 @@ make_grid_wrapper(maxyr = maxyr,
 maxyr <- 2022 #CHANGE
 SRVY <- "AI"
 plot_anom <- FALSE
-plot_subtitle = "NOAA Fisheries Aluetian Islands Bottom Trawl Survey"
+plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 region_akgfmaps = "ai"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
 #dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
@@ -222,7 +222,7 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_in, '/shapefiles/'),#
       dplyr::mutate(SRVY == "AI",
                     region = stringr::str_to_title(inpfc_area),
                     region = dplyr::case_when(
-                      region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians and Chirikof", 
+                      region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians", 
                       TRUE ~ region)) %>%
       dplyr::select(stratum, region) %>%
       dplyr::distinct(),
