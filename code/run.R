@@ -81,7 +81,7 @@ survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.cr
 
 # Daily
 var = "bt"
-dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
+dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
 show_planned_stations <- TRUE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
@@ -109,13 +109,13 @@ make_plot_wrapper(maxyr = maxyr,
 
 # Blank Grid (no survey data) 
 # Just the empty grid (comment this v out when running after beginning of survey)
-make_grid_wrapper(maxyr = maxyr, 
-                  SRVY = SRVY, 
-                  haul = haul, 
-                  dat_survreg = dat_survreg, 
-                  dir_googledrive_upload = dir_googledrive_upload, 
-                  survey_area = survey_area, 
-                  plot_subtitle = plot_subtitle)
+# make_grid_wrapper(maxyr = maxyr, 
+#                   SRVY = SRVY, 
+#                   haul = haul, 
+#                   dat_survreg = dat_survreg, 
+#                   dir_googledrive_upload = dir_googledrive_upload, 
+#                   survey_area = survey_area, 
+#                   plot_subtitle = plot_subtitle)
 
 # ### past years -----------------------------------------------------------------
 # data_source = "haul"
@@ -195,7 +195,7 @@ make_grid_wrapper(maxyr = maxyr,
 #                   plot_subtitle = plot_subtitle)
 
 ## AI --------------------------------------------------------------------------
-maxyr <- 2022 #CHANGE
+maxyr <- 2018 #CHANGE
 SRVY <- "AI"
 plot_anom <- FALSE
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
@@ -203,7 +203,7 @@ region_akgfmaps = "ai"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
 #dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 var = "bt"
-dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <- "2018-08-08" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 show_planned_stations <- FALSE
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 
@@ -251,22 +251,22 @@ make_grid_wrapper(maxyr = maxyr,
                   plot_subtitle = plot_subtitle)
 
 # ### past years -----------------------------------------------------------------
-# data_source = "haul"
+#data_source = "haul"
 # plot_anom = FALSE
 # dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 # 
 # maxyr <- 2018
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
-# make_plot_wrapper(maxyr = maxyr, 
-#                   SRVY = SRVY, 
-#                   haul = haul, 
-#                   dat_survreg = dat_survreg, 
+# make_plot_wrapper(maxyr = maxyr,
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
 #                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload, 
-#                   dates0 = dates0, 
-#                   survey_area = survey_area, 
-#                   plot_subtitle = plot_subtitle, 
-#                   show_planned_stations = show_planned_stations, 
-#                   data_source = data_source, 
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
 #                   plot_anom = FALSE)
 

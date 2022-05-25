@@ -103,7 +103,7 @@ if (as.character(dates0[1]) == "none") {
   }
   
   fig_cap <- fig_alt <- paste0(
-    "NOAA Fisheries near-real time bottom ocean temperatures collected ", 
+    "NOAA Fisheries near-real time ocean bottom temperatures collected ", 
     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
            paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
            paste0("between ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 

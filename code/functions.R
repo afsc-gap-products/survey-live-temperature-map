@@ -835,8 +835,8 @@ create_vargridplots_bs <- function(
                         output_dir = dir_out,
                         output_file = paste0(".", dir_out, filename0, ".pdf"))
       file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
-      
-    } else if (file_end == "anom"){ 
+
+    } else if (file_end == "anom"){
       ggsave(paste0(filename0,'.pdf'),
              height = height,
              width = width,
@@ -1164,7 +1164,7 @@ create_vargridplots_ai <- function(
             ylim = c(extent(grid_stations_plot1)[3:4])) +
         ggtitle(x)  +
           ggsn::scalebar(data = grid_stations_plot1,
-                         location = ifelse(x == "Western Aleutians and Chirikof", "topright", "topleft"),
+                         location = ifelse(x == "Western Aleutians", "topright", "topleft"),
                          dist = 25,
                          dist_unit = "nm",
                          transform = FALSE,
@@ -1359,14 +1359,14 @@ create_vargridplots_ai <- function(
            width = width,
            plot=gg, 
            device="png") # pdfs are great for editing later
-    
+
     if (file_end %in% c("grid", "daily")){
     rmarkdown::render(paste0("./code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(".", dir_out, filename0, ".pdf"))
     file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
-    
-    } else if (file_end == "anom"){ 
+
+    } else if (file_end == "anom"){
     ggsave(paste0(filename0,'.pdf'),
            height = height,
            width = width,
