@@ -137,7 +137,11 @@ make_plot_wrapper <- function(maxyr,
     var00 = 'Bottom Temperature'
     unit0 <- '(\u00B0C)'
     var0 <- "gear_temperature"
-    var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50) # if anom DOES NOT exist (straight temps!)
+    if (SRVY == "BS") {
+      var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50)
+    } else {
+      var_breaks <- c(-10, seq(from = 4, to = 8, by = 0.5), 50)
+    }
   } else if (var == "st") {
     var00 = 'Surface Temperature'
     unit0 <- '(\u00B0C)'
@@ -189,11 +193,14 @@ make_plot_wrapper <- function(maxyr,
                       !is.na(dplyr::all_of(var))) %>% 
       dplyr::rename(var = all_of(var0), 
                     station = stationid, 
-                    date = start_time) #%>% 
-      # dplyr::select(-vessel_id) 
+                    date = start_time) 
+    if (SRVY %in% c("AI", "GOA")){
+      dat <- dat %>%
+        dplyr::filter(var != 0) # there shouldn't be bottom temps of 0 in the AI or GOA
+    }
     dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
     for (ii in 1:length(unique(dat$SRVY))){
-      temp <- unique(dat_survreg$SRVY)[ii]
+      temp <- unique(dat$SRVY)[ii]
       dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0("\n(", 
                                     format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"),
                                     " - ", 
@@ -426,7 +433,7 @@ create_vargridplots_bs <- function(
     dir_in = "./",
     show_planned_stations = TRUE,
     data_source = "gd",
-    dir_googledrive_upload) {
+    dir_googledrive_upload = NULL) {
   
   # Create Directories
   dir.create(path = dir_out, showWarnings = FALSE)
@@ -819,57 +826,21 @@ create_vargridplots_bs <- function(
                  scale = .15 )
     
     # Save plots
-    filename0 <- paste0(dir_out, '/',
-                        ifelse(as.character(dates0[1]) == "none", "", 
-                               max_date), 
-                        ifelse(file_end=="", "", paste0("_", file_end)))
-    
-    ggsave(paste0(filename0,'.png'),
-           height = height, 
-           width = width,
-           plot=gg, 
-           device="png") # pdfs are great for editing later
-    
-    if (file_end %in% c("grid", "daily")){
-      rmarkdown::render(paste0("./code/template.Rmd"),
-                        output_dir = dir_out,
-                        output_file = paste0(".", dir_out, filename0, ".pdf"))
-      file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
-
-    } else if (file_end == "anom"){
-      ggsave(paste0(filename0,'.pdf'),
-             height = height,
-             width = width,
-             plot=gg,
-             device="pdf") # pdfs are great for editing later
-    }
-    
-    if (make_gifs | as.character(dates0[1]) != "none") {
-      create_vargridplots_gif(file_end = file_end, 
-                              max_date = max_date,
-                              dir_out = dir_out)
-    }
-    
-    if (!(is.null(dir_googledrive_upload))) {
-      
-      drive_upload(
-        media = paste0(filename0,'.png'), 
-        path = dir_googledrive_upload, 
-        overwrite = TRUE)
-      
-      drive_upload(
-        media = paste0(filename0,'.pdf'), 
-        path = dir_googledrive_upload, 
-        overwrite = TRUE)
-      
-      # change each day of the survey
-      if (make_gifs | as.character(dates0[1]) != "none") {
-        drive_upload(
-          media = paste0(filename0,'.gif'), 
-          path = dir_googledrive_upload, 
-          overwrite = TRUE)
-      }
-    }
+    save_figures(gg, 
+                 dat, 
+                 dat_plot, 
+                 dat_planned, 
+                 survey_area, 
+                 grid_stations_plot, 
+                 data_source, 
+                 dir_out, 
+                 dates0, 
+                 max_date, 
+                 file_end, 
+                 height, 
+                 width, 
+                 dir_googledrive_upload, 
+                 make_gifs)
     
     end_time <- Sys.time()
     print((end_time - start_time))
@@ -921,7 +892,7 @@ create_vargridplots_ai <- function(
     dir_in = "./",
     show_planned_stations = TRUE,
     data_source = "gd",
-    dir_googledrive_upload) {
+    dir_googledrive_upload = NULL) {
   
   # Create Directories
   dir.create(path = dir_out, showWarnings = FALSE)
@@ -1348,58 +1319,21 @@ create_vargridplots_ai <- function(
                  x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                  scale = .15 )
     
-    # Save plots
-    filename0 <- paste0(dir_out, '/',
-                        ifelse(as.character(dates0[1]) == "none", "", 
-                               max_date), 
-                        ifelse(file_end=="", "", paste0("_", file_end)))
-    
-    ggsave(paste0(filename0,'.png'),
-           height = height, 
-           width = width,
-           plot=gg, 
-           device="png") # pdfs are great for editing later
-
-    if (file_end %in% c("grid", "daily")){
-    rmarkdown::render(paste0("./code/template.Rmd"),
-                      output_dir = dir_out,
-                      output_file = paste0(".", dir_out, filename0, ".pdf"))
-    file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
-
-    } else if (file_end == "anom"){
-    ggsave(paste0(filename0,'.pdf'),
-           height = height,
-           width = width,
-           plot=gg,
-           device="pdf") # pdfs are great for editing later
-    }
-    
-    if (make_gifs | as.character(dates0[1]) != "none") {
-      create_vargridplots_gif(file_end = file_end, 
-                              max_date = max_date,
-                              dir_out = dir_out)
-    }
-    
-    if (!(is.null(dir_googledrive_upload))) {
-      
-      drive_upload(
-        media = paste0(filename0,'.png'), 
-        path = dir_googledrive_upload, 
-        overwrite = TRUE)
-      
-      drive_upload(
-        media = paste0(filename0,'.pdf'), 
-        path = dir_googledrive_upload, 
-        overwrite = TRUE)
-      
-      # change each day of the survey
-      if (make_gifs | as.character(dates0[1]) != "none") {
-        drive_upload(
-          media = paste0(filename0,'.gif'), 
-          path = dir_googledrive_upload, 
-          overwrite = TRUE)
-      }
-    }
+    save_figures(gg, 
+                 dat, 
+                 dat_plot, 
+                 dat_planned = NULL, 
+                 survey_area, 
+                 grid_stations_plot, 
+                 data_source, 
+                 dir_out, 
+                 dates0, 
+                 max_date, 
+                 file_end, 
+                 height, 
+                 width, 
+                 dir_googledrive_upload, 
+                 make_gifs)
     
     end_time <- Sys.time()
     print((end_time - start_time))
@@ -1414,6 +1348,77 @@ create_vargridplots_ai <- function(
   
   # HeatPlot_all<-fig_list
   # save(HeatPlot_all, file = paste0(dir_out, '/HeatPlot_all.RData'))
+  
+}
+
+
+save_figures <- function(gg,
+                         dat, 
+                         dat_plot, 
+                         dat_planned = NULL, 
+                         survey_area, 
+                         grid_stations_plot, 
+                         data_source, 
+                         dir_out, 
+                         dates0, 
+                         max_date, 
+                         file_end, 
+                         height, 
+                         width, 
+                         dir_googledrive_upload = NULL, 
+                         make_gifs = TRUE) {
+  
+  filename0 <- paste0(dir_out, '/',
+                      ifelse(as.character(dates0[1]) == "none", "", 
+                             max_date), 
+                      ifelse(file_end=="", "", paste0("_", file_end)))
+  
+  ggsave(paste0(filename0,'.png'),
+         height = height, 
+         width = width,
+         plot=gg, 
+         device="png") # pdfs are great for editing later
+  
+  if (file_end %in% c("grid", "daily")){
+    rmarkdown::render(paste0("./code/template.Rmd"),
+                      output_dir = dir_out,
+                      output_file = paste0(".", dir_out, filename0, ".pdf"))
+    file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
+    
+  } else if (file_end == "anom"){
+    ggsave(paste0(filename0,'.pdf'),
+           height = height,
+           width = width,
+           plot=gg,
+           device="pdf") # pdfs are great for editing later
+  }
+  
+  if (make_gifs | as.character(dates0[1]) != "none") {
+    create_vargridplots_gif(file_end = file_end, 
+                            max_date = max_date,
+                            dir_out = dir_out)
+  }
+  
+  if (!(is.null(dir_googledrive_upload))) {
+    
+    drive_upload(
+      media = paste0(filename0,'.png'), 
+      path = dir_googledrive_upload, 
+      overwrite = TRUE)
+    
+    drive_upload(
+      media = paste0(filename0,'.pdf'), 
+      path = dir_googledrive_upload, 
+      overwrite = TRUE)
+    
+    # change each day of the survey
+    if (make_gifs | as.character(dates0[1]) != "none") {
+      drive_upload(
+        media = paste0(filename0,'.gif'), 
+        path = dir_googledrive_upload, 
+        overwrite = TRUE)
+    }
+  }
   
 }
 

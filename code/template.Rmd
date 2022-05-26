@@ -1,5 +1,7 @@
 ---
-output: pdf_document
+output:
+  pdf_document:
+    latex_engine: xelatex
 classoption: landscape
 geometry: margin=1cm
 mainfont: Arial Narrow
@@ -62,7 +64,8 @@ if (as.character(dates0[1]) == "none") {
                        by = c("stratum", "station"))  %>%
       dplyr::arrange(vessel_shape) %>% 
       dplyr::mutate(lon = round(x = lon, digits = 3), 
-                    lat = round(x = lat, digits = 3))
+                    lat = round(x = lat, digits = 3)) %>% 
+      dplyr::filter(!is.na(vessel_shape))
     
     
     temp <- c()
@@ -82,7 +85,7 @@ if (as.character(dates0[1]) == "none") {
     
     stations1 <- paste0(text_list(temp))
     
-    if (exists("dat_planned")) {
+    if (!is.null(dat_planned)) {
       if (length(dat_planned) == 0){
         
         if ((date_entered[length(date_entered)] == max_date & data_source == "haul")) {
@@ -99,11 +102,13 @@ if (as.character(dates0[1]) == "none") {
                               format(x = (as.Date(max_date)+1), "%B %d"), ". ")
         }
       }
+    } else {
+      stations1 <- paste0(stations1, ". ")
     }
   }
   
   fig_cap <- fig_alt <- paste0(
-    "NOAA Fisheries near-real time ocean bottom temperatures collected ", 
+    "NOAA Fisheries near-real time bottom ocean temperatures collected ", 
     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
            paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
            paste0("between ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
@@ -111,7 +116,9 @@ if (as.character(dates0[1]) == "none") {
                   format(x = as.Date(max_date), format = "%B %d, %Y"))), 
     " during the ",
     text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
-    " surveys daily aboard the ",
+    " survey",
+    ifelse(length(unique(dat$SRVY))>1, "s", ""),
+    " daily aboard the ",
     vess,
     ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
     stations1, 

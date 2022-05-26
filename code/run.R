@@ -36,7 +36,7 @@ dat_survreg <- dplyr::bind_rows(dat_survreg,
                                            SRVY = "AI",
                                            region = "AI",
                                            vessel_id = c(148, 176), # CHANGE
-                                           vessel_shape = c("O", "S"), # CHANGE
+                                           vessel_shape = c("OEX", "SS"), # CHANGE
                                            reg_dates = "\n(May 25-Aug 04)")) # CHANGE
 # dat_survreg <- dplyr::bind_rows(dat_survreg, 
 #                                data.frame(reg_shapefile = "GOA", 
@@ -251,22 +251,22 @@ make_grid_wrapper(maxyr = maxyr,
                   plot_subtitle = plot_subtitle)
 
 # ### past years -----------------------------------------------------------------
-#data_source = "haul"
-# plot_anom = FALSE
-# dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-# 
-# maxyr <- 2018
-# dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
-# make_plot_wrapper(maxyr = maxyr,
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = dates0,
-#                   survey_area = survey_area,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   data_source = data_source,
-#                   plot_anom = FALSE)
+data_source = "haul"
+plot_anom = FALSE
+dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+
+maxyr <- 2018
+dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
+make_plot_wrapper(maxyr = maxyr,
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  var = var,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  dates0 = dates0,
+                  survey_area = survey_area,
+                  plot_subtitle = plot_subtitle,
+                  show_planned_stations = show_planned_stations,
+                  data_source = data_source,
+                  plot_anom = plot_anom)
 
