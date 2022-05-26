@@ -140,7 +140,7 @@ make_plot_wrapper <- function(maxyr,
     if (SRVY == "BS") {
       var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50)
     } else {
-      var_breaks <- c(-10, seq(from = 4, to = 8, by = 0.5), 50)
+      var_breaks <- c(-10, seq(from = 2, to = 8, by = 0.5), 50)
     }
   } else if (var == "st") {
     var00 = 'Surface Temperature'

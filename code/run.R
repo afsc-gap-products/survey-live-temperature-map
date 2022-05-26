@@ -56,7 +56,7 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
-# dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 # dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
 dir_in<- paste0(getwd(), "/") 
@@ -81,7 +81,7 @@ survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.cr
 
 # Daily
 var = "bt"
-dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
+dates0 <- "2022-06-03" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
 show_planned_stations <- TRUE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
@@ -242,13 +242,13 @@ make_plot_wrapper(maxyr = maxyr,
 
 # Blank Grid (no survey data) 
 # Just the empty grid (comment this v out when running after beginning of survey)
-make_grid_wrapper(maxyr = maxyr, 
-                  SRVY = SRVY, 
-                  haul = haul, 
-                  dat_survreg = dat_survreg, 
-                  dir_googledrive_upload = dir_googledrive_upload, 
-                  survey_area = survey_area, 
-                  plot_subtitle = plot_subtitle)
+# make_grid_wrapper(maxyr = maxyr, 
+#                   SRVY = SRVY, 
+#                   haul = haul, 
+#                   dat_survreg = dat_survreg, 
+#                   dir_googledrive_upload = dir_googledrive_upload, 
+#                   survey_area = survey_area, 
+#                   plot_subtitle = plot_subtitle)
 
 # # ### past years -----------------------------------------------------------------
 # data_source = "haul"
