@@ -840,7 +840,8 @@ create_vargridplots_bs <- function(
                  height, 
                  width, 
                  dir_googledrive_upload, 
-                 make_gifs)
+                 make_gifs,
+                 date_entered)
     
     end_time <- Sys.time()
     print((end_time - start_time))
@@ -1333,7 +1334,8 @@ create_vargridplots_ai <- function(
                  height, 
                  width, 
                  dir_googledrive_upload, 
-                 make_gifs)
+                 make_gifs,
+                 date_entered)
     
     end_time <- Sys.time()
     print((end_time - start_time))
@@ -1366,7 +1368,8 @@ save_figures <- function(gg,
                          height, 
                          width, 
                          dir_googledrive_upload = NULL, 
-                         make_gifs = TRUE) {
+                         make_gifs = TRUE, 
+                         date_entered) {
   
   filename0 <- paste0(dir_out, '/',
                       ifelse(as.character(dates0[1]) == "none", "", 

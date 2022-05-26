@@ -59,7 +59,7 @@ googledrive::drive_auth()
 dir_in<-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 # dir_in <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_in<-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-dir_in<- paste0(getwd(), "/") 
+# dir_in<- paste0(getwd(), "/")
 
 source(file = paste0(dir_in,"code/functions.R"))
 # source(file = paste0(dir_in, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -81,7 +81,7 @@ survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.cr
 
 # Daily
 var = "bt"
-dates0 <- "2022-06-03" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
+dates0 <- "2022-06-04" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
 show_planned_stations <- TRUE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
