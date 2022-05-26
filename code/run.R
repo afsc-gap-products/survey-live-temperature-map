@@ -35,8 +35,8 @@ dat_survreg <- dplyr::bind_rows(dat_survreg,
                                            region_long = "Aleutian Islands",
                                            SRVY = "AI",
                                            region = "AI",
-                                           vessel_id = c(148, 176), # CHANGE
-                                           vessel_shape = c("OEX", "SS"), # CHANGE
+                                           vessel_id = c(148, 176, 143), # CHANGE
+                                           vessel_shape = c("OEX", "AP", "SS"), # CHANGE
                                            reg_dates = "\n(May 25-Aug 04)")) # CHANGE
 # dat_survreg <- dplyr::bind_rows(dat_survreg, 
 #                                data.frame(reg_shapefile = "GOA", 
@@ -109,12 +109,12 @@ make_plot_wrapper(maxyr = maxyr,
 
 # Blank Grid (no survey data) 
 # Just the empty grid (comment this v out when running after beginning of survey)
-# make_grid_wrapper(maxyr = maxyr, 
-#                   SRVY = SRVY, 
-#                   haul = haul, 
-#                   dat_survreg = dat_survreg, 
-#                   dir_googledrive_upload = dir_googledrive_upload, 
-#                   survey_area = survey_area, 
+# make_grid_wrapper(maxyr = maxyr,
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
 #                   plot_subtitle = plot_subtitle)
 
 # ### past years -----------------------------------------------------------------
@@ -124,17 +124,17 @@ make_plot_wrapper(maxyr = maxyr,
 # 
 # maxyr <- 2021
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW")
-# make_plot_wrapper(maxyr = maxyr, 
-#                   SRVY = SRVY, 
-#                   haul = haul, 
-#                   dat_survreg = dat_survreg, 
+# make_plot_wrapper(maxyr = maxyr,
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
 #                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload, 
-#                   dates0 = dates0, 
-#                   survey_area = survey_area, 
-#                   plot_subtitle = plot_subtitle, 
-#                   show_planned_stations = show_planned_stations, 
-#                   data_source = data_source, 
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
 #                   plot_anom = TRUE)
 # 
 # maxyr <- 2019
@@ -158,40 +158,40 @@ make_plot_wrapper(maxyr = maxyr,
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1jaJrvKE729I15YnC6LhRDVI5Xxg4xEPo")
 # region_akgfmaps = "bs.south"
 # survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-# survey_area$survey.grid <- survey_area$survey.grid %>% 
+# survey_area$survey.grid <- survey_area$survey.grid %>%
 #   sf::st_transform(x = ., survey_area$crs$input) %>%
 #   dplyr::rename(station = STATIONID) %>%
-#   sp::merge(x = ., 
+#   sp::merge(x = .,
 #             y = haul %>%
-#               dplyr::rename(station = stationid) %>% 
-#               dplyr::select(station, stratum) %>% 
-#               dplyr::distinct(), 
-#             all.x = TRUE) %>% 
-#   dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  %>% 
+#               dplyr::rename(station = stationid) %>%
+#               dplyr::select(station, stratum) %>%
+#               dplyr::distinct(),
+#             all.x = TRUE) %>%
+#   dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  %>%
 #   dplyr::mutate(region = "Bering Sea")
 # 
-# make_plot_wrapper(maxyr = maxyr, 
-#                   SRVY = SRVY, 
-#                   haul = haul, 
-#                   dat_survreg = dat_survreg, 
+# make_plot_wrapper(maxyr = maxyr,
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
 #                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload, 
-#                   dates0 = dates0, 
-#                   survey_area = survey_area, 
-#                   plot_subtitle = plot_subtitle, 
-#                   show_planned_stations = show_planned_stations, 
-#                   data_source = data_source, 
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
 #                   plot_anom = plot_anom)
 # 
-# # Blank Grid (no survey data) 
+# # Blank Grid (no survey data)
 # # Just the empty grid (comment this v out when running after beginning of survey)
-# make_grid_wrapper(maxyr = maxyr, 
-#                   SRVY = SRVY, 
-#                   haul = haul, 
-#                   dat_survreg = dat_survreg, 
-#                   dir_googledrive_upload = dir_googledrive_upload, 
-#                   survey_area = survey_area, 
-#                   data_source = data_source, 
+# make_grid_wrapper(maxyr = maxyr,
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle)
 
 ## AI --------------------------------------------------------------------------
@@ -250,23 +250,23 @@ make_grid_wrapper(maxyr = maxyr,
                   survey_area = survey_area, 
                   plot_subtitle = plot_subtitle)
 
-# ### past years -----------------------------------------------------------------
-data_source = "haul"
-plot_anom = FALSE
-dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-
-maxyr <- 2018
-dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
-make_plot_wrapper(maxyr = maxyr,
-                  SRVY = SRVY,
-                  haul = haul,
-                  dat_survreg = dat_survreg,
-                  var = var,
-                  dir_googledrive_upload = dir_googledrive_upload,
-                  dates0 = dates0,
-                  survey_area = survey_area,
-                  plot_subtitle = plot_subtitle,
-                  show_planned_stations = show_planned_stations,
-                  data_source = data_source,
-                  plot_anom = plot_anom)
+# # ### past years -----------------------------------------------------------------
+# data_source = "haul"
+# plot_anom = FALSE
+# dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+# 
+# maxyr <- 2018
+# dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
+# make_plot_wrapper(maxyr = maxyr,
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   var = var,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
+#                   plot_anom = plot_anom)
 
