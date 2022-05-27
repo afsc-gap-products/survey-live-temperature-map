@@ -10,9 +10,9 @@
 # J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018
 
 # Download data from oracle saved locally: -------------------------------------
-a<-list.files(path = "./data/oracle/")
+a<-list.files(path = paste0(dir_wd, "data/oracle/"))
 for (i in 1:length(a)){
-  b <- read_csv(file = paste0("./data/oracle/", a[i]))
+  b <- read_csv(file = paste0(dir_wd, "data/oracle/", a[i]))
   b <- janitor::clean_names(b)
   if (names(b)[1] %in% "x1"){
     b$x1<-NULL
@@ -28,7 +28,7 @@ if (googledrive_dl) {
 googledrive::drive_download(file = googledrive::as_id(dir_googledrive_log),  #"gap_survey_progression.csv",
                             type = "xlsx", 
                             overwrite = TRUE, 
-                            path = paste0("./data/gap_survey_progression.xlsx"))
+                            path = paste0(dir_wd, "data/gap_survey_progression.xlsx"))
 }
 
 # haul data --------------------------------------------------------------------
