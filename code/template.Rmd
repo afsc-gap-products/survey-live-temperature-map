@@ -118,14 +118,14 @@ if (as.character(dates0[1]) == "none") {
     text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
     " survey",
     ifelse(length(unique(dat$SRVY))>1, "s", ""),
-    " daily aboard the ",
+    " aboard the ",
     vess,
     ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
     stations1, 
     
     ifelse(data_source == "gd", 
-           "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. ", 
-           "These data have been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), are publicly accessible on the Fisheries One Stop Shop (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::) platform. "))
+           "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop platform (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). ", 
+           "These data have been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), are publicly accessible on the Fisheries One Stop Shop platform (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). "))
   
 }
 

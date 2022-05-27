@@ -118,10 +118,11 @@ make_plot_wrapper <- function(maxyr,
                               plot_subtitle = "", 
                               show_planned_stations, 
                               data_source = "gd", 
-                              plot_anom = TRUE) {
+                              plot_anom = TRUE, 
+                              dir_wd = "./") {
   
   case <- paste0(maxyr, "_", SRVY)
-  dir_out <- paste0("./output/", case, "/")
+  dir_out <- paste0(dir_wd, "/output/", case, "/")
   
   SRVY1 <- SRVY
   create_vargridplots <- create_vargridplots_ai
@@ -176,7 +177,7 @@ make_plot_wrapper <- function(maxyr,
   
   if (data_source == "gd") { # Temperature data from google drive
     dat <- 
-      readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
+      readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                         sheet = case, skip = 1) %>%
       janitor::clean_names() %>% 
       dplyr::rename("var" = all_of(var), 
@@ -255,7 +256,7 @@ make_plot_wrapper <- function(maxyr,
                       dates0 = dates0, #"latest", # "all", #"2021-06-05",
                       survey_area = survey_area,
                       file_end = file_end,
-                      dir_in = dir_in,
+                      dir_wd = dir_wd,
                       dir_out = dir_out, 
                       dir_googledrive_upload = dir_googledrive_upload, 
                       make_gifs = TRUE, 
@@ -263,28 +264,28 @@ make_plot_wrapper <- function(maxyr,
                       show_planned_stations = show_planned_stations)
   
   if (plot_anom) {
-  # Anomaly plot
-  dat <- dat %>% 
-    dplyr::rename(bt = var, 
-            var = anom)
-  var_breaks <- c(-10, seq(from = -2, to = 3, by = 0.5), 50) # for the anomaly data
-  file_end = "anom"
-  plot_title <- plot_title_anom
-  legend_title = legend_title_anom
-  create_vargridplots(dat = dat,
-                      var_breaks = var_breaks, 
-                      plot_title = plot_title,
-                      plot_subtitle = plot_subtitle,
-                      legend_title = legend_title,
-                      dates0 = dates0, #"latest", # "all", #"2021-06-05",
-                      survey_area = survey_area,
-                      file_end = file_end,
-                      dir_in = dir_in,
-                      dir_out = dir_out, 
-                      dir_googledrive_upload = dir_googledrive_upload, 
-                      make_gifs = TRUE, 
-                      data_source = data_source,
-                      show_planned_stations = show_planned_stations)
+    # Anomaly plot
+    dat <- dat %>% 
+      dplyr::rename(bt = var, 
+                    var = anom)
+    var_breaks <- c(-10, seq(from = -2, to = 3, by = 0.5), 50) # for the anomaly data
+    file_end = "anom"
+    plot_title <- plot_title_anom
+    legend_title = legend_title_anom
+    create_vargridplots(dat = dat,
+                        var_breaks = var_breaks, 
+                        plot_title = plot_title,
+                        plot_subtitle = plot_subtitle,
+                        legend_title = legend_title,
+                        dates0 = dates0, #"latest", # "all", #"2021-06-05",
+                        survey_area = survey_area,
+                        file_end = file_end,
+                        dir_wd = dir_wd,
+                        dir_out = dir_out, 
+                        dir_googledrive_upload = dir_googledrive_upload, 
+                        make_gifs = TRUE, 
+                        data_source = data_source,
+                        show_planned_stations = show_planned_stations)
   }
 }
 
@@ -297,10 +298,11 @@ make_grid_wrapper<-function(maxyr,
                             dir_googledrive_upload,  
                             survey_area, 
                             plot_subtitle = "", 
-                            data_source = "gd") {
+                            data_source = "gd", 
+                            dir_wd = "./") {
   
   case <- paste0(maxyr, "_", SRVY)
-  dir_out <- paste0("./output/", case, "/")
+  dir_out <- paste0(dir_wd, "/output/", case, "/")
   
   file_end = "grid"
   dates0 <- "none"
@@ -322,7 +324,7 @@ make_grid_wrapper<-function(maxyr,
   
   if (data_source == "gd") { # Temperature data from google drive
     dat <- 
-      readxl::read_xlsx(path = "./data/gap_survey_progression.xlsx", 
+      readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                         sheet = case, skip = 1) %>%
       janitor::clean_names() %>% 
       dplyr::rename(#"var" = all_of(var), 
@@ -370,33 +372,21 @@ make_grid_wrapper<-function(maxyr,
                   var_bin = NA) %>%
     dplyr::arrange(date)
   
-  # region_akgfmaps = "bs.all"
-  # survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-  # survey_area$survey.grid <- survey_area$survey.grid %>% 
-  #   sf::st_transform(x = ., survey_area$crs$input) %>%
-  #   # dplyr::filter(!(STATION %in% c("DD-09", "AA-10"))) %>% 
-  #   dplyr::rename(station = STATIONID) %>%
-  #   sp::merge(x = ., 
-  #             y = haul %>%
-  #               dplyr::rename(station = stationid) %>% 
-  #               dplyr::select(station, stratum) %>% 
-  #               dplyr::distinct(), 
-  #             all.x = TRUE) 
-  
+  # Daily plot
   create_vargridplots(dat = dat,
                       var_breaks = var_breaks, 
                       plot_title = plot_title,
                       plot_subtitle = plot_subtitle,
-                      legend_title = ,
-                      dates0 = dates0,
+                      legend_title = legend_title,
+                      dates0 = dates0, #"latest", # "all", #"2021-06-05",
                       survey_area = survey_area,
                       file_end = file_end,
-                      dir_in = dir_in,
+                      dir_wd = dir_wd,
                       dir_out = dir_out, 
                       dir_googledrive_upload = dir_googledrive_upload, 
-                      make_gifs = make_gifs, 
+                      make_gifs = FALSE, 
+                      data_source = data_source,
                       show_planned_stations = show_planned_stations)
-  
 }
 
 
@@ -430,7 +420,7 @@ create_vargridplots_bs <- function(
     file_end = "",
     make_gifs = TRUE,
     dir_out = "./", 
-    dir_in = "./",
+    dir_wd = "./",
     show_planned_stations = TRUE,
     data_source = "gd",
     dir_googledrive_upload = NULL) {
@@ -821,7 +811,7 @@ create_vargridplots_bs <- function(
                color = "black", size = 5, fontface=2) 
     
     gg <- ggdraw(gg) +
-      draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
+      draw_image(image = paste0(dir_wd, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
                  x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                  scale = .15 )
     
@@ -890,7 +880,7 @@ create_vargridplots_ai <- function(
     file_end = "",
     make_gifs = TRUE,
     dir_out = "./", 
-    dir_in = "./",
+    dir_wd = "./",
     show_planned_stations = TRUE,
     data_source = "gd",
     dir_googledrive_upload = NULL) {
@@ -1316,7 +1306,7 @@ create_vargridplots_ai <- function(
       }
     
     gg <- ggdraw(gg) +
-      draw_image(image = paste0(dir_in, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
+      draw_image(image = paste0(dir_wd, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
                  x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                  scale = .15 )
     
@@ -1371,53 +1361,56 @@ save_figures <- function(gg,
                          make_gifs = TRUE, 
                          date_entered) {
   
-  filename0 <- paste0(dir_out, '/',
-                      ifelse(as.character(dates0[1]) == "none", "", 
+  filename0 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
                              max_date), 
                       ifelse(file_end=="", "", paste0("_", file_end)))
   
-  ggsave(paste0(filename0,'.png'),
+  ggsave(filename = paste0(filename0,'.png'),
+         path = dir_out,
          height = height, 
          width = width,
          plot=gg, 
          device="png") # pdfs are great for editing later
   
   if (file_end %in% c("grid", "daily")){
-    rmarkdown::render(paste0("./code/template.Rmd"),
+    rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
-                      output_file = paste0(".", dir_out, filename0, ".pdf"))
-    file.remove(list.files(path = "./code/", pattern = ".log", full.names = TRUE))
+                      output_file = paste0(filename0, ".pdf"))
+    file.remove(list.files(path = paste0(dir_wd, "/code/"), 
+                           pattern = ".log", full.names = TRUE))
     
   } else if (file_end == "anom"){
-    ggsave(paste0(filename0,'.pdf'),
+    ggsave(filename = paste0(filename0,'.pdf'),
+           path = dir_out,
            height = height,
            width = width,
-           plot=gg,
-           device="pdf") # pdfs are great for editing later
+           plot = gg,
+           device ="pdf") # pdfs are great for editing later
   }
   
   if (make_gifs | as.character(dates0[1]) != "none") {
     create_vargridplots_gif(file_end = file_end, 
                             max_date = max_date,
-                            dir_out = dir_out)
+                            dir_out = dir_out, 
+                            filename0 = filename0)
   }
   
   if (!(is.null(dir_googledrive_upload))) {
     
     drive_upload(
-      media = paste0(filename0,'.png'), 
+      media = paste0(dir_out, filename0,'.png'), 
       path = dir_googledrive_upload, 
       overwrite = TRUE)
     
     drive_upload(
-      media = paste0(filename0,'.pdf'), 
+      media = paste0(dir_out, filename0,'.pdf'), 
       path = dir_googledrive_upload, 
       overwrite = TRUE)
     
     # change each day of the survey
     if (make_gifs | as.character(dates0[1]) != "none") {
       drive_upload(
-        media = paste0(filename0,'.gif'), 
+        media = paste0(dir_out, filename0,'.gif'), 
         path = dir_googledrive_upload, 
         overwrite = TRUE)
     }
@@ -1426,7 +1419,10 @@ save_figures <- function(gg,
 }
 
 
-create_vargridplots_gif<-function(file_end, max_date, dir_out) {
+create_vargridplots_gif<-function(file_end, 
+                                  max_date, 
+                                  dir_out, 
+                                  filename0) {
   
   imgs <- list.files(path = dir_out, 
                        pattern = paste0(as.Date(max_date), "_", file_end, ".png"), 
@@ -1486,8 +1482,7 @@ create_vargridplots_gif<-function(file_end, max_date, dir_out) {
   ## save to disk
   magick::image_write(
     image = img_animated, 
-    path = paste0(dir_out, "/", max_date, "_", 
-                  file_end, ".gif") )
+    path = paste0(dir_out, filename0, ".gif") )
   
 }
 
