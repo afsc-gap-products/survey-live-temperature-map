@@ -12,7 +12,7 @@ googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
 dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
-#dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1HDKTMR8wPghIL6pUo2zv8OJF3Od8exev"
+#dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # The surveys this script will be covering 
 dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF", 
@@ -56,8 +56,8 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
-# dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
+dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+#dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
 # dir_wd <- paste0(getwd(), "/")
 
@@ -69,11 +69,11 @@ source(file = paste0(dir_wd, "code/data.R"))
 
 ## NBS + EBS Maps --------------------------------------------------------------
 maxyr <- 2022 #CHANGE
-data_source <- "gd" # googel drive
+data_source <- "gd" # google drive
 SRVY <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-#dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 region_akgfmaps = "bs.all"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 
@@ -118,7 +118,7 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   dir_wd = dir_wd)
 
 # ### past years -----------------------------------------------------------------
-# data_source = "haul"
+# data_source = "oracle"
 # plot_anom = FALSE
 # dates0 <- "all"
 # 
@@ -218,7 +218,7 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 
 ## AI --------------------------------------------------------------------------
 # maxyr <- 2022 #CHANGE
-# data_source <- "gd" # googel drive
+# data_source <- "gd" # google drive
 # SRVY <- "AI"
 # plot_anom <- FALSE
 # plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
@@ -328,7 +328,7 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   dir_wd = dir_wd)
 # 
 # # ### past years -----------------------------------------------------------------
-# data_source = "haul"
+# data_source = "oracle"
 # plot_anom = FALSE
 # dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 # 

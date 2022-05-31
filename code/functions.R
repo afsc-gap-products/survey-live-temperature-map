@@ -68,9 +68,9 @@ for (p in PKG) {
 
 # Functions --------------------------------------------------------------------
 
-#' Takes a string of words and combines them into a sentance that lists them.
+#' Takes a string of words and combines them into a sentence that lists them.
 #'
-#' This function alows you to take a string of words and combine them into a sentance list. For example, 'apples', 'oranges', 'pears' would become 'apples, oranges, and pears'. This function uses oxford commas.
+#' This function allows you to take a string of words and combine them into a sentence list. For example, 'apples', 'oranges', 'pears' would become 'apples, oranges, and pears'. This function uses oxford commas.
 #' @param x Character strings you want in your string.
 #' @param oxford T/F: would you like to use an oxford comma? Default = TRUE
 #' @param sep string. default = ", " but "; " or " " might be what you need!
@@ -183,7 +183,7 @@ make_varplot_wrapper <- function(maxyr,
         SRVY %in% SRVY1) %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
     
-  } else if (data_source == "haul") {
+  } else if (data_source == "oracle") {
     dat <- haul %>% 
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1 &
@@ -215,16 +215,17 @@ make_varplot_wrapper <- function(maxyr,
   }
   
   if (show_planned_stations) {
-  temp <- data.frame(matrix(data = NA, ncol = ncol(dat), nrow = length(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])))) 
-  names(temp) <- names(dat)
-  dat <- dplyr::bind_rows(
-    temp %>% dplyr::mutate(SRVY = SRVY1[1], 
-                           stratum = 0,
-                           station = "0", 
-                           var = 0,
-                           date = as.character(min(as.Date(dat$date), na.rm = TRUE)-1), 
-                           vessel_shape = unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])), 
-    dat)
+    temp <- data.frame(matrix(data = NA, ncol = ncol(dat), nrow = length(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])))) 
+    names(temp) <- names(dat)
+    dat <- dplyr::bind_rows(
+      temp %>% dplyr::mutate(SRVY = SRVY1[1], 
+                             stratum = 0,
+                             station = "0", 
+                             var = 0,
+                             date = as.character(min(as.Date(dat$date), na.rm = TRUE)-1), 
+                             vessel_shape = unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])), 
+      dat %>% 
+        dplyr::mutate(date=as.character(date)))
   }
   
   dat <- dat %>% 
@@ -232,15 +233,15 @@ make_varplot_wrapper <- function(maxyr,
                      y = dat_survreg %>%
                        dplyr::select(-dplyr::starts_with("vessel_"))%>%
                        dplyr::distinct() 
-                     ) %>%
+    ) %>%
     dplyr::left_join(x = ., 
                      y = dat_survreg %>%
                        dplyr::select(dplyr::starts_with("vessel_"))%>%
                        dplyr::distinct() 
-                     ) %>%
+    ) %>%
     dplyr::left_join(x = ., 
                      y = dat_survreg
-                     ) %>%
+    ) %>%
     dplyr::left_join(x = ., 
                      y = vessel_info, 
                      by = c("vessel_id")) %>% # add survey vessel data
@@ -351,7 +352,7 @@ make_grid_wrapper<-function(maxyr,
       dplyr::filter(!is.na(SRVY) & 
                       SRVY %in% SRVY1) %>% 
       dplyr::select(SRVY, stratum, station, date, vessel_shape) 
-  } else if (data_source == "haul") {
+  } else if (data_source == "oracle") {
     dat <- haul %>% 
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1) %>% 
@@ -491,12 +492,8 @@ make_figure <- function(
                                            labels = var_labels) ) 
     
     # Create new temperature maps
-    # if (length(dates0)>1) {
     date_entered<-sort(unique(dat$date))
     date_entered<-date_entered[!is.na(date_entered)]
-    # } else {
-    #   date_entered <- dates0
-    # }
   }
   
   # bind dat to survey_area$survey.grid for plotting
@@ -513,9 +510,15 @@ make_figure <- function(
   } else if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
   } else if (dates0 == "all") {
-    iterate <- 1:length(date_entered) # if you want to run all of plots for each date_entered: 
+    iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
+    if (sum(is.na(dat$var))!=0){
+      iterate <- iterate[-length(iterate)]
+    }
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
+    if (sum(is.na(dat$var))!=0){
+      iterate <- iterate[-length(iterate)]
+    }
   } else { # if you want to run a specific date
     iterate <- which(as.character(date_entered) %in% as.character(dates0))
   }
@@ -973,9 +976,9 @@ make_figure <- function(
       }
       
       gg <- cowplot::plot_grid(
-          gg, NULL, side_bar, 
-          ncol = 3, greedy = TRUE, rel_widths = c(1, .05, .5))
-        
+        gg, NULL, side_bar, 
+        ncol = 3, greedy = TRUE, rel_widths = c(1, .05, .5))
+      
       gg <- cowplot::plot_grid(
         title_row, 
         subtitle_row, 
