@@ -183,6 +183,17 @@ make_varplot_wrapper <- function(maxyr,
         SRVY %in% SRVY1) %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
     
+    temp <- data.frame(matrix(data = NA, ncol = ncol(dat), nrow = length(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])))) 
+    names(temp) <- names(dat)
+    dat <- dplyr::bind_rows(
+      temp %>% dplyr::mutate(SRVY = SRVY1[1], 
+                           stratum = 0,
+                           station = "0", 
+                           var = 0,
+                           date = min(as.Date(dat$date), na.rm = TRUE)-1, 
+                           vessel_shape = unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])), 
+      dat)
+    
   } else if (data_source == "haul") {
     dat <- haul %>% 
       dplyr::filter(year == maxyr &

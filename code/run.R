@@ -35,8 +35,8 @@ dat_survreg <- dplyr::bind_rows(dat_survreg,
                                            region_long = "Aleutian Islands",
                                            SRVY = "AI",
                                            region = "AI",
-                                           vessel_id = c(148, 176, 143), # CHANGE
-                                           vessel_shape = c("OEX", "AP", "SS"), # CHANGE
+                                           vessel_id = c(148, 176), # CHANGE
+                                           vessel_shape = c("OEX", "AP"), # CHANGE
                                            reg_dates = "\n(June 07-Aug 17 2022)")) # CHANGE
 # dat_survreg <- dplyr::bind_rows(dat_survreg, 
 #                                data.frame(reg_shapefile = "GOA", 
@@ -56,10 +56,10 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
-dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+# dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 # dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-# dir_wd <- paste0(getwd(), "/")
+dir_wd <- paste0(getwd(), "/")
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -333,6 +333,16 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 # data_source = "haul"
 # plot_anom = FALSE
 # dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+# 
+# reg_dates = "\n(Aug 03-Aug 28 2022)")) # CHANGE
+# dat_survreg <- dplyr::bind_rows(dat_survreg, 
+#                                 data.frame(reg_shapefile = "AI",
+#                                            region_long = "Aleutian Islands",
+#                                            SRVY = "AI",
+#                                            region = "AI",
+#                                            vessel_id = c(148, 143), # CHANGE
+#                                            vessel_shape = c("OEX", "SS"), # CHANGE
+#                                            reg_dates = "\n(June 07-Aug 17 2022)")) # CHANGE
 # 
 # maxyr <- 2018
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
