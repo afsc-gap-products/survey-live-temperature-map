@@ -283,7 +283,8 @@ make_varplot_wrapper <- function(maxyr,
                 dir_googledrive_upload = dir_googledrive_upload, 
                 make_gifs = TRUE, 
                 data_source = data_source,
-                show_planned_stations = show_planned_stations)
+                show_planned_stations = show_planned_stations, 
+                height = ifelse(SRVY %in% "AI", 6, 8.5))
   }
 }
 
@@ -346,14 +347,8 @@ make_grid_wrapper<-function(maxyr,
     dat <- dat  %>% 
       dplyr::mutate(var = NA, 
                     vessel_id = NA, 
-                    vessel_name = NA) %>% 
-      # dplyr::left_join(
-      #   x = ., 
-      #   y = dat_survreg %>% 
-      #     dplyr::select(vessel_id, vessel_shape) %>%
-      #     dplyr::distinct(), 
-      #   by = "vessel_id")  %>% 
-      dplyr::rename(vessel_shape = NA) %>%
+                    vessel_name = NA,
+                    vessel_shape = NA) %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape)
   }
   
@@ -386,7 +381,8 @@ make_grid_wrapper<-function(maxyr,
               dir_googledrive_upload = dir_googledrive_upload, 
               make_gifs = FALSE, 
               data_source = data_source,
-              show_planned_stations = show_planned_stations)
+              show_planned_stations = show_planned_stations, 
+              height = ifelse(SRVY == "AI", 6, 8.5))
 }
 
 
@@ -911,7 +907,8 @@ make_figure <- function(
     for(i in 2:c(length(var_breaks))) {
       var_labels <- c(var_labels, 
                       dplyr::case_when(
-                        i==2 ~ paste0("\u2264 ",var_breaks[i]), # ,"\u00B0C" <=
+                        i==2 ~ paste0("\u2264 ",# "≤ ", #
+                                      var_breaks[i]), # ,"\u00B0C" <=
                         i==(length(var_breaks)) ~ paste0("> ", var_breaks[i-1]), # , "\u00B0C"
                         TRUE ~ paste0("> ",
                                       var_breaks[i-1]," \u2013 ",var_breaks[i]) # ,"\u00B0C" "\u00B0"
@@ -961,7 +958,7 @@ make_figure <- function(
   }
   
   ## Make plots for each day of dates0 -----------------------------------------
-  for (i in iterate) {  
+  for (i in iterate) {
     start_time <- Sys.time()
     
     grid_stations_plot<-survey_area$survey.grid
@@ -1081,7 +1078,7 @@ make_figure <- function(
         axis.text = element_text(size=9), 
         axis.title=element_text(size=14) )
     
-    if (SRVY ==  "BS") {
+    if (SRVY %in% c("BS", "EBS", "NBS")) {
       ### Bering Sea -----------------------------------------------------------
       
       gg <- gg +
@@ -1156,7 +1153,7 @@ make_figure <- function(
               labels = sort(unique(dat_planned$lab))) +
             
             guides(
-              fill = guide_legend(ncol=ifelse(length(var_breaks)>15, 2, 1), # temperatures # in case you want to have 2+ columns for the legend!
+              fill = guide_legend(ncol = 2, #ifelse(length(var_breaks)>15, 2, 1), # temperatures # in case you want to have 2+ columns for the legend!
                                   override.aes = list(colour = c("white"),
                                                       size = 0),
                                   order = 1),
@@ -1170,7 +1167,7 @@ make_figure <- function(
           gg <- gg +
             guides(
               # tempartures # in case you want to have 2+ columns for the legend!
-              fill = guide_legend(ncol=1, 
+              fill = guide_legend(ncol=2, #1, 
                                   override.aes = list(colour = c("white"),
                                                       size = 0),
                                   order = 1),
@@ -1225,7 +1222,9 @@ make_figure <- function(
         # temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
         gg <- gg +
           ggplot2::geom_sf(data = survey_area$survey.grid, 
-                           colour = "grey20", 
+                           # mapping = aes(colour = survey_area$survey.grid$region, 
+                           #               fill = survey_area$survey.grid$region),
+                           colour = "grey20",
                            size = .01,
                            show.legend = legend_title) +
           # geom_sf(data = survey_area$bathymetry) +
@@ -1243,8 +1242,7 @@ make_figure <- function(
       # now we build a plot list
       lapply(unique(grid_stations_plot$region), function(x) {
         # x <- unique(grid_stations_plot$region)
-        grid_stations_plot1 <- grid_stations_plot %>% 
-          dplyr::arrange(region)
+        grid_stations_plot1 <- grid_stations_plot
         grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
         grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
         
@@ -1254,8 +1252,7 @@ make_figure <- function(
           
           gg1 <- gg1  + 
             ggplot2::geom_sf(data = grid_stations_plot1, 
-                             aes(#group = region, 
-                               fill = var_bin), 
+                             aes(fill = var_bin), 
                              colour = "grey20", 
                              size = .01,
                              show.legend = FALSE) +
@@ -1272,7 +1269,7 @@ make_figure <- function(
           ggtitle(x)  +
           ggsn::scalebar(data = grid_stations_plot1,
                          location = ifelse(x == "Western Aleutians", "topright", "topleft"),
-                         dist = ifelse(as.character(dates0[1]) != "none", 25, 50),
+                         dist = 25,
                          dist_unit = "nm",
                          transform = FALSE,
                          st.dist = 0.06,
@@ -1402,7 +1399,7 @@ make_figure <- function(
       
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
         side_bar <- cowplot::plot_grid(
-          ifelse(cowplot::get_legend(legend_temp)), gg_insert, 
+          cowplot::get_legend(legend_temp), gg_insert, 
           rel_heights = c(1.25, .75),
           nrow = 2, align = "v", axis = "r")
       } else {

@@ -7,7 +7,7 @@
 
 # Knowns -----------------------------------------------------------------------
 
-maxyr <- 2022 #CHANGE
+# maxyr <- 2022 #CHANGE
 googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
@@ -56,17 +56,14 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
-# dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 # dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-dir_wd <- paste0(getwd(), "/")
+# dir_wd <- paste0(getwd(), "/")
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
-
-# dates0 <- as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-# dates0 <-"all"
 
 # Map --------------------------------------------------------------------------
 
@@ -97,28 +94,28 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
-# make_varplot_wrapper(maxyr = maxyr, # Daily plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = dates0,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   dir_wd = dir_wd)
-
-make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+make_varplot_wrapper(maxyr = maxyr, # Daily plot
                   SRVY = SRVY,
                   haul = haul,
                   dat_survreg = dat_survreg,
+                  var = var,
                   dir_googledrive_upload = dir_googledrive_upload,
+                  dates0 = dates0,
                   survey_area = survey_area,
                   data_source = data_source,
                   plot_subtitle = plot_subtitle,
+                  show_planned_stations = show_planned_stations,
                   dir_wd = dir_wd)
+# 
+# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
+#                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
 
 # ### past years -----------------------------------------------------------------
 # data_source = "haul"
@@ -147,6 +144,7 @@ make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
 #                   dat_survreg = dat_survreg,
 #                   dir_googledrive_upload = dir_googledrive_upload,
 #                   survey_area = survey_area,
+#                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
 # 
@@ -172,6 +170,7 @@ make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
 #                   dat_survreg = dat_survreg,
 #                   dir_googledrive_upload = dir_googledrive_upload,
 #                   survey_area = survey_area,
+#                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
 # 
@@ -218,41 +217,95 @@ make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
 #                   dir_wd = dir_wd)
 
 ## AI --------------------------------------------------------------------------
-maxyr <- 2022 #CHANGE
-data_source <- "gd" # googel drive
-SRVY <- "AI"
-plot_anom <- FALSE
-plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-region_akgfmaps = "ai"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-#dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
-var = "bt"
-dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-show_planned_stations <- FALSE
-survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-
-survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
-                                layer = "aigrid_trawable_thru2018",
-                                verbose=F) %>% 
-  sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-  st_as_sf(x = .) %>%
-  dplyr::rename(station = ID, 
-                stratum = STRATUM) %>%
-  dplyr::filter(stratum %in% unique(goa_strata0$stratum)) %>%
-  # dplyr::mutate(region = dplyr::case_when())
-  sp::merge(
-    x = .,
-    y = goa_strata0 %>%
-      dplyr::mutate(SRVY == "AI",
-                    region = stringr::str_to_title(inpfc_area),
-                    region = dplyr::case_when(
-                      region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians", 
-                      TRUE ~ region)) %>%
-      dplyr::select(stratum, region) %>%
-      dplyr::distinct(),
-    all.x = TRUE, duplicateGeoms = TRUE)
-
-# # Daily
+# maxyr <- 2022 #CHANGE
+# data_source <- "gd" # googel drive
+# SRVY <- "AI"
+# plot_anom <- FALSE
+# plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
+# region_akgfmaps = "ai"
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
+# #dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+# var = "bt"
+# dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+# show_planned_stations <- FALSE
+# survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+# 
+# survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
+#                                 layer = "aigrid_trawable_thru2018",
+#                                 verbose=F) %>%
+#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
+#   st_as_sf(x = .) %>%
+#   dplyr::rename(station = ID,
+#                 stratum = STRATUM) %>%
+#   dplyr::filter(stratum %in% unique(goa_strata0$stratum) #&
+#                   # is.null(Field2)
+#                 ) %>%
+#   # dplyr::mutate(region = dplyr::case_when())
+#   sp::merge(
+#     x = ., 
+#     y = goa_strata0 %>%
+#       dplyr::filter(survey == "AI") %>%
+#       dplyr::mutate(SRVY = "AI",
+#                     region = stringr::str_to_title(inpfc_area),
+#                     region = dplyr::case_when(
+#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
+#                       TRUE ~ region)) %>%
+#       dplyr::select(SRVY, stratum, region) %>%
+#       dplyr::distinct(),
+#     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
+#   dplyr::arrange(region)
+#   
+#   
+# #   temp <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
+# #                          layer = "aigrid_trawable_thru2018",
+# #                          verbose=F) %>% 
+# #     sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
+# #     st_as_sf(x = .) %>%
+# #     dplyr::rename(station = ID, 
+# #                   stratum = STRATUM) %>%
+# #     dplyr::filter(stratum %in% unique(goa_strata0$stratum[goa_strata0$survey == "AI"]))
+# #   
+# #   temp1 <- sf::st_transform(x = temp, 
+# #                                       crs = sf::st_crs("+proj=longlat +datum=WGS84 +no_defs")) %>% 
+# #                        sf::st_coordinates(x = .) %>% 
+# #     data.frame() %>%
+# #     # dplyr::mutate(SRVY = "AI", 
+# #     #               region = dplyr::case_when(
+# #     #                 X <= -177 ~ "Western Aleutians", 
+# #     #                 X > -177 & X <= 177 ~ "Central Aleutians",
+# #     #                 X > 177 & X <= 170 ~ "Eastern Aleutians", 
+# #     #                 X > 170 ~ "Southern Bering Sea"
+# #     #               ))  %>%
+# #     dplyr::mutate(SRVY = "AI", 
+# #                   lon = ifelse(X>0, X, X+360),
+# #                   region = dplyr::case_when(
+# #                     lon >= 183 ~ "Western Aleutians", 
+# #                     (lon > 177 & lon <= 183) ~ "Central Aleutians",
+# #                     (lon > 170 & lon <= 177) ~ "Eastern Aleutians", 
+# #                     lon >= 170 ~ "Southern Bering Sea")) %>% 
+# #     sf::st_transform(x = temp, 
+# #                      crs = sf::st_crs(survey_area$crs$input))
+# # 
+# # survey_area$survey.grid <- temp1
+# #     
+# #     
+# #   temp %>% 
+# #     dplyr::mutate(x = temp1$X)
+# #   
+# #   
+# #     sp::merge(
+# #       x = .,
+# #       y = goa_strata0 %>%
+# #         dplyr::filter(survey == "AI") %>%
+# #         dplyr::mutate(SRVY = "AI", 
+# #                       region = stringr::str_to_title(inpfc_area),
+# #                       region = dplyr::case_when(
+# #                         region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians", 
+# #                         TRUE ~ region)) %>%
+# #         dplyr::select(SRVY, stratum, region) %>%
+# #         dplyr::distinct(),
+# #       all.x = TRUE, duplicateGeoms = TRUE)
+# 
 # make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -265,18 +318,18 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
 #                   plot_subtitle = plot_subtitle,
 #                   show_planned_stations = show_planned_stations,
 #                   dir_wd = dir_wd)
-
-make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
-                  SRVY = SRVY,
-                  haul = haul,
-                  dat_survreg = dat_survreg,
-                  dir_googledrive_upload = dir_googledrive_upload,
-                  survey_area = survey_area,
-                  data_source = data_source,
-                  plot_subtitle = plot_subtitle,
-                  dir_wd = dir_wd)
-
-# ### past years -----------------------------------------------------------------
+# 
+# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
+#                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
+# 
+# # ### past years -----------------------------------------------------------------
 # data_source = "haul"
 # plot_anom = FALSE
 # dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
