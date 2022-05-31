@@ -57,9 +57,9 @@ googledrive::drive_auth()
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
 # dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-# dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
+dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-dir_wd <- paste0(getwd(), "/")
+# dir_wd <- paste0(getwd(), "/")
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -237,12 +237,10 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #   st_as_sf(x = .) %>%
 #   dplyr::rename(station = ID,
 #                 stratum = STRATUM) %>%
-#   dplyr::filter(stratum %in% unique(goa_strata0$stratum) #&
-#                   # is.null(Field2)
-#                 ) %>%
-#   # dplyr::mutate(region = dplyr::case_when())
+#   dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
+#                   stratum != 0) %>% # land
 #   sp::merge(
-#     x = ., 
+#     x = .,
 #     y = goa_strata0 %>%
 #       dplyr::filter(survey == "AI") %>%
 #       dplyr::mutate(SRVY = "AI",
@@ -254,58 +252,58 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #       dplyr::distinct(),
 #     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
 #   dplyr::arrange(region)
-#   
-#   
+# 
+# 
 # #   temp <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
 # #                          layer = "aigrid_trawable_thru2018",
-# #                          verbose=F) %>% 
+# #                          verbose=F) %>%
 # #     sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
 # #     st_as_sf(x = .) %>%
-# #     dplyr::rename(station = ID, 
+# #     dplyr::rename(station = ID,
 # #                   stratum = STRATUM) %>%
 # #     dplyr::filter(stratum %in% unique(goa_strata0$stratum[goa_strata0$survey == "AI"]))
-# #   
-# #   temp1 <- sf::st_transform(x = temp, 
-# #                                       crs = sf::st_crs("+proj=longlat +datum=WGS84 +no_defs")) %>% 
-# #                        sf::st_coordinates(x = .) %>% 
+# #
+# #   temp1 <- sf::st_transform(x = temp,
+# #                                       crs = sf::st_crs("+proj=longlat +datum=WGS84 +no_defs")) %>%
+# #                        sf::st_coordinates(x = .) %>%
 # #     data.frame() %>%
-# #     # dplyr::mutate(SRVY = "AI", 
+# #     # dplyr::mutate(SRVY = "AI",
 # #     #               region = dplyr::case_when(
-# #     #                 X <= -177 ~ "Western Aleutians", 
+# #     #                 X <= -177 ~ "Western Aleutians",
 # #     #                 X > -177 & X <= 177 ~ "Central Aleutians",
-# #     #                 X > 177 & X <= 170 ~ "Eastern Aleutians", 
+# #     #                 X > 177 & X <= 170 ~ "Eastern Aleutians",
 # #     #                 X > 170 ~ "Southern Bering Sea"
 # #     #               ))  %>%
-# #     dplyr::mutate(SRVY = "AI", 
+# #     dplyr::mutate(SRVY = "AI",
 # #                   lon = ifelse(X>0, X, X+360),
 # #                   region = dplyr::case_when(
-# #                     lon >= 183 ~ "Western Aleutians", 
+# #                     lon >= 183 ~ "Western Aleutians",
 # #                     (lon > 177 & lon <= 183) ~ "Central Aleutians",
-# #                     (lon > 170 & lon <= 177) ~ "Eastern Aleutians", 
-# #                     lon >= 170 ~ "Southern Bering Sea")) %>% 
-# #     sf::st_transform(x = temp, 
+# #                     (lon > 170 & lon <= 177) ~ "Eastern Aleutians",
+# #                     lon >= 170 ~ "Southern Bering Sea")) %>%
+# #     sf::st_transform(x = temp,
 # #                      crs = sf::st_crs(survey_area$crs$input))
-# # 
+# #
 # # survey_area$survey.grid <- temp1
-# #     
-# #     
-# #   temp %>% 
+# #
+# #
+# #   temp %>%
 # #     dplyr::mutate(x = temp1$X)
-# #   
-# #   
+# #
+# #
 # #     sp::merge(
 # #       x = .,
 # #       y = goa_strata0 %>%
 # #         dplyr::filter(survey == "AI") %>%
-# #         dplyr::mutate(SRVY = "AI", 
+# #         dplyr::mutate(SRVY = "AI",
 # #                       region = stringr::str_to_title(inpfc_area),
 # #                       region = dplyr::case_when(
-# #                         region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians", 
+# #                         region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
 # #                         TRUE ~ region)) %>%
 # #         dplyr::select(SRVY, stratum, region) %>%
 # #         dplyr::distinct(),
 # #       all.x = TRUE, duplicateGeoms = TRUE)
-# 
+#
 # make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -335,7 +333,7 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 # dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 # 
 # reg_dates = "\n(Aug 03-Aug 28 2022)")) # CHANGE
-# dat_survreg <- dplyr::bind_rows(dat_survreg, 
+# dat_survreg <- dplyr::bind_rows(dat_survreg,
 #                                 data.frame(reg_shapefile = "AI",
 #                                            region_long = "Aleutian Islands",
 #                                            SRVY = "AI",
