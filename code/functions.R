@@ -216,8 +216,18 @@ make_varplot_wrapper <- function(maxyr,
   
   dat <- dat %>% 
     dplyr::left_join(x = ., 
-                     y = dat_survreg, 
-                     by = c("SRVY", "vessel_shape")) %>%
+                     y = dat_survreg %>%
+                       dplyr::select(-dplyr::starts_with("vessel_"))%>%
+                       dplyr::distinct() 
+                     ) %>%
+    dplyr::left_join(x = ., 
+                     y = dat_survreg %>%
+                       dplyr::select(dplyr::starts_with("vessel_"))%>%
+                       dplyr::distinct() 
+                     ) %>%
+    dplyr::left_join(x = ., 
+                     y = dat_survreg
+                     ) %>%
     dplyr::left_join(x = ., 
                      y = vessel_info, 
                      by = c("vessel_id")) %>% # add survey vessel data
