@@ -7,7 +7,8 @@
 
 # Shapefiles -------------------------------------------------------------------
 # J:\RACE_GF\GOA\GOA 2021\Files for boats\ArcGIS\GOAGRID_2021
-# J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018
+# J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018 - ERRORS,do not use!
+# G:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawable_thru2018_Emily.shp
 
 # Download data from oracle saved locally: -------------------------------------
 a<-list.files(path = paste0(dir_wd, "data/oracle/"))

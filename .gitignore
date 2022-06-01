@@ -34,3 +34,4 @@ vignettes/*.pdf
 /code/old
 ConnectToOracle.R
 *.log
+/shapefiles/archive
