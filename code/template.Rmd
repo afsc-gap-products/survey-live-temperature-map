@@ -72,9 +72,7 @@ if (as.character(dates0[1]) == "none") {
                        by = c("stratum", "station"))  %>%
       dplyr::arrange(vessel_shape) %>% 
       dplyr::mutate(lon = round(x = lon, digits = 3), 
-                    lat = round(x = lat, digits = 3)) #%>% 
-      # dplyr::filter(!is.na(vessel_shape))
-    
+                    lat = round(x = lat, digits = 3)) 
     
     temp <- c()
     for (iii in 1:length(unique(dat_max_date$vessel_shape))) {

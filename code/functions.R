@@ -540,8 +540,8 @@ make_figure <- function(
     }
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
-    if (sum(is.na(dat$var))!=0){
-      iterate <- iterate[-length(iterate)]
+    if (sum(is.na(dat$var))!=0) {
+      iterate <- iterate-1
     }
   } else { # if you want to run a specific date
     iterate <- which(as.character(date_entered) %in% as.character(dates0))
@@ -553,7 +553,7 @@ make_figure <- function(
     
     grid_stations_plot<-survey_area$survey.grid
     dat_plot <- dat    
-    
+    dat_planned <- NULL
     
     if (as.character(dates0[1]) == "none") { # If you ARE NOT using any data from temp data
       
@@ -843,8 +843,8 @@ make_figure <- function(
           gg1 <- gg1  + 
             ggplot2::geom_sf(data = grid_stations_plot1, 
                              aes(fill = var_bin), 
-                             colour = "grey20", 
-                             size = .01,
+                             colour = "black", # "grey20" 
+                             size = .02, 
                              show.legend = FALSE) +
             ggplot2::scale_fill_manual(name = legend_title,
                                        values = var_color, 

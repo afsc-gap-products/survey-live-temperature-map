@@ -251,7 +251,7 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #       dplyr::distinct(),
 #     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
 #   dplyr::arrange(region)
-# 
+
 # 
 # #   temp <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
 # #                          layer = "aigrid_trawable_thru2018",
@@ -331,7 +331,6 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 # plot_anom = FALSE
 # dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 # 
-# reg_dates = "\n(Aug 03-Aug 28 2022)")) # CHANGE
 # dat_survreg <- dplyr::bind_rows(dat_survreg,
 #                                 data.frame(reg_shapefile = "AI",
 #                                            region_long = "Aleutian Islands",
