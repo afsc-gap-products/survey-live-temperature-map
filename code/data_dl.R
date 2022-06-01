@@ -30,11 +30,11 @@ source("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R")
 # odbcGetInfo(channel)
 
 locations<-c(
-  "RACEBASE.HAUL", 
   "RACE_DATA.VESSELS", 
   "AI.AIGRID_GIS", 
   "GOA.GOAGRID_GIS", 
   "GOA.GOA_STRATA", 
+  "RACEBASE.HAUL", 
   "RACE_DATA.V_CRUISES"
 )
 

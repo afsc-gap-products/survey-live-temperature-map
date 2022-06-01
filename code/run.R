@@ -1,7 +1,7 @@
 #' ---------------------------
 #' title: Survey Daily and Anomaly Temperature Plot
 #' OG author: Jason Conner
-#' maintained: Emily Markowitz and Liz Dawson (Jan 2022)
+#' maintained: Emily Markowitz and Liz Dawson (May 2022)
 #' purpose: run script
 #' ---------------------------
 
@@ -79,11 +79,10 @@ survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.cr
 
 # Daily
 var = "bt"
-dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))git 
+dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days")) 
 show_planned_stations <- TRUE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
-  # dplyr::filter(!(STATION %in% c("DD-09", "AA-10"))) %>% 
   dplyr::rename(station = STATIONID) %>%
   sp::merge(x = ., 
             y = haul %>%

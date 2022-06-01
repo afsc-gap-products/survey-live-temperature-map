@@ -53,19 +53,6 @@ for (p in PKG) {
     require(p,character.only = TRUE)}
 }
 
-# Configuration ----------------------------------------------------------------
-
-# con <- file("notes.log")
-# sink(con, append=TRUE)
-# 
-# sessionInfo()
-# 
-# # Restore output to console
-# sink() 
-
-# And look at the log...
-# cat(readLines("notes.log"), sep="\n")
-
 # Functions --------------------------------------------------------------------
 
 #' Takes a string of words and combines them into a sentence that lists them.
@@ -89,9 +76,7 @@ text_list<-function(x = "",
                     sep_last = "and ") {
   
   x<-x[which(x!="")]
-  # x<-x[which(!is.null(x))]
   x<-x[which(!is.na(x))]
-  # x<-x[order(x)]
   if (length(x)==2) {
     str1<-paste(x, collapse = paste0(" ", sep_last))
   } else if (length(x)>2) {
@@ -106,17 +91,38 @@ text_list<-function(x = "",
 }
 
 
+#' Wrapper function to produce daily or anomaly plots
+#' 
+#' This function prepares data to be used in the make_figures() function
+#'
+#' @param maxyr Numeric. The 4 digit year (YYYY) of the year that the data is from. 
+#' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
+#' @param haul data.frame. Here, derived from the RACEBASE.HAUL and RACE_DATA.V_CRUISES oracle tables. See example in data.R script. 
+#' @param dat_survreg data.frame. Must include reg_shapefile (the name of the shapefile polygon), region_long (the formal name of the survey), SRVY ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), reg_dates (the planned dates of the survey).
+#' @param var String. Default = "bt". "bt" will select the bottom temperature column and "st" will select the surface temperature column in haul data. 
+#' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
+#' @param dates0 Default = "latest". A string of either the date to be plotted to ("YYYY-MM-DD"), a string of dates to be plotted (as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will be printed. 
+#' @param survey_area From akgfmaps::get_base_layers(select.region = ..., set.crs = "auto"). 
+#' @param plot_subtitle String. Default = "". The desired subtitle for the figure. 
+#' @param show_planned_stations Logical. Default = TRUE. TRUE will show planned stations on the plot and FALSE will not. 
+#' @param data_source String. Default = "gd". "gd" will pull data from the google drive file and "oracle" will use the haul data (noted above) that comes from oracle. 
+#' @param plot_anom Logical. Default = TRUE. TRUE will plot anomaly plots and FALSE will not. 
+#' @param dir_wd String. Default = "./", or the root directory. Necessary because the task scheduler does not understand the concept of the R Project root directory (therefore, beware of the {here} R package.. This string should be the path to the R Project root directory. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 make_varplot_wrapper <- function(maxyr, 
                                  SRVY, 
                                  haul, 
-                                 dat = NULL,
                                  dat_survreg, 
                                  var = "bt", 
-                                 dir_googledrive_upload, 
-                                 dates0, 
+                                 dir_googledrive_upload = NULL, 
+                                 dates0 = "latest", 
                                  survey_area, 
                                  plot_subtitle = "", 
-                                 show_planned_stations, 
+                                 show_planned_stations = TRUE, 
                                  data_source = "gd", 
                                  plot_anom = TRUE, 
                                  dir_wd = "./") {
@@ -179,7 +185,7 @@ make_varplot_wrapper <- function(maxyr,
       dplyr::rename("var" = all_of(var), 
                     "SRVY" = "srvy", 
                     "vessel_shape" = "vessel") %>%
-      dplyr::filter(#!is.na(SRVY) &
+      dplyr::filter(
         SRVY %in% SRVY1) %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
     
@@ -229,22 +235,23 @@ make_varplot_wrapper <- function(maxyr,
   }
   
   dat <- dat %>% 
-    dplyr::left_join(x = ., 
-                     y = dat_survreg %>%
-                       dplyr::select(-dplyr::starts_with("vessel_"))%>%
-                       dplyr::distinct() 
-    ) %>%
-    dplyr::left_join(x = ., 
-                     y = dat_survreg %>%
-                       dplyr::select(dplyr::starts_with("vessel_"))%>%
-                       dplyr::distinct() 
-    ) %>%
-    dplyr::left_join(x = ., 
-                     y = dat_survreg
-    ) %>%
-    dplyr::left_join(x = ., 
-                     y = vessel_info, 
-                     by = c("vessel_id")) %>% # add survey vessel data
+    dplyr::left_join(
+      x = ., 
+      y = dat_survreg %>%
+        dplyr::select(-dplyr::starts_with("vessel_"))%>%
+        dplyr::distinct() ) %>%
+    dplyr::left_join(
+      x = ., 
+      y = dat_survreg %>%
+        dplyr::select(dplyr::starts_with("vessel_"))%>%
+        dplyr::distinct() ) %>%
+    dplyr::left_join(
+      x = ., 
+      y = dat_survreg) %>%
+    dplyr::left_join(
+      x = ., 
+      y = vessel_info, 
+      by = c("vessel_id")) %>% # add survey vessel data
     dplyr::left_join(
       x = ., 
       y = dat_anom, 
@@ -274,7 +281,7 @@ make_varplot_wrapper <- function(maxyr,
               plot_title = plot_title,
               plot_subtitle = plot_subtitle,
               legend_title = legend_title,
-              dates0 = dates0, #"latest", # "all", #"2021-06-05",
+              dates0 = dates0, 
               survey_area = survey_area,
               file_end = file_end,
               dir_wd = dir_wd,
@@ -299,7 +306,7 @@ make_varplot_wrapper <- function(maxyr,
                 plot_title = plot_title,
                 plot_subtitle = plot_subtitle,
                 legend_title = legend_title,
-                dates0 = dates0, #"latest", # "all", #"2021-06-05",
+                dates0 = dates0, 
                 survey_area = survey_area,
                 file_end = file_end,
                 dir_wd = dir_wd,
@@ -314,11 +321,29 @@ make_varplot_wrapper <- function(maxyr,
 
 
 
+#' Wrapper function to produce empty grid plots
+#' 
+#' This function prepares data to be used in the make_figures() function
+#'
+#' @param maxyr Numeric. The 4 digit year (YYYY) of the year that the data is from. 
+#' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
+#' @param haul data.frame. Here, derived from the RACEBASE.HAUL and RACE_DATA.V_CRUISES oracle tables. See example in data.R script. 
+#' @param dat_survreg data.frame. Must include reg_shapefile (the name of the shapefile polygon), region_long (the formal name of the survey), SRVY ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), reg_dates (the planned dates of the survey).
+#' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
+#' @param survey_area From akgfmaps::get_base_layers(select.region = ..., set.crs = "auto"). 
+#' @param plot_subtitle String. Default = "". The desired subtitle for the figure. 
+#' @param data_source String. Default = "gd". "gd" will pull data from the google drive file and "oracle" will use the haul data (noted above) that comes from oracle. 
+#' @param dir_wd String. Default = "./", or the root directory. Necessary because the task scheduler does not understand the concept of the R Project root directory (therefore, beware of the {here} R package.. This string should be the path to the R Project root directory. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 make_grid_wrapper<-function(maxyr, 
                             SRVY, 
                             haul, 
                             dat_survreg, 
-                            dir_googledrive_upload,  
+                            dir_googledrive_upload = NULL,  
                             survey_area, 
                             plot_subtitle = "", 
                             data_source = "gd", 
@@ -346,7 +371,7 @@ make_grid_wrapper<-function(maxyr,
       readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                         sheet = case, skip = 1) %>%
       janitor::clean_names() %>%
-      dplyr::rename(#"var" = all_of(var), 
+      dplyr::rename(
         "SRVY" = "srvy", 
         "vessel_shape" = "vessel")  %>%
       dplyr::filter(!is.na(SRVY) & 
@@ -359,7 +384,6 @@ make_grid_wrapper<-function(maxyr,
       dplyr::rename(station = stationid, 
                     date = start_time) %>%
       dplyr::mutate(var = NA)
-    # dplyr::select(-vessel_id) 
     dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
     for (ii in 1:length(unique(dat$SRVY))){
       temp <- unique(dat_survreg$SRVY)[ii]
@@ -383,10 +407,7 @@ make_grid_wrapper<-function(maxyr,
                        dplyr::select(-dplyr::starts_with("vessel_")) %>% 
                        dplyr::distinct(), 
                      by = c("SRVY")) %>%
-    # dplyr::left_join(x = ., 
-    #                  y = vessel_info, 
-    #                  by = c("vessel_id")) %>% # add survey vessel data
-    dplyr::mutate(reg_lab = paste0(region_long), #, " ", reg_dates
+    dplyr::mutate(reg_lab = paste0(region_long), 
                   var_bin = NA) %>%
     dplyr::arrange(date)
   
@@ -410,23 +431,26 @@ make_grid_wrapper<-function(maxyr,
 }
 
 
+
 #' Create temperature and anomaly plots
 #'
-#' @param dat The csv file from googledrive with data for the 'maxyr' being plotted or compared to in the anomally. 
-#' @param plot_title A string of what the plot title should be. 
-#' @param plot_subtitle A string of what the plot subtitle should be. 
-#' @param legend_title A string of the temperature legend header. 
+#' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
+#' @param dat The csv file from googledrive or oracle with data for the 'maxyr' being plotted or compared to in the anomally. 
+#' @param var_breaks String. Desired breaks for var to be binned into. 
+#' @param plot_title String. Default = "". The desired title for the figure. 
+#' @param plot_subtitle String. Default = "". The desired subtitle for the figure. 
+#' @param legend_title String. Default = "". The desired legend title for the variable in mapped in the figure. 
 #' @param dates0 A string of either the date to be plotted to ("YYYY-MM-DD"), "all" which will plot all of the days where data was collected for in that year, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will bbe printed. Default = "latest". 
-#' @param shapefile Select the shapefile you want to use for the grids. "Egrid_stations" plots the EBS region and "NEgrid_stations_df" plots EBS and NBS regions. Default = "NEgrid_stations".
-#' @param height Numeric height of the figure in inches. default = 8.
-#' @param width Numeric width of the figure in inches. default = 10.5.
-#' @param file_end String. Will appear after "_" in the file name. 
-#' @param make_gifs Logical. Default = TRUE means that a make_gifs of lastest and past files will be created.  
-#' @param dir_out String. A path for the files to be saved to when the funciton is complete.
-#' @param show_planned_stations Logical. Default = TURE. If FALSE, will not show planned stations. 
-#' @param dir_googledrive_upload Upload documents to google drive. Here, enter the path on google drive where these files should be saved or "NULL" if you do not want it saved to google drive. Default = as_id("1iZKhka07guho68WVUn2TJ7iI521mdWEb"). https://drive.google.com/drive/folders/1iZKhka07guho68WVUn2TJ7iI521mdWEb?usp=sharing
-#'
-#' @export
+#' @param survey_area From akgfmaps::get_base_layers(select.region = ..., set.crs = "auto"). 
+#' @param height Numeric. Default = 6. Numeric height of the figure in inches. 
+#' @param width Numeric. Default = 10.5. Numeric width of the figure in inches. 
+#' @param file_end String. Will appear after "_" in the file name. Options include "grid" (will produce an empty grid), "daily" (will produce the daily updated plot), "anom" (will produce anomally differences in the updated plot).
+#' @param make_gifs Logical. Default = TRUE means that a gifs will be compiled from the latest gif.  
+#' @param dir_out String. A path for the files to be saved to on the local machine when the funciton is complete. 
+#' @param dir_wd String. Default = "./", or the root directory. Necessary because the task scheduler does not understand the concept of the R Project root directory (therefore, beware of the {here} R package.. This string should be the path to the R Project root directory. 
+#' @param show_planned_stations Logical. Default = TRUE. TRUE will show planned stations on the plot and FALSE will not. 
+#' @param data_source String. Default = "gd". "gd" will pull data from the google drive file and "oracle" will use the haul data (noted above) that comes from oracle. 
+#' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 make_figure <- function(
     SRVY, 
     dat = NULL, 
@@ -1078,6 +1102,14 @@ make_figure <- function(
 
 
 
+#' gif compiler
+#'
+#' Compile gif from previous gifs in folder
+#'
+#' @param file_end String. Will appear after "_" in the file name. Options include "grid" (will produce an empty grid), "daily" (will produce the daily updated plot), "anom" (will produce anomally differences in the updated plot).
+#' @param max_date String. The maximum date the function will inclusively create the gif for. 
+#' @param dir_out String. A path for the files to be saved to on the local machine when the funciton is complete. 
+#' @param filename0 String. The desired name of the gif to be created. Must include ".gif" at the end of the name. 
 make_figure_gif<-function(file_end, 
                           max_date, 
                           dir_out, 
