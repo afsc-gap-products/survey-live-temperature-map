@@ -216,41 +216,41 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   dir_wd = dir_wd)
 
 ## AI --------------------------------------------------------------------------
-# maxyr <- 2022 #CHANGE
-# data_source <- "gd" # google drive
-# SRVY <- "AI"
-# plot_anom <- FALSE
-# plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-# region_akgfmaps = "ai"
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-# #dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
-# var = "bt"
-# dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-# show_planned_stations <- FALSE
-# survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-# 
-# survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
-#                                 layer = "aigrid_trawable_thru2018",
-#                                 verbose=F) %>%
-#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-#   st_as_sf(x = .) %>%
-#   dplyr::rename(station = ID,
-#                 stratum = STRATUM) %>%
-#   dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
-#                   stratum != 0) %>% # land
-#   sp::merge(
-#     x = .,
-#     y = goa_strata0 %>%
-#       dplyr::filter(survey == "AI") %>%
-#       dplyr::mutate(SRVY = "AI",
-#                     region = stringr::str_to_title(inpfc_area),
-#                     region = dplyr::case_when(
-#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-#                       TRUE ~ region)) %>%
-#       dplyr::select(SRVY, stratum, region) %>%
-#       dplyr::distinct(),
-#     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
-#   dplyr::arrange(region)
+maxyr <- 2022 #CHANGE
+data_source <- "gd" # google drive
+SRVY <- "AI"
+plot_anom <- FALSE
+plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
+region_akgfmaps = "ai"
+dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
+#dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+var = "bt"
+dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+show_planned_stations <- FALSE
+survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+
+survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
+                                layer = "aigrid_trawable_thru2018_Emily",
+                                verbose=F) %>%
+  sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
+  st_as_sf(x = .) %>%
+  dplyr::rename(station = ID,
+                stratum = STRATUM) %>%
+  dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
+                  stratum != 0) %>% # land
+  sp::merge(
+    x = .,
+    y = goa_strata0 %>%
+      dplyr::filter(survey == "AI") %>%
+      dplyr::mutate(SRVY = "AI",
+                    region = stringr::str_to_title(inpfc_area),
+                    region = dplyr::case_when(
+                      region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
+                      TRUE ~ region)) %>%
+      dplyr::select(SRVY, stratum, region) %>%
+      dplyr::distinct(),
+    all.x = TRUE)  %>% # , duplicateGeoms = TRUE
+  dplyr::arrange(region)
 
 # 
 # #   temp <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
@@ -316,15 +316,15 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   show_planned_stations = show_planned_stations,
 #                   dir_wd = dir_wd)
 # 
-# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
+make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  survey_area = survey_area,
+                  data_source = data_source,
+                  plot_subtitle = plot_subtitle,
+                  dir_wd = dir_wd)
 # 
 # # ### past years -----------------------------------------------------------------
 # data_source = "oracle"
