@@ -19,11 +19,12 @@ PKG <- c(
   "sf",
   "ggsn",
   
-  #logo
+  #images
   "png",
   "grid",
   "cowplot",
   "magick", 
+  "qpdf",
   
   # color managment (color blind friendly!)
   # "viridis", 
@@ -1065,6 +1066,23 @@ make_figure <- function(
              device ="pdf") # pdfs are great for editing later
     }
     
+    if (file_end != "grid") {
+
+      if (iterate[i] == 1) {
+        qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf')), 
+                          output = c(paste0(dir_out, filename0, "_bind.pdf")))      
+      } else if (iterate[i] != 1) {
+        filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
+                                    as.character(as.Date(max_date)-1)), 
+                             ifelse(file_end=="", "", paste0("_", file_end)), "_bind")
+        
+        qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"), 
+                                    paste0(dir_out, filename00,'.pdf')), 
+                          output = c(paste0(dir_out, filename0, "_bind.pdf")))      
+      }
+      
+    }
+    
     ### GIF -------------------------------------------------------------------------
     if (make_gifs | as.character(dates0[1]) != "none") {
       make_figure_gif(file_end = file_end, 
@@ -1085,6 +1103,13 @@ make_figure <- function(
         media = paste0(dir_out, filename0,'.pdf'), 
         path = dir_googledrive_upload, 
         overwrite = TRUE)
+      
+      if (file_end != "grid") {
+        drive_upload(
+          media = paste0(dir_out, filename0,'_bind.pdf'), 
+          path = dir_googledrive_upload, 
+          overwrite = TRUE)       
+      }
       
       # change each day of the survey
       if (make_gifs | as.character(dates0[1]) != "none") {

@@ -12,7 +12,7 @@ googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
 dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
-#dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
+dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # The surveys this script will be covering 
 dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF", 
@@ -59,7 +59,7 @@ googledrive::drive_auth()
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-# dir_wd <- paste0(getwd(), "/")
+dir_wd <- paste0(getwd(), "/")
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -73,7 +73,7 @@ data_source <- "gd" # google drive
 SRVY <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 region_akgfmaps = "bs.all"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 
@@ -252,56 +252,6 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
 #   dplyr::arrange(region)
 # 
-# 
-# #   temp <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
-# #                          layer = "aigrid_trawable_thru2018",
-# #                          verbose=F) %>%
-# #     sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-# #     st_as_sf(x = .) %>%
-# #     dplyr::rename(station = ID,
-# #                   stratum = STRATUM) %>%
-# #     dplyr::filter(stratum %in% unique(goa_strata0$stratum[goa_strata0$survey == "AI"]))
-# #
-# #   temp1 <- sf::st_transform(x = temp,
-# #                                       crs = sf::st_crs("+proj=longlat +datum=WGS84 +no_defs")) %>%
-# #                        sf::st_coordinates(x = .) %>%
-# #     data.frame() %>%
-# #     # dplyr::mutate(SRVY = "AI",
-# #     #               region = dplyr::case_when(
-# #     #                 X <= -177 ~ "Western Aleutians",
-# #     #                 X > -177 & X <= 177 ~ "Central Aleutians",
-# #     #                 X > 177 & X <= 170 ~ "Eastern Aleutians",
-# #     #                 X > 170 ~ "Southern Bering Sea"
-# #     #               ))  %>%
-# #     dplyr::mutate(SRVY = "AI",
-# #                   lon = ifelse(X>0, X, X+360),
-# #                   region = dplyr::case_when(
-# #                     lon >= 183 ~ "Western Aleutians",
-# #                     (lon > 177 & lon <= 183) ~ "Central Aleutians",
-# #                     (lon > 170 & lon <= 177) ~ "Eastern Aleutians",
-# #                     lon >= 170 ~ "Southern Bering Sea")) %>%
-# #     sf::st_transform(x = temp,
-# #                      crs = sf::st_crs(survey_area$crs$input))
-# #
-# # survey_area$survey.grid <- temp1
-# #
-# #
-# #   temp %>%
-# #     dplyr::mutate(x = temp1$X)
-# #
-# #
-# #     sp::merge(
-# #       x = .,
-# #       y = goa_strata0 %>%
-# #         dplyr::filter(survey == "AI") %>%
-# #         dplyr::mutate(SRVY = "AI",
-# #                       region = stringr::str_to_title(inpfc_area),
-# #                       region = dplyr::case_when(
-# #                         region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-# #                         TRUE ~ region)) %>%
-# #         dplyr::select(SRVY, stratum, region) %>%
-# #         dplyr::distinct(),
-# #       all.x = TRUE, duplicateGeoms = TRUE)
 #
 # make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   SRVY = SRVY,
