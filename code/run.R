@@ -59,7 +59,7 @@ googledrive::drive_auth()
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-dir_wd <- paste0(getwd(), "/")
+# dir_wd <- paste0(getwd(), "/")
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -73,14 +73,15 @@ data_source <- "gd" # google drive
 SRVY <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 region_akgfmaps = "bs.all"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 
 # Daily
 var = "bt"
-dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days")) 
+dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 show_planned_stations <- TRUE
+plot_anom <- FALSE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
   dplyr::rename(station = STATIONID) %>%
@@ -93,6 +94,16 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
+# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
+#                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
+# 
 make_varplot_wrapper(maxyr = maxyr, # Daily plot
                   SRVY = SRVY,
                   haul = haul,
@@ -106,37 +117,13 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
                   show_planned_stations = show_planned_stations,
                   dir_wd = dir_wd)
 # 
-# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
-
-# ### past years -----------------------------------------------------------------
+# # ### past years -----------------------------------------------------------------
 # data_source = "oracle"
 # plot_anom = FALSE
 # dates0 <- "all"
 # 
 # maxyr <- 2021
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW")
-# make_varplot_wrapper(maxyr = maxyr, # Daily plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = dates0,
-#                   survey_area = survey_area,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   data_source = data_source,
-#                   plot_anom = TRUE,
-#                   dir_wd = dir_wd)
-# 
 # make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -146,9 +133,6 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
-# 
-# maxyr <- 2019
-# dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1S5FyXwWyFUgFkvDlGTC6cymtISyZdd9R")
 # make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -163,6 +147,8 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
 # 
+# maxyr <- 2019
+# dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1S5FyXwWyFUgFkvDlGTC6cymtISyZdd9R")
 # make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -171,6 +157,44 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   survey_area = survey_area,
 #                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
+# make_varplot_wrapper(maxyr = maxyr, # Daily plot
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   var = var,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
+#                   plot_anom = plot_anom,
+#                   dir_wd = dir_wd)
+# 
+# maxyr <- 2017
+# dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1nAeb9Jq9_FxUc70ZfvXaYZbXrZCQTD4u")
+# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
+#                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
+# make_varplot_wrapper(maxyr = maxyr, # Daily plot
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   var = var,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
+#                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
 # 
 # maxyr <- 2018
@@ -191,6 +215,15 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #   dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  %>%
 #   dplyr::mutate(region = "Bering Sea")
 # 
+# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
+#                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
 # make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -205,17 +238,7 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
 # 
-# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
-
-## AI --------------------------------------------------------------------------
+# ## AI --------------------------------------------------------------------------
 # maxyr <- 2022 #CHANGE
 # data_source <- "gd" # google drive
 # SRVY <- "AI"
@@ -252,20 +275,6 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
 #   dplyr::arrange(region)
 # 
-#
-# make_varplot_wrapper(maxyr = maxyr, # Daily plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = dates0,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   dir_wd = dir_wd)
-# 
 # make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -274,6 +283,19 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   survey_area = survey_area,
 #                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
+# make_varplot_wrapper(maxyr = maxyr, # Daily plot
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   var = var,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = dates0,
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
+#                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
 # 
 # # ### past years -----------------------------------------------------------------
@@ -292,6 +314,15 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 # 
 # maxyr <- 2018
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
+# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   survey_area = survey_area,
+#                   data_source = data_source,
+#                   plot_subtitle = plot_subtitle,
+#                   dir_wd = dir_wd)
 # make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -305,13 +336,4 @@ make_varplot_wrapper(maxyr = maxyr, # Daily plot
 #                   data_source = data_source,
 #                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
-# 
-# make_grid_wrapper(maxyr = maxyr, # Blank Grid (no survey data)
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
+# #

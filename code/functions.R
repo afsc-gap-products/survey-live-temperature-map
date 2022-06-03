@@ -293,6 +293,18 @@ make_varplot_wrapper <- function(maxyr,
               show_planned_stations = show_planned_stations)
   
   if (plot_anom) {
+    
+    # googledrive::drive_mkdir(name = "anom", 
+    #                          path = dir_googledrive_upload,
+    #                          overwrite = FALSE)
+    
+    dir_googledrive_upload<- googledrive::drive_ls(path = dir_googledrive_upload) %>% 
+      dplyr::filter(name == "anom") %>% 
+      dplyr::select("id") %>% 
+      unlist() %>% 
+      googledrive::as_id()
+
+    
     # Anomaly plot
     dat <- dat %>% 
       dplyr::rename(bt = var, 
@@ -1049,6 +1061,7 @@ make_figure <- function(
            device = "png") # pdfs are great for editing later
     
     ### PDF -------------------------------------------------------------------------
+    # Create main PDF
     if (file_end %in% c("grid", "daily")){
       rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                         output_dir = dir_out,
@@ -1066,14 +1079,25 @@ make_figure <- function(
              device ="pdf") # pdfs are great for editing later
     }
     
+    # Create Binded PDF
     if (file_end != "grid") {
+      
+      # remove file if already exists - qpdf::pdf_combine() will not overwrite
+      if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
+        file.remove(paste0(dir_out, filename0, "_bind.pdf"))
+      }
 
-      if (iterate[i] == 1) {
-        qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf')), 
+      if (date_entered[1] == date_entered[i]) { # length(date_entered) == 1 | 
+        qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
+                                    paste0(dir_out,'_grid.pdf')), 
                           output = c(paste0(dir_out, filename0, "_bind.pdf")))      
-      } else if (iterate[i] != 1) {
+      } else {
+        temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf")), split = "_")
+        temp <- as.Date(sort(sapply(temp,"[[",1)))
+        temp <- max(temp[as.Date(temp) < as.Date(max_date)])
+        
         filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
-                                    as.character(as.Date(max_date)-1)), 
+                                    as.character(temp)), 
                              ifelse(file_end=="", "", paste0("_", file_end)), "_bind")
         
         qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"), 
@@ -1091,30 +1115,25 @@ make_figure <- function(
                       filename0 = filename0)
     }
     
-    if (!(is.null(dir_googledrive_upload))) {
-      
       ### Upload to google drive ------------------------------------------------------
-      drive_upload(
-        media = paste0(dir_out, filename0,'.png'), 
-        path = dir_googledrive_upload, 
-        overwrite = TRUE)
-      
-      drive_upload(
-        media = paste0(dir_out, filename0,'.pdf'), 
-        path = dir_googledrive_upload, 
-        overwrite = TRUE)
-      
-      if (file_end != "grid") {
+    
+    # if (file_end != "anom") {
+    #   temp <- googledrive::drive_ls(path = dir_googledrive_upload, recursive = FALSE) 
+    #   
+    #   temp0 <- temp %>% 
+    #     dplyr::filter(grepl(pattern = "archive", x = name, fixed = TRUE))
+    #   
+    #   temp <- temp %>% 
+    #     dplyr::filter(grepl(pattern = ".", x = name, fixed = TRUE))
+    #   
+    #   googledrive::drive_mv(file = temp, path = )
+    # }
+    
+    if (!(is.null(dir_googledrive_upload))) {
+      temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+      for (iii in 1:length(temp)) {
         drive_upload(
-          media = paste0(dir_out, filename0,'_bind.pdf'), 
-          path = dir_googledrive_upload, 
-          overwrite = TRUE)       
-      }
-      
-      # change each day of the survey
-      if (make_gifs | as.character(dates0[1]) != "none") {
-        drive_upload(
-          media = paste0(dir_out, filename0,'.gif'), 
+          media = temp[iii], 
           path = dir_googledrive_upload, 
           overwrite = TRUE)
       }
