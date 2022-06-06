@@ -125,7 +125,9 @@ make_varplot_wrapper <- function(maxyr,
                                  plot_subtitle = "", 
                                  show_planned_stations = TRUE, 
                                  data_source = "gd", 
+                                 plot_daily = TRUE,
                                  plot_anom = TRUE, 
+                                 plot_mean = FALSE,
                                  dir_wd = "./") {
   
   case <- paste0(maxyr, "_", SRVY)
@@ -183,11 +185,16 @@ make_varplot_wrapper <- function(maxyr,
       readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                         sheet = case, skip = 1) %>%
       janitor::clean_names() %>% 
-      dplyr::rename("var" = all_of(var), 
+      # dplyr::mutate(var = all_of(var0)) %>%
+      dplyr::rename(#"var" = all_of(var), 
                     "SRVY" = "srvy", 
                     "vessel_shape" = "vessel") %>%
       dplyr::filter(
-        SRVY %in% SRVY1) %>%
+        SRVY %in% SRVY1) 
+    
+    dat$var <- as.numeric(unlist(dat[,var]))
+
+    dat <- dat %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
     
   } else if (data_source == "oracle") {
@@ -195,9 +202,13 @@ make_varplot_wrapper <- function(maxyr,
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1 &
                       !is.na(dplyr::all_of(var))) %>% 
-      dplyr::rename(var = all_of(var0), 
-                    station = stationid, 
+      # dplyr::mutate(var = haul[,var0]) %>%
+      dplyr::rename(station = stationid, 
                     date = start_time) 
+    dat$var <- unlist(dat[,var0])
+    dat$var0 <- unlist(dat[,var0])
+    names(dat)[names(dat) == "var0"] <- var
+    
     if (SRVY %in% c("AI", "GOA")){
       dat <- dat %>%
         dplyr::filter(var != 0) # there shouldn't be bottom temps of 0 in the AI or GOA
@@ -205,10 +216,11 @@ make_varplot_wrapper <- function(maxyr,
     dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
     for (ii in 1:length(unique(dat$SRVY))){
       temp <- unique(dat$SRVY)[ii]
-      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0("\n(", 
-                                                                format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"),
+      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0(#"\n(", 
+                                                                format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d"),
                                                                 " - ", 
-                                                                format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"), ")")
+                                                                format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d")#, ")"
+                                                                )
     }
     dat <- dat %>% 
       dplyr::left_join(
@@ -217,12 +229,16 @@ make_varplot_wrapper <- function(maxyr,
           dplyr::select(vessel_id, vessel_shape) %>%
           dplyr::distinct(), 
         by = "vessel_id")  %>% 
-      dplyr::select(SRVY, stratum, station, var, date, vessel_shape)
+      dplyr::select(SRVY, stratum, station, var, dplyr::all_of(var), date, vessel_shape)
     
   }
   
   if (show_planned_stations) {
-    temp <- data.frame(matrix(data = NA, ncol = ncol(dat), nrow = length(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])))) 
+    vess <- unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])
+    if (sum(vess %in% dat$vessel_shape) != length(vess)) {
+    temp <- data.frame(matrix(data = NA, 
+                              ncol = ncol(dat), 
+                              nrow = length(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])))) 
     names(temp) <- names(dat)
     dat <- dplyr::bind_rows(
       temp %>% dplyr::mutate(SRVY = SRVY1[1], 
@@ -238,6 +254,7 @@ make_varplot_wrapper <- function(maxyr,
                       var = as.numeric(var),
                       date = as.character(date),
                       vessel_shape = as.character(vessel_shape)) )
+    }
   }
   
   dat <- dat %>% 
@@ -262,7 +279,7 @@ make_varplot_wrapper <- function(maxyr,
       x = ., 
       y = dat_anom, 
       by = c("SRVY", "stratum", "station")) %>% 
-    dplyr::mutate(reg_lab = paste0(region_long, " ", reg_dates), 
+    dplyr::mutate(reg_lab = paste0(region_long, "\n(", reg_dates, ")"), 
                   var = as.numeric(var), 
                   anom = var-mean, # calculate anomalies
                   date = as.character(date)) %>%
@@ -279,7 +296,10 @@ make_varplot_wrapper <- function(maxyr,
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
   
-  # Daily plot
+  height = ifelse(SRVY %in% "AI", 6, 8)
+  
+  ### Daily --------------------------------------------------------------------
+  if (plot_daily) {  # Daily plot
   file_end = "daily"
   make_figure(SRVY = SRVY, 
               dat = dat,
@@ -295,27 +315,55 @@ make_varplot_wrapper <- function(maxyr,
               dir_googledrive_upload = dir_googledrive_upload, 
               make_gifs = TRUE, 
               data_source = data_source,
-              show_planned_stations = show_planned_stations)
+              show_planned_stations = show_planned_stations, 
+              height = height)
+  }
   
-  if (plot_anom) {
-    
+  ### Mean ---------------------------------------------------------------------
+  dat <- dat %>%
+    dplyr::mutate(reg_lab = paste0(region_long, "\n "))
+  
     # googledrive::drive_mkdir(name = "anom", 
     #                          path = dir_googledrive_upload,
     #                          overwrite = FALSE)
-    
-    dir_googledrive_upload<- googledrive::drive_ls(path = dir_googledrive_upload) %>% 
+      
+  dir_googledrive_upload0 <- googledrive::drive_ls(path = dir_googledrive_upload) %>% 
       dplyr::filter(name == "anom") %>% 
       dplyr::select("id") %>% 
       unlist() %>% 
       googledrive::as_id()
-
     
-    # Anomaly plot
-    dat <- dat %>% 
-      dplyr::rename(bt = var, 
-                    var = anom)
+  if (plot_mean) {
+
+    dat <- dat %>% # Mean plot
+      dplyr::mutate(var = mean)
+    file_end <- "mean"
+    plot_title <- gsub(pattern = "Anomaly", replacement = "Mean", x = plot_title_anom)
+    legend_title = gsub(pattern = "Anomaly", replacement = "Mean", x = legend_title_anom)
+    make_figure(SRVY = SRVY, 
+                dat = dat,
+                var_breaks = var_breaks, 
+                plot_title = plot_title,
+                plot_subtitle = plot_subtitle,
+                legend_title = legend_title,
+                dates0 = dates0, 
+                survey_area = survey_area,
+                file_end = file_end,
+                dir_wd = dir_wd,
+                dir_out = dir_out, 
+                dir_googledrive_upload = dir_googledrive_upload0, 
+                make_gifs = FALSE, 
+                data_source = data_source,
+                show_planned_stations = FALSE, 
+                height = height)
+  }
+  
+  ### Anomaly ------------------------------------------------------------------
+  if (plot_anom) {
+    dat <- dat %>% # Anomaly plot
+      dplyr::mutate(var = anom)
     var_breaks <- c(-10, seq(from = -2, to = 3, by = 0.5), 50) # for the anomaly data
-    file_end = "anom"
+    file_end <- "anom"
     plot_title <- plot_title_anom
     legend_title = legend_title_anom
     make_figure(SRVY = SRVY, 
@@ -329,11 +377,11 @@ make_varplot_wrapper <- function(maxyr,
                 file_end = file_end,
                 dir_wd = dir_wd,
                 dir_out = dir_out, 
-                dir_googledrive_upload = dir_googledrive_upload, 
-                make_gifs = TRUE, 
+                dir_googledrive_upload = dir_googledrive_upload0, 
+                make_gifs = FALSE, 
                 data_source = data_source,
-                show_planned_stations = show_planned_stations, 
-                height = ifelse(SRVY %in% "AI", 6, 8.5))
+                show_planned_stations = FALSE, 
+                height = height)
   }
 }
 
@@ -406,9 +454,9 @@ make_grid_wrapper<-function(maxyr,
     for (ii in 1:length(unique(dat$SRVY))){
       temp <- unique(dat_survreg$SRVY)[ii]
       dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0("\n(", 
-                                                                format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"),
+                                                                format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d"),
                                                                 " - ", 
-                                                                format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%B %d"), ")")
+                                                                format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d"), ")")
     }
     dat <- dat  %>% 
       dplyr::mutate(var = NA, 
@@ -478,7 +526,7 @@ make_figure <- function(
     legend_title = "",
     dates0 = "latest",
     survey_area, 
-    height = 6, 
+    height = 8, 
     width = 10.5,
     file_end = "",
     make_gifs = TRUE,
@@ -715,19 +763,6 @@ make_figure <- function(
         }
       }
       
-      # if (length(dat_plot$reg_shapefile)>1) {
-      gg <- gg  +
-        geom_sf(data = survey_area$survey.area, 
-                aes(color = SURVEY), 
-                fill = NA,
-                size = 2,
-                show.legend = TRUE) +
-        scale_color_manual(name = "Survey Region", 
-                           values = survey_area$survey.area$survey_reg_col,  
-                           breaks = survey_area$survey.area$SURVEY, 
-                           labels = survey_area$survey.area$reg_lab) 
-      # }
-      
       # Add temperature squares
       # } else 
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
@@ -746,6 +781,21 @@ make_figure <- function(
           ggspatial::coord_sf(
             xlim = c(extent(grid_stations_plot)), # %in% c(213, 511),])[1:2]),
             ylim = c(extent(grid_stations_plot))) #+ # %in% c(213, 511),])[3:4])) +
+      }
+      
+      # if (length(dat_plot$reg_shapefile)>1) {
+      gg <- gg  +
+        geom_sf(data = survey_area$survey.area, 
+                aes(color = SURVEY), 
+                fill = NA,
+                size = 2,
+                show.legend = TRUE) +
+        scale_color_manual(name = "Survey Region", 
+                           values = survey_area$survey.area$survey_reg_col,  
+                           breaks = survey_area$survey.area$SURVEY, 
+                           labels = survey_area$survey.area$reg_lab) 
+      # }
+      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
         
         # if we are showing planned stations
         if (show_planned_stations) {
@@ -812,10 +862,10 @@ make_figure <- function(
                  label = ifelse(is.na(max_date), 
                                 "", 
                                 ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                       paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
-                                       paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
+                                       paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
+                                       paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
                                               " \u2013\n", 
-                                              format(x = as.Date(max_date), format = "%B %d, %Y")))), 
+                                              format(x = as.Date(max_date), format = "%b %d, %Y")))), 
                  color = "black", size = 5, fontface=2) 
       
       gg <- ggdraw(gg) +
@@ -988,10 +1038,10 @@ make_figure <- function(
           paste0(plot_subtitle, 
                  ifelse(dates0 == "none", "", paste0("\n", 
                                                      ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                                            paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d, %Y")), 
-                                                            paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%B %d"), 
+                                                            paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
+                                                            paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
                                                                    " \u2013 ", 
-                                                                   format(x = as.Date(max_date), format = "%B %d, %Y")))))),
+                                                                   format(x = as.Date(max_date), format = "%b %d, %Y")))))),
           fontface = 'bold',
           x = 0,
           hjust = 0, 
@@ -1074,7 +1124,7 @@ make_figure <- function(
       file.remove(list.files(path = paste0(dir_wd, "/code/"), 
                              pattern = ".log", full.names = TRUE))
       
-    } else if (file_end == "anom"){
+    } else if (file_end %in% c("anom", "mean")){
       ggsave(filename = paste0(filename0,'.pdf'),
              path = dir_out,
              height = height,
@@ -1085,7 +1135,7 @@ make_figure <- function(
     }
     
     # Create Binded PDF
-    if (file_end != "grid") {
+    if (file_end %in% c("daily")) { # "anom", 
       
       # remove file if already exists - qpdf::pdf_combine() will not overwrite
       if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
@@ -1094,7 +1144,7 @@ make_figure <- function(
 
       if (date_entered[1] == date_entered[i]) { # length(date_entered) == 1 | 
         qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
-                                    paste0(dir_out,'_grid.pdf')), 
+                                    ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
                           output = c(paste0(dir_out, filename0, "_bind.pdf")))      
       } else {
         temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf")), split = "_")
@@ -1113,11 +1163,13 @@ make_figure <- function(
     }
     
     ### GIF -------------------------------------------------------------------------
-    if (make_gifs | as.character(dates0[1]) != "none") {
+    if (make_gifs) {
+      # if (as.character(dates0[1]) != "none") {
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
                       filename0 = filename0)
+      # }
     }
     
       ### Upload to google drive ------------------------------------------------------

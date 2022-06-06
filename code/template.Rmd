@@ -45,6 +45,23 @@ if (as.character(dates0[1]) == "none") {
     ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
     paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
   
+# } else if (file_end = "mean") {
+#   
+#     temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
+#   
+#   fig_cap <- fig_alt <- paste0(
+#     "NOAA Fisheries conducted the ", 
+#     text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+#     " survey",
+#     ifelse(length(temp1)>1, "s", "")
+#     ," in ", maxyr, 
+#     # "aboard the ",
+#     # vess,
+#     ". This figure includes the empty grid of stations across the survey area",
+#     ifelse(length(temp1)>1, "s", ""),
+#     ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
+#     paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
+  
 } else {
   
   loc <- dat_plot %>% 

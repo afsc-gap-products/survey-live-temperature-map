@@ -31,9 +31,9 @@ source("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R")
 
 locations<-c(
   "RACE_DATA.VESSELS", 
-  "AI.AIGRID_GIS", 
-  "GOA.GOAGRID_GIS", 
-  "GOA.GOA_STRATA", 
+  # "AI.AIGRID_GIS", 
+  # "GOA.GOAGRID_GIS", 
+  "GOA.GOA_STRATA", # To get regions for each stratum
   "RACEBASE.HAUL", 
   "RACE_DATA.V_CRUISES"
 )
