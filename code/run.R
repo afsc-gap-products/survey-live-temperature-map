@@ -103,7 +103,7 @@ survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 #                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
-# 
+
 make_varplot_wrapper(maxyr = maxyr, # Daily plot
                   SRVY = SRVY,
                   haul = haul,

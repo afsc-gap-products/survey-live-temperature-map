@@ -232,7 +232,12 @@ make_varplot_wrapper <- function(maxyr,
                              date = as.character(min(as.Date(dat$date), na.rm = TRUE)-1), 
                              vessel_shape = unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])), 
       dat %>% 
-        dplyr::mutate(date=as.character(date)))
+        dplyr::mutate(SRVY = as.character(SRVY), 
+                      stratum = as.numeric(stratum), 
+                      station = as.character(station), 
+                      var = as.numeric(var),
+                      date = as.character(date),
+                      vessel_shape = as.character(vessel_shape)) )
   }
   
   dat <- dat %>% 
@@ -529,8 +534,8 @@ make_figure <- function(
                                            labels = var_labels) ) 
     
     # Create new temperature maps
-    date_entered<-sort(unique(dat$date))
-    date_entered<-date_entered[!is.na(date_entered)]
+    date_entered <- sort(unique(dat$date))
+    date_entered <- date_entered[!is.na(date_entered)]
   }
   
   # bind dat to survey_area$survey.grid for plotting
