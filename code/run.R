@@ -59,7 +59,7 @@ googledrive::drive_auth()
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
-dir_wd <- paste0(getwd(), "/")
+# dir_wd <- paste0(getwd(), "/")
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -131,7 +131,7 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   plot_anom = FALSE, # anom plot here doesnt make sense to print until the end
 #                   plot_mean = TRUE,
 #                   dir_wd = dir_wd)
-
+# 
 # ### past years -----------------------------------------------------------------
 # data_source = "oracle"
 # plot_anom = FALSE

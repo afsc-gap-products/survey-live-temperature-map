@@ -235,7 +235,7 @@ make_varplot_wrapper <- function(maxyr,
   
   if (show_planned_stations) {
     vess <- unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])
-    if (sum(vess %in% dat$vessel_shape) != length(vess)) {
+    # if (sum(vess %in% dat$vessel_shape) != length(vess)) {
     temp <- data.frame(matrix(data = NA, 
                               ncol = ncol(dat), 
                               nrow = length(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]])))) 
@@ -254,7 +254,7 @@ make_varplot_wrapper <- function(maxyr,
                       var = as.numeric(var),
                       date = as.character(date),
                       vessel_shape = as.character(vessel_shape)) )
-    }
+    # }
   }
   
   dat <- dat %>% 
