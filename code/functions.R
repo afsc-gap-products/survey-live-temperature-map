@@ -477,6 +477,9 @@ make_grid_wrapper<-function(maxyr,
                   var_bin = NA) %>%
     dplyr::arrange(date)
   
+  make_gifs = FALSE
+  height = ifelse(SRVY == "AI", 6, 8.5)
+  
   # Daily plot
   make_figure(SRVY = SRVY, 
               dat = dat,
@@ -490,10 +493,10 @@ make_grid_wrapper<-function(maxyr,
               dir_wd = dir_wd,
               dir_out = dir_out, 
               dir_googledrive_upload = dir_googledrive_upload, 
-              make_gifs = FALSE, 
+              make_gifs = make_gifs, 
               data_source = data_source,
               show_planned_stations = show_planned_stations, 
-              height = ifelse(SRVY == "AI", 6, 8.5))
+              height = height)
 }
 
 
@@ -876,17 +879,17 @@ make_figure <- function(
     } else if (SRVY == "AI") {
       ### Aleutian Islands -----------------------------------------------------------
       
-      if (as.character(dates0[1]) == "none") {
+      # if (as.character(dates0[1]) == "none") {
         # temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
         gg <- gg +
-          ggplot2::geom_sf(data = survey_area$survey.grid, 
+          ggplot2::geom_sf(data = survey_area$survey.grid1, 
                            # mapping = aes(colour = survey_area$survey.grid$region,
                            #               fill = survey_area$survey.grid$region),
-                           colour = "grey20",
-                           size = .01,
-                           show.legend = legend_title) +
+                           colour = ifelse((as.character(dates0[1]) == "none"), "grey20", "grey50"),
+                           size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
+                           show.legend = FALSE) #+
           # geom_sf(data = survey_area$bathymetry) +
-          guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
+          # guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
         # if (nrow(temp)>0) {
         #   gg <- gg +
         # 
@@ -895,71 +898,78 @@ make_figure <- function(
         #   annotate(geom = "text", x = temp$x, y = temp$y, label = temp$lab,
         #            color = "darkblue", fontface="bold", angle = 0)
         # }
-      } 
+      # } 
       
       # now we build a plot list
-      lapply(unique(grid_stations_plot$region), function(x) {
-        # x <- unique(grid_stations_plot$region)
-        grid_stations_plot1 <- grid_stations_plot
-        grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
-        grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
-        
-        gg1 <- gg
-        
-        if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
+        lapply(unique(grid_stations_plot$region), function(x) {
+          # x <- unique(grid_stations_plot$region)
+          grid_stations_plot1 <- grid_stations_plot
+          grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
+          grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
           
-          gg1 <- gg1  + 
-            ggplot2::geom_sf(data = grid_stations_plot1, 
-                             aes(fill = var_bin), 
-                             colour = "black", # "grey20" 
-                             size = .02, 
-                             show.legend = FALSE) +
-            ggplot2::scale_fill_manual(name = legend_title,
-                                       values = var_color, 
-                                       labels = var_labels,
-                                       drop = F,
-                                       na.translate = F)
-        } 
-        gg1 <- gg1 +
-          ggspatial::coord_sf(
-            xlim = c(extent(grid_stations_plot1)[1:2]), 
-            ylim = c(extent(grid_stations_plot1)[3:4])) +
-          ggtitle(x)  +
-          ggsn::scalebar(data = grid_stations_plot1,
-                         location = ifelse(x == "Western Aleutians", "topright", "topleft"),
-                         dist = 25,
-                         dist_unit = "nm",
-                         transform = FALSE,
-                         st.dist = 0.06,
-                         border.size = .25,
-                         height = 0.03,
-                         st.bottom = TRUE,
-                         st.size = 3, 
-                         model = survey_area$crs) +
-          theme(
-            plot.title = element_text(size = 10, face = "bold"), 
-            # axis.text = element_text(size=9),
-            axis.title = element_blank(),
-            plot.margin=unit(c(0,0,0,0), "cm"))
-        
-        gg1
-        
-      }) -> region_list
+          gg1 <- gg
+          
+          if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
+            
+            gg1 <- gg1  + 
+              ggplot2::geom_sf(data = grid_stations_plot1, 
+                               aes(fill = var_bin), 
+                               colour = "black", # "grey20" 
+                               size = .05, 
+                               show.legend = FALSE) +
+              ggplot2::scale_fill_manual(name = legend_title,
+                                         values = var_color, 
+                                         labels = var_labels,
+                                         drop = F,
+                                         na.translate = F)
+          } 
+          gg1 <- gg2 <- gg1 +
+            ggspatial::coord_sf(
+              xlim = c(extent(grid_stations_plot1)[1:2]), 
+              ylim = c(extent(grid_stations_plot1)[3:4])) +
+            ggtitle(x)  +
+            ggsn::scalebar(data = grid_stations_plot1,
+                           location = ifelse(x == "Western Aleutians", "topright", "topleft"),
+                           dist = 25,
+                           dist_unit = "nm",
+                           transform = FALSE,
+                           st.dist = 0.06,
+                           border.size = .25,
+                           height = 0.03,
+                           st.bottom = TRUE,
+                           st.size = 3, 
+                           model = survey_area$crs) +
+            theme(
+              legend.position = "none", 
+              plot.title = element_text(size = 10, face = "bold"), 
+              # axis.text = element_text(size=9),
+              axis.title = element_blank(),
+              plot.margin=unit(c(0,0,0,0), "cm"))
+          
+          gg1
+          
+        }) -> region_list
       
       # var legend
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
         legend_temp <- gg  + 
-          ggplot2::geom_sf(data = grid_stations_plot[grid_stations_plot$region == "Central Aleutians",], 
-                           aes(#group = region, 
-                             fill = var_bin), 
-                           colour = "grey50",
+          ggplot2::geom_sf(data = grid_stations_plot,#[grid_stations_plot$region == "Southern Bering Sea",], 
+                           aes(fill = var_bin), 
+                           colour = "black", # "grey20" 
+                           size = .05,
                            show.legend = legend_title) +
           ggplot2::scale_fill_manual(name = legend_title,
                                      values = var_color, 
                                      labels = var_labels,
                                      drop = F,
                                      na.translate = F) +
+          ggspatial::coord_sf(
+            xlim = c(extent(grid_stations_plot)[1:2]), 
+            ylim = c(extent(grid_stations_plot)[3:4])) +
           theme(
+            plot.title = element_text(size = 10, face = "bold"), 
+            axis.title = element_blank(),
+            plot.margin=unit(c(0,0,0,0), "cm"), 
             axis.text = element_text(size=5))
       } 
       
@@ -1012,7 +1022,7 @@ make_figure <- function(
                   size = 3) +
         ggspatial::coord_sf(
           xlim = c(extent(grid_stations_plot)[1:2]),
-          ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+400000)) + 
+          ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+350000)) + 
         ggtitle(gsub(pattern = "\n", replacement = "", x = unique(survey_area$survey.area$reg_lab), fixed = TRUE)) +
         theme_minimal() + 
         theme(
@@ -1049,6 +1059,19 @@ make_figure <- function(
         theme(# add margin on the left of the drawing canvas,
           plot.margin = margin(0, 0, 0, 7)) # so title is aligned with left edge of first plot
       
+      noaa_logo <- ggdraw() + cowplot::draw_image(image = paste0(dir_wd, "img/noaa-fish-wide.png"))
+      
+      header_row <- cowplot::plot_grid(
+        title_row, 
+        subtitle_row, 
+        nrow = 2, greedy = TRUE, rel_heights = c(0.1, 0.2))
+      
+      header_row <- cowplot::plot_grid(
+        header_row, 
+        # gg_insert, 
+        noaa_logo, 
+        ncol = 2, greedy = TRUE, rel_heights = c(3, 0.1))
+      
       gg <- cowplot::plot_grid(
         region_list[[1]], region_list[[2]], region_list[[3]], region_list[[4]],
         ncol = 2, nrow = 2, greedy = TRUE, rel_widths = c(1.5, 1.5)) +
@@ -1057,52 +1080,31 @@ make_figure <- function(
       
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
         side_bar <- cowplot::plot_grid(
-          cowplot::get_legend(legend_temp), gg_insert, 
+          cowplot::get_legend(legend_temp), gg_insert,
           rel_heights = c(1.25, .75),
           nrow = 2, align = "v", axis = "r")
       } else {
         side_bar <- cowplot::plot_grid(
-          NULL, gg_insert, 
+          NULL, gg_insert,
           rel_heights = c(1.25, .75),
-          nrow = 2, align = "v", axis = "r")        
+          nrow = 2, align = "v", axis = "r")
+      }
+      
+      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
+      gg <- cowplot::plot_grid(
+        gg, NULL, side_bar, 
+        ncol = 3, greedy = TRUE, rel_widths = c(1, .01, .25))
       }
       
       gg <- cowplot::plot_grid(
-        gg, NULL, side_bar, 
-        ncol = 3, greedy = TRUE, rel_widths = c(1, .05, .5))
-      
-      gg <- cowplot::plot_grid(
-        title_row, 
-        subtitle_row, 
+        header_row, 
         gg, 
-        nrow = 3, greedy = TRUE, rel_heights = c(0.1, 0.2, 2))
-      
-      gg <- ggdraw(gg) +
-        draw_image(image = paste0(dir_wd, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
-                   x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
-                   scale = .15 )
+        nrow = 3, greedy = TRUE, rel_heights = c(0.3, 2))
       
     }
     
-    # Save plots -----------------------------------------------------------------
-    # save_figure(gg, 
-    #             dat, 
-    #             dat_plot, 
-    #             dat_planned, 
-    #             survey_area, 
-    #             grid_stations_plot, 
-    #             data_source, 
-    #             dir_out, 
-    #             dates0, 
-    #             max_date, 
-    #             file_end, 
-    #             height, 
-    #             width, 
-    #             dir_googledrive_upload, 
-    #             make_gifs,
-    #             date_entered)
-    
-    filename0 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
+    filename0 <- paste0(ifelse((as.character(dates0[1]) == "none" | file_end == "mean"), 
+                               "", 
                                max_date), 
                         ifelse(file_end=="", "", paste0("_", file_end)))
     
