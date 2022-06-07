@@ -1023,7 +1023,7 @@ make_figure <- function(
         ggspatial::coord_sf(
           xlim = c(extent(grid_stations_plot)[1:2]),
           ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+350000)) + 
-        ggtitle(gsub(pattern = "\n", replacement = "", x = unique(survey_area$survey.area$reg_lab), fixed = TRUE)) +
+        ggtitle(gsub(pattern = "\n", replacement = " ", x = unique(survey_area$survey.area$reg_lab), fixed = TRUE)) +
         theme_minimal() + 
         theme(
           panel.border = element_rect(colour = "grey50", fill=NA, size=1), 
@@ -1064,42 +1064,33 @@ make_figure <- function(
       header_row <- cowplot::plot_grid(
         title_row, 
         subtitle_row, 
-        nrow = 2, greedy = TRUE, rel_heights = c(0.1, 0.2))
+        nrow = 2, greedy = TRUE, rel_heights = c(0.2, 0.3))
       
       header_row <- cowplot::plot_grid(
         header_row, 
         # gg_insert, 
         noaa_logo, 
-        ncol = 2, greedy = TRUE, rel_heights = c(3, 0.1))
-      
-      gg <- cowplot::plot_grid(
-        region_list[[1]], region_list[[2]], region_list[[3]], region_list[[4]],
-        ncol = 2, nrow = 2, greedy = TRUE, rel_widths = c(1.5, 1.5)) +
-        draw_label("Longitude", x = 0.25, y = 0, vjust = -0.5, angle = 0) +
-        draw_label("Latitude", x = 0, y = 0.5, vjust = 1.5, angle = 90)      
+        ncol = 2, greedy = TRUE, rel_widths = c(2.6, 0.4))
       
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
-        side_bar <- cowplot::plot_grid(
-          cowplot::get_legend(legend_temp), gg_insert,
-          rel_heights = c(1.25, .75),
-          nrow = 2, align = "v", axis = "r")
+        gg1 <- cowplot::plot_grid(
+          region_list[[1]], region_list[[2]], cowplot::get_legend(legend_temp), 
+          ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.4))    
       } else {
-        side_bar <- cowplot::plot_grid(
-          NULL, gg_insert,
-          rel_heights = c(1.25, .75),
-          nrow = 2, align = "v", axis = "r")
+        gg1 <- cowplot::plot_grid(
+          region_list[[1]], region_list[[2]], NULL, 
+          ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.4))    
       }
       
-      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
-      gg <- cowplot::plot_grid(
-        gg, NULL, side_bar, 
-        ncol = 3, greedy = TRUE, rel_widths = c(1, .01, .25))
-      }
+      gg2 <- cowplot::plot_grid(
+        # region_list[[1]], region_list[[2]], 
+        region_list[[3]], region_list[[4]], gg_insert, 
+        ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.25, 0.75, 0.6)) +
+        draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
+        draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)   
       
-      gg <- cowplot::plot_grid(
-        header_row, 
-        gg, 
-        nrow = 3, greedy = TRUE, rel_heights = c(0.3, 2))
+      gg <- cowplot::plot_grid(header_row, gg1, gg2, 
+                               ncol = 1, nrow = 3, greedy = TRUE, rel_heights = c(0.4, 1, 1))
       
     }
     

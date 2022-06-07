@@ -313,7 +313,7 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   plot_mean = TRUE,
 #                   dir_wd = dir_wd)
 # 
-# ## AI --------------------------------------------------------------------------
+## AI --------------------------------------------------------------------------
 maxyr <- 2022 #CHANGE
 data_source <- "gd" # google drive
 SRVY <- "AI"
@@ -350,7 +350,7 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
   dplyr::arrange(region)
 survey_area$survey.grid1 <- survey_area$survey.grid
-# 
+
 # make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
 #                   SRVY = SRVY,
 #                   haul = haul,
@@ -372,21 +372,6 @@ survey_area$survey.grid1 <- survey_area$survey.grid
 #                   show_planned_stations = show_planned_stations,
 #                   data_source = data_source,
 #                   plot_anom = plot_anom,
-#                   dir_wd = dir_wd)
-# make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = "latest",
-#                   survey_area = survey_area,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   data_source = data_source,
-#                   plot_daily = FALSE,
-#                   plot_anom = TRUE,
-#                   plot_mean = TRUE,
 #                   dir_wd = dir_wd)
 # 
 # ### past years -----------------------------------------------------------------
