@@ -1,4 +1,4 @@
-# RACE Groundfish and crab Live Survey Temperature Maps
+# RACE Groundfish and Crab Live Survey Temperature Maps
 
 > Code is always in development. 
 
