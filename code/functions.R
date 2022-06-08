@@ -131,7 +131,7 @@ make_varplot_wrapper <- function(maxyr,
                                  dir_wd = "./") {
   
   case <- paste0(maxyr, "_", SRVY)
-  dir_out <- paste0(dir_wd, "/output/", case, "/")
+  dir_out <- paste0(dir_wd, "output/", case)
   
   SRVY1 <- SRVY
   if (SRVY == "BS") {
@@ -416,7 +416,7 @@ make_grid_wrapper<-function(maxyr,
                             dir_wd = "./") {
   
   case <- paste0(maxyr, "_", SRVY)
-  dir_out <- paste0(dir_wd, "/output/", case, "/")
+  dir_out <- paste0(dir_wd, "output/", case)
   
   file_end = "grid"
   dates0 <- "none"

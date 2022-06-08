@@ -56,7 +56,9 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
-dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+dir_wd <-"C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
+# dir_wd <-"~/temp_maps_2022/survey-live-temperature-map/"
+# dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
 # dir_wd <- paste0(getwd(), "/")
@@ -115,7 +117,10 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                   show_planned_stations = show_planned_stations,
                   data_source = data_source,
                   plot_anom = plot_anom,
-                  dir_wd = dir_wd)
+                  dir_wd = dir_wd)#,
+                  # plot_daily = FALSE,
+                  # plot_anom = TRUE,
+                  # plot_mean = TRUE) #CIA: added...?
 # # mean plot doesnt make sense to print until the end
 # 
 # ### past years -----------------------------------------------------------------
