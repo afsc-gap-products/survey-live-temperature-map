@@ -138,7 +138,7 @@ if (as.character(dates0[1]) == "none") {
                   " and ", 
                   format(x = as.Date(max_date), format = "%B %d, %Y"))), 
     " during the ",
-    text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+    text_list(x = gsub(pattern = "\n", replacement = " ", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
     " survey",
     ifelse(length(unique(dat$SRVY))>1, "s", ""),
     " aboard the ",
