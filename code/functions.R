@@ -1143,9 +1143,9 @@ make_figure <- function(
       }
 
       if (date_entered[1] == date_entered[i]) { # length(date_entered) == 1 | 
-        qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
+        qpdf::pdf_combine(input = c(paste0(dir_out, '/',filename0,'.pdf'), 
                                     ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
-                          output = c(paste0(dir_out, filename0, "_bind.pdf")))      
+                          output = c(paste0(dir_out, '/', filename0, "_bind.pdf")))      
       } else {
         temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf")), split = "_")
         temp <- as.Date(sort(sapply(temp,"[[",1)))
