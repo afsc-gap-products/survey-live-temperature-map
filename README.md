@@ -42,6 +42,8 @@ How to set up the task scheduler: https://docs.google.com/document/d/1pwBmR6Aqgn
 
 Where the files will be saved to: https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq
 
+Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. The latest version is here: https://github.com/jgm/pandoc/releases/tag/2.18. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
+
 ## Plot Examples
 
 ### Final combined gifs

@@ -604,12 +604,12 @@ make_figure <- function(
     iterate <- 1 
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
-    if (sum(is.na(dat$var))!=0){
+    if (sum(is.na(dat$var))!=0 & show_planned_stations){
       iterate <- iterate[-length(iterate)]
     }
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
-    if (sum(is.na(dat$var))!=0) {
+    if (sum(is.na(dat$var))!=0 & show_planned_stations) {
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
@@ -618,6 +618,7 @@ make_figure <- function(
   
   ## Make plots for each day of dates0 -----------------------------------------
   for (i in iterate) {
+    
     start_time <- Sys.time()
     
     grid_stations_plot<-survey_area$survey.grid
@@ -632,6 +633,7 @@ make_figure <- function(
     } else {
       
       max_date <- date_entered[i]
+      print(max_date)
       
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
