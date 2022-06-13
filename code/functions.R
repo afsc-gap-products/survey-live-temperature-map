@@ -604,12 +604,12 @@ make_figure <- function(
     iterate <- 1 
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
-    if (sum(is.na(dat$var))!=0){
+    if (sum(is.na(dat$var))!=0 & show_planned_stations){
       iterate <- iterate[-length(iterate)]
     }
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
-    if (sum(is.na(dat$var))!=0) {
+    if (sum(is.na(dat$var))!=0 & show_planned_stations) {
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
