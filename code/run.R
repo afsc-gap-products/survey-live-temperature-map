@@ -6,6 +6,7 @@
 #' ---------------------------
 
 # Knowns -----------------------------------------------------------------------
+googledrive_dl <- TRUE
 
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
@@ -55,6 +56,7 @@ googledrive::drive_auth()
 ## Actually we cant use the here package - it actually causes issues with the tasks scheduler, 
 ## which has no concept of a project root folder. 
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+dir_wd <-"C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 # dir_wd <-"C:/Users/emily.markowitz/Work/Projects/GAPSurveyTemperatureMap/"
 # dir_wd <- paste0(getwd(), "/")
@@ -131,44 +133,83 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   dir_wd = dir_wd)
 # 
 ## AI --------------------------------------------------------------------------
-maxyr <- 2022 #CHANGE
-data_source <- "gd" # google drive
-SRVY <- "AI"
-plot_anom <- FALSE
-plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-region_akgfmaps = "ai"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-#dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
-var = "bt"
-dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-show_planned_stations <- FALSE
-survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-
-survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
-                                layer = "aigrid_trawable_thru2018_Emily",
-                                verbose=F) %>%
-  sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-  st_as_sf(x = .) %>%
-  dplyr::rename(station = ID,
-                stratum = STRATUM) %>%
-  dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
-                  stratum != 0) %>% # land
-  sp::merge(
-    x = .,
-    y = goa_strata0 %>%
-      dplyr::filter(survey == "AI") %>%
-      dplyr::mutate(SRVY = "AI",
-                    region = stringr::str_to_title(inpfc_area),
-                    region = dplyr::case_when(
-                      region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-                      TRUE ~ region)) %>%
-      dplyr::select(SRVY, stratum, region) %>%
-      dplyr::distinct(),
-    all.x = TRUE)  %>% # , duplicateGeoms = TRUE
-  dplyr::arrange(region)
-survey_area$survey.grid1 <- survey_area$survey.grid
-
-# make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+# maxyr <- 2022 #CHANGE
+# data_source <- "gd" # google drive
+# SRVY <- "AI"
+# plot_anom <- FALSE
+# plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
+# region_akgfmaps = "ai"
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
+# #dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+# var = "bt"
+# dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+# show_planned_stations <- FALSE
+# survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+# 
+# survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
+#                                 layer = "aigrid_trawable_thru2018_Emily",
+#                                 verbose=F) %>%
+#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
+#   st_as_sf(x = .) %>%
+#   dplyr::rename(station = ID,
+#                 stratum = STRATUM) %>%
+#   dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
+#                   stratum != 0) %>% # land
+#   sp::merge(
+#     x = .,
+#     y = goa_strata0 %>%
+#       dplyr::filter(survey == "AI") %>%
+#       dplyr::mutate(SRVY = "AI",
+#                     region = stringr::str_to_title(inpfc_area),
+#                     region = dplyr::case_when(
+#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
+#                       TRUE ~ region)) %>%
+#       dplyr::select(SRVY, stratum, region) %>%
+#       dplyr::distinct(),
+#     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
+#   dplyr::arrange(region)
+# survey_area$survey.grid1 <- survey_area$survey.grid
+# 
+# # make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+# #                   SRVY = SRVY,
+# #                   haul = haul,
+# #                   dat_survreg = dat_survreg,
+# #                   dir_googledrive_upload = dir_googledrive_upload,
+# #                   survey_area = survey_area,
+# #                   data_source = data_source,
+# #                   plot_subtitle = plot_subtitle,
+# #                   dir_wd = dir_wd)
+# # make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
+# #                   SRVY = SRVY,
+# #                   haul = haul,
+# #                   dat_survreg = dat_survreg,
+# #                   var = var,
+# #                   dir_googledrive_upload = dir_googledrive_upload,
+# #                   dates0 = dates0,
+# #                   survey_area = survey_area,
+# #                   plot_subtitle = plot_subtitle,
+# #                   show_planned_stations = show_planned_stations,
+# #                   data_source = data_source,
+# #                   plot_anom = plot_anom,
+# #                   dir_wd = dir_wd)
+# # 
+# # ### past years -----------------------------------------------------------------
+# data_source = "oracle"
+# plot_anom = FALSE
+# dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+# 
+# dat_survreg <- dplyr::bind_rows(dat_survreg,
+#                                 data.frame(reg_shapefile = "AI",
+#                                            region_long = "Aleutian Islands",
+#                                            SRVY = "AI",
+#                                            region = "AI",
+#                                            vessel_id = c(148, 143), # CHANGE
+#                                            vessel_shape = c("OEX", "SS"), # CHANGE
+#                                            reg_dates = "\n(June 07-Aug 17 2022)")) # CHANGE
+# 
+# maxyr <- 2018
+# dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
+# make_grid_wrapper(maxyr = maxyr,                               # Blank grid plot
 #                   SRVY = SRVY,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
@@ -177,7 +218,7 @@ survey_area$survey.grid1 <- survey_area$survey.grid
 #                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
-# make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
+# make_varplot_wrapper(maxyr = maxyr,                                 # Daily plot
 #                   SRVY = SRVY,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
@@ -190,42 +231,3 @@ survey_area$survey.grid1 <- survey_area$survey.grid
 #                   data_source = data_source,
 #                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
-# 
-# ### past years -----------------------------------------------------------------
-data_source = "oracle"
-plot_anom = FALSE
-dates0 <- "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-
-dat_survreg <- dplyr::bind_rows(dat_survreg,
-                                data.frame(reg_shapefile = "AI",
-                                           region_long = "Aleutian Islands",
-                                           SRVY = "AI",
-                                           region = "AI",
-                                           vessel_id = c(148, 143), # CHANGE
-                                           vessel_shape = c("OEX", "SS"), # CHANGE
-                                           reg_dates = "\n(June 07-Aug 17 2022)")) # CHANGE
-
-maxyr <- 2018
-dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
-make_grid_wrapper(maxyr = maxyr,                               # Blank grid plot
-                  SRVY = SRVY,
-                  haul = haul,
-                  dat_survreg = dat_survreg,
-                  dir_googledrive_upload = dir_googledrive_upload,
-                  survey_area = survey_area,
-                  data_source = data_source,
-                  plot_subtitle = plot_subtitle,
-                  dir_wd = dir_wd)
-make_varplot_wrapper(maxyr = maxyr,                                 # Daily plot
-                  SRVY = SRVY,
-                  haul = haul,
-                  dat_survreg = dat_survreg,
-                  var = var,
-                  dir_googledrive_upload = dir_googledrive_upload,
-                  dates0 = dates0,
-                  survey_area = survey_area,
-                  plot_subtitle = plot_subtitle,
-                  show_planned_stations = show_planned_stations,
-                  data_source = data_source,
-                  plot_anom = plot_anom,
-                  dir_wd = dir_wd)
