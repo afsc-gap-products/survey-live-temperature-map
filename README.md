@@ -1,7 +1,4 @@
-# GAP Survey Temperature Maps
-
-<!-- badges: start -->
-<!-- badges: end -->
+# RACE Groundfish and Crab Live Survey Temperature Maps
 
 > Code is always in development. 
 
@@ -33,7 +30,7 @@ Seattle, WA 98195
 These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website
 
  - [2022 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-bering-sea-bottom-trawl-surveys-2022)
- - [2022 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-bering-sea-bottom-trawl-surveys-2022) 
+ - [2022 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-aleutian-islands-bottom-trawl-surveys-2022) 
  - [2021 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey)
  - [2019 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/feature-story/2019-southeastern-bering-sea-shelf-bottom-trawl-survey-gets-underway)
  - [2018 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2018-eastern-bering-sea-continental-shelf-and-northern-bering-sea-trawl-surveys)
@@ -45,15 +42,21 @@ How to set up the task scheduler: https://docs.google.com/document/d/1pwBmR6Aqgn
 
 Where the files will be saved to: https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq
 
-## Final combined gif for the NEBS survey (2021)
+Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. The latest version is here: https://github.com/jgm/pandoc/releases/tag/2.18. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
+
+## Plot Examples
+
+### Final combined gifs
 
 ![2021 Bering Sea Survey](./test/2021-08-16_daily.gif)
 
-## Example files
+![2018 Aluetian Islands Survey](./test/2021-08-08_daily.gif)
 
 ### Blank, Grid-only Plot
 
-![Daily Temperatrues](./test/_grid.png)
+![Bering Sea Survey Empty Grid](./test/_grid_bs.png)
+
+![Aluetian Islands Survey Empty Grid](./test/_grid_ai.png)
 
 ### Daily Plot
 
@@ -62,10 +65,6 @@ Where the files will be saved to: https://drive.google.com/drive/u/2/folders/1BS
 ### Anomaly Plot
 
 ![Anomaly Temperatrues](./test/2021-06-04_anom.png)
-
-### GIF of maps as they progressed over time
-
-![GIF of Daily Temperatrues](./test/2021-06-04_daily.gif)
 
 ## NOAA README
 

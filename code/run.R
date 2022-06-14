@@ -96,15 +96,15 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
-# make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
+make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  survey_area = survey_area,
+                  data_source = data_source,
+                  plot_subtitle = plot_subtitle,
+                  dir_wd = dir_wd)
 make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      SRVY = SRVY,
                      haul = haul,
@@ -118,21 +118,21 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      data_source = data_source,
                      plot_anom = plot_anom,
                      dir_wd = dir_wd)
-# make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = "latest",
-#                   survey_area = survey_area,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   data_source = data_source,
-#                   plot_daily = FALSE,
-#                   plot_anom = FALSE, # anom plot here doesnt make sense to print until the end
-#                   plot_mean = TRUE,
-#                   dir_wd = dir_wd)
+make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  var = var,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  dates0 = "latest",
+                  survey_area = survey_area,
+                  plot_subtitle = plot_subtitle,
+                  show_planned_stations = show_planned_stations,
+                  data_source = data_source,
+                  plot_daily = FALSE,
+                  plot_anom = FALSE, # anom plot here doesnt make sense to print until the end
+                  plot_mean = TRUE,
+                  dir_wd = dir_wd)
 
 
 # ## AI --------------------------------------------------------------------------
@@ -143,7 +143,7 @@ plot_anom <- FALSE
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 region_akgfmaps = "ai"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-#dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 var = "bt"
 dates0 <- "latest" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 show_planned_stations <- FALSE
@@ -173,15 +173,15 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
   dplyr::arrange(region)
 survey_area$survey.grid1 <- survey_area$survey.grid
 
-# make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
+make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  survey_area = survey_area,
+                  data_source = data_source,
+                  plot_subtitle = plot_subtitle,
+                  dir_wd = dir_wd)
 make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      SRVY = SRVY,
                      haul = haul,
