@@ -326,12 +326,13 @@ make_varplot_wrapper <- function(maxyr,
   # googledrive::drive_mkdir(name = "anom", 
   #                          path = dir_googledrive_upload,
   #                          overwrite = FALSE)
-  
+  if (!is.null(dir_googledrive_upload)) {
   dir_googledrive_upload0 <- googledrive::drive_ls(path = dir_googledrive_upload) %>% 
     dplyr::filter(name == "anom") %>% 
     dplyr::select("id") %>% 
     unlist() %>% 
     googledrive::as_id()
+  }
   
   if (plot_mean) {
     
@@ -1216,7 +1217,7 @@ make_figure <- function(
     #   googledrive::drive_mv(file = temp, path = )
     # }
     
-    if (!(is.null(dir_googledrive_upload))) {
+    if (!is.null(dir_googledrive_upload)) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       if (i == iterate[length(iterate)] & file_end %in% c("daily")) {
         temp <- c(temp, 
