@@ -27,11 +27,21 @@ knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = 
 vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
-
-if (as.character(dates0[1]) == "none") {
+if (file_end == "mean") {
+  
+    temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
+  
+  fig_cap <- fig_alt <- paste0(
+    "Mean bottom temperatures from the NOAA Fisheries ", 
+    gsub(pattern = "\n", replacement = " and ", x = plot_title), 
+    " in ", maxyr, 
+    ". ")
+  
+} else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
   
   temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
   
+  if (SRVY != "AI") {
   fig_cap <- fig_alt <- paste0(
     "NOAA Fisheries conducted the ", 
     text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
@@ -44,6 +54,10 @@ if (as.character(dates0[1]) == "none") {
     ifelse(length(temp1)>1, "s", ""),
     ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
     paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
+  } else {
+    fig_cap <- fig_alt <- paste0("Aleutian Islands survey region, ", maxyr, ". ")
+  }
+  
   
 # } else if (file_end = "mean") {
 #   
@@ -67,6 +81,7 @@ if (as.character(dates0[1]) == "none") {
   loc <- dat_plot %>% 
     dplyr::filter(!is.na(var) & 
                     date == max_date) 
+  
   if (nrow(loc) == 0) {
     stations1 <- "no stations were sampled "
   } else {
@@ -90,6 +105,10 @@ if (as.character(dates0[1]) == "none") {
       dplyr::arrange(vessel_shape) %>% 
       dplyr::mutate(lon = round(x = lon, digits = 3), 
                     lat = round(x = lat, digits = 3)) 
+    
+    # TOLEDO because there are issues in the shapefile... again
+    dat_max_date <- dat_max_date %>% 
+      dplyr::filter(!is.na(lon))
     
     temp <- c()
     for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
