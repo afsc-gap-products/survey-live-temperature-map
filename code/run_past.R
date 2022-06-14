@@ -40,7 +40,7 @@ survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.cr
 
 # Daily
 var = "bt"
-dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 show_planned_stations <- TRUE
 plot_anom <- FALSE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
@@ -57,7 +57,6 @@ survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
 data_source = "oracle"
 plot_anom = FALSE
-dates0 <- "all"
 
 dat_ebs <- data.frame(reg_shapefile = "EBS_SHELF", 
                           region_long = "Eastern Bering Sea", 
@@ -76,18 +75,18 @@ dat_nbs <- data.frame(reg_shapefile = "NBS_SHELF",
 dat_survdat <- dplyr::bind_rows(dat_ebs, dat_nbs)
 
 
-yrs <- list(2021 = c("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW"), 
+yrs <- list("2021" = c("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW"), 
                      # dat = dat_bs), 
-            2019 = c("https://drive.google.com/drive/folders/1S5FyXwWyFUgFkvDlGTC6cymtISyZdd9R"), 
+            "2019" = c("https://drive.google.com/drive/folders/1S5FyXwWyFUgFkvDlGTC6cymtISyZdd9R"), 
                      # dat = dat_bs), 
-            2017 = c("https://drive.google.com/drive/folders/1nAeb9Jq9_FxUc70ZfvXaYZbXrZCQTD4u"))#, 
+            "2017" = c("https://drive.google.com/drive/folders/1nAeb9Jq9_FxUc70ZfvXaYZbXrZCQTD4u"))#, 
 # dat = dat_bs))
 
 
 for (i in 1:length(yrs)){
   
   maxyr <- as.numeric(names(yrs)[i])
-  dir_googledrive_upload <- googledrive::as_id(yrs[i])
+  dir_googledrive_upload <- googledrive::as_id(unlist(yrs[i]))
   make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
                     SRVY = SRVY,
                     haul = haul,
@@ -144,12 +143,12 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  %>%
   dplyr::mutate(region = "Bering Sea")
 
-yrs <- list(2018 = "https://drive.google.com/drive/folders/1jaJrvKE729I15YnC6LhRDVI5Xxg4xEPo")
+yrs <- list("2018" = "https://drive.google.com/drive/folders/1jaJrvKE729I15YnC6LhRDVI5Xxg4xEPo")
 
 for (i in 1:length(yrs)) {
   
   maxyr <- as.numeric(names(yrs)[i])
-  dir_googledrive_upload <- googledrive::as_id(yrs[i])
+  dir_googledrive_upload <- googledrive::as_id(unlist(yrs[i]))
   
   make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
                     SRVY = SRVY,
@@ -236,12 +235,12 @@ dat_survreg <- dplyr::bind_rows(dat_survreg,
                                            vessel_shape = c("OEX", "SS"), # CHANGE
                                            reg_dates = "\n(June 07-Aug 17 2022)")) # CHANGE
 
-yrs <- list(2018 = "https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
+yrs <- list("2018" = "https://drive.google.com/drive/folders/1dzWwb3bXnPXlSy_JIaY4BKo6WDshru_d")
 
 for (i in 1:length(yrs)) {
   
   maxyr <- as.numeric(names(yrs)[i])
-  dir_googledrive_upload <- googledrive::as_id(yrs[i])
+  dir_googledrive_upload <- googledrive::as_id(unlist(yrs[i]))
   
   make_grid_wrapper(maxyr = maxyr,                               # Blank grid plot
                     SRVY = SRVY,

@@ -300,7 +300,7 @@ make_varplot_wrapper <- function(maxyr,
   
   ### Daily --------------------------------------------------------------------
   if (plot_daily) {  # Daily plot
-    file_end = "daily"
+    file_end <- "daily"
     make_figure(SRVY = SRVY, 
                 dat = dat,
                 var_breaks = var_breaks, 
@@ -1168,6 +1168,7 @@ make_figure <- function(
       } else {
         temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf")), split = "_")
         temp <- as.Date(sort(sapply(temp,"[[",1)))
+        temp <- temp[!is.na(temp)]
         temp <- max(temp[as.Date(temp) < as.Date(max_date)])
         
         filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
@@ -1192,10 +1193,12 @@ make_figure <- function(
     }
     
     ### rename "current" plots for easy finding ------------------------------------
-    if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+    if (i == iterate[length(iterate)] & file_end %in% c("daily")) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      for (i in 1:length(temp)){
-        file.copy(from = temp[i], to = gsub(pattern = max_date, replacement = "current", x = temp[i]))
+      for (iii in 1:length(temp)){
+        file.copy(from = temp[iii], 
+                  to = gsub(pattern = max_date, replacement = "current", x = temp[iii]), 
+                  overwrite = TRUE)
       }
     }
     
@@ -1215,9 +1218,11 @@ make_figure <- function(
     
     if (!(is.null(dir_googledrive_upload))) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+      if (i == iterate[length(iterate)] & file_end %in% c("daily")) {
         temp <- c(temp, 
-                  list.files(path = dir_out, pattern = sub(pattern = max_date, replacement = "current", x = filename0), full.names = TRUE))
+                  list.files(path = dir_out, 
+                             pattern = sub(pattern = max_date, replacement = "current", x = filename0), 
+                             full.names = TRUE))
       }
       for (iii in 1:length(temp)) {
         drive_upload(
