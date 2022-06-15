@@ -5,7 +5,13 @@
 #' purpose: run script
 #' ---------------------------
 
+
+# source("./code/run_past.R")
+# 1
+
 # Knowns -----------------------------------------------------------------------
+googledrive_dl <- TRUE
+dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
@@ -27,22 +33,17 @@ source(file = paste0(dir_wd,"code/functions.R"))
 source(file = paste0(dir_wd, "code/data.R"))
 
 # Map --------------------------------------------------------------------------
+var = "bt"
+data_source <- "oracle"
+plot_anom <- FALSE
+dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 
 ## NBS + EBS -------------------------------------------------------------------
-maxyr <- 2022 #CHANGE
-data_source <- "gd" # google drive
 SRVY <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 region_akgfmaps = "bs.all"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-
-# Daily
-var = "bt"
-dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 show_planned_stations <- TRUE
-plot_anom <- FALSE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
   dplyr::rename(station = STATIONID) %>%
@@ -54,9 +55,6 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
             all.x = TRUE) %>% 
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
-
-data_source = "oracle"
-plot_anom = FALSE
 
 dat_ebs <- data.frame(reg_shapefile = "EBS_SHELF", 
                           region_long = "Eastern Bering Sea", 
@@ -72,16 +70,11 @@ dat_nbs <- data.frame(reg_shapefile = "NBS_SHELF",
                                            vessel_id = c(94, 162), 
                                            vessel_shape = c("V", "A"), 
                                            reg_dates = "Aug 03 - Aug 28 2022") 
-dat_survdat <- dplyr::bind_rows(dat_ebs, dat_nbs)
-
+dat_survreg <- dplyr::bind_rows(dat_ebs, dat_nbs)
 
 yrs <- list("2021" = c("https://drive.google.com/drive/folders/1q4UN9INXFAyZcIwqy8W9UYfY3G1LuQgW"), 
-                     # dat = dat_bs), 
             "2019" = c("https://drive.google.com/drive/folders/1S5FyXwWyFUgFkvDlGTC6cymtISyZdd9R"), 
-                     # dat = dat_bs), 
-            "2017" = c("https://drive.google.com/drive/folders/1nAeb9Jq9_FxUc70ZfvXaYZbXrZCQTD4u"))#, 
-# dat = dat_bs))
-
+            "2017" = c("https://drive.google.com/drive/folders/1nAeb9Jq9_FxUc70ZfvXaYZbXrZCQTD4u"))
 
 for (i in 1:length(yrs)){
   
@@ -191,10 +184,8 @@ for (i in 1:length(yrs)) {
 
 ## AI --------------------------------------------------------------------------
 SRVY <- "AI"
-plot_anom <- FALSE
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 region_akgfmaps = "ai"
-var = "bt"
 show_planned_stations <- FALSE
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 
@@ -221,10 +212,6 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
   dplyr::arrange(region)
 survey_area$survey.grid1 <- survey_area$survey.grid
-
-data_source = "oracle"
-plot_anom = FALSE
-dates0 <- "all" # latest 
 
 dat_survreg <- dplyr::bind_rows(dat_survreg,
                                 data.frame(reg_shapefile = "AI",
