@@ -1257,8 +1257,10 @@ make_figure_gif<-function(file_end,
                      pattern = paste0(as.Date(max_date), "_", file_end, ".png"), 
                      full.names = TRUE)
   
-  temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
-  
+  temp <- list.files(path = dir_out, pattern = paste0("_", file_end, ".gif"))
+  temp <- temp[!grepl(pattern = "current", x = temp)]
+  temp <- strsplit(x = temp, split = "_")
+
   if (length(temp) != 0) {
     temp <- as.Date(sort(sapply(temp,"[[",1)))
     temp <- max(temp[as.Date(temp) < as.Date(max_date)])
