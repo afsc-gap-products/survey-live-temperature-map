@@ -605,13 +605,18 @@ make_figure <- function(
     iterate <- 1 
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
-    if (sum(is.na(dat$var))!=0 & show_planned_stations){
+    # if (sum(is.na(dat$var))!=0 & show_planned_stations){
+      if ((sum(is.na(dat$var))!=0 & # if not the last day of the survey
+           show_planned_stations) & # if we are even showing planned stations
+          ( data_source == "gd" & max(unique(dat$date[!is.na(dat$var)])) != date_entered[length(date_entered)])) { # and if there are even planned stations to show
+      
       iterate <- iterate[-length(iterate)]
     }
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
-    if ((sum(is.na(dat$var))!=0 & show_planned_stations) & 
-       ( data_source == "gd" & max(unique(dat$date[!is.na(dat$var)])) != date_entered[length(date_entered)])) {
+    if ((sum(is.na(dat$var))!=0 & # if not the last day of the survey
+         show_planned_stations) & # if we are even showing planned stations
+       ( data_source == "gd" & max(unique(dat$date[!is.na(dat$var)])) != date_entered[length(date_entered)])) { # and if there are even planned stations to show
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
