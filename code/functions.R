@@ -1174,7 +1174,9 @@ make_figure <- function(
                                     ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
                           output = c(paste0(dir_out, filename0, "_bind.pdf")))      
       } else {
-        temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf")), split = "_")
+        temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
+        temp <- temp[!grepl(pattern = "current", x = temp)]
+        temp <- strsplit(x = temp, split = "_")
         temp <- as.Date(sort(sapply(temp,"[[",1)))
         temp <- max(temp[as.Date(temp) < as.Date(max_date)])
         
@@ -1260,6 +1262,7 @@ make_figure_gif<-function(file_end,
                      full.names = TRUE)
   
   temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
+  temp <- temp[!grepl(pattern = "current", x = temp)]
   
   if (length(temp) != 0) {
     temp <- as.Date(sort(sapply(temp,"[[",1)))
