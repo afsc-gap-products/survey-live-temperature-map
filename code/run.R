@@ -166,15 +166,15 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
   dplyr::arrange(region)
 survey_area$survey.grid1 <- survey_area$survey.grid
 
-# make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   survey_area = survey_area,
-#                   data_source = data_source,
-#                   plot_subtitle = plot_subtitle,
-#                   dir_wd = dir_wd)
+make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  survey_area = survey_area,
+                  data_source = data_source,
+                  plot_subtitle = plot_subtitle,
+                  dir_wd = dir_wd)
 make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      SRVY = SRVY,
                      haul = haul,

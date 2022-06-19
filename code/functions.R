@@ -300,7 +300,7 @@ make_varplot_wrapper <- function(maxyr,
   
   ### Daily --------------------------------------------------------------------
   if (plot_daily) {  # Daily plot
-    file_end <- "daily"
+    file_end = "daily"
     make_figure(SRVY = SRVY, 
                 dat = dat,
                 var_breaks = var_breaks, 
@@ -326,13 +326,12 @@ make_varplot_wrapper <- function(maxyr,
   # googledrive::drive_mkdir(name = "anom", 
   #                          path = dir_googledrive_upload,
   #                          overwrite = FALSE)
-  if (!is.null(dir_googledrive_upload)) {
+  
   dir_googledrive_upload0 <- googledrive::drive_ls(path = dir_googledrive_upload) %>% 
     dplyr::filter(name == "anom") %>% 
     dplyr::select("id") %>% 
     unlist() %>% 
     googledrive::as_id()
-  }
   
   if (plot_mean) {
     
@@ -423,8 +422,7 @@ make_grid_wrapper<-function(maxyr,
   dates0 <- "none"
   show_planned_stations = FALSE
   make_gifs = FALSE
-  show_planned_stations = FALSE
-  
+
   SRVY1 <- SRVY
   if (SRVY == "BS") {
     SRVY1 <- c("EBS", "NBS")
@@ -605,18 +603,16 @@ make_figure <- function(
     iterate <- 1 
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
-    # if (sum(is.na(dat$var))!=0 & show_planned_stations){
-      if ((sum(is.na(dat$var))!=0 & # if not the last day of the survey
-           show_planned_stations) & # if we are even showing planned stations
-          ( data_source == "gd" & max(unique(dat$date[!is.na(dat$var)])) != date_entered[length(date_entered)])) { # and if there are even planned stations to show
-      
+    if (sum(is.na(dat$var))!=0 & # if the survey is not yet complete
+        show_planned_stations & # if we plan to show planned stations
+        sum(is.na(dat$var) & !is.na(dat$vessel_shape))>0) { # and if there are planned stations to show
       iterate <- iterate[-length(iterate)]
     }
   } else if (dates0 == "latest") {
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
-    if ((sum(is.na(dat$var))!=0 & # if not the last day of the survey
-         show_planned_stations) & # if we are even showing planned stations
-       ( data_source == "gd" & max(unique(dat$date[!is.na(dat$var)])) != date_entered[length(date_entered)])) { # and if there are even planned stations to show
+    if (sum(is.na(dat$var))!=0 & # if the survey is not yet complete
+        show_planned_stations & # if we plan to show planned stations
+        sum(is.na(dat$var) & !is.na(dat$vessel_shape))>0) { # and if there are planned stations to show
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
@@ -641,20 +637,25 @@ make_figure <- function(
       
       max_date <- date_entered[i]
       print(max_date)
+      next_date <- date_entered[length(date_entered)]
       
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
       grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
-      # only use dates including 1 days before this date and before this date, so we can see the planned progression
+      # only use dates including the next day before this date and before this date, so we can see the planned progression
       # if (date_entered[i] != date_entered[length(date_entered)]) {
-      dat_plot$vessel_shape[as.Date(dat_plot$date)>as.Date(max_date)+1]<-NA
-      dat_plot$date[as.Date(dat_plot$date)>as.Date(max_date)+1]<-NA
-      grid_stations_plot$vessel_shape[as.Date(grid_stations_plot$date) > as.Date(max_date)+1]<-NA
-      grid_stations_plot$date[as.Date(grid_stations_plot$date) > as.Date(max_date)+1]<-NA
+      dat_plot$vessel_shape[as.Date(dat_plot$date)>as.Date(next_date)]<-NA
+      dat_plot$date[as.Date(dat_plot$date)>as.Date(next_date)]<-NA
+      grid_stations_plot$vessel_shape[as.Date(grid_stations_plot$date) > as.Date(next_date)]<-NA
+      grid_stations_plot$date[as.Date(grid_stations_plot$date) > as.Date(next_date)]<-NA
       
       # separate out the data for the temperature and planned stations if there are planned stations listed
-      if (show_planned_stations & 
-          sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) {
+      # if (show_planned_stations & 
+      #     sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) {
+        if (#sum(is.na(dat$var))!=0 & # if the survey is not yet complete
+            show_planned_stations & # if we plan to show planned stations
+            sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) { # and if there are any planned stations to show
+          
         
         # planned stations
         loc <- dat_plot %>% 
@@ -1175,7 +1176,6 @@ make_figure <- function(
       } else {
         temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf")), split = "_")
         temp <- as.Date(sort(sapply(temp,"[[",1)))
-        temp <- temp[!is.na(temp)]
         temp <- max(temp[as.Date(temp) < as.Date(max_date)])
         
         filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
@@ -1200,12 +1200,10 @@ make_figure <- function(
     }
     
     ### rename "current" plots for easy finding ------------------------------------
-    if (i == iterate[length(iterate)] & file_end %in% c("daily")) {
+    if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      for (iii in 1:length(temp)){
-        file.copy(from = temp[iii], 
-                  to = gsub(pattern = max_date, replacement = "current", x = temp[iii]), 
-                  overwrite = TRUE)
+      for (i in 1:length(temp)){
+        file.copy(from = temp[i], to = gsub(pattern = max_date, replacement = "current", x = temp[i]))
       }
     }
     
@@ -1223,13 +1221,11 @@ make_figure <- function(
     #   googledrive::drive_mv(file = temp, path = )
     # }
     
-    if (!is.null(dir_googledrive_upload)) {
+    if (!(is.null(dir_googledrive_upload))) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      if (i == iterate[length(iterate)] & file_end %in% c("daily")) {
+      if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
         temp <- c(temp, 
-                  list.files(path = dir_out, 
-                             pattern = sub(pattern = max_date, replacement = "current", x = filename0), 
-                             full.names = TRUE))
+                  list.files(path = dir_out, pattern = sub(pattern = max_date, replacement = "current", x = filename0), full.names = TRUE))
       }
       for (iii in 1:length(temp)) {
         drive_upload(
@@ -1263,10 +1259,8 @@ make_figure_gif<-function(file_end,
                      pattern = paste0(as.Date(max_date), "_", file_end, ".png"), 
                      full.names = TRUE)
   
-  temp <- list.files(path = dir_out, pattern = paste0("_", file_end, ".gif"))
-  temp <- temp[!grepl(pattern = "current", x = temp)]
-  temp <- strsplit(x = temp, split = "_")
-
+  temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
+  
   if (length(temp) != 0) {
     temp <- as.Date(sort(sapply(temp,"[[",1)))
     temp <- max(temp[as.Date(temp) < as.Date(max_date)])
