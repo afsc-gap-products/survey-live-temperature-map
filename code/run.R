@@ -62,7 +62,8 @@ googledrive::drive_auth()
 ## the tasks scheduler, which has no concept of a project root folder. 
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
-dir_wd <- paste0(getwd(), "/")
+# dir_wd <- paste0(getwd(), "/")
+dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
 
 sink(file=paste0(dir_wd, "/output/", Sys.Date(), "_log.txt")) # save console output
 
