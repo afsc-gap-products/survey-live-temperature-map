@@ -120,6 +120,7 @@ make_varplot_wrapper <- function(maxyr,
                                  dat_survreg, 
                                  var = "bt", 
                                  dir_googledrive_upload = NULL, 
+                                 dir_app_server = NULL,
                                  dates0 = "latest", 
                                  survey_area, 
                                  plot_subtitle = "", 
@@ -317,6 +318,13 @@ make_varplot_wrapper <- function(maxyr,
                 data_source = data_source,
                 show_planned_stations = show_planned_stations, 
                 height = height)
+    
+    # if (!is.null(dir_app_server)) {
+    #     temp <- list.files(path = dir_out, pattern = "current", full.names = TRUE)
+    #     for (i in 1:length(temp)){
+    #       file.copy(from = temp[i], to = gsub(pattern = dir_out, replacement = dir_app_server, x = temp[i]))
+    #     }
+    # }
   }
   
   ### Mean ---------------------------------------------------------------------
@@ -410,6 +418,7 @@ make_grid_wrapper<-function(maxyr,
                             haul, 
                             dat_survreg, 
                             dir_googledrive_upload = NULL,  
+                            dir_app_server = NULL, 
                             survey_area, 
                             plot_subtitle = "", 
                             data_source = "gd", 
@@ -496,6 +505,14 @@ make_grid_wrapper<-function(maxyr,
               data_source = data_source,
               show_planned_stations = show_planned_stations, 
               height = height)
+  
+  if (!is.null(dir_app_server)) {
+      temp <- list.files(path = dir_out, pattern = "_grid", full.names = TRUE)
+      for (i in 1:length(temp)){
+        file.copy(from = temp[i], to = gsub(pattern = dir_out, replacement = dir_app_server, x = temp[i]))
+      }
+  }
+  
 }
 
 

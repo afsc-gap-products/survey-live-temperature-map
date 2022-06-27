@@ -64,7 +64,7 @@ dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
 dir_wd <- paste0(getwd(), "/")
 
-sink(file=paste0(dir_wd, "/output/", Sys.Date(), "_log.txt")) # save console output
+# sink(file=paste0(dir_wd, "/output/", Sys.Date(), "_log.txt")) # save console output
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -79,6 +79,7 @@ region_akgfmaps = "bs.all"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
 # dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+dir_app_server <- "apps.afsc.noaa.gov/RACE/groundfish/beringsea"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 show_planned_stations <- TRUE
 plot_anom <- TRUE
@@ -99,6 +100,7 @@ survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
 #                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dir_app_server = dir_app_server, 
 #                   survey_area = survey_area,
 #                   data_source = data_source,
 #                   plot_subtitle = plot_subtitle,
@@ -109,6 +111,7 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      dat_survreg = dat_survreg,
                      var = var,
                      dir_googledrive_upload = dir_googledrive_upload,
+                     dir_app_server = dir_app_server, 
                      dates0 = dates0,
                      survey_area = survey_area,
                      plot_subtitle = plot_subtitle,
@@ -139,6 +142,7 @@ region_akgfmaps = "ai"
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
 # dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+dir_app_server <- "apps.afsc.noaa.gov/RACE/groundfish/aleutians"
 plot_anom <- FALSE
 show_planned_stations <- FALSE
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
@@ -171,6 +175,7 @@ make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
                   haul = haul,
                   dat_survreg = dat_survreg,
                   dir_googledrive_upload = dir_googledrive_upload,
+                  dir_app_server = dir_app_server, 
                   survey_area = survey_area,
                   data_source = data_source,
                   plot_subtitle = plot_subtitle,
@@ -181,6 +186,7 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      dat_survreg = dat_survreg,
                      var = var,
                      dir_googledrive_upload = dir_googledrive_upload,
+                     dir_app_server = dir_app_server, 
                      dates0 = dates0,
                      survey_area = survey_area,
                      plot_subtitle = plot_subtitle,
@@ -205,4 +211,4 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   dir_wd = dir_wd)
 # 
 
-sink()
+# sink()
