@@ -71,6 +71,9 @@ dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
+if (googledrive_dl == TRUE) {
+  source(file = paste0(dir_wd, "code/ftp_login.R")) # removed in gitignore - ask for premission
+}
 
 # Map --------------------------------------------------------------------------
 # ## AI --------------------------------------------------------------------------
@@ -147,7 +150,25 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   plot_anom = TRUE,
 #                   plot_mean = TRUE,
 #                   dir_wd = dir_wd)
-# 
+
+## send all current files to the FTP -------------------------------------------
+# vars here defined in ftp_login.R
+dir_out <- paste0(getwd(),"/output/",maxyr,"_",SRVY,"/")
+temp <- list.files(path = dir_out, pattern = "current_", full.names = FALSE)
+dest <- dev_bs
+
+for (iiii in 1:length(temp)) {
+  print(temp[iiii])
+  
+  RCurl::ftpUpload(
+    what = paste0(dir_out, "/", temp[iiii]),
+    asText = FALSE,
+    to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", temp[iiii])),
+    userpwd = paste0(user,":", pass),
+    .opts=curlOptions(verbose=TRUE))
+}
+
+ 
 # NBS + EBS Maps --------------------------------------------------------------
 
 SRVY <- "BS"
@@ -212,7 +233,21 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   plot_mean = TRUE,
 #                   dir_wd = dir_wd)
 
+## send all current files to the FTP -------------------------------------------
+# vars here defined in ftp_login.R
+dir_out <- paste0(getwd(),"/output/",maxyr,"_",SRVY,"/")
+temp <- list.files(path = dir_out, pattern = "current_", full.names = FALSE)
+dest <- dev_bs
 
+for (iiii in 1:length(temp)) {
+  print(temp[iiii])
 
+  RCurl::ftpUpload(
+    what = paste0(dir_out, "/", temp[iiii]),
+    asText = FALSE,
+    to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", temp[iiii])),
+    userpwd = paste0(user,":", pass),
+    .opts=curlOptions(verbose=TRUE))
+}
 
 # sink()
