@@ -17,7 +17,7 @@ googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
 dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
-# dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
+dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # The surveys this script will be covering 
 dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF", 
@@ -61,9 +61,9 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
-dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+#dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
-# dir_wd <- paste0(getwd(), "/")
+dir_wd <- paste0(getwd(), "/")
 dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
 
 # sink(file=paste0(dir_wd, "/output/", Sys.Date(), "_log.txt")) # save console output
@@ -73,81 +73,12 @@ source(file = paste0(dir_wd,"code/functions.R"))
 source(file = paste0(dir_wd, "code/data.R"))
 
 # Map --------------------------------------------------------------------------
-
-## NBS + EBS Maps --------------------------------------------------------------
-
-SRVY <- "BS"
-region_akgfmaps = "bs.all"
-plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
-dir_app_server <- "apps.afsc.noaa.gov/RACE/groundfish/beringsea"
-survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-show_planned_stations <- TRUE
-plot_anom <- TRUE
-survey_area$survey.grid <- survey_area$survey.grid %>% 
-  sf::st_transform(x = ., survey_area$crs$input) %>%
-  dplyr::rename(station = STATIONID) %>%
-  sp::merge(x = ., 
-            y = haul %>%
-              dplyr::rename(station = stationid) %>% 
-              dplyr::select(station, stratum) %>% 
-              dplyr::distinct(), 
-            all.x = TRUE) %>% 
-  dplyr::mutate(region = "Bering Sea")
-survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
-
-if(shapef == TRUE) {
-make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-                  SRVY = SRVY,
-                  haul = haul,
-                  dat_survreg = dat_survreg,
-                  dir_googledrive_upload = dir_googledrive_upload,
-                  dir_app_server = dir_app_server,
-                  survey_area = survey_area,
-                  data_source = data_source,
-                  plot_subtitle = plot_subtitle,
-                  dir_wd = dir_wd)
-}
-
-make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
-                     SRVY = SRVY,
-                     haul = haul,
-                     dat_survreg = dat_survreg,
-                     var = var,
-                     dir_googledrive_upload = dir_googledrive_upload,
-                     dir_app_server = dir_app_server, 
-                     dates0 = dates0,
-                     survey_area = survey_area,
-                     plot_subtitle = plot_subtitle,
-                     show_planned_stations = show_planned_stations,
-                     data_source = data_source,
-                     plot_anom = plot_anom,
-                     dir_wd = dir_wd)
-# make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
-#                   SRVY = SRVY,
-#                   haul = haul,
-#                   dat_survreg = dat_survreg,
-#                   var = var,
-#                   dir_googledrive_upload = dir_googledrive_upload,
-#                   dates0 = "latest",
-#                   survey_area = survey_area,
-#                   plot_subtitle = plot_subtitle,
-#                   show_planned_stations = show_planned_stations,
-#                   data_source = data_source,
-#                   plot_daily = FALSE,
-#                   plot_anom = FALSE, # anom plot here doesnt make sense to print until the end
-#                   plot_mean = TRUE,
-#                   dir_wd = dir_wd)
-
-
 # ## AI --------------------------------------------------------------------------
 SRVY <- "AI"
 region_akgfmaps = "ai"
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
-dir_app_server <- "apps.afsc.noaa.gov/RACE/groundfish/aleutians"
+dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
 plot_anom <- FALSE
 show_planned_stations <- FALSE
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
@@ -175,17 +106,17 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
   dplyr::arrange(region)
 survey_area$survey.grid1 <- survey_area$survey.grid
 
-if(shapef == TRUE) {
-make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-                  SRVY = SRVY,
-                  haul = haul,
-                  dat_survreg = dat_survreg,
-                  dir_googledrive_upload = dir_googledrive_upload,
-                  dir_app_server = dir_app_server, 
-                  survey_area = survey_area,
-                  data_source = data_source,
-                  plot_subtitle = plot_subtitle,
-                  dir_wd = dir_wd)
+if(shapef == TRUE)
+{
+  make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+                    SRVY = SRVY,
+                    haul = haul,
+                    dat_survreg = dat_survreg,
+                    dir_googledrive_upload = dir_googledrive_upload,
+                    survey_area = survey_area,
+                    data_source = data_source,
+                    plot_subtitle = plot_subtitle,
+                    dir_wd = dir_wd)
 }
 
 make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
@@ -194,7 +125,6 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      dat_survreg = dat_survreg,
                      var = var,
                      dir_googledrive_upload = dir_googledrive_upload,
-                     dir_app_server = dir_app_server, 
                      dates0 = dates0,
                      survey_area = survey_area,
                      plot_subtitle = plot_subtitle,
@@ -218,5 +148,71 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   plot_mean = TRUE,
 #                   dir_wd = dir_wd)
 # 
+# NBS + EBS Maps --------------------------------------------------------------
+
+SRVY <- "BS"
+region_akgfmaps = "bs.all"
+plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
+dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
+# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
+show_planned_stations <- TRUE
+plot_anom <- TRUE
+survey_area$survey.grid <- survey_area$survey.grid %>% 
+  sf::st_transform(x = ., survey_area$crs$input) %>%
+  dplyr::rename(station = STATIONID) %>%
+  sp::merge(x = ., 
+            y = haul %>%
+              dplyr::rename(station = stationid) %>% 
+              dplyr::select(station, stratum) %>% 
+              dplyr::distinct(), 
+            all.x = TRUE) %>% 
+  dplyr::mutate(region = "Bering Sea")
+survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
+
+if(shapef == TRUE)
+{
+make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
+                  SRVY = SRVY,
+                  haul = haul,
+                  dat_survreg = dat_survreg,
+                  dir_googledrive_upload = dir_googledrive_upload,
+                  survey_area = survey_area,
+                  data_source = data_source,
+                  plot_subtitle = plot_subtitle,
+                  dir_wd = dir_wd)
+}
+
+make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
+                     SRVY = SRVY,
+                     haul = haul,
+                     dat_survreg = dat_survreg,
+                     var = var,
+                     dir_googledrive_upload = dir_googledrive_upload,
+                     dates0 = dates0,
+                     survey_area = survey_area,
+                     plot_subtitle = plot_subtitle,
+                     show_planned_stations = show_planned_stations,
+                     data_source = data_source,
+                     plot_anom = plot_anom,
+                     dir_wd = dir_wd)
+# make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
+#                   SRVY = SRVY,
+#                   haul = haul,
+#                   dat_survreg = dat_survreg,
+#                   var = var,
+#                   dir_googledrive_upload = dir_googledrive_upload,
+#                   dates0 = "latest",
+#                   survey_area = survey_area,
+#                   plot_subtitle = plot_subtitle,
+#                   show_planned_stations = show_planned_stations,
+#                   data_source = data_source,
+#                   plot_daily = FALSE,
+#                   plot_anom = FALSE, # anom plot here doesnt make sense to print until the end
+#                   plot_mean = TRUE,
+#                   dir_wd = dir_wd)
+
+
+
 
 # sink()

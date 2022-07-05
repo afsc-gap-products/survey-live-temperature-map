@@ -120,7 +120,6 @@ make_varplot_wrapper <- function(maxyr,
                                  dat_survreg, 
                                  var = "bt", 
                                  dir_googledrive_upload = NULL, 
-                                 dir_app_server = NULL,
                                  dates0 = "latest", 
                                  survey_area, 
                                  plot_subtitle = "", 
@@ -318,13 +317,6 @@ make_varplot_wrapper <- function(maxyr,
                 data_source = data_source,
                 show_planned_stations = show_planned_stations, 
                 height = height)
-    
-    # if (!is.null(dir_app_server)) {
-    #     temp <- list.files(path = dir_out, pattern = "current", full.names = TRUE)
-    #     for (i in 1:length(temp)){
-    #       file.copy(from = temp[i], to = gsub(pattern = dir_out, replacement = dir_app_server, x = temp[i]))
-    #     }
-    # }
   }
   
   ### Mean ---------------------------------------------------------------------
@@ -418,7 +410,6 @@ make_grid_wrapper<-function(maxyr,
                             haul, 
                             dat_survreg, 
                             dir_googledrive_upload = NULL,  
-                            dir_app_server = NULL, 
                             survey_area, 
                             plot_subtitle = "", 
                             data_source = "gd", 
@@ -505,14 +496,6 @@ make_grid_wrapper<-function(maxyr,
               data_source = data_source,
               show_planned_stations = show_planned_stations, 
               height = height)
-  
-  if (!is.null(dir_app_server)) {
-      temp <- list.files(path = dir_out, pattern = "_grid", full.names = TRUE)
-      for (i in 1:length(temp)){
-        file.copy(from = temp[i], to = gsub(pattern = dir_out, replacement = dir_app_server, x = temp[i]))
-      }
-  }
-  
 }
 
 
@@ -654,7 +637,9 @@ make_figure <- function(
       
       max_date <- date_entered[i]
       print(max_date)
-      next_date <- date_entered[length(date_entered)]
+      next_date <- ifelse(date_entered[i]==date_entered[length(date_entered)], 
+                          as.character(as.Date(date_entered[i])+1), 
+                          date_entered[i+1])
       
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
@@ -672,11 +657,12 @@ make_figure <- function(
         if (#sum(is.na(dat$var))!=0 & # if the survey is not yet complete
             show_planned_stations & # if we plan to show planned stations
             sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) { # and if there are any planned stations to show
-          
-        
+
         # planned stations
         loc <- dat_plot %>% 
-          dplyr::filter(is.na(var) & !is.na(vessel_shape)) %>% 
+          dplyr::filter(is.na(var) & 
+                          !is.na(vessel_shape) & 
+                          as.Date(date) == as.Date(next_date)) %>% 
           dplyr::mutate(planned = "Y")
         
         dat_planned <- as(grid_stations_plot, 'Spatial')
@@ -1186,7 +1172,7 @@ make_figure <- function(
         file.remove(paste0(dir_out, filename0, "_bind.pdf"))
       }
       
-      if (date_entered[1] == date_entered[i]) { # length(date_entered) == 1 | 
+      if (as.character(date_entered[1]) == as.character(date_entered[i])) { # 
         qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
                                     ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
                           output = c(paste0(dir_out, filename0, "_bind.pdf")))      
@@ -1221,8 +1207,8 @@ make_figure <- function(
     ### rename "current" plots for easy finding ------------------------------------
     if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      for (i in 1:length(temp)){
-        file.copy(from = temp[i], to = gsub(pattern = max_date, replacement = "current", x = temp[i]))
+      for (iiii in 1:length(temp)){
+        file.copy(from = temp[iiii], to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
       }
     }
     
@@ -1249,7 +1235,7 @@ make_figure <- function(
       for (iii in 1:length(temp)) {
         drive_upload(
           media = temp[iii], 
-          path = dir_googledrive_upload, 
+          path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
           overwrite = TRUE)
       }
     }
