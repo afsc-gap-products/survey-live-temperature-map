@@ -38,6 +38,7 @@ PKG <- c(
   "janitor", 
   
   # "tinytex",
+  "RCurl",
   
   # tidyverse, 
   "broom", 
@@ -327,7 +328,7 @@ make_varplot_wrapper <- function(maxyr,
   #                          path = dir_googledrive_upload,
   #                          overwrite = FALSE)
   
-  dir_googledrive_upload0 <- googledrive::drive_ls(path = dir_googledrive_upload) %>% 
+    dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive:as_id(dir_googledrive_upload)) %>% 
     dplyr::filter(name == "anom") %>% 
     dplyr::select("id") %>% 
     unlist() %>% 
@@ -1235,7 +1236,8 @@ make_figure <- function(
       for (iii in 1:length(temp)) {
         drive_upload(
           media = temp[iii], 
-          path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
+          path = googledrive::as_id(dir_googledrive_upload),
+          #path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
           overwrite = TRUE)
       }
     }

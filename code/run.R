@@ -17,7 +17,7 @@ googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
 dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
-dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
+#dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # The surveys this script will be covering 
 dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF", 
@@ -72,7 +72,7 @@ source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
 if (googledrive_dl == TRUE) {
-  source(file = paste0(dir_wd, "code/ftp_login.R")) # removed in gitignore - ask for premission
+  source(file = paste0(dir_wd, "code/ftp.R")) # removed in gitignore - ask for premission
 }
 
 # Map --------------------------------------------------------------------------
@@ -80,8 +80,7 @@ if (googledrive_dl == TRUE) {
 SRVY <- "AI"
 region_akgfmaps = "ai"
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_ai)
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+dir_googledrive_upload <- (dir_googledrive_upload_ai)
 plot_anom <- FALSE
 show_planned_stations <- FALSE
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
@@ -152,9 +151,9 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   dir_wd = dir_wd)
 
 ## send all current files to the FTP -------------------------------------------
-# vars here defined in ftp_login.R
+# vars here defined in ftp.R
 dir_out <- paste0(getwd(),"/output/",maxyr,"_",SRVY,"/")
-temp <- list.files(path = dir_out, pattern = "current_", full.names = FALSE)
+temp <- list.files(path = dir_out, pattern = "current_daily", full.names = FALSE)
 dest <- dev_bs
 
 for (iiii in 1:length(temp)) {
@@ -168,26 +167,25 @@ for (iiii in 1:length(temp)) {
     .opts=curlOptions(verbose=TRUE))
 }
 
- 
+
 # NBS + EBS Maps --------------------------------------------------------------
 
 SRVY <- "BS"
 region_akgfmaps = "bs.all"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
-dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_bs)
-# dir_googledrive_upload <- googledrive::as_id(dir_googledrive_upload_test)
+dir_googledrive_upload <- (dir_googledrive_upload_bs)
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 show_planned_stations <- TRUE
 plot_anom <- TRUE
-survey_area$survey.grid <- survey_area$survey.grid %>% 
+survey_area$survey.grid <- survey_area$survey.grid %>%
   sf::st_transform(x = ., survey_area$crs$input) %>%
   dplyr::rename(station = STATIONID) %>%
-  sp::merge(x = ., 
+  sp::merge(x = .,
             y = haul %>%
-              dplyr::rename(station = stationid) %>% 
-              dplyr::select(station, stratum) %>% 
-              dplyr::distinct(), 
-            all.x = TRUE) %>% 
+              dplyr::rename(station = stationid) %>%
+              dplyr::select(station, stratum) %>%
+              dplyr::distinct(),
+            all.x = TRUE) %>%
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
@@ -234,9 +232,9 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
 #                   dir_wd = dir_wd)
 
 ## send all current files to the FTP -------------------------------------------
-# vars here defined in ftp_login.R
+# vars here defined in ftp.R
 dir_out <- paste0(getwd(),"/output/",maxyr,"_",SRVY,"/")
-temp <- list.files(path = dir_out, pattern = "current_", full.names = FALSE)
+temp <- list.files(path = dir_out, pattern = "current_daily", full.names = FALSE)
 dest <- dev_bs
 
 for (iiii in 1:length(temp)) {
@@ -250,4 +248,4 @@ for (iiii in 1:length(temp)) {
     .opts=curlOptions(verbose=TRUE))
 }
 
-# sink()
+# # sink()
