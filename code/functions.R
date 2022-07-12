@@ -328,11 +328,11 @@ make_varplot_wrapper <- function(maxyr,
   #                          path = dir_googledrive_upload,
   #                          overwrite = FALSE)
   
-    dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload)) %>% 
-    dplyr::filter(name == "anom") %>% 
-    dplyr::select("id") %>% 
-    unlist() %>% 
-    googledrive::as_id()
+    # dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload)) %>% 
+    # dplyr::filter(name == "anom") %>% 
+    # dplyr::select("id") %>% 
+    # unlist() %>% 
+    # googledrive::as_id()
   
   if (plot_mean) {
     

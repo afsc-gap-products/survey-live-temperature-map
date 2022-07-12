@@ -16,7 +16,7 @@ var <- "bt"
 googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
 #dir_googledrive_upload_bs = "https://drive.google.com/drive/u/2/folders/1wvLejYW73nd0v_lOejmAdoCBbD2kUsbf" #NULL #"https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
-dir_googledrive_upload_ai = "https://drive.google.com/drive/u/2/folders/17rHN6GTkw5ywMXJ6VfyOkKXr7FY7o7B3" #NULL #"https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
+dir_googledrive_upload_ai = "https://drive.google.com/drive/u/0/folders/17rHN6GTkw5ywMXJ6VfyOkKXr7FY7o7B3" #NULL #"https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
 #dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # The surveys this script will be covering 
@@ -66,8 +66,6 @@ googledrive::drive_auth()
 #dir_wd <- paste0(getwd(), "/")
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
-
-# sink(file=paste0(dir_wd, "/output/", Sys.Date(), "_log.txt")) # save console output
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -249,4 +247,3 @@ for (iiii in 1:length(temp)) {
 #     .opts=curlOptions(verbose=TRUE))
 # }
 # 
-# # sink()

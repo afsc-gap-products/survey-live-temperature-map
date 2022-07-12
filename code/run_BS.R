@@ -6,7 +6,6 @@
 #' ---------------------------
 
 # Knowns -----------------------------------------------------------------------
-#sink(file="C:/Users/liz.dawson/Desktop/job1.log",split=TRUE,type="output")
 maxyr <- 2022 
 data_source <- "gd" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
@@ -15,7 +14,7 @@ var <- "bt"
 
 googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/u/2/folders/1wvLejYW73nd0v_lOejmAdoCBbD2kUsbf" #NULL #"https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
+dir_googledrive_upload_bs = "https://drive.google.com/drive/u/0/folders/1wvLejYW73nd0v_lOejmAdoCBbD2kUsbf" #NULL #"https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
 #dir_googledrive_upload_ai = "https://drive.google.com/drive/u/2/folders/17rHN6GTkw5ywMXJ6VfyOkKXr7FY7o7B3" #NULL #"https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
 #dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
@@ -67,8 +66,6 @@ googledrive::drive_auth()
 dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 #dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
 
-# sink(file=paste0(dir_wd, "/output/", Sys.Date(), "_log.txt")) # save console output
-
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
@@ -82,7 +79,7 @@ plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 dir_googledrive_upload <- (dir_googledrive_upload_bs)
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 show_planned_stations <- TRUE
-plot_anom <- TRUE
+plot_anom <- FALSE
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
   dplyr::rename(station = STATIONID) %>%
