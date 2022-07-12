@@ -328,7 +328,7 @@ make_varplot_wrapper <- function(maxyr,
   #                          path = dir_googledrive_upload,
   #                          overwrite = FALSE)
   
-    dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive:as_id(dir_googledrive_upload)) %>% 
+    dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload)) %>% 
     dplyr::filter(name == "anom") %>% 
     dplyr::select("id") %>% 
     unlist() %>% 
@@ -1206,12 +1206,12 @@ make_figure <- function(
     }
     
     ### rename "current" plots for easy finding ------------------------------------
-    if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+    # if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       for (iiii in 1:length(temp)){
-        file.copy(from = temp[iiii], to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
+        file.copy(from = temp[iiii], overwrite = TRUE, to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
       }
-    }
+    # }
     
     ### Upload to google drive ------------------------------------------------------
     
@@ -1229,10 +1229,10 @@ make_figure <- function(
     
     if (!(is.null(dir_googledrive_upload))) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+      #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
         temp <- c(temp, 
                   list.files(path = dir_out, pattern = sub(pattern = max_date, replacement = "current", x = filename0), full.names = TRUE))
-      }
+     # }
       for (iii in 1:length(temp)) {
         drive_upload(
           media = temp[iii], 
