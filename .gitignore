@@ -35,3 +35,5 @@ vignettes/*.pdf
 ConnectToOracle.R
 *.log
 /shapefiles/archive
+/code/ftp.R
+

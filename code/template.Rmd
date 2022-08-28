@@ -27,11 +27,21 @@ knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = 
 vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
-
-if (as.character(dates0[1]) == "none") {
+if (file_end == "mean") {
+  
+    temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
+  
+  fig_cap <- fig_alt <- paste0(
+    "Mean bottom temperatures from the NOAA Fisheries ", 
+    gsub(pattern = "\n", replacement = " and ", x = plot_title), 
+    " in ", maxyr, 
+    ". ")
+  
+} else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
   
   temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
   
+  if (SRVY != "AI") {
   fig_cap <- fig_alt <- paste0(
     "NOAA Fisheries conducted the ", 
     text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
@@ -44,6 +54,10 @@ if (as.character(dates0[1]) == "none") {
     ifelse(length(temp1)>1, "s", ""),
     ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
     paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
+  } else {
+    fig_cap <- fig_alt <- paste0("Aleutian Islands survey region, ", maxyr, ". ")
+  }
+  
   
 # } else if (file_end = "mean") {
 #   
@@ -62,11 +76,12 @@ if (as.character(dates0[1]) == "none") {
 #     ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
 #     paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
   
-} else {
+} else if (file_end == "daily") {
   
   loc <- dat_plot %>% 
     dplyr::filter(!is.na(var) & 
                     date == max_date) 
+  
   if (nrow(loc) == 0) {
     stations1 <- "no stations were sampled "
   } else {
@@ -91,15 +106,21 @@ if (as.character(dates0[1]) == "none") {
       dplyr::mutate(lon = round(x = lon, digits = 3), 
                     lat = round(x = lat, digits = 3)) 
     
+    # TOLEDO because there are issues in the shapefile... again
+    dat_max_date <- dat_max_date %>% 
+      dplyr::filter(!is.na(lon))
+    
     temp <- c()
     for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
       temp1 <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
       temp <- c(temp, 
-                paste0(nrow(temp1), " station",
-                       ifelse(nrow(temp1)>1, "s", "")," with ",
-                       ifelse(nrow(temp1)>1, "", "a "), "station ID", ifelse(nrow(temp1)>1, "s", ""), " of ",
+                paste0(# nrow(temp1), 
+                       # " station",
+                       # ifelse(nrow(temp1)>1, "s", "")," with ",
+                       ifelse(nrow(temp1)>1, "", "a "), "station", # ID", 
+                       ifelse(nrow(temp1)>1, "s", ""), " ", #" of ",
                        text_list(x = paste0(temp1$station,
-                                            " (near ",temp1$lat,"°N and ",temp1$lon,"°W, measuring ",
+                                            " (",temp1$lat,"°N, ",temp1$lon,"°W; ",
                                             gsub(pattern = " ", replacement = "", x = temp1$var_bin, fixed = TRUE),"°C)")), 
                        " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
                        gsub(pattern = "F/V ", replacement = "", fixed = TRUE,
@@ -131,24 +152,26 @@ if (as.character(dates0[1]) == "none") {
   }
   
   fig_cap <- fig_alt <- paste0(
-    "NOAA Fisheries near-real time ocean bottom temperatures collected ", 
+    "Near real-time ocean bottom temperatures collected ", 
     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-           paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d, %Y")), 
-           paste0("between ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
-                  " and ", 
-                  format(x = as.Date(max_date), format = "%B %d, %Y"))), 
+           paste0("on ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
+           paste0(" ", format(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                  "-", 
+                  format(x = as.Date(max_date), format = "%B %d %Y"))), 
     " during the ",
-    text_list(x = gsub(pattern = "\n", replacement = " ", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
-    " survey",
-    ifelse(length(unique(dat$SRVY))>1, "s", ""),
+    text_list(x = gsub(pattern = " - ", 
+                       replacement = "-", 
+                       x = gsub(pattern = "\n", replacement = " ", 
+                                x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])))),
+    " survey", ifelse(length(unique(dat$SRVY))>1, "s", ""),
     " aboard the ",
     vess,
     ". On ", format(x = as.Date(max_date), "%B %d"), ", ",
     stations1, 
     
     ifelse(data_source == "gd", 
-           "These data have not been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), will be publicly accessible on the Fisheries One Stop Shop platform (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). ", 
-           "These data have been through final review. Final, validated survey data (e.g., temperature and species collected at each station among other observations), are publicly accessible on the Fisheries One Stop Shop platform (FOSS; https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). "))
+           "Data have NOT been through final review. Final, validated data (e.g., temperature and species collected at each station), will be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). ", 
+           "Data have been through final review. Final, validated data (e.g., temperature and species collected at each station), are be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). "))
   
 }
 
@@ -156,6 +179,9 @@ fig_cap <- fig_alt <- paste0(fig_cap, "\\textit{Credit: NOAA Fisheries}")
 
 fig_alt <- gsub(pattern = "\\textit{", replacement = "", x = fig_alt, fixed = TRUE)
 fig_alt <- gsub(pattern = "}", replacement = "", x = fig_alt, fixed = TRUE)
+fig_alt <- gsub(pattern = " (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::)", 
+                replacement = "", 
+                x = fig_alt, fixed = TRUE)
 
 readr::write_lines(x = fig_alt, file = paste0(dir_out, filename0, ".txt"))
 
