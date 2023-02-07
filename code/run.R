@@ -63,7 +63,9 @@ googledrive::drive_auth()
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
 locations <- c("Z:/Projects/survey-live-temperature-map/", 
-               "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/")
+               "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
+               "C:/Users/christopher.anderson/Work/survey-live-temperature-map/")
+
 for (i in 1:length(locations)){
   if (file.exists(locations[i])) {
     dir_wd  <- locations[i]
