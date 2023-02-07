@@ -8,11 +8,14 @@
 # *** Oracle -------------------------------------------------------------------
 
 # This has a specific username and password because I DONT want people to have access to this!
-# source("C:/Users/emily.markowitz/Work/Projects/ConnectToOracle.R")
-#source("C:/Users/emily.markowitz/Documents/Projects/ConnectToOracle.R")
-source("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R")
-# source("Z:/Projects/ConnectToOracle.R")
-
+locations <- c("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R", 
+               "Z:/Projects/ConnectToOracle.R", 
+               "C:/Users/emily.markowitz/Work/Projects/ConnectToOracle.R")
+for (i in 1:length(locations)){
+  if (file.exists(locations[i])){
+    source(locations[i])
+  }
+}
 # I set up a ConnectToOracle.R that looks like this: 
 #   
 #   PKG <- c("RODBC")

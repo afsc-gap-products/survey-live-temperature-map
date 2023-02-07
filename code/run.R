@@ -7,7 +7,7 @@
 
 # Knowns -----------------------------------------------------------------------
 
-maxyr <- 2022 
+maxyr <- 2023
 data_source <- "gd" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 shapef <- FALSE #set to TRUE to run make_grid_wrapper to run shapefiles for EBS and AI
@@ -15,8 +15,9 @@ var <- "bt"
 
 googledrive_dl <- TRUE
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
-#dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
-dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1V9GLy2DkOz8UbMTw6eC0GxjMfWa5FeHm"
+# dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
+dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3OOCKsKzMX-UzTwKGVVGFsOW"
 #dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
 
 # The surveys this script will be covering 
@@ -24,25 +25,25 @@ dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF",
                           region_long = "Eastern Bering Sea", 
                           SRVY = "EBS", 
                           region = "BS", 
-                          vessel_id = c(94, 162), # CHANGE
-                          vessel_shape = c("V", "A"), # CHANGE
+                          vessel_id = c(134, 162), # CHANGE
+                          vessel_shape = c("N", "A"), # CHANGE
                           reg_dates = "May 25 - Aug 03 2022") # CHANGE
 dat_survreg <- dplyr::bind_rows(dat_survreg, 
                                 data.frame(reg_shapefile = "NBS_SHELF", 
                                            region_long = "Northern Bering Sea", 
                                            SRVY = "NBS", 
                                            region = "BS", 
-                                           vessel_id = c(94, 162), # CHANGE
-                                           vessel_shape = c("V", "A"), # CHANGE
+                                           vessel_id = c(134, 162), # CHANGE
+                                           vessel_shape = c("N", "A"), # CHANGE
                                            reg_dates = "Aug 03 - Aug 28 2022")) # CHANGE
-dat_survreg <- dplyr::bind_rows(dat_survreg, 
-                                data.frame(reg_shapefile = "AI",
-                                           region_long = "Aleutian Islands",
-                                           SRVY = "AI",
-                                           region = "AI",
-                                           vessel_id = c(148, 176), # CHANGE
-                                           vessel_shape = c("OEX", "AP"), # CHANGE
-                                           reg_dates = "Jun 07 - Aug 17 2022")) # CHANGE
+# dat_survreg <- dplyr::bind_rows(dat_survreg, 
+#                                 data.frame(reg_shapefile = "AI",
+#                                            region_long = "Aleutian Islands",
+#                                            SRVY = "AI",
+#                                            region = "AI",
+#                                            vessel_id = c(148, 176), # CHANGE
+#                                            vessel_shape = c("OEX", "AP"), # CHANGE
+#                                            reg_dates = "Jun 07 - Aug 17 2022")) # CHANGE
 # dat_survreg <- dplyr::bind_rows(dat_survreg, 
 #                                data.frame(reg_shapefile = "GOA", 
 #                                           region_long = "Gulf of Alaska", 
@@ -61,11 +62,13 @@ googledrive::drive_auth()
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
-#dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-#dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
-#dir_wd <- paste0(getwd(), "/")
-#dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
+locations <- c("Z:/Projects/survey-live-temperature-map/", 
+               "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/")
+for (i in 1:length(locations)){
+  if (file.exists(locations[i])) {
+    dir_wd  <- locations[i]
+  }
+}
 
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -166,74 +169,14 @@ for (iiii in 1:length(temp)) {
     .opts=curlOptions(verbose=TRUE))
 }
 
+
 # NBS + EBS Maps --------------------------------------------------------------
 
-maxyr <- 2022 
+maxyr <- 2023
 data_source <- "gd" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 shapef <- FALSE #set to TRUE to run make_grid_wrapper to run shapefiles for EBS and AI
 var <- "bt"
-
-googledrive_dl <- TRUE
-dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit#gid=315914502"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1vWza36Dog0SpZLcTN22wD-iCEn6ooGCM"
-#dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1SeNOAh5-muQ2BDgOHWZWwYIoLl68DHWX"
-#dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1rsR0aFfFzrspTBFU48Bb26EJvdhIZSpl"
-
-# The surveys this script will be covering 
-dat_survreg <- data.frame(reg_shapefile = "EBS_SHELF", 
-                          region_long = "Eastern Bering Sea", 
-                          SRVY = "EBS", 
-                          region = "BS", 
-                          vessel_id = c(94, 162), # CHANGE
-                          vessel_shape = c("V", "A"), # CHANGE
-                          reg_dates = "May 25 - Aug 03 2022") # CHANGE
-dat_survreg <- dplyr::bind_rows(dat_survreg, 
-                                data.frame(reg_shapefile = "NBS_SHELF", 
-                                           region_long = "Northern Bering Sea", 
-                                           SRVY = "NBS", 
-                                           region = "BS", 
-                                           vessel_id = c(94, 162), # CHANGE
-                                           vessel_shape = c("V", "A"), # CHANGE
-                                           reg_dates = "Aug 03 - Aug 28 2022")) # CHANGE
-dat_survreg <- dplyr::bind_rows(dat_survreg, 
-                                data.frame(reg_shapefile = "AI",
-                                           region_long = "Aleutian Islands",
-                                           SRVY = "AI",
-                                           region = "AI",
-                                           vessel_id = c(148, 176), # CHANGE
-                                           vessel_shape = c("OEX", "AP"), # CHANGE
-                                           reg_dates = "Jun 07 - Aug 17 2022")) # CHANGE
-# dat_survreg <- dplyr::bind_rows(dat_survreg, 
-#                                data.frame(reg_shapefile = "GOA", 
-#                                           region_long = "Gulf of Alaska", 
-#                                           SRVY = "GOA", 
-#                                           region = "GOA", 
-#                                           vessel_id = c(148, 176), # CHANGE
-#                                           vessel_shape = c("OEX", "SS"), # CHANGE
-#                                           reg_dates = "May 25 - Aug 04")) # CHANGE
-
-# SIGN INTO GOOGLE DRIVE--------------------------------------------------------
-## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
-googledrive::drive_deauth()
-googledrive::drive_auth()
-1
-
-# SOURCE SUPPORT SCRIPTS -------------------------------------------------------
-## Actually we cant use the here package, here - it actually causes issues with 
-## the tasks scheduler, which has no concept of a project root folder. 
-#dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-#dir_wd <- "G:/EBSother/GAPsurveyTemperatureMap/"
-#dir_wd <- paste0(getwd(), "/")
-#dir_wd <-"C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
-dir_wd <- "C:/Users/caitlin.akselrud/Work/survey-live-temperature-map/"
-
-source(file = paste0(dir_wd,"code/functions.R"))
-# source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
-source(file = paste0(dir_wd, "code/data.R"))
-if (googledrive_dl == TRUE) {
-  source(file = paste0(dir_wd, "code/ftp.R")) # removed in gitignore - ask for premission
-}
 
 SRVY <- "BS"
 region_akgfmaps = "bs.all"
@@ -280,6 +223,8 @@ make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
                      data_source = data_source,
                      plot_anom = plot_anom,
                      dir_wd = dir_wd)
+
+## send all current files to the FTP -------------------------------------------
 
 dir_out <- paste0(dir_wd,"/output/",maxyr,"_",SRVY,"/")
 temp <- list.files(path = dir_out, pattern = "current_daily", full.names = FALSE)
