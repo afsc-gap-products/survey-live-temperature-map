@@ -6,7 +6,7 @@
 #' ---------------------------
 
 # Knowns -----------------------------------------------------------------------
-maxyr <- 2022 
+maxyr <- 2023 
 data_source <- "gd" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 shapef <- FALSE #set to TRUE to run make_grid_wrapper to run shapefiles for EBS and AI
