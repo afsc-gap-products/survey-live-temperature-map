@@ -1193,7 +1193,7 @@ make_figure <- function(
         ggtitle(gsub(pattern = "\n", replacement = " ", x = unique(survey_area$survey.area$reg_lab), fixed = TRUE)) +
         theme_minimal() # + 
       # theme(
-      #   panel.border = element_rect(colour = "grey50", fill=NA, size=1), 
+      #   panel.border = element_rect(colour = "grey50", fill=NA, linewidth=1), 
       #   plot.title = element_text(size = 8, face = "bold"), 
       #   axis.text.y = element_blank(),
       #   axis.title = element_blank(),
@@ -1202,7 +1202,7 @@ make_figure <- function(
       if (file_end == "grid") { 
         gg_insert <- gg_insert  + 
           theme(
-            panel.border = element_rect(colour = "grey50", fill=NA, size=1), 
+            panel.border = element_rect(colour = "grey50", fill=NA, linewidth=1), 
             plot.title = element_text(size = 20, face = "bold"), 
             axis.text = element_text(size = 9), 
             axis.title = element_text(size = 14)#, 
@@ -1211,7 +1211,7 @@ make_figure <- function(
       } else {
         gg_insert <- gg_insert  + 
           theme(
-            panel.border = element_rect(colour = "grey50", fill=NA, size=1), 
+            panel.border = element_rect(colour = "grey50", fill=NA, linewidth=1), 
             plot.title = element_text(size = 8, face = "bold"), 
             axis.text.y = element_blank(),
             axis.title = element_blank(),

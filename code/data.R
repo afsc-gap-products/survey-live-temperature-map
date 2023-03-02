@@ -130,6 +130,7 @@ shp_nbs <- survey_area
 #                           set.crs = "+proj=longlat +datum=WGS84")$survey.strata
 survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
 survey_area$survey.grid <-  survey_area$survey.grid %>% 
+  dplyr::rename(station = ID) %>%
   sp::merge(
     x = .,
     y = goa_goa_strata0 %>%

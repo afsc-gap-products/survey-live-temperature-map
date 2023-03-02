@@ -114,7 +114,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
   dir_googledrive_upload <- (dir_googledrive_upload_bs)
   show_planned_stations <- TRUE
-  plot_anom <- FALSE
+  plot_anom <- TRUE
   survey_area <- shp_bs
   
   if (plot_grid){
