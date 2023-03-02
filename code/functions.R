@@ -11,13 +11,32 @@
 PKG <- c(
   # Mapping
   "akgfmaps", # devtools::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = TRUE)
-  "rgdal", 
   "maps", 
-  "sp", 
-  "raster", 
+  "sp",    # Used for the spsample function
   "rgeos",
   "sf",
   "ggsn",
+  # Spatial
+  "rlist", 
+  "jsonlite",   # For outputting JS files
+  "prettymapr",
+  "rgdal", 
+  "rosm", 
+  "shadowtext", 
+  "ggspatial", 
+  "digest", 
+  "ps", 
+  "backports", 
+  "callr", 
+  "labeling", 
+  "gstat", 
+  "raster", 
+  "reshape", 
+  "stars",
+  "mapview",
+  "maptools", 
+  "spatialEco", 
+  "KernSmooth", 
   
   #images
   "png",
@@ -25,17 +44,20 @@ PKG <- c(
   "cowplot",
   "magick", 
   "qpdf",
-  
-  # color managment (color blind friendly!)
-  # "viridis", 
+  "ggplot2", # Create Elegant Data Visualisations Using the Grammar of Graphics
+  "nmfspalette",  # devtools::install_github("nmfs-general-modeling-tools/nmfspalette" # oceans, waves, seagrass, urchin, crusteacean, coral
+  # https://drive.google.com/file/d/1EwZOVAzzqwniXczu611yk6uXs4_TuRwH/view?usp=sharing
   "colorRamps",
+  "viridis", 
   
-  # google drive
-  "googledrive", # library(googlesheets)
+  "extrafont", # install.packages("extrafont")
+  # loadfonts()
+  # extrafont::font_import()
+  # windowsFonts()
   
   # data management
   "bindrcpp", 
-  "janitor", 
+  # "janitor", 
   
   # "tinytex",
   "RCurl",
@@ -43,11 +65,48 @@ PKG <- c(
   # tidyverse, 
   "broom", 
   "readr", 
-  "dplyr", 
   "glue",
-  "ggplot2",
-  "rmarkdown"
-)
+  "rmarkdown", 
+  "dplyr",
+  "googledrive",
+  "magrittr",
+  "stringr", 
+  "data.table",
+  "tidyr", 
+  
+  # For creating R Markdown Docs
+  "knitr", # A general-purpose tool for dynamic report generation in R
+  
+  # File Management
+  "here", # For finding the root directory of your scripts and thus, find your files
+  "officer",
+  
+  # For editing XML files
+  "XML", 
+  
+  # Oracle
+  "RODBC", 
+  
+  #shiny
+  "shiny", # Need for running Shiny apps
+  "shinydashboard", 
+  "shinythemes", 
+  "shinyauthr", 
+  "htmltools", 
+  "htmlwidgets",
+  "shinyjs",   # Use Java Script
+  "shinyBS", 
+  "V8", 
+  
+  # For table formatting
+  "DT", 
+  "kableExtra", 
+  "formattable", 
+  
+  # leaflet
+  "leaflet", 
+  "leafem", 
+  "leafpop")
 
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {  
@@ -55,7 +114,100 @@ for (p in PKG) {
     require(p,character.only = TRUE)}
 }
 
+# colors -----------------------------------------------------------------------
+
+NOAAFisheries.Colors<-list(
+  
+  Oceans = list(
+    "Process Blue" = "#0093D0", 
+    "Reflex Blue" = "#0055A4", #Nav Bar Hover
+    "PMS 541" = "#00467F", # Nav Bar
+    "White" = "#FFFFFF"
+  ), 
+  
+  Waves = list(
+    "PMS 319" = "#1ECAD3", 
+    "PMS 321" = "#008998", 
+    "PMS 322" = "#00708", 
+    "Gray 10%" = "#E8E8E8"
+  ),
+  
+  Seagrass = list(
+    "PMS 375" = "#93D500", 
+    "PMS 362" = "#4C9C2E", 
+    "PMS 322" = "#007078", 
+    "Gray 20%" = "#D0D0D0"
+  ), 
+  
+  Urchin = list(
+    "Custom" = "#7F7FFF", 
+    "PMS 2725" = "#625BC4", 
+    "PMS 7670" = "#575195",
+    "Gray 40%" = "#9A9A9A"
+  ), 
+  
+  Crustacean = list(
+    "PMS 151" = "#FF8300", 
+    "PMS 717" = "#D65F00", 
+    "PMS 7670" = "#575195", 
+    "Gray 50%" = "#7B7B7B"
+  ), 
+  
+  Coral = list(
+    "Warm Red" = "#FF4438", 
+    "PMS 711" = "D02C2F", 
+    "PMS 1805" = "#B2292E", 
+    "Gray 70%" = "#646464"
+  ),
+  
+  "NOAA Colors" = list(
+    
+    #Primary Colors
+    "REFLEX BLUE" = "#0A4595", 
+    "PROCESS BLUE" = "#0099D8", 
+    "DARK SLATE GREY" = "#333333", 
+    "WHITE" = "#FFFFFF", 
+    
+    #Secondary Colors
+    "DARK GREY" = "#575757", 
+    "MEDIUM GREY" = "#666666",
+    "LIGHT GREY" = "#ACACAC",
+    "FADED BLUE" = "#6B84B4",
+    "RICH BLUE GREY" = "#28282A"
+  )
+  
+)
+
+NOAA.Fonts<-"Proxima Nova"
+
+
+
 # Functions --------------------------------------------------------------------
+
+
+upload_ftp <- function(dir_wd, 
+                       dir_out, 
+                       maxyr, 
+                       SRVY, 
+                       dest, 
+                       user, 
+                       pass){
+  
+  dir_out <- paste0(dir_wd,"/output/",maxyr,"_",SRVY,"/")
+  temp <- list.files(path = dir_out, pattern = "current_daily", full.names = FALSE)
+  dest <- dev_ai
+  
+  for (iiii in 1:length(temp)) {
+    print(temp[iiii])
+    
+    RCurl::ftpUpload(
+      what = paste0(dir_out, "/", temp[iiii]),
+      asText = FALSE,
+      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", temp[iiii])),
+      userpwd = paste0(user,":", pass),
+      .opts=curlOptions(verbose=TRUE))
+  }
+}
 
 #' Takes a string of words and combines them into a sentence that lists them.
 #'
@@ -115,7 +267,8 @@ text_list<-function(x = "",
 #' @export
 #'
 #' @examples
-make_varplot_wrapper <- function(maxyr, 
+make_varplot_wrapper <- function(
+    maxyr, 
                                  SRVY, 
                                  haul, 
                                  dat_survreg, 
@@ -143,7 +296,7 @@ make_varplot_wrapper <- function(maxyr,
   if (var == "bt") {
     var00 = 'Bottom Temperature'
     unit0 <- '(\u00B0C)'
-    var0 <- "gear_temperature"
+    var0 <- "bottom_temperature_c"
     if (SRVY == "BS") {
       var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50)
     } else {
@@ -152,7 +305,7 @@ make_varplot_wrapper <- function(maxyr,
   } else if (var == "st") {
     var00 = 'Surface Temperature'
     unit0 <- '(\u00B0C)'
-    var0 <- "surface_temperature"
+    var0 <- "surface_temperature_c"
     var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50) # if anom DOES NOT exist (straight temps!)
   }
   
@@ -171,9 +324,8 @@ make_varplot_wrapper <- function(maxyr,
                             text_list(paste0(anom_years$SRVY, " ", anom_years$range), sep = ";"))
   legend_title_anom = paste0(var00, '\nAnomaly ', unit0)
   
-  # Calculate var averages from pervious data
+  # Calculate var averages from previous data
   dat_anom <- haul %>% 
-    dplyr::rename(station = stationid) %>%
     dplyr::filter(!(is.na(station)) &
                     year <= maxyr &
                     SRVY == ifelse(SRVY == "BS", c("EBS", "NBS"), SRVY)) %>%
@@ -182,47 +334,43 @@ make_varplot_wrapper <- function(maxyr,
     dplyr::summarise(mean = mean(var, na.rm = TRUE))
   
   if (data_source == "gd") { # Temperature data from google drive
+    
     dat <- 
       readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                         sheet = case, skip = 1) %>%
-      janitor::clean_names() %>% 
-      # dplyr::mutate(var = all_of(var0)) %>%
-      dplyr::rename(#"var" = all_of(var), 
-        "SRVY" = "srvy", 
-        "vessel_shape" = "vessel") %>%
-      dplyr::filter(
-        SRVY %in% SRVY1) 
+      dplyr::rename(vessel_shape = vessel) %>%
+      dplyr::filter(SRVY %in% SRVY1) 
     
-    dat$var <- as.numeric(unlist(dat[,var]))
-    
+    names(dat)[names(dat) == "var"] <- "var"
+  
     dat <- dat %>%
+      dplyr::mutate(var = as.numeric(var)) %>%
       dplyr::select(SRVY, stratum, station, var, date, vessel_shape) 
     
   } else if (data_source == "oracle") {
-    dat <- haul %>% 
+
+    dat <- haul 
+    names(dat)[names(dat) == var0] <- "var"
+    dat <- dat %>% 
+      # dplyr::rename(date = date_time) %>% 
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1 &
-                      !is.na(dplyr::all_of(var))) %>% 
-      # dplyr::mutate(var = haul[,var0]) %>%
-      dplyr::rename(station = stationid, 
-                    date = start_time) 
-    dat$var <- unlist(dat[,var0])
-    dat$var0 <- unlist(dat[,var0])
-    names(dat)[names(dat) == "var0"] <- var
-    
-    if (SRVY %in% c("AI", "GOA")){
+                      !is.na(var))
+      
+    if (SRVY %in% c("AI", "GOA")) {
       dat <- dat %>%
         dplyr::filter(var != 0) # there shouldn't be bottom temps of 0 in the AI or GOA
     }
-    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+    
     for (ii in 1:length(unique(dat$SRVY))){
       temp <- unique(dat$SRVY)[ii]
       dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0(#"\n(", 
-        format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d"),
+        format(x = min(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d"),
         " - ", 
-        format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d")#, ")"
+        format(x = max(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d")#, ")"
       )
     }
+    
     dat <- dat %>% 
       dplyr::left_join(
         x = ., 
@@ -230,7 +378,7 @@ make_varplot_wrapper <- function(maxyr,
           dplyr::select(vessel_id, vessel_shape) %>%
           dplyr::distinct(), 
         by = "vessel_id")  %>% 
-      dplyr::select(SRVY, stratum, station, var, dplyr::all_of(var), date, vessel_shape)
+      dplyr::select(SRVY, stratum, station, var, date, vessel_shape) #  dplyr::all_of(var),
     
   }
   
@@ -328,11 +476,11 @@ make_varplot_wrapper <- function(maxyr,
   #                          path = dir_googledrive_upload,
   #                          overwrite = FALSE)
   
-    # dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload)) %>% 
-    # dplyr::filter(name == "anom") %>% 
-    # dplyr::select("id") %>% 
-    # unlist() %>% 
-    # googledrive::as_id()
+  # dir_googledrive_upload0 <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload)) %>% 
+  # dplyr::filter(name == "anom") %>% 
+  # dplyr::select("id") %>% 
+  # unlist() %>% 
+  # googledrive::as_id()
   
   if (plot_mean) {
     
@@ -396,7 +544,6 @@ make_varplot_wrapper <- function(maxyr,
 #' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
 #' @param haul data.frame. Here, derived from the RACEBASE.HAUL and RACE_DATA.V_CRUISES oracle tables. See example in data.R script. 
 #' @param dat_survreg data.frame. Must include reg_shapefile (the name of the shapefile polygon), region_long (the formal name of the survey), SRVY ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), reg_dates (the planned dates of the survey).
-#' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 #' @param survey_area From akgfmaps::get_base_layers(select.region = ..., set.crs = "auto"). 
 #' @param plot_subtitle String. Default = "". The desired subtitle for the figure. 
 #' @param data_source String. Default = "gd". "gd" will pull data from the google drive file and "oracle" will use the haul data (noted above) that comes from oracle. 
@@ -419,55 +566,69 @@ make_grid_wrapper<-function(maxyr,
   case <- paste0(maxyr, "_", SRVY)
   dir_out <- paste0(dir_wd, "/output/", case, "/")
   
-  file_end = "grid"
+  file_end <- "grid"
   dates0 <- "none"
   show_planned_stations = FALSE
-  make_gifs = FALSE
-
+  make_gifs <- FALSE
+  
   SRVY1 <- SRVY
   if (SRVY == "BS") {
     SRVY1 <- c("EBS", "NBS")
   }
   
-  plot_title <- ifelse(SRVY == "AI", "Survey Region", "Survey Grid")
+  plot_title <- ifelse(SRVY %in% c("GOA", "AI"), "Survey Region", "Survey Grid")
   legend_title <- ""
   
   if (data_source == "gd") { # Temperature data from google drive
+    
     dat <- 
       readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                         sheet = case, skip = 1) %>%
-      janitor::clean_names() %>%
-      dplyr::rename(
-        "SRVY" = "srvy", 
-        "vessel_shape" = "vessel")  %>%
+      dplyr::rename(vessel_shape = vessel)  %>%
       dplyr::filter(!is.na(SRVY) & 
                       SRVY %in% SRVY1) %>% 
       dplyr::select(SRVY, stratum, station, date, vessel_shape) 
+    
+    # # A tibble: 520 × 5                                                                                              
+    # SRVY  stratum station date                vessel_shape
+    # <chr>   <dbl> <chr>   <dttm>              <chr>       
+    #   1 EBS        50 A-02    2022-06-19 00:00:00 A           
+    # 2 EBS        50 A-03    2022-06-19 00:00:00 A 
+    
   } else if (data_source == "oracle") {
+    
     dat <- haul %>% 
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1) %>% 
-      dplyr::rename(station = stationid, 
-                    date = start_time) %>%
+      dplyr::select(SRVY, date, vessel_id, vessel_name, stratum, station) %>% 
       dplyr::mutate(var = NA)
-    dat$date <- as.character(as.Date(sapply(strsplit(x = dat$date, split = " ", fixed = TRUE),`[[`, 1), "%m/%d/%Y"))
+    
     for (ii in 1:length(unique(dat$SRVY))){
-      temp <- unique(dat_survreg$SRVY)[ii]
-      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0("\n(", 
-                                                                format(x = min(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d"),
-                                                                " - ", 
-                                                                format(x = max(as.Date(dat$date[dat$SRVY == temp]), na.rm = TRUE), "%b %d"), ")")
+      temp <- unique(dat$SRVY)[ii]
+      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0(#"\n(", 
+        format(x = min(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d"),
+        " - ", 
+        format(x = max(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d")#, ")"
+      )
     }
+    
     dat <- dat  %>% 
-      dplyr::mutate(var = NA, 
-                    vessel_id = NA, 
-                    vessel_name = NA,
+      dplyr::mutate(#var = NA, 
+                    # vessel_id = NA, 
+                    # vessel_name = NA,
                     vessel_shape = NA) %>%
-      dplyr::select(SRVY, stratum, station, var, date, vessel_shape)
+      dplyr::select(SRVY, stratum, station, #var, 
+                    date, vessel_shape)
+    
+    # # A tibble: 520 × 9
+    # SRVY  date_time           vessel_id vessel_name   stratum station var   date       vessel_shape
+    # <chr> <dttm>                  <dbl> <chr>           <dbl> <chr>   <lgl> <chr>      <lgl>       
+    #   1 EBS   2022-06-12 11:00:45        94 Vesteraalen        31 B-06    NA    06/12/2022 NA          
+    # 2 EBS   2022-06-12 14:43:21       162 Alaska Knight      31 Z-05    NA    06/12/2022 NA          
+    # 3 EBS   2022-06-12 14:51:17        94 Vesteraalen        31 C-06    NA    06/12/2022 NA 
   }
   
   dat <- dat %>%
-    dplyr::filter(!is.na(SRVY))  %>% 
     dplyr::left_join(x = ., 
                      y = dat_survreg %>% 
                        dplyr::select(-dplyr::starts_with("vessel_")) %>% 
@@ -481,22 +642,24 @@ make_grid_wrapper<-function(maxyr,
   height = ifelse(SRVY == "AI", 6, 8.5)
   
   # Daily plot
-  make_figure(SRVY = SRVY, 
-              dat = dat,
-              var_breaks = var_breaks, 
-              plot_title = plot_title,
-              plot_subtitle = plot_subtitle,
-              legend_title = legend_title,
-              dates0 = dates0, #"latest", # "all", #"2021-06-05",
-              survey_area = survey_area,
-              file_end = file_end,
-              dir_wd = dir_wd,
-              dir_out = dir_out, 
-              dir_googledrive_upload = dir_googledrive_upload, 
-              make_gifs = make_gifs, 
-              data_source = data_source,
-              show_planned_stations = show_planned_stations, 
-              height = height)
+  pp <- make_figure(SRVY = SRVY, 
+                    dat = dat,
+                    var_breaks = var_breaks, 
+                    plot_title = plot_title,
+                    plot_subtitle = plot_subtitle,
+                    legend_title = legend_title,
+                    dates0 = dates0, #"latest", # "all", #"2021-06-05",
+                    survey_area = survey_area,
+                    file_end = file_end,
+                    dir_wd = dir_wd,
+                    dir_out = dir_out, 
+                    dir_googledrive_upload = dir_googledrive_upload, 
+                    make_gifs = make_gifs, 
+                    data_source = data_source,
+                    show_planned_stations = show_planned_stations, 
+                    height = height)
+  
+  return(pp)
 }
 
 
@@ -522,7 +685,7 @@ make_grid_wrapper<-function(maxyr,
 #' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 make_figure <- function(
     SRVY, 
-    dat = NULL, 
+    dat, 
     var_breaks, 
     plot_title = "",
     plot_subtitle = "",
@@ -549,13 +712,13 @@ make_figure <- function(
   survey_area$survey.area <- sp::merge(
     x = survey_area$survey.area, 
     y = dat %>% 
-      dplyr::select(reg_shapefile, region_long, reg_lab) %>% 
-      dplyr::filter(!is.na(reg_shapefile)) %>%
+      dplyr::select(region_long, reg_lab, SRVY) %>% 
+      # dplyr::filter(!is.na(reg_shapefile)) %>%
       dplyr::distinct() %>% 
-      dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))) %>%
-      dplyr::rename(SURVEY = reg_shapefile), 
+      dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))), # %>%
+    # dplyr::rename(SURVEY = reg_shapefile), 
     all.x = TRUE) %>% 
-    dplyr::arrange(desc(SURVEY))
+    dplyr::arrange(desc(SRVY))
   
   ## Define colors and bins for var ----------------------------------------------
   if (as.character(dates0[1]) != "none") {
@@ -590,9 +753,10 @@ make_figure <- function(
   }
   
   # bind dat to survey_area$survey.grid for plotting
-  survey_area$survey.grid <- sp::merge(x = survey_area$survey.grid, 
+  survey_area$survey.grid <- 
+    sp::merge(x = survey_area$survey.grid, 
                                        y = dat %>%
-                                         dplyr::select(station, stratum, var_bin, reg_shapefile, 
+                                         dplyr::select(station, stratum, var_bin, # reg_shapefile, 
                                                        region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
                                          dplyr::distinct(), 
                                        all.x = TRUE) 
@@ -639,7 +803,7 @@ make_figure <- function(
       max_date <- date_entered[i]
       print(max_date)
       next_date <- ifelse(date_entered[i]==date_entered[length(date_entered)], 
-                          as.character(as.Date(date_entered[i])+1), 
+                          as.character(format(as.Date(date_entered[i], "%m/%d/%Y")+1), "%Y-%m-%d"), 
                           date_entered[i+1])
       
       # only use dates including this date and before this date
@@ -655,10 +819,10 @@ make_figure <- function(
       # separate out the data for the temperature and planned stations if there are planned stations listed
       # if (show_planned_stations & 
       #     sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) {
-        if (#sum(is.na(dat$var))!=0 & # if the survey is not yet complete
-            show_planned_stations & # if we plan to show planned stations
-            sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) { # and if there are any planned stations to show
-
+      if (#sum(is.na(dat$var))!=0 & # if the survey is not yet complete
+        show_planned_stations & # if we plan to show planned stations
+        sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) { # and if there are any planned stations to show
+        
         # planned stations
         loc <- dat_plot %>% 
           dplyr::filter(is.na(var) & 
@@ -890,29 +1054,15 @@ make_figure <- function(
                    x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                    scale = .15 )
       
-    } else if (SRVY == "AI") {
-      ### Aleutian Islands -----------------------------------------------------------
+    } else if (SRVY %in% c("AI", "GOA")) {
+      ### Aleutian Islands and Gulf of Alaska ----------------------------------
       
       # if (as.character(dates0[1]) == "none") {
-      # temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
-      gg <- gg +
-        ggplot2::geom_sf(data = survey_area$survey.grid1, 
-                         # mapping = aes(colour = survey_area$survey.grid$region,
-                         #               fill = survey_area$survey.grid$region),
-                         colour = ifelse((as.character(dates0[1]) == "none"), "grey20", "grey50"),
-                         size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
-                         show.legend = FALSE) #+
-      # geom_sf(data = survey_area$bathymetry) +
-      # guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
-      # if (nrow(temp)>0) {
-      #   gg <- gg +
-      # 
-      #   # geom_text(data = temp, mapping = aes(x = x, y = y, label = lab),
-      #   #           size = 4, hjust=0, vjust=1, fontface=2, angle = 90)
-      #   annotate(geom = "text", x = temp$x, y = temp$y, label = temp$lab,
-      #            color = "darkblue", fontface="bold", angle = 0)
-      # }
-      # } 
+      # gg <- gg+
+      # ggplot2::geom_sf(data = survey_area$survey.grid, 
+      #                  colour = ifelse((as.character(dates0[1]) == "none"), "grey20", "grey50"),
+      #                  size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
+      #                  show.legend = FALSE) 
       
       # now we build a plot list
       lapply(unique(grid_stations_plot$region), function(x) {
@@ -921,7 +1071,11 @@ make_figure <- function(
         grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
         grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
         
-        gg1 <- gg
+        gg1 <- gg +
+          ggplot2::geom_sf(data = grid_stations_plot1, 
+                           colour = ifelse((as.character(dates0[1]) == "none"), "grey20", "grey50"),
+                           size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
+                           show.legend = FALSE) 
         
         if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
           
@@ -1147,14 +1301,14 @@ make_figure <- function(
     
     ### PDF -------------------------------------------------------------------------
     # Create main PDF
-    if (file_end %in% c("grid", "daily", "mean")){
+    if (file_end %in% c("grid", "daily", "mean")) {
       rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                         output_dir = dir_out,
                         output_file = paste0(filename0, ".pdf"))
       file.remove(list.files(path = paste0(dir_wd, "/code/"), 
                              pattern = ".log", full.names = TRUE))
       
-    } else if (file_end %in% c("anom")){
+    } else if (file_end %in% c("anom")) {
       ggsave(filename = paste0(filename0,'.pdf'),
              path = dir_out,
              height = height,
@@ -1207,11 +1361,12 @@ make_figure <- function(
     
     ### rename "current" plots for easy finding ------------------------------------
     # if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+    if (file_end != "grid") {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      for (iiii in 1:length(temp)){
-        file.copy(from = temp[iiii], overwrite = TRUE, to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
-      }
-    # }
+    for (iiii in 1:length(temp)){
+      file.copy(from = temp[iiii], overwrite = TRUE, to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
+    }
+    }
     
     ### Upload to google drive ------------------------------------------------------
     
@@ -1230,9 +1385,12 @@ make_figure <- function(
     if (!(is.null(dir_googledrive_upload))) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-        temp <- c(temp, 
-                  list.files(path = dir_out, pattern = sub(pattern = max_date, replacement = "current", x = filename0), full.names = TRUE))
-     # }
+      if (file_end != "grid") {
+      temp <- c(temp, 
+                list.files(path = dir_out, 
+                           pattern = sub(pattern = max_date, replacement = "current", x = filename0),
+                           full.names = TRUE))
+      }
       for (iii in 1:length(temp)) {
         drive_upload(
           media = temp[iii], 
@@ -1380,3 +1538,425 @@ make_figure_gif<-function(file_end,
 #   }
 #   
 # }
+
+
+licence0 <- "Software code created by U.S. Government employees is not subject to copyright in the United States (17 U.S.C. §105). The United States/Department of Commerce reserve all rights to seek and obtain copyright protection in countries other than the United States for Software authored in its entirety by the Department of Commerce. To this end, the Department of Commerce hereby grants to Recipient a royalty-free, nonexclusive license to use, copy, and create derivative works of the Software outside of the United States."
+
+
+# Shiny functions --------------------------------------------------------------
+
+# https://stackoverflow.com/questions/37446283/creating-legend-with-circles-leaflet-r
+addLegendCustom <- function(map, position = "bottomright", title = "", colors, labels, sizes, opacity = 0.5){
+  colorAdditions <- paste0(colors, "; width:", sizes, "px; height:", sizes, "px")
+  labelAdditions <- paste0("<div style='display: inline-block;height: ", sizes, "px;margin-top: 4px;line-height: ", sizes, "px;'>", labels, "</div>")
+  
+  return(addLegend(map, position = position, title = title, colors = colorAdditions, labels = labelAdditions, opacity = opacity))
+}
+
+ageoffile<-function(path) {
+  # system("touch temp")
+  info <- file.info(path)
+  x<-format(info$mtime,"%B %d, %Y")
+  return(x)
+}
+
+# SameColNames<-function(df.ls) {
+#   #All column names
+#   colnames0<-c()
+#   for (i in 1:length(df.ls)){
+#     df0<-df.ls[[i]]
+#     # colnames(df0)<-toupper(colnames(df0))
+#     df0<-janitor::clean_names(df0)
+#     df.ls[[i]]<-df0
+#     colnames0<-c(colnames0, (colnames(df0)))
+#   }
+#   colnames0<-sort(unique(colnames0), decreasing = T)
+#   
+#   #New df's
+#   df.ls0<-list()
+#   df.rbind0<-c()
+#   for (i in 1:length(df.ls)){
+#     df0<-df.ls[[i]]
+#     colnames.out<-colnames0[!(colnames0 %in% colnames(df0))]
+#     if (length(colnames.out) != 0) {
+#       for (ii in 1:length(colnames.out)){
+#         df0[,(ncol(df0)+1)]<-NA
+#         names(df0)[ncol(df0)]<-colnames.out[ii]
+#       }
+#     }
+#     df0<-df0[,match(table =  colnames(df0), x = colnames0)]
+#     df.ls0[[i]]<-df0
+#     names(df.ls0)[i]<-names(df.ls)[i]
+#     df.rbind0<-rbind.data.frame(df.rbind0, df0)
+#   }
+#   return(df.rbind0)
+# }
+
+scale_values<-function(X) {
+  # X <- X[X != 0]
+  val <- ((X - min(X, na.rm = TRUE))/diff(range(X, na.rm = TRUE))) 
+  return(val)
+}
+
+make_idw_map0 <- 
+  function (x = NA, COMMON_NAME = NA, LATITUDE = NA, LONGITUDE = NA, 
+            CPUE_KGHA = NA, region = "bs.south", extrap.box = NA, 
+            set.breaks = "jenks", grid.cell = c(0.05, 0.05), in.crs = "+proj=longlat", 
+            out.crs = "auto", key.title = "auto", log.transform = FALSE, 
+            idw.nmax = 4, use.survey.bathymetry = TRUE, return.continuous.grid = TRUE) {
+    if (is.na(x)) {
+      x <- data.frame(COMMON_NAME = COMMON_NAME, 
+                      LATITUDE = LATITUDE, 
+                      LONGITUDE = LONGITUDE, 
+                      CPUE_KGHA = CPUE_KGHA)
+    }
+    if (key.title == "auto") {
+      key.title <- x$COMMON_NAME[1]
+    }
+    if (is.na(extrap.box)) {
+      if (region %in% c("bs.south", "sebs")) {
+        extrap.box = c(xmn = -179.5, xmx = -157, 
+                       ymn = 54, ymx = 63)
+      }
+      if (region %in% c("bs.all", "ebs")) {
+        extrap.box = c(xmn = -179.5, xmx = -157, 
+                       ymn = 54, ymx = 68)
+      }
+      if (region %in% c("bs.north", "nbs")) {
+        extrap.box = c(xmn = -176.5, xmx = -160, 
+                       ymn = 58, ymx = 66)
+      } 
+    }
+    
+    map_layers <- get_base_layers0(select.region = region, 
+                                   set.crs = out.crs)
+    out.crs <- map_layers$crs
+    if (use.survey.bathymetry) {
+      map_layers$bathymetry <- get_survey_bathymetry0(select.region = region, 
+                                                      set.crs = out.crs)
+    }
+    x <- sf::st_as_sf(x, coords = c(x = "LONGITUDE", y = "LATITUDE"), 
+                      crs = sf::st_crs(in.crs)) %>% 
+      sf::st_transform(crs = map_layers$crs)
+    idw_fit <- gstat::gstat(formula = CPUE_KGHA ~ 1, 
+                            locations = x, 
+                            nmax = idw.nmax)
+    stn.predict <- predict(idw_fit, x)
+    sp_extrap.raster <- raster::raster(xmn = extrap.box["xmn"], 
+                                       xmx = extrap.box["xmx"], 
+                                       ymn = extrap.box["ymn"], 
+                                       ymx = extrap.box["ymx"], 
+                                       ncol = (extrap.box["xmx"] - 
+                                                 extrap.box["xmn"])/grid.cell, 
+                                       nrow = (extrap.box["ymx"] - 
+                                                 extrap.box["ymn"])/grid.cell, 
+                                       crs = crs(in.crs)) 
+    if (as.character(crs(x)) != as.character(crs(sp_extrap.raster))) {
+      sp_extrap.raster <- sp_extrap.raster %>% 
+        projectRaster(crs = crs(x))
+    }
+    extrap.grid <- predict(idw_fit, 
+                           as(sp_extrap.raster, "SpatialPoints")) %>% 
+      sf::st_as_sf() %>% 
+      sf::st_transform(crs = crs(x)) %>% 
+      stars::st_rasterize() %>% 
+      sf::st_join(map_layers$survey.area, 
+                  join = st_intersects)
+    
+    if (return.continuous.grid) {
+      continuous.grid <- extrap.grid
+    } else {
+      continuous.grid <- NA
+    }
+    alt.round <- 0
+    if (is.character(set.breaks[1])) {
+      set.breaks <- tolower(set.breaks)
+      break.vals <- classInt::classIntervals(x$CPUE_KGHA, n = 5, 
+                                             style = set.breaks)$brks
+      alt.round <- floor(-1 * (min((log10(break.vals) - 2)[abs(break.vals) > 
+                                                             0])))
+      set.breaks <- c(-1, round(break.vals, alt.round))
+    }
+    if (min(set.breaks) > 0) {
+      set.breaks <- c(0, set.breaks)
+    }
+    if (min(set.breaks) == 0) {
+      set.breaks <- c(-1, set.breaks)
+    }
+    if (max(set.breaks) < max(stn.predict$var1.pred)) {
+      set.breaks[length(set.breaks)] <- max(stn.predict$var1.pred) + 1
+    }
+    
+    dig.lab <- 7
+    set.levels <- cut(x = stn.predict$var1.pred, set.breaks, right = TRUE, 
+                      dig.lab = dig.lab)
+    
+    # if (alt.round > 0) {
+    #   while (dig.lab > alt.round) {
+    #     dig.lab <- dig.lab - 1
+    #     set.levels <- cut(x = stn.predict$var1.pred,
+    #                       breaks = set.breaks,
+    #                       right = TRUE,
+    #                       dig.lab = dig.lab)
+    #   }
+    # } else {
+    #   while (length(grep("\\.", set.levels)) > 0) {
+    #     dig.lab <- dig.lab - 1
+    #     print(dig.lab)
+    #     set.levels <- base::cut(x = stn.predict$var1.pred,
+    #                       breaks = set.breaks,
+    #                       right = TRUE,
+    #                       dig.lab = dig.lab)
+    #   }
+    # }
+    
+    # if (alt.round > 0) {
+    #   while (dig.lab > alt.round) {
+    #     dig.lab <- dig.lab - 1
+    #     set.levels <- cut(stn.predict$var1.pred, set.breaks, 
+    #                       right = TRUE, dig.lab = dig.lab)
+    #   }
+    # }
+    # else {
+    #   while (length(grep("\\.", set.levels)) > 0) {
+    #     dig.lab <- dig.lab - 1
+    #     # print(dig.lab)
+    #     set.levels <- cut(stn.predict$var1.pred, set.breaks, 
+    #                       right = TRUE, dig.lab = dig.lab)
+    #   }
+    # }
+    
+    extrap.grid$var1.pred <- cut(extrap.grid$var1.pred, 
+                                 set.breaks, 
+                                 right = TRUE, 
+                                 dig.lab = dig.lab)
+    
+    sig.dig <- round(set.breaks[which(nchar(round(set.breaks)) >= 4)])
+    
+    make_level_labels <- function(vec, sig.dig) {
+      vec <- as.character(vec)
+      vec[grep("-1", vec)] <- "No catch"
+      vec <- sub("\\(", "\\>", vec)
+      vec <- sub("\\,", "–", vec)
+      vec <- sub("\\]", "", vec)
+      if (length(sig.dig) > 3) {
+        for (j in 1:length(sig.dig)) {
+          vec <- sub(sig.dig[j], format(sig.dig[j], nsmall = 0, 
+                                        big.mark = ","), vec)
+        }
+      }
+      return(vec)
+    }
+    
+    extrap.grid$var1.pred <- factor(make_level_labels(vec = extrap.grid$var1.pred, sig.dig), 
+                                    levels = make_level_labels(levels(set.levels), sig.dig))
+    
+    
+    n.breaks <- length(levels(set.levels))
+    
+    p1 <- ggplot() + 
+      geom_sf(data = map_layers$survey.area, fill = NA) + 
+      geom_stars(data = extrap.grid) + 
+      geom_sf(data = map_layers$survey.area, 
+              fill = NA) + 
+      # geom_sf(data = map_layers$akland$geometry[2],
+      #         fill = "grey80") +
+      geom_sf(data = map_layers$akland,
+              fill = "grey80") +
+      # geom_sf(data = sf::st_shift_longitude(sf::st_shift_longitude(map_layers$akland$geometry[1])),
+      #         fill = "grey80") +
+      # geom_sf(data = sf::st_wrap_dateline(map_layers$akland),
+      #         fill = "grey80") +
+      geom_sf(data = map_layers$bathymetry) + 
+      geom_sf(data = map_layers$graticule, 
+              color = alpha("grey70", 0.3)) + 
+      scale_fill_manual(name = paste0(key.title, "\nCPUE (kg/ha)"), 
+                        values = c("white", RColorBrewer::brewer.pal(9, name = "Blues")[c(2, 4, 6, 8, 9)]),
+                        na.translate = FALSE, 
+                        drop = FALSE) + 
+      scale_x_continuous(breaks = map_layers$lon.breaks) + 
+      scale_y_continuous(breaks = map_layers$lat.breaks) + 
+      coord_sf(xlim = map_layers$plot.boundary$x, 
+               ylim = map_layers$plot.boundary$y) + 
+      theme(panel.border = element_rect(color = "black", fill = NA), 
+            panel.background = element_rect(fill = NA, color = "black"), 
+            legend.key = element_rect(fill = NA, color = "grey70"), 
+            legend.position = c(0.12, 0.18), 
+            axis.title = element_blank(), 
+            axis.text = element_text(size = 10), 
+            legend.text = element_text(size = 10), 
+            legend.title = element_text(size = 10), 
+            plot.background = element_rect(fill = NA, color = NA))
+    
+    return(list(plot = p1, map_layers = map_layers, extrapolation.grid = extrap.grid, 
+                continuous.grid = continuous.grid, region = region, n.breaks = n.breaks, 
+                key.title = key.title, crs = out.crs))
+  }
+
+
+
+get_base_layers0 <- 
+  function (select.region, 
+            set.crs = "+proj=longlat +datum=NAD83", 
+            use.survey.bathymetry = FALSE) {
+    if (set.crs == "auto") {
+      region.crs <- c("+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=68.1 +lat_2=70.7 +lat_0=69.4 +lon_0=-162.6 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=60.8 +lat_2=67 +lat_0=63.9 +lon_0=-167 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+      set.crs <- region.crs[match(select.region, c("bs.south", 
+                                                   "sebs", "bs.all", "ebs", "ecs", 
+                                                   "ebs.ecs", "bs.north", "nbs"))]
+    }
+    akland <- sf::st_read(system.file("data", "ak_russia.shp", 
+                                      package = "akgfmaps"), quiet = TRUE)
+    
+    bathymetry <- sf::st_read(system.file("data", "npac_0-200_meters.shp", 
+                                          package = "akgfmaps"), quiet = TRUE)
+    if (select.region %in% c("bs.south", "sebs")) {
+      survey.area <- sf::st_read(system.file("data", 
+                                             "sebs_survey_boundary.shp", package = "akgfmaps"), 
+                                 quiet = TRUE)
+      survey.strata <- sf::st_read(system.file("data", 
+                                               "sebs_strata.shp", package = "akgfmaps"), 
+                                   quiet = TRUE)
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(
+        x = c(-177.3, -154.3), 
+        y = c(54.5, 63.15)), 
+        out.crs = set.crs)
+      graticule <- st_graticule(lat = seq(54, 64, 2), 
+                                lon = seq(-180, -140, 5), 
+                                margin = 1e-05)
+      lon.breaks <- seq(-180, -154, 5)
+      lat.breaks <- seq(54, 64, 2)
+    }
+    if (select.region %in% c("bs.all", "ebs")) {
+      survey.area <- sf::st_read(system.file("data", 
+                                             "ebs_survey_boundary.shp", package = "akgfmaps"), 
+                                 quiet = TRUE)
+      survey.strata <- sf::st_read(system.file("data", 
+                                               "ebs_strata.shp", package = "akgfmaps"), 
+                                   quiet = TRUE)
+      
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(
+        x = c(-177.8, -154.7), 
+        y = c(54, 65.1)), 
+        out.crs = set.crs)
+      graticule <- st_graticule(lat = seq(54, 68, 2), 
+                                lon = seq(-180, -140, 5), 
+                                margin = 1e-05)
+      lon.breaks <- seq(-180, -154, 5)
+      lat.breaks <- seq(54, 66, 2)
+    }
+    if (select.region %in% c("bs.north", "nbs")) {
+      survey.area <- sf::st_read(system.file("data", 
+                                             "ebs_survey_boundary.shp", package = "akgfmaps"), 
+                                 quiet = TRUE)$geometry[2]
+      
+      survey.strata <- sf::st_read(system.file("data", 
+                                               "ebs_strata.shp", package = "akgfmaps"), 
+                                   quiet = TRUE) %>% 
+        dplyr::filter(STRATUM %in% c(70, 71, 81))
+      
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(
+        # x = c(-177.8, -154.7), 
+        # y = c(63.15, 65.1)), 
+        x = c(-176.5, -160), 
+        y = c(60, 66)), 
+        out.crs = set.crs)
+      
+      graticule <- st_graticule(lat = seq(64, 68, 2), 
+                                lon = seq(-180, -140, 5), 
+                                margin = 1e-05)
+      lon.breaks <- seq(-180, -154, 5)
+      lat.breaks <- seq(64, 66, 2)
+    }
+    if (select.region == "ecs") {
+      survey.area <- sf::st_read(system.file("data", 
+                                             "chukchi_survey_boundary.shp", package = "akgfmaps"), 
+                                 quiet = TRUE)
+      survey.strata <- sf::st_read(system.file("data", 
+                                               "chukchi_strata.shp", package = "akgfmaps"), 
+                                   quiet = TRUE)
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(-170, -156), 
+                                                                     y = c(65, 73)), 
+                                                          out.crs = set.crs)
+      graticule <- st_graticule(lat = seq(60, 76, 2), lon = seq(-180, -140, 5), margin = 1e-05)
+      lon.breaks <- seq(-180, -154, 5)
+      lat.breaks <- seq(66, 76, 2)
+    }
+    if (select.region == "ebs.ecs") {
+      survey.area <- sf::st_read(system.file("data", 
+                                             "ebs_chukchi_survey_boundary.shp", package = "akgfmaps"), 
+                                 quiet = TRUE)
+      survey.strata <- sf::st_read(system.file("data", 
+                                               "ebs_chukchi_strata.shp", package = "akgfmaps"), 
+                                   quiet = TRUE)
+      bathymetry <- sf::st_read(system.file("data", "npac_0-200_meters.shp", 
+                                            package = "akgfmaps"), quiet = TRUE)
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(-177, -151), 
+                                                                     y = c(54.5, 72.5)), 
+                                                          out.crs = set.crs)
+      graticule <- st_graticule(lat = seq(54, 78, 4), 
+                                lon = seq(-180, -140, 5), 
+                                margin = 1e-05)
+      lon.breaks <- seq(-180, -150, 5)
+      lat.breaks <- seq(54, 78, 4)
+    }
+    if (tolower(class(set.crs)) != "crs") {
+      set.crs <- sf::st_crs(set.crs)
+    }
+    akland <- akland %>% sf::st_transform(crs = set.crs)
+    survey.area <- survey.area %>% sf::st_transform(crs = set.crs)
+    survey.strata <- survey.strata %>% sf::st_transform(crs = set.crs)
+    bathymetry <- bathymetry %>% sf::st_transform(crs = set.crs)
+    place.labels <- read.csv(file = system.file("data",
+                                                "placenames.csv", package = "akgfmaps")) %>%
+      dplyr::filter(region == select.region) %>% akgfmaps::transform_data_frame_crs(out.crs = set.crs)
+    return(list(akland = akland, survey.area = survey.area, survey.strata = survey.strata, 
+                bathymetry = bathymetry, place.labels = place.labels, 
+                graticule = graticule, crs = set.crs, plot.boundary = plot.boundary, 
+                lon.breaks = lon.breaks, lat.breaks = lat.breaks))
+  }
+
+
+get_survey_bathymetry0 <- 
+  function (select.region, set.crs) {
+    
+    if (set.crs == "auto") {
+      region.crs <- c("+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=68.1 +lat_2=70.7 +lat_0=69.4 +lon_0=-162.6 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=60.8 +lat_2=67 +lat_0=63.9 +lon_0=-167 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
+                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+      set.crs <- region.crs[match(select.region, c("bs.south", 
+                                                   "sebs", "bs.all", "ebs", "ecs", 
+                                                   "ebs.ecs", "bs.north", "nbs"))]
+    }
+    
+    if (select.region %in% c("bs.all", "ebs")) {
+      bathymetry <- sf::st_read(system.file("data", "ebs_survey_bathymetry.shp", 
+                                            package = "akgfmaps"), quiet = TRUE) %>% st_transform(crs = set.crs)
+    } else if (select.region %in% c("bs.south", "sebs")) {
+      bathymetry <- sf::st_read(system.file("data", "ebs_survey_bathymetry.shp", 
+                                            package = "akgfmaps"), quiet = TRUE) %>% st_transform(crs = set.crs) %>% 
+        dplyr::filter(FNODE_ != 5)
+    } else if (select.region %in% c("bs.north", "nbs")) {
+      bathymetry <- sf::st_read(system.file("data", "ebs_survey_bathymetry.shp", 
+                                            package = "akgfmaps"), quiet = TRUE) %>% st_transform(crs = set.crs) %>% 
+        dplyr::filter(FNODE_ == 5)
+    } else {
+      stop(paste0("No survey-specific bathymetry available for ", 
+                  select.region, ". If using make_idw_map, set use.survey.bathymetry = FALSE."))
+    }
+    return(bathymetry)
+  }
+
+
