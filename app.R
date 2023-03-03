@@ -33,9 +33,28 @@
 #               stratum = TRUE,
 #               stat_points = TRUE)
 
+
+## SOURCE DATA -----------------------------------------------------------------
+
+source("style.R") # Universal Documents
+# source("functions.R") # App-specific files
+# source("data.R") # Universal Documents
+### ui code (lists, instructions, etc) used in multiple tabs
+# source(file.path("ui_files", "ui_common.R"), local = TRUE, echo = FALSE, chdir = TRUE)
+# source(file.path("ui_files", "ui_functions.R"), local = TRUE, echo = FALSE, chdir = TRUE)
+
+dat_cpue <- data.frame(year = 2022, common = "pollock", survey = "EBS", survey_num = 98)
+lastdl <- Sys.Date()
+
+### ui code parsed by tabName
+files0 <- list.files(path = here::here("ui_files"), full.names = TRUE)
+for (i in 1:length(files0)) {
+  source(files0[i], local = TRUE, echo = FALSE, chdir = TRUE)
+}
+
 # DEFINE -----------------------------------------------------------------------
 
-title0<-" | Near Real-time Temperatures From The Bering Sea Bottom Trawl Surveys "
+title0 <- " | Near Real-time Temperatures From The Bering Sea Bottom Trawl Surveys "
 # require.login<-T 
 # 
 # user_base <- tibble(

@@ -60,7 +60,6 @@ if ("GOA" %in% dat_survreg$SRVY) {
   maxyr <- 2021 # testing
   data_source <- "oracle" # testing
   
-  
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
   dir_googledrive_upload <- (dir_googledrive_upload_bs)

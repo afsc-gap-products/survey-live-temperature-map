@@ -37,6 +37,8 @@ for (i in 1:length(locations)){
 locations<-c(
   # "RACE_DATA.VESSELS", 
   "GOA.GOA_STRATA", 
+  "RACEDATA.V_CRUISES",
+  # "AI.AIGRID_GIS",
   # "RACEBASE.HAUL", 
   # "RACE_DATA.V_CRUISES"
   "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL"

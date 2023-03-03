@@ -5,6 +5,7 @@
 #' purpose: download oracle data
 #' ---------------------------
 
+
 # Load data from Google Sheet --------------------------------------------------
 
 if (googledrive_dl) {
@@ -14,29 +15,6 @@ if (googledrive_dl) {
                               overwrite = TRUE, 
                               path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"))
 }
-
-# The surveys this script will be covering -------------------------------------
-
-dat_survreg <- readxl::read_excel(
-  path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
-  sheet = "runs") %>% 
-  dplyr::filter(year == maxyr) %>%
-  dplyr::mutate(
-    region_long = dplyr::case_when(
-      SRVY == "EBS" ~ "Eastern Bering Sea", 
-      SRVY == "NBS" ~ "Northern Bering Sea", 
-      SRVY == "GOA" ~ "Gulf of Alaska", 
-      SRVY == "AI" ~ "Aleutian Islands"), 
-    region = dplyr::case_when(
-      SRVY %in% c("EBS", "NBS") ~ "BS", 
-      SRVY == "GOA" ~ "GOA", 
-      SRVY == "AI" ~ "AI"), 
-    )
-
-# Load Design Based Estimates --------------------------------------------------
-
-load(here::here("data", "publicdata", "all_data.Rdata"))
-lastdl <- ageoffile(here::here("data", "publicdata", "all_data.Rdata"))
 
 # Download data from oracle saved locally: -------------------------------------
 
@@ -51,37 +29,16 @@ for (i in 1:length(a)){
 }
 
 # haul data --------------------------------------------------------------------
-# haul <- dplyr::left_join(
-#   x = racebase_haul0, 
-#   y = race_data_v_cruises0 %>% 
-#     dplyr::select(cruise_id,  year, survey_name, vessel_id, survey_definition_id, 
-#                   vessel_name, start_date, end_date, cruisejoin), 
-#   by = "cruisejoin") %>% 
-#   dplyr::mutate(#year = substr(x = cruise, start = 1, stop = 4),  
-#     bottom_type = NULL, 
-#     SRVY = dplyr::case_when(
-#       survey_definition_id == 143 ~"NBS", 
-#       survey_definition_id == 98 ~ "EBS", 
-#       survey_definition_id == 47 ~ "GOA", 
-#       survey_definition_id == 52 ~ "AI", 
-#       survey_definition_id == 78 ~"BSS")  ) %>%
-#   dplyr::filter(#year <= maxyr &
-#     year != 2020 & # no surveys happened this year because of COVID
-#       ((year >= 1982 & SRVY == "EBS") | # 1982 BS inclusive - much more standardized after this year
-#          (year >= 2010 & SRVY == "NBS") | # 1982 BS inclusive - much more standardized after this year
-#          (year != 2018 & SRVY == "NBS") | # 2018 NBS was not a standard haul
-#          SRVY == "BSS" | # keep all years of the BSS
-#          (year >= 1991 & SRVY %in% c("AI", "GOA")))) %>% # 1991 AI and GOA (1993) inclusive - much more standardized after this year
-#   # !is.na(SRVY) & 
-#   dplyr::filter(#SRVY %in% unique(dat_survreg$SRVY) &
-#     haul_type == 3 &
-#       abundance_haul == "Y" &
-#       performance >= 0 &
-#       !(is.null(stationid)))
+
 haul <- racebase_foss_join_foss_cpue_haul0 %>% 
   dplyr::rename(SRVY = srvy) %>%
-  dplyr::mutate(date = as.Date(date_time))
-  
+  dplyr::mutate(date = as.Date(date_time)) %>% 
+  dplyr::filter(!is.na(surface_temperature_c) &
+                  !is.na(bottom_temperature_c) & 
+                  # there shouldn't be bottom temps of 0 in the AI or GOA
+                  (SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) & 
+                  (SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0))
+
 # vessel -----------------------------------------------------------------------
 
 vessel_info <- haul %>% 
@@ -89,6 +46,53 @@ vessel_info <- haul %>%
   dplyr::distinct() %>% 
   dplyr::mutate(vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*")) %>%
   dplyr::mutate(vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)))
+
+# The surveys this script will be covering -------------------------------------
+
+dat_survreg <- race_data_v_cruises0 %>% 
+  dplyr::mutate(
+    region_long = dplyr::case_when(
+      survey_definition_id == "98" ~ "Eastern Bering Sea", 
+      survey_definition_id == "143" ~ "Northern Bering Sea", 
+      survey_definition_id == "47" ~ "Gulf of Alaska", 
+      survey_definition_id == "52" ~ "Aleutian Islands"), 
+    SRVY = dplyr::case_when(
+      survey_definition_id == "98" ~ "EBS", 
+      survey_definition_id == "143" ~ "NBS", 
+      survey_definition_id == "47" ~ "GOA", 
+      survey_definition_id == "52" ~ "AI"), 
+    region = dplyr::case_when(
+      SRVY %in% c("EBS", "NBS") ~ "BS", 
+      SRVY == "GOA" ~ "GOA", 
+      SRVY == "AI" ~ "AI"), 
+    vessel_shape = substr(x = vessel_name, start = 1, stop = 1), 
+    reg_dates = paste0(
+      format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
+      " - ", 
+      format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
+  dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, region_long, region)
+
+# dat_survreg <- readxl::read_excel(
+#   path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
+#   sheet = "runs") %>% 
+#   # dplyr::filter(year == maxyr) %>%
+#   dplyr::mutate(
+#     region_long = dplyr::case_when(
+#       SRVY == "EBS" ~ "Eastern Bering Sea", 
+#       SRVY == "NBS" ~ "Northern Bering Sea", 
+#       SRVY == "GOA" ~ "Gulf of Alaska", 
+#       SRVY == "AI" ~ "Aleutian Islands"), 
+#     region = dplyr::case_when(
+#       SRVY %in% c("EBS", "NBS") ~ "BS", 
+#       SRVY == "GOA" ~ "GOA", 
+#       SRVY == "AI" ~ "AI"), 
+#     )
+
+# Load Design Based Estimates --------------------------------------------------
+
+load(here::here("data", "publicdata", "all_data.Rdata"))
+lastdl <- ageoffile(here::here("data", "publicdata", "all_data.Rdata"))
+
 
 # Load shape files -------------------------------------------------------------
 
@@ -128,9 +132,41 @@ shp_nbs <- survey_area
 
 # shp_ai <- get_base_layers(select.region = "ai", 
 #                           set.crs = "+proj=longlat +datum=WGS84")$survey.strata
+
+
+# survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
+# survey_area$survey.grid <-  
+#   sp::merge(
+#     x = survey_area$survey.grid %>%
+#       dplyr::rename(station = ID, 
+#                     stratum = STRATUM),
+#     y = goa_goa_strata0 %>%
+#       dplyr::filter(survey == "AI") %>%
+#       dplyr::mutate(SRVY = "AI",
+#                     region = stringr::str_to_title(inpfc_area),
+#                     region = dplyr::case_when(
+#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
+#                       TRUE ~ region)) %>%
+#       dplyr::select(SRVY, stratum, region) %>%
+#       dplyr::distinct(),
+#     all.x = TRUE)  %>% 
+#   dplyr::arrange(region) %>% 
+#   dplyr::filter(!is.na(region))
+# survey_area$survey.area <- survey_area$survey.area %>% 
+#   dplyr::mutate(SURVEY = "AI", 
+#                 SRVY = "AI")
+# shp_ai <- survey_area
+
 survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
-survey_area$survey.grid <-  survey_area$survey.grid %>% 
-  dplyr::rename(station = ID) %>%
+survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
+                                          layer = "aigrid_trawable_thru2018_Emily",
+                                          verbose=F) %>%
+  sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
+  st_as_sf(x = .) %>%
+  dplyr::rename(station = ID,
+                stratum = STRATUM) %>%
+  dplyr::filter(stratum %in% unique(goa_goa_strata0$stratum) &
+                  stratum != 0) %>% # land
   sp::merge(
     x = .,
     y = goa_goa_strata0 %>%
@@ -142,49 +178,82 @@ survey_area$survey.grid <-  survey_area$survey.grid %>%
                       TRUE ~ region)) %>%
       dplyr::select(SRVY, stratum, region) %>%
       dplyr::distinct(),
-    all.x = TRUE)  %>% 
-  dplyr::arrange(region)
-survey_area$survey.area <- survey_area$survey.area %>% 
-  dplyr::mutate(SURVEY = "AI", 
+    all.x = TRUE)  %>%
+  dplyr::arrange(region) %>%
+  dplyr::mutate(AIGRID_ID = as.double(AIGRID_ID))
+survey_area$survey.area <- survey_area$survey.area %>%
+  dplyr::mutate(SURVEY = "AI",
                 SRVY = "AI")
-# survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/plot_gridiles/'),# Prepare map objects
-#                                           layer = "aigrid_trawable_thru2018_Emily",
-#                                           verbose=F) %>%
-#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-#   st_as_sf(x = .) %>%
-#   dplyr::rename(station = ID,
-#                 stratum = STRATUM) %>%
-#   dplyr::filter(stratum %in% unique(goa_goa_strata0$stratum) &
-#                   stratum != 0) %>% # land
-#   sp::merge(
-#     x = .,
-#     y = goa_goa_strata0 %>%
-#       dplyr::filter(survey == "AI") %>%
-#       dplyr::mutate(SRVY = "AI",
-#                     region = stringr::str_to_title(inpfc_area),
-#                     region = dplyr::case_when(
-#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-#                       TRUE ~ region)) %>%
-#       dplyr::select(SRVY, stratum, region) %>%
-#       dplyr::distinct(),
-#     all.x = TRUE)  %>% 
-#   dplyr::arrange(region)
-# survey_area$survey.grid1 <- survey_area$survey.grid
 shp_ai <- survey_area
+
+# 
+# 
+# temp1 <- shp_ai$survey.grid %>%
+#   dplyr::mutate(area = sf::st_area(shp_ai$survey.grid$geometry), 
+#                 perimeter = sf::st_length(shp_ai$survey.grid$geometry)#, 
+#                 # area_diff = (AREA - area), 
+#                 # perimeter_diff = (PERIMETER - perimeter)
+#                 ) %>%
+#   data.frame() %>%
+#   dplyr::select(region, AIGRID_ID, stratum, station, area, perimeter)
+# names(temp1) <- paste0("r_", names(temp1))
+# 
+# temp2 <- data.frame(survey_area$survey.grid) %>%
+#   dplyr::mutate(area = sf::st_area(survey_area$survey.grid$geometry), 
+#                 perimeter = sf::st_length(survey_area$survey.grid$geometry)#, 
+#                 # area_diff = AREA != area, 
+#                 # perimeter_diff = PERIMETER != perimeter
+#                 ) %>%
+#   data.frame() %>%
+#   dplyr::select(region, AIGRID_ID, stratum, station, area, perimeter)
+# names(temp2) <- paste0("a_", names(temp2))
+# 
+# temp3 <- ai_aigrid_gis0[order(ai_aigrid_gis0$aigrid_id),] %>%
+#   dplyr::select(AIGRID_ID = aigrid_id, stratum, station = stationid , AREA = area_km2, PERIMETER = perimeter_km2) %>% 
+#   dplyr::mutate(region = NA)
+# names(temp3) <- paste0("t_", names(temp3))
+# 
+# temp <- dplyr::full_join(
+#   x = temp1,
+#   y = temp2,
+#   by = c("r_AIGRID_ID" = "a_AIGRID_ID")) %>%
+#   dplyr::mutate(diff_region = r_region != a_region,
+#                 diff_stratum = r_stratum != a_stratum,
+#                 diff_station = r_station != a_station,
+#                 diff_area = as.numeric(r_area) != as.numeric(a_area), 
+#                 diff_perim = as.numeric(r_perimeter) != as.numeric(a_perimeter))
+# 
+# temp <- dplyr::full_join(
+#   x = temp1,
+#   y = temp3,
+#   by = c("r_AIGRID_ID" = "t_AIGRID_ID")) %>%
+#   dplyr::mutate(
+#     #diff_region = r_region != t_region,
+#                 diff_stratum = r_stratum != t_stratum,
+#                 diff_station = r_station != t_station,
+#                 diff_area = r_AREA != t_AREA, 
+#                 diff_perim = r_PERIMETER != t_PERIMETER)
 
 ## GOA  ------------------------------------------------------------------------
 survey_area <- akgfmaps::get_base_layers(select.region = "goa", set.crs = "auto")
-survey_area$survey.grid <-  survey_area$survey.grid %>% 
+survey_area$survey.grid <-  
   sp::merge(
-    x = .,
+    x = survey_area$survey.grid %>%
+      dplyr::rename(station = ID, 
+                    stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "GOA") %>%
       dplyr::mutate(SRVY = "GOA",
-                    region = stringr::str_to_title(inpfc_area)) %>%
+                    region = stringr::str_to_title(inpfc_area)#,
+                    # region = dplyr::case_when(
+                    #   region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
+                    #   TRUE ~ region)
+                    ) %>%
       dplyr::select(SRVY, stratum, region) %>%
       dplyr::distinct(),
     all.x = TRUE)  %>% 
-  dplyr::arrange(region)
+  dplyr::arrange(region) %>% 
+  dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>% 
   dplyr::mutate(SURVEY = "GOA", 
                 SRVY = "GOA")

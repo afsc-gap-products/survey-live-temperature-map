@@ -354,22 +354,7 @@ make_varplot_wrapper <- function(
     dat <- dat %>% 
       # dplyr::rename(date = date_time) %>% 
       dplyr::filter(year == maxyr &
-                      SRVY %in% SRVY1 &
-                      !is.na(var))
-      
-    if (SRVY %in% c("AI", "GOA")) {
-      dat <- dat %>%
-        dplyr::filter(var != 0) # there shouldn't be bottom temps of 0 in the AI or GOA
-    }
-    
-    for (ii in 1:length(unique(dat$SRVY))){
-      temp <- unique(dat$SRVY)[ii]
-      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0(#"\n(", 
-        format(x = min(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d"),
-        " - ", 
-        format(x = max(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d")#, ")"
-      )
-    }
+                      SRVY %in% SRVY1)
     
     dat <- dat %>% 
       dplyr::left_join(
@@ -601,22 +586,7 @@ make_grid_wrapper<-function(maxyr,
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1) %>% 
       dplyr::select(SRVY, date, vessel_id, vessel_name, stratum, station) %>% 
-      dplyr::mutate(var = NA)
-    
-    for (ii in 1:length(unique(dat$SRVY))){
-      temp <- unique(dat$SRVY)[ii]
-      dat_survreg$reg_dates[dat_survreg$SRVY == temp] <- paste0(#"\n(", 
-        format(x = min(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d"),
-        " - ", 
-        format(x = max(dat$date[dat$SRVY == temp], na.rm = TRUE), "%b %d")#, ")"
-      )
-    }
-    
-    dat <- dat  %>% 
-      dplyr::mutate(#var = NA, 
-                    # vessel_id = NA, 
-                    # vessel_name = NA,
-                    vessel_shape = NA) %>%
+      dplyr::mutate(var = NA) %>% 
       dplyr::select(SRVY, stratum, station, #var, 
                     date, vessel_shape)
     
@@ -659,7 +629,7 @@ make_grid_wrapper<-function(maxyr,
                     show_planned_stations = show_planned_stations, 
                     height = height)
   
-  return(pp)
+  # return(pp)
 }
 
 
@@ -1058,11 +1028,12 @@ make_figure <- function(
       ### Aleutian Islands and Gulf of Alaska ----------------------------------
       
       # if (as.character(dates0[1]) == "none") {
-      # gg <- gg+
-      # ggplot2::geom_sf(data = survey_area$survey.grid, 
-      #                  colour = ifelse((as.character(dates0[1]) == "none"), "grey20", "grey50"),
-      #                  size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
-      #                  show.legend = FALSE) 
+      gg <- gg +
+      ggplot2::geom_sf(
+        data = survey_area$survey.grid,
+                       colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
+                       size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
+                       show.legend = FALSE)
       
       # now we build a plot list
       lapply(unique(grid_stations_plot$region), function(x) {
@@ -1073,7 +1044,7 @@ make_figure <- function(
         
         gg1 <- gg +
           ggplot2::geom_sf(data = grid_stations_plot1, 
-                           colour = ifelse((as.character(dates0[1]) == "none"), "grey20", "grey50"),
+                           colour = ifelse((as.character(dates0[1]) == "none"), "grey50", "grey70"),
                            size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
                            show.legend = FALSE) 
         
@@ -1095,7 +1066,7 @@ make_figure <- function(
           ggspatial::coord_sf(
             xlim = c(extent(grid_stations_plot1)[1:2]), 
             ylim = c(extent(grid_stations_plot1)[3:4])) +
-          ggtitle(x)  +
+          ggtitle(x) +
           ggsn::scalebar(data = grid_stations_plot1,
                          location = ifelse(x == "Western Aleutians", "topright", "topleft"),
                          dist = 25,
@@ -1184,13 +1155,24 @@ make_figure <- function(
       }
       
       gg_insert <- gg_insert + 
-        geom_text(data = bb, 
-                  mapping = aes(x = x, y = y+ifelse(file_end == "grid", 100000, 200000), label = lab), 
-                  size = ifelse(file_end != "grid", 3, 5)) +
         ggspatial::coord_sf(
           xlim = c(extent(grid_stations_plot)[1:2]),
           ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+350000)) + 
-        ggtitle(gsub(pattern = "\n", replacement = " ", x = unique(survey_area$survey.area$reg_lab), fixed = TRUE)) +
+        geom_label(data = bb, 
+                  color = "white", 
+                  fill = "black",
+                  fontface = "bold",
+                  label.size = NA,
+                  label.r = unit(0, "pt"),
+                  mapping = 
+                    aes(x = x, 
+                                y = (y+ifelse(file_end == "grid", 100000, 200000)), 
+                                label = lab), 
+                  size = ifelse(file_end != "grid", 3, 5)) +
+
+        ggtitle(gsub(pattern = "\n", replacement = " ", 
+                     x = unique(survey_area$survey.area$reg_lab), 
+                     fixed = TRUE)) +
         theme_minimal() # + 
       # theme(
       #   panel.border = element_rect(colour = "grey50", fill=NA, linewidth=1), 
@@ -1403,6 +1385,8 @@ make_figure <- function(
     end_time <- Sys.time()
     print((end_time - start_time))
   }
+  
+  return(gg)
 }
 
 
