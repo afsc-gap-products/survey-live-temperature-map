@@ -28,71 +28,98 @@ for (i in 1:length(a)){
   assign(x = gsub(pattern = "\\.csv", replacement = "", x = paste0(a[i], "0")), value = b)
 }
 
-# haul data --------------------------------------------------------------------
-
-haul <- racebase_foss_join_foss_cpue_haul0 %>% 
-  dplyr::rename(SRVY = srvy) %>%
-  dplyr::mutate(date = as.Date(date_time)) %>% 
-  dplyr::filter(!is.na(surface_temperature_c) &
-                  !is.na(bottom_temperature_c) & 
-                  # there shouldn't be bottom temps of 0 in the AI or GOA
-                  (SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) & 
-                  (SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0))
-
-# vessel -----------------------------------------------------------------------
-
-vessel_info <- haul %>% 
-  dplyr::select(vessel_name, vessel_id) %>% 
-  dplyr::distinct() %>% 
-  dplyr::mutate(vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*")) %>%
-  dplyr::mutate(vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)))
 
 # The surveys this script will be covering -------------------------------------
 
-dat_survreg <- race_data_v_cruises0 %>% 
+# need race_data_v_cruises because it has the cruise start and end dates
+
+dat_survreg <- 
+  dplyr::left_join( # get SRVY
+    x = racebase_foss_join_foss_cpue_haul0 %>% 
+      dplyr::select(SRVY = srvy, survey_definition_id = survey_id, year, vessel_id),
+    y = race_data_v_cruises0,
+    by = c("survey_definition_id", 'year', 'vessel_id')) %>% 
   dplyr::mutate(
-    region_long = dplyr::case_when(
-      survey_definition_id == "98" ~ "Eastern Bering Sea", 
-      survey_definition_id == "143" ~ "Northern Bering Sea", 
-      survey_definition_id == "47" ~ "Gulf of Alaska", 
-      survey_definition_id == "52" ~ "Aleutian Islands"), 
-    SRVY = dplyr::case_when(
-      survey_definition_id == "98" ~ "EBS", 
-      survey_definition_id == "143" ~ "NBS", 
-      survey_definition_id == "47" ~ "GOA", 
-      survey_definition_id == "52" ~ "AI"), 
-    region = dplyr::case_when(
-      SRVY %in% c("EBS", "NBS") ~ "BS", 
-      SRVY == "GOA" ~ "GOA", 
-      SRVY == "AI" ~ "AI"), 
     vessel_shape = substr(x = vessel_name, start = 1, stop = 1), 
+    vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
+    vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)),
+    region_long = dplyr::case_when(
+      SRVY == "EBS" ~ "Eastern Bering Sea", 
+      SRVY == "NBS" ~ "Northern Bering Sea", 
+      SRVY == "GOA" ~ "Gulf of Alaska", 
+      SRVY == "AI" ~ "Aleutian Islands"), 
+    # region = dplyr::case_when(
+    #   SRVY %in% c("EBS", "NBS") ~ "BS", 
+    #   SRVY == "GOA" ~ "GOA", 
+    #   SRVY == "AI" ~ "AI"), 
     reg_dates = paste0(
       format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
       " - ", 
       format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
-  dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, region_long, region)
+  dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, region_long) %>% 
+  dplyr::distinct()
 
-# dat_survreg <- readxl::read_excel(
-#   path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
-#   sheet = "runs") %>% 
-#   # dplyr::filter(year == maxyr) %>%
-#   dplyr::mutate(
-#     region_long = dplyr::case_when(
-#       SRVY == "EBS" ~ "Eastern Bering Sea", 
-#       SRVY == "NBS" ~ "Northern Bering Sea", 
-#       SRVY == "GOA" ~ "Gulf of Alaska", 
-#       SRVY == "AI" ~ "Aleutian Islands"), 
-#     region = dplyr::case_when(
-#       SRVY %in% c("EBS", "NBS") ~ "BS", 
-#       SRVY == "GOA" ~ "GOA", 
-#       SRVY == "AI" ~ "AI"), 
-#     )
+
+# > head(dat_survreg)
+# # A tibble: 6 × 6
+# year SRVY  reg_dates       vessel_id vessel_shape region_long       
+# <dbl> <chr> <chr>               <dbl> <chr>        <chr>             
+#   1  1982 EBS   May 29 - Aug 23        19 P            Eastern Bering Sea
+# 2  1982 EBS   May 29 - Aug 23         1 C            Eastern Bering Sea
+# 3  1982 EBS   May 29 - Aug 23        19 P            Eastern Bering Sea
+
+# haul data --------------------------------------------------------------------
+
+haul <- racebase_foss_join_foss_cpue_haul0 %>% 
+  dplyr::rename(SRVY = srvy) %>%
+  dplyr::mutate(
+    date = as.Date(date_time)#, 
+    # vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
+    # vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name))
+    ) %>% 
+  dplyr::filter(!is.na(surface_temperature_c) &
+                  !is.na(bottom_temperature_c) & 
+                  # there shouldn't be bottom temps of 0 in the AI or GOA
+                  ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
+                  (SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) %>% 
+  
+  # dplyr::left_join(x = ., 
+  #                  y = dat_survreg %>% 
+  #                    dplyr::select(-dplyr::starts_with("vessel_")) %>% 
+  #                    dplyr::distinct(), 
+  #                  by = c("SRVY")) %>%
+  
+  dplyr::left_join( # get vessel_shape
+  x = ., 
+  y = dat_survreg, 
+  by = c("vessel_id", "SRVY", "year")) %>% 
+  dplyr::select(
+    SRVY, year, stratum, station, date, vessel_shape, region_long, reg_dates, 
+    st = surface_temperature_c, 
+    bt = bottom_temperature_c, 
+  ) %>% 
+  dplyr::arrange(-year)
+
+# > head(haul)
+# # A tibble: 6 × 9
+# SRVY   year stratum station date       vessel_shape region_long           st    bt
+# <chr> <dbl>   <dbl> <chr>   <date>     <chr>        <chr>              <dbl> <dbl>
+#   1 EBS    2022      31 B-06    2022-06-12 V            Eastern Bering Sea   8.3   3.9
+# 2 AI     2022     721 327-78  2022-06-12 A            Aleutian Islands     6.3   4.5
+# 3 AI     2022     794 322-77  2022-06-12 O            Aleutian Islands     6.7   4.1
+
+# vessel -----------------------------------------------------------------------
+
+# vessel_info <- haul %>% 
+#   dplyr::select(vessel_name, vessel_id, vessel_shape) %>% 
+#   dplyr::distinct() %>% 
+#   dplyr::mutate(vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*")) %>%
+#   dplyr::mutate(vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)))
 
 # Load Design Based Estimates --------------------------------------------------
 
 load(here::here("data", "publicdata", "all_data.Rdata"))
 lastdl <- ageoffile(here::here("data", "publicdata", "all_data.Rdata"))
-
 
 # Load shape files -------------------------------------------------------------
 
