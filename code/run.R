@@ -82,7 +82,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       plot_end0 = c("daily"), #"grid", "mean", "anom"
+                       file_end0 = c("daily"), #"grid", "mean", "anom"
                        dir_wd = dir_wd)
 }
 
@@ -104,12 +104,12 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = dates0,
+                       dates0 = "first", # dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       plot_end0 = c("daily", "anom", "grid", "mean"),
+                       file_end0 = c("daily", "anom", "grid", "mean"),
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
@@ -136,7 +136,7 @@ if ("AI" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       plot_end0 = c("daily"), #"grid", "mean", "anom"
+                       file_end0 = c("daily"), #"grid", "mean", "anom"
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }

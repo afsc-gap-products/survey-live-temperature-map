@@ -27,15 +27,13 @@ knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = 
 vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
-if (file_end == "mean") {
+if (file_end %in% c("mean", "anom")) {
   
     temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
   
-  fig_cap <- fig_alt <- paste0(
-    "Mean bottom temperatures from the NOAA Fisheries ", 
-    gsub(pattern = "\n", replacement = " and ", x = plot_title), 
-    " in ", maxyr, 
-    ". ")
+    fig_cap <- fig_alt <- paste0(
+    gsub(pattern = "\n", replacement = paste0(", comparing bottom temperatures from ", maxyr, " to "), x = plot_title), 
+    ". Credit: NOAA Fisheries. ")
   
 } else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
   

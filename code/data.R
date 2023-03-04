@@ -40,7 +40,7 @@ dat_survreg <-
     y = race_data_v_cruises0,
     by = c("survey_definition_id", 'year', 'vessel_id')) %>% 
   dplyr::mutate(
-    vessel_shape = substr(x = vessel_name, start = 1, stop = 1), 
+    vessel_shape = as.factor(substr(x = vessel_name, start = 1, stop = 1)), 
     vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
     vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)),
     region_long = dplyr::case_when(
@@ -56,7 +56,7 @@ dat_survreg <-
       format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
       " - ", 
       format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
-  dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, region_long) %>% 
+  dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, region_long) %>% 
   dplyr::distinct()
 
 
@@ -72,41 +72,25 @@ dat_survreg <-
 
 haul <- racebase_foss_join_foss_cpue_haul0 %>% 
   dplyr::rename(SRVY = srvy) %>%
-  dplyr::mutate(
-    date = as.Date(date_time)#, 
-    # vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
-    # vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name))
-    ) %>% 
-  dplyr::filter(!is.na(surface_temperature_c) &
+  dplyr::filter(
+    !is.na(surface_temperature_c) &
                   !is.na(bottom_temperature_c) & 
                   # there shouldn't be bottom temps of 0 in the AI or GOA
                   ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
-                  (SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) %>% 
-  
-  # dplyr::left_join(x = ., 
-  #                  y = dat_survreg %>% 
-  #                    dplyr::select(-dplyr::starts_with("vessel_")) %>% 
-  #                    dplyr::distinct(), 
-  #                  by = c("SRVY")) %>%
-  
+                  ((SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS")))) %>% 
+  dplyr::mutate(date = as.Date(date_time)) %>% 
+  dplyr::select(-vessel_name) %>%
   dplyr::left_join( # get vessel_shape
-  x = ., 
-  y = dat_survreg, 
-  by = c("vessel_id", "SRVY", "year")) %>% 
+    x = ., 
+    y = dat_survreg, 
+    by = c("SRVY", "year", "vessel_id")) %>% 
   dplyr::select(
-    SRVY, year, stratum, station, date, vessel_shape, region_long, reg_dates, 
+    SRVY, year, stratum, station, date, region_long, reg_dates, 
+    vessel_shape, vessel_name, vessel_ital, 
     st = surface_temperature_c, 
     bt = bottom_temperature_c, 
   ) %>% 
   dplyr::arrange(-year)
-
-# > head(haul)
-# # A tibble: 6 × 9
-# SRVY   year stratum station date       vessel_shape region_long           st    bt
-# <chr> <dbl>   <dbl> <chr>   <date>     <chr>        <chr>              <dbl> <dbl>
-#   1 EBS    2022      31 B-06    2022-06-12 V            Eastern Bering Sea   8.3   3.9
-# 2 AI     2022     721 327-78  2022-06-12 A            Aleutian Islands     6.3   4.5
-# 3 AI     2022     794 322-77  2022-06-12 O            Aleutian Islands     6.7   4.1
 
 # vessel -----------------------------------------------------------------------
 
@@ -275,7 +259,7 @@ survey_area$survey.grid <-
                     # region = dplyr::case_when(
                     #   region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
                     #   TRUE ~ region)
-                    ) %>%
+      ) %>%
       dplyr::select(SRVY, stratum, region) %>%
       dplyr::distinct(),
     all.x = TRUE)  %>% 
