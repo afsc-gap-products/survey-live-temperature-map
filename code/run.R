@@ -7,7 +7,7 @@
 
 # KNOWNS -----------------------------------------------------------------------
 
-maxyr <- 2022
+maxyr <- 2023
 data_source <- "gd" # google drive
 data_source <- "oracle" # testing
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
@@ -104,7 +104,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = "first", # dates0,
+                       dates0 = "latest", # "all", # "first", # dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,

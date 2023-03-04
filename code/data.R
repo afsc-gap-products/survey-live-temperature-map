@@ -34,7 +34,7 @@ for (i in 1:length(a)){
 # need race_data_v_cruises because it has the cruise start and end dates
 
 dat_survreg <- 
-  dplyr::left_join( # get SRVY
+  dplyr::right_join( # get SRVY
     x = racebase_foss_join_foss_cpue_haul0 %>% 
       dplyr::select(SRVY = srvy, survey_definition_id = survey_id, year, vessel_id),
     y = race_data_v_cruises0,
@@ -43,21 +43,23 @@ dat_survreg <-
     vessel_shape = as.factor(substr(x = vessel_name, start = 1, stop = 1)), 
     vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
     vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)),
+    SRVY = dplyr::case_when(
+      survey_definition_id == 98 ~ "EBS", 
+      survey_definition_id == 143 ~ "NBS", 
+      survey_definition_id == 47 ~ "GOA", 
+      survey_definition_id == 52 ~ "AI"), 
     region_long = dplyr::case_when(
       SRVY == "EBS" ~ "Eastern Bering Sea", 
       SRVY == "NBS" ~ "Northern Bering Sea", 
       SRVY == "GOA" ~ "Gulf of Alaska", 
       SRVY == "AI" ~ "Aleutian Islands"), 
-    # region = dplyr::case_when(
-    #   SRVY %in% c("EBS", "NBS") ~ "BS", 
-    #   SRVY == "GOA" ~ "GOA", 
-    #   SRVY == "AI" ~ "AI"), 
     reg_dates = paste0(
       format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
       " - ", 
       format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
   dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, region_long) %>% 
-  dplyr::distinct()
+  dplyr::distinct() %>% 
+  dplyr::arrange(-year)
 
 
 # > head(dat_survreg)
@@ -73,11 +75,12 @@ dat_survreg <-
 haul <- racebase_foss_join_foss_cpue_haul0 %>% 
   dplyr::rename(SRVY = srvy) %>%
   dplyr::filter(
-    !is.na(surface_temperature_c) &
-                  !is.na(bottom_temperature_c) & 
-                  # there shouldn't be bottom temps of 0 in the AI or GOA
-                  ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
-                  ((SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS")))) %>% 
+    !(is.na(station)) &
+      !is.na(surface_temperature_c) &
+      !is.na(bottom_temperature_c) & 
+      # there shouldn't be bottom temps of 0 in the AI or GOA
+      ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
+      ((SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS")))) %>% 
   dplyr::mutate(date = as.Date(date_time)) %>% 
   dplyr::select(-vessel_name) %>%
   dplyr::left_join( # get vessel_shape
@@ -91,14 +94,6 @@ haul <- racebase_foss_join_foss_cpue_haul0 %>%
     bt = bottom_temperature_c, 
   ) %>% 
   dplyr::arrange(-year)
-
-# vessel -----------------------------------------------------------------------
-
-# vessel_info <- haul %>% 
-#   dplyr::select(vessel_name, vessel_id, vessel_shape) %>% 
-#   dplyr::distinct() %>% 
-#   dplyr::mutate(vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*")) %>%
-#   dplyr::mutate(vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)))
 
 # Load Design Based Estimates --------------------------------------------------
 
