@@ -345,10 +345,12 @@ make_varplot_wrapper <- function(
       dplyr::mutate(date = as.Date(date)) %>%
       dplyr::filter(!is.na(SRVY) & 
                       SRVY %in% SRVY1) %>% 
-      dplyr::select(SRVY, stratum, station, date, vessel_shape = vessel, var0 = dplyr::all_of(var)) %>% 
+      dplyr::select(SRVY, stratum, station, date, 
+                    vessel_shape = vessel, var0 = dplyr::all_of(var)) %>% 
       dplyr::left_join(x = ., 
                        y = dat_survreg %>% 
-                         dplyr::select(SRVY, vessel_shape, reg_dates, region_long, vessel_name) %>% 
+                         dplyr::select(SRVY, vessel_shape, reg_dates, 
+                                       region_long, vessel_name) %>% 
                          dplyr::distinct(), 
                        by = c("SRVY", "vessel_shape"))
     
@@ -357,7 +359,8 @@ make_varplot_wrapper <- function(
     dat <- haul %>% 
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1) %>% 
-      dplyr::select(SRVY, stratum, station, date, vessel_shape, vessel_name, region_long, reg_dates, var0 = `var`) 
+      dplyr::select(SRVY, stratum, station, date, vessel_shape, vessel_name, 
+                    region_long, reg_dates, var0 = dplyr::all_of(var)) 
     
   }
   
@@ -366,7 +369,7 @@ make_varplot_wrapper <- function(
   if (nrow(dat0) == 0) {
     dat <- dplyr::right_join(
       x = dat_anom, 
-                            y = dat_survreg %>% 
+      y = dat_survreg %>% 
         dplyr::select(SRVY, reg_dates, region_long) %>% 
         dplyr::distinct()) %>% 
       dplyr::mutate(var0 = 0, 
@@ -427,10 +430,9 @@ make_varplot_wrapper <- function(
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
   
-  if (nrow(dat0)>0) {
-    print("No observation data was available at this time and no daily or anomaly plots were created. ")
+  if (nrow(dat0)==0) {
+    print("No observation data was available and no daily or anomaly plots were created. ")
   }
-  
   
   ### Grid ----------------------------------------------------------------------
   if ("grid" %in% file_end0) {  
@@ -680,18 +682,17 @@ make_figure <- function(
       max_date <- date_entered[i]
       print(max_date)
       next_date <- ifelse(date_entered[i]==date_entered[length(date_entered)], 
-                          as.character(format(as.Date(date_entered[i], "%m/%d/%Y")+1), "%Y-%m-%d"), 
+                          date_entered+1, 
                           date_entered[i+1])
       
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
       grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
       # only use dates including the next day before this date and before this date, so we can see the planned progression
-      # if (date_entered[i] != date_entered[length(date_entered)]) {
-      dat_plot$vessel_shape[as.Date(dat_plot$date)>as.Date(next_date)]<-NA
-      dat_plot$date[as.Date(dat_plot$date)>as.Date(next_date)]<-NA
-      grid_stations_plot$vessel_shape[as.Date(grid_stations_plot$date) > as.Date(next_date)]<-NA
-      grid_stations_plot$date[as.Date(grid_stations_plot$date) > as.Date(next_date)]<-NA
+      dat_plot$vessel_shape[dat_plot$date>next_date]<-NA
+      dat_plot$date[dat_plot$date>next_date]<-NA
+      grid_stations_plot$vessel_shape[grid_stations_plot$date > next_date]<-NA
+      grid_stations_plot$date[grid_stations_plot$date > next_date]<-NA
       
       # separate out the data for the temperature and planned stations if there are planned stations listed
       # if (show_planned_stations & 
@@ -704,7 +705,7 @@ make_figure <- function(
         loc <- dat_plot %>% 
           dplyr::filter(is.na(var) & 
                           !is.na(vessel_shape) & 
-                          as.Date(date) == as.Date(next_date)) %>% 
+                          date == next_date) %>% 
           dplyr::mutate(planned = "Y")
         
         dat_planned <- as(grid_stations_plot, 'Spatial')
@@ -763,7 +764,7 @@ make_figure <- function(
                                   date = NA, 
                                   lab = paste0(unique(dat_plot$vessel_name)[!is.na(unique(dat_plot$vessel_name))], "\n "))
       }
-    }      
+    }
     
     gg <- ggplot() +
       geom_sf(data = survey_area$akland, fill = "white") + 
@@ -848,7 +849,7 @@ make_figure <- function(
                            values = survey_area$survey.area$survey_reg_col,  
                            breaks = survey_area$survey.area$SURVEY, 
                            labels = survey_area$survey.area$reg_lab) 
-
+      
       if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
         
         # if we are showing planned stations
@@ -907,22 +908,22 @@ make_figure <- function(
                  color = "black", size = 10) 
       
       if (file_end %in% c("daily", "anom")) {
-      gg <- gg +
-        annotate("text", 
-                 x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .12), 
-                 y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .15), 
-                 label = ifelse(is.na(max_date), 
-                                "", 
-                                ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                       paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
-                                       paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
-                                              " \u2013\n", 
-                                              format(x = as.Date(max_date), format = "%b %d, %Y")))), 
-                 color = "black", size = 5, fontface=2) 
+        gg <- gg +
+          annotate("text", 
+                   x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .12), 
+                   y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .15), 
+                   label = ifelse(is.na(max_date), 
+                                  "", 
+                                  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                                         paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
+                                         paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
+                                                " \u2013\n", 
+                                                format(x = as.Date(max_date), format = "%b %d, %Y")))), 
+                   color = "black", size = 5, fontface=2) 
       }
       
       gg <- ggdraw(gg) +
-        draw_image(image = paste0(dir_wd, "img/noaa-fish-wide.png"), # "img/noaa-50th-logo.png"
+        draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
                    x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
                    scale = .15 )
       
@@ -1129,7 +1130,7 @@ make_figure <- function(
         theme(# add margin on the left of the drawing canvas,
           plot.margin = margin(0, 0, 0, 7)) # so title is aligned with left edge of first plot
       
-      noaa_logo <- ggdraw() + cowplot::draw_image(image = paste0(dir_wd, "img/noaa-fish-wide.png"))
+      noaa_logo <- ggdraw() + cowplot::draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"))
       
       header_row <- cowplot::plot_grid(
         title_row, 
@@ -1170,10 +1171,9 @@ make_figure <- function(
     
     ## Save files --------------------------------------------------------------
     
-    filename0 <- paste0(ifelse((as.character(dates0[1]) == "none" | file_end == "mean"), 
-                               "", 
-                               max_date), 
-                        ifelse(file_end=="", "", paste0("_", file_end)))
+    filename0 <- paste0(
+      ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
+      "_", file_end)
     
     ### PNG -------------------------------------------------------------------------
     ggsave(filename = paste0(filename0,'.png'), 
@@ -1189,12 +1189,12 @@ make_figure <- function(
     
     # Create main PDF
     # if (file_end %in% c("grid", "daily")) {
-      rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
-                        output_dir = dir_out,
-                        output_file = paste0(filename0, ".pdf"))
-      file.remove(list.files(path = paste0(dir_wd, "/code/"), 
-                             pattern = ".log", full.names = TRUE))
-      
+    rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
+                      output_dir = dir_out,
+                      output_file = paste0(filename0, ".pdf"))
+    file.remove(list.files(path = paste0(dir_wd, "/code/"), 
+                           pattern = ".log", full.names = TRUE))
+    
     # } else if (file_end %in% c("anom", "mean")) {
     #   ggsave(filename = paste0(filename0,'.pdf'),
     #          path = dir_out,

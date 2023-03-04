@@ -27,12 +27,25 @@ knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = 
 vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
-if (file_end %in% c("mean", "anom")) {
+
+if (file_end %in% c("mean")) {
   
     temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
   
     fig_cap <- fig_alt <- paste0(
-    gsub(pattern = "\n", replacement = paste0(", comparing bottom temperatures from ", maxyr, " to "), x = plot_title), 
+    gsub(pattern = "\n", 
+         replacement = paste0(": "), 
+         x = stringr::str_to_sentence(plot_title)), 
+    ". Credit: NOAA Fisheries. ")
+
+} else if (file_end %in% c("anom")) {
+  
+    temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
+  
+    fig_cap <- fig_alt <- paste0(
+    gsub(pattern = "\n", 
+         replacement = paste0(", comparing bottom temperatures from ", maxyr, " to "), 
+         x = stringr::str_to_sentence(plot_title)), 
     ". Credit: NOAA Fisheries. ")
   
 } else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
@@ -42,7 +55,9 @@ if (file_end %in% c("mean", "anom")) {
   if (SRVY != "AI") {
   fig_cap <- fig_alt <- paste0(
     "NOAA Fisheries conducted the ", 
-    text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
+    text_list(x = gsub(pattern = "\n", 
+                       replacement = "", 
+                       x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
     " survey",
     ifelse(length(temp1)>1, "s", "")
     ," in ", maxyr, 
@@ -104,7 +119,6 @@ if (file_end %in% c("mean", "anom")) {
       dplyr::mutate(lon = round(x = lon, digits = 3), 
                     lat = round(x = lat, digits = 3)) 
     
-    # TOLEDO because there are issues in the shapefile... again
     dat_max_date <- dat_max_date %>% 
       dplyr::filter(!is.na(lon))
     
@@ -117,11 +131,16 @@ if (file_end %in% c("mean", "anom")) {
                        # ifelse(nrow(temp1)>1, "s", "")," with ",
                        ifelse(nrow(temp1)>1, "", "a "), "station", # ID", 
                        ifelse(nrow(temp1)>1, "s", ""), " ", #" of ",
-                       text_list(x = paste0(temp1$station,
+                       text_list(x = 
+                                   paste0(temp1$station,
                                             " (",temp1$lat,"°N, ",temp1$lon,"°W; ",
-                                            gsub(pattern = " ", replacement = "", x = temp1$var_bin, fixed = TRUE),"°C)")), 
+                                            gsub(pattern = " ", 
+                                                 replacement = "", 
+                                                 x = temp1$var_bin, fixed = TRUE),"°C)")), 
                        " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
-                       gsub(pattern = "F/V ", replacement = "", fixed = TRUE,
+                       gsub(pattern = "F/V ", 
+                            replacement = "", 
+                            fixed = TRUE,
                             x = unique(temp1$vessel_name[!is.na(temp1$vessel_name)])),"}") )
     }
     
@@ -140,7 +159,9 @@ if (file_end %in% c("mean", "anom")) {
         if ((date_entered[length(date_entered)] == max_date & sum(is.na(dat$var))>0)) {
           stations1 <- paste0(stations1, ". This is the last day of the survey. ")
         } else {
-          stations1 <- paste0(stations1, ". There are ",nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
+          stations1 <- 
+            paste0(stations1, ". There are ",
+                              nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
                               format(x = (as.Date(max_date)+1), "%B %d"), ". ")
         }
       }
@@ -168,8 +189,8 @@ if (file_end %in% c("mean", "anom")) {
     stations1, 
     
     ifelse(data_source == "gd", 
-           "Data have NOT been through final review. Final, validated data (e.g., temperature and species collected at each station), will be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). ", 
-           "Data have been through final review. Final, validated data (e.g., temperature and species collected at each station), are be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). "))
+           "Data have NOT been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). ", 
+           "Data have been through final review. Final, validated haul and catch data collected at each station), are be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). "))
   
 }
 

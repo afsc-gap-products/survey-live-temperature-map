@@ -28,7 +28,6 @@ for (i in 1:length(a)){
   assign(x = gsub(pattern = "\\.csv", replacement = "", x = paste0(a[i], "0")), value = b)
 }
 
-
 # The surveys this script will be covering -------------------------------------
 
 # need race_data_v_cruises because it has the cruise start and end dates
@@ -36,9 +35,13 @@ for (i in 1:length(a)){
 dat_survreg <- 
   dplyr::right_join( # get SRVY
     x = racebase_foss_join_foss_cpue_haul0 %>% 
-      dplyr::select(SRVY = srvy, survey_definition_id = survey_id, year, vessel_id),
-    y = race_data_v_cruises0,
+      dplyr::select(SRVY = srvy, survey_definition_id = survey_id, year, vessel_id) %>% 
+      dplyr::distinct(),
+    y = race_data_v_cruises0 %>% 
+      dplyr::select(year, vessel_id, start_date, end_date, survey_definition_id, vessel_name) %>% 
+      dplyr::distinct(),
     by = c("survey_definition_id", 'year', 'vessel_id')) %>% 
+  dplyr::arrange(-year) %>%
   dplyr::mutate(
     vessel_shape = as.factor(substr(x = vessel_name, start = 1, stop = 1)), 
     vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
@@ -54,12 +57,11 @@ dat_survreg <-
       SRVY == "GOA" ~ "Gulf of Alaska", 
       SRVY == "AI" ~ "Aleutian Islands"), 
     reg_dates = paste0(
-      format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
+      format(x = as.Date(start_date), "%b %d"),
       " - ", 
-      format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
+      format(x = as.Date(end_date), "%b %d"))) %>% 
   dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, region_long) %>% 
-  dplyr::distinct() %>% 
-  dplyr::arrange(-year)
+  dplyr::distinct()
 
 
 # > head(dat_survreg)
@@ -164,7 +166,7 @@ shp_nbs <- survey_area
 # shp_ai <- survey_area
 
 survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
-survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
+survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/data/shapefiles/'),# Prepare map objects
                                           layer = "aigrid_trawable_thru2018_Emily",
                                           verbose=F) %>%
   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%

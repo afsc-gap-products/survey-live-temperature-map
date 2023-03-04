@@ -203,7 +203,7 @@ ui <- tagList(
               tags$script(src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/3.5.16/iframeResizer.contentWindow.min.js",
                           type="text/javascript"),
               includeScript("www/returnClick.js"), 
-      tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+      tags$link(rel = "stylesheet", type = "text/css", href = "/code/custom.css"),
       tags$script(src = "./www/custom.js"),
     # ),
     
