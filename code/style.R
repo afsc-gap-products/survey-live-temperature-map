@@ -1,8 +1,7 @@
 
+# JAVA SCRIPT ------------------------------------------------------------------
 
-
-############JAVA SCRIPT##############
-#https://stackoverflow.com/questions/50313540/r-shiny-conditionally-change-numericinput-background-colour/50314686
+# https://stackoverflow.com/questions/50313540/r-shiny-conditionally-change-numericinput-background-colour/50314686
 jsCode1 <- '
 shinyjs.backgroundCol = function(params) {
 var defaultParams = {

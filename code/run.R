@@ -5,13 +5,6 @@
 #' purpose: run script
 #' ---------------------------
 
-# KNOWNS -----------------------------------------------------------------------
-
-maxyr <- 2022
-data_source <- "gd" # google drive
-# data_source <- "oracle" # testing
-dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
-var <- "bt"
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 ## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
@@ -20,6 +13,13 @@ googledrive::drive_deauth()
 googledrive::drive_auth()
 1
 
+# KNOWNS -----------------------------------------------------------------------
+
+maxyr <- 2023
+data_source <- "gd" # google drive
+data_source <- "oracle" # testing
+dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+var <- "bt"
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1V9GLy2DkOz8UbMTw6eC0GxjMfWa5FeHm"
 dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1MrAq9jtQL1YBlYQcbeGiHh751EpPybY2"
@@ -77,12 +77,12 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = dates0,
+                       dates0 = "first", #dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"), #"grid", "mean", "anom"
+                       file_end0 = c("daily", "grid"),# "mean", "anom"
                        dir_wd = dir_wd)
 }
 
@@ -104,7 +104,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = "all", # "all", # "first", # dates0,
+                       dates0 = "first", # "all", # "first", # "latest", # dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
@@ -116,6 +116,9 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
 
 ## AI --------------------------------------------------------------------------
 if ("AI" %in% dat_survreg$SRVY) {
+  
+  maxyr <- 2022 # testing
+  data_source <- "oracle" # testing
   
   SRVY <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
@@ -131,12 +134,12 @@ if ("AI" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = dates0,
+                       dates0 = "first",
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"), #"grid", "mean", "anom"
+                       file_end0 = c("grid", "daily"), #"mean", "anom"
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }

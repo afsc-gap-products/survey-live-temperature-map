@@ -209,6 +209,12 @@ upload_ftp <- function(dir_wd,
   }
 }
 
+format_date_txt <- function(x = "1998-09-02", format0 = "%B %d") {
+  if (!(isClass(Class = "Date", where = x))) {x <- as.Date(x)}
+  x <- gsub("(\\D)0", "\\1", format(x, format0))
+  return(x)
+}
+
 #' Takes a string of words and combines them into a sentence that lists them.
 #'
 #' This function allows you to take a string of words and combine them into a sentence list. For example, 'apples', 'oranges', 'pears' would become 'apples, oranges, and pears'. This function uses oxford commas.
@@ -341,16 +347,21 @@ make_varplot_wrapper <- function(
     
     dat <- 
       readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
-                        sheet = case, skip = 1) %>%
+                        sheet = case, 
+                        skip = 1) %>%
       dplyr::mutate(date = as.Date(date)) %>%
       dplyr::filter(!is.na(SRVY) & 
                       SRVY %in% SRVY1) %>% 
       dplyr::select(SRVY, stratum, station, date, 
                     vessel_shape = vessel, var0 = dplyr::all_of(var)) %>% 
-      dplyr::left_join(x = ., 
+      dplyr::left_join(x = ., # obtain survey data
                        y = dat_survreg %>% 
-                         dplyr::select(SRVY, vessel_shape, reg_dates, 
-                                       region_long, vessel_name) %>% 
+                         dplyr::select(SRVY, reg_dates, region_long) %>% 
+                         dplyr::distinct(), 
+                       by = c("SRVY")) %>% 
+      dplyr::left_join(x = ., # obtain vessel data
+                       y = dat_survreg %>% 
+                         dplyr::select(SRVY, vessel_shape, vessel_name) %>% 
                          dplyr::distinct(), 
                        by = c("SRVY", "vessel_shape"))
     
@@ -435,7 +446,7 @@ make_varplot_wrapper <- function(
   }
   
   ### Grid ----------------------------------------------------------------------
-  if ("grid" %in% file_end0) {  
+  if ("grid" %in% file_end0) {
     file_end <- "grid"; print(paste0("------------", file_end, "------------"))
     
     make_figure(
@@ -459,9 +470,8 @@ make_varplot_wrapper <- function(
       height = height)
   }
   
-  
   ### Mean ---------------------------------------------------------------------
-  if ("mean" %in% file_end0) {  
+  if ("mean" %in% file_end0) {
     file_end <- "mean"; print(paste0("------------", file_end, "------------"))
     
     make_figure(
@@ -580,7 +590,7 @@ make_figure <- function(
   # Create Directories
   dir.create(path = dir_out, showWarnings = FALSE)
   
-  ## Set Base Layers ------------------------------------------------------------
+  # Set Base Layers ------------------------------------------------------------
   # survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
   survey_reg_col <- gray.colors(length(unique(dat$SRVY))+2) # region colors
   survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
@@ -594,7 +604,7 @@ make_figure <- function(
     all.x = TRUE) %>% 
     dplyr::arrange(desc(SRVY))
   
-  ## Colors and bins for var ----------------------------------------------
+  # Colors and bins for var ----------------------------------------------
   if (file_end %in% c("daily", "anom", "mean")) {
     
     var_labels <- c()
@@ -638,7 +648,7 @@ make_figure <- function(
                 dplyr::distinct(), 
               all.x = TRUE) 
   
-  ## Date range of figures to create ------------------------------------
+  # Date range of figures to create ------------------------------------
   if (length(dates0)>1) { # if there is a specific range of dates
     iterate <- which(as.character(date_entered) %in% dates0)
   } else if (dates0 == "none") { # If you are not using any data from temp data
@@ -663,7 +673,7 @@ make_figure <- function(
     iterate <- which((date_entered) %in% (dates0))
   }
   
-  ## Make plots for each day of dates0 -----------------------------------------
+  # Make plots for each day of dates0 -----------------------------------------
   for (i in iterate) {
     
     start_time <- Sys.time()
@@ -778,7 +788,7 @@ make_figure <- function(
       scale_y_continuous(name = "Latitude", 
                          breaks = survey_area$lat.breaks)  +
       theme( 
-        panel.background = element_rect(fill = "grey90"),
+        panel.background = element_rect(fill = "grey95"),
         plot.title = element_text(size=20), 
         plot.subtitle = element_text(size=14), 
         legend.text=element_text(size=10), 
@@ -794,7 +804,7 @@ make_figure <- function(
         axis.title=element_text(size=14) )
     
     if (SRVY %in% c("BS", "EBS", "NBS")) {
-      ### Bering Sea -----------------------------------------------------------
+      ## Bering Sea -----------------------------------------------------------
       
       gg <- gg +
         ggtitle(label = plot_title, 
@@ -811,7 +821,9 @@ make_figure <- function(
                            colour = "grey50",
                            show.legend = legend_title) +
           geom_sf(data = survey_area$bathymetry) +
-          guides(colour = guide_legend(override.aes = list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
+          guides(colour = 
+                   guide_legend(override.aes = 
+                                  list(fill = survey_area$survey.area$survey_reg_col)))  # survey regions
         
         if (nrow(temp)>0) {
           gg <- gg +
@@ -843,7 +855,7 @@ make_figure <- function(
         geom_sf(data = survey_area$survey.area, 
                 aes(color = SURVEY), 
                 fill = NA,
-                size = 2,
+                size = 4,
                 show.legend = TRUE) +
         scale_color_manual(name = "Survey Region", 
                            values = survey_area$survey.area$survey_reg_col,  
@@ -901,11 +913,11 @@ make_figure <- function(
                        st.dist = 0.03,
                        st.bottom = FALSE,
                        model = survey_area$crs)  +
-        annotate("text", 
-                 x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
-                 y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
-                 label = "Alaska", 
-                 color = "black", size = 10) 
+        ggplot2::annotate("text", 
+                          x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
+                          y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
+                          label = "Alaska", 
+                          color = "black", size = 10) 
       
       if (file_end %in% c("daily", "anom")) {
         gg <- gg +
@@ -928,94 +940,9 @@ make_figure <- function(
                    scale = .15 )
       
     } else if (SRVY %in% c("AI", "GOA")) {
-      ### Aleutian Islands and Gulf of Alaska ----------------------------------
+      ## Aleutian Islands and Gulf of Alaska ----------------------------------
       
-      # if (as.character(dates0[1]) == "none") {
-      gg <- gg +
-        ggplot2::geom_sf(
-          data = survey_area$survey.grid,
-          colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
-          size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
-          show.legend = FALSE)
-      
-      # now we build a plot list
-      lapply(unique(grid_stations_plot$region), function(x) {
-        # x <- unique(grid_stations_plot$region)
-        grid_stations_plot1 <- grid_stations_plot
-        grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
-        grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
-        
-        gg1 <- gg +
-          ggplot2::geom_sf(data = grid_stations_plot1, 
-                           colour = ifelse((as.character(dates0[1]) == "none"), "grey50", "grey70"),
-                           size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
-                           show.legend = FALSE) 
-        
-        if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
-          
-          gg1 <- gg1  + 
-            ggplot2::geom_sf(data = grid_stations_plot1, 
-                             aes(fill = var_bin), 
-                             colour = "black", # "grey20" 
-                             size = .05, 
-                             show.legend = FALSE) +
-            ggplot2::scale_fill_manual(name = legend_title,
-                                       values = var_color, 
-                                       labels = var_labels,
-                                       drop = F,
-                                       na.translate = F)
-        } 
-        gg1 <- gg2 <- gg1 +
-          ggspatial::coord_sf(
-            xlim = c(extent(grid_stations_plot1)[1:2]), 
-            ylim = c(extent(grid_stations_plot1)[3:4])) +
-          ggtitle(x) +
-          ggsn::scalebar(data = grid_stations_plot1,
-                         location = ifelse(x == "Western Aleutians", "topright", "topleft"),
-                         dist = 25,
-                         dist_unit = "nm",
-                         transform = FALSE,
-                         st.dist = 0.06,
-                         border.size = .25,
-                         height = 0.03,
-                         st.bottom = TRUE,
-                         st.size = 3, 
-                         model = survey_area$crs) +
-          theme(
-            legend.position = "none", 
-            plot.title = element_text(size = 10, face = "bold"), 
-            # axis.text = element_text(size=9),
-            axis.title = element_blank(),
-            plot.margin=unit(c(0,0,0,0), "cm"))
-        
-        gg1
-        
-      }) -> region_list
-      
-      # var legend
-      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
-        legend_temp <- gg  + 
-          ggplot2::geom_sf(data = grid_stations_plot,#[grid_stations_plot$region == "Southern Bering Sea",], 
-                           aes(fill = var_bin), 
-                           colour = "black", # "grey20" 
-                           size = .05,
-                           show.legend = legend_title) +
-          ggplot2::scale_fill_manual(name = legend_title,
-                                     values = var_color, 
-                                     labels = var_labels,
-                                     drop = F,
-                                     na.translate = F) +
-          ggspatial::coord_sf(
-            xlim = c(extent(grid_stations_plot)[1:2]), 
-            ylim = c(extent(grid_stations_plot)[3:4])) +
-          theme(
-            plot.title = element_text(size = 10, face = "bold"), 
-            axis.title = element_blank(),
-            plot.margin=unit(c(0,0,0,0), "cm"), 
-            axis.text = element_text(size=5))
-      }
-      # }
-      # inset map
+      ### Prepare insert map ---------------------------------------------------
       gg_insert <- ggplot() +
         geom_sf(data = survey_area$akland, fill = "black", color = NA) + # AK Map (thanks {akgfmaps}!)
         geom_sf(data = survey_area$graticule, 
@@ -1027,6 +954,8 @@ make_figure <- function(
                            breaks = survey_area$lon.breaks) +
         scale_y_continuous(name = "Latitude",
                            breaks = survey_area$lat.breaks)
+      
+      # Draw bounding boxes
       bb <- data.frame()
       for (iiii in 1:length(unique(grid_stations_plot$region))) {
         x <- unique(grid_stations_plot$region)[iiii]
@@ -1062,8 +991,8 @@ make_figure <- function(
           xlim = c(extent(grid_stations_plot)[1:2]),
           ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+350000)) + 
         geom_label(data = bb, 
-                   color = "white", 
-                   fill = "black",
+                   color = ifelse(SRVY == "AI", "black", "white"), 
+                   fill = ifelse(SRVY == "AI", NA, "black"),
                    fontface = "bold",
                    label.size = NA,
                    label.r = unit(0, "pt"),
@@ -1076,15 +1005,9 @@ make_figure <- function(
         ggtitle(gsub(pattern = "\n", replacement = " ", 
                      x = unique(survey_area$survey.area$reg_lab), 
                      fixed = TRUE)) +
-        theme_minimal() # + 
-      # theme(
-      #   panel.border = element_rect(colour = "grey50", fill=NA, linewidth=1), 
-      #   plot.title = element_text(size = 8, face = "bold"), 
-      #   axis.text.y = element_blank(),
-      #   axis.title = element_blank(),
-      #   plot.margin=unit(c(0,0,0,0), "cm") ) 
+        theme_minimal()
       
-      if (file_end == "grid") { 
+      if (file_end == "grid") {
         gg_insert <- gg_insert  + 
           theme(
             panel.border = element_rect(colour = "grey50", fill=NA, linewidth=1), 
@@ -1103,7 +1026,8 @@ make_figure <- function(
             plot.margin=unit(c(0,0,0,0), "cm") ) 
       }
       
-      # put all plot peices together
+      ### Prep figure titles and headers ---------------------------------------
+      
       title_row <- cowplot::ggdraw() + 
         draw_label(
           plot_title,
@@ -1143,25 +1067,237 @@ make_figure <- function(
         noaa_logo, 
         ncol = 2, greedy = TRUE, rel_widths = c(2.6, 0.4))
       
-      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data # Add temperature squares
-        gg1 <- cowplot::plot_grid(
-          region_list[[1]], region_list[[2]], cowplot::get_legend(legend_temp), 
-          ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.4))    
-        # } else {
-        #   gg1 <- cowplot::plot_grid(
-        #     region_list[[1]], region_list[[2]], NULL, 
-        #     ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.4))    
-        # }
+      ### Create plots ---------------------------------------------------------
+      
+      grid_stations_plot$region <- factor(grid_stations_plot$region)        
+      
+      gg <- gg +
+        ggplot2::geom_sf(
+          data = survey_area$survey.grid,
+          colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
+          size = ifelse(file_end == "grid", .05, .02),
+          show.legend = FALSE)  +
+        ggplot2::geom_sf(
+          data = grid_stations_plot, 
+          colour = ifelse((as.character(dates0[1]) == "none"), "grey50", "grey70"),
+          size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
+          show.legend = FALSE)
+      
+      ### Plot of whole area ---------------------------------------------------
+      if (file_end != 'grid') {
         
-        gg2 <- cowplot::plot_grid(
-          # region_list[[1]], region_list[[2]], 
-          region_list[[3]], region_list[[4]], gg_insert, 
-          ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.25, 0.75, 0.6)) +
-          draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
-          draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)   
+        grid_stations_plot_visited <- grid_stations_plot %>% 
+          dplyr::filter(!is.na(var_bin)) %>% 
+          sf::st_centroid() %>% 
+          st_geometry() %>% 
+          data.frame() %>%
+          dplyr::mutate(
+            var_bin = grid_stations_plot$var_bin[!is.na(grid_stations_plot$var_bin)])
         
+        gg2 <- gg  + 
+          geom_sf(
+            data = grid_stations_plot_visited,
+            mapping = aes(geometry = geometry,
+                          fill = var_bin,
+                          color = var_bin),
+            size = 3,
+            show.legend = legend_title) +
+          ggspatial::coord_sf(
+            xlim = c(extent(grid_stations_plot)[1:2]), 
+            ylim = c(extent(grid_stations_plot)[3:4])) +
+          ggplot2::theme(
+            plot.title = element_text(size = 10, face = "bold"), 
+            axis.title = element_blank(),
+            plot.margin=unit(c(0,0,0,0), "cm"), 
+            axis.text = element_text(size=8)) + 
+          guides(color = FALSE) 
+        
+        legend_temp_tall <- cowplot::get_legend(
+          gg2 +
+            ggplot2::scale_fill_manual(
+              name = legend_title,
+              values = var_color, 
+              labels = var_labels,
+              drop = FALSE,
+              na.translate = FALSE) ) # for extracting legend graphic
+        
+        gg_whole <- gg2  +
+          ggsn::scalebar(data = grid_stations_plot,
+                         location = "topleft",
+                         dist = 100,
+                         dist_unit = "nm",
+                         transform = FALSE,
+                         st.dist = 0.06,
+                         border.size = .25,
+                         height = 0.03,
+                         st.bottom = TRUE,
+                         st.size = 3, 
+                         model = survey_area$crs) +
+          ggplot2::scale_fill_manual(
+            name = gsub(pattern = "\n", replacement = " ", x = legend_title),
+            values = var_color, 
+            labels = var_labels,
+            drop = FALSE,
+            na.translate = FALSE, 
+            guide = guide_legend(
+              direction = "horizontal",
+              title.position = "top",
+              label.position = "bottom", 
+              nrow = 1,
+              label.hjust = 0.5,
+              label.vjust = 0.5,
+              label.theme = element_text(angle = 90)
+            ) ) +
+          ggplot2::theme(
+            legend.position = "bottom")
+        
+        legend_temp_short <- cowplot::get_legend(gg_whole)
+        
+        gg_whole <- cowplot::plot_grid(
+          header_row, 
+          gg_whole, 
+          ncol = 1, 
+          nrow = 2, 
+          greedy = TRUE, 
+          rel_heights = c(0.4, 3))
+        
+        filename0 <- paste0(
+          ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
+          "_", file_end, "_whole")
+        
+        save_files(filename0 = filename0, 
+                   dat = dat,
+                   file_end = file_end, 
+                   dir_out = dir_out,
+                   height = height, 
+                   width = width,
+                   gg = gg_whole,
+                   ftp = ftp, 
+                   dir_googledrive_upload = dir_googledrive_upload, 
+                   max_date = max_date, 
+                   make_gifs = FALSE, 
+                   date_entered = date_entered, 
+                   dat_plot = dat_plot, 
+                   plot_title = plot_title, 
+                   grid_stations_plot = grid_stations_plot, 
+                   dat_planned = dat_planned)
+        
+        ### Crop to survey regions -----------------------------------------------
+        
+        reg <- unique(grid_stations_plot$region)
+        lapply(reg, function(x) { # now we build a plot list
+          x <- as.character(x)
+          print(x)
+          grid_stations_plot1 <- grid_stations_plot
+          grid_stations_plot1$region <- factor(grid_stations_plot1$region)
+          grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
+          
+          # If you are using any data from temp data # Add temperature squares
+          xlim = c(extent(grid_stations_plot1)[1:2])
+          ylim = c(extent(grid_stations_plot1)[3:4])
+          
+          gg3 <- gg1 <- gg2 + 
+            ggspatial::coord_sf(
+              xlim = c(extent(grid_stations_plot1)[1:2]), 
+              ylim = c(extent(grid_stations_plot1)[3:4])) +
+            ggtitle(x) + 
+            ggsn::scalebar(data = grid_stations_plot1,
+                           location = 
+                             dplyr::case_when(
+                               x %in% c("Western Aleutians") ~ "topright", 
+                               x %in% c("Yakutat", "Southeastern") ~ "bottomright", 
+                               TRUE ~ "topleft"),
+                           dist = 25,
+                           dist_unit = "nm",
+                           transform = FALSE,
+                           st.dist = 0.06,
+                           border.size = .25,
+                           height = 0.03,
+                           st.bottom = TRUE,
+                           st.size = 3, 
+                           model = survey_area$crs) +
+            theme(legend.position = "none")
+            
+            if (x %in% c("Shumagin", "Yakutat", # GOA
+                         "Central Aleutians", "Eastern Aleutians" # AI
+                         )) {
+            gg1 <- cowplot::plot_grid(
+              gg1,legend_temp_short,
+              ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(3, 1))
+            } else {
+              gg1 <- cowplot::plot_grid(
+                gg1, legend_temp_tall,
+                ncol = 2, nrow = 1, greedy = TRUE, rel_widths = c(4, 1))
+            }
+          
+            gg1 <- cowplot::plot_grid(
+              header_row, 
+              gg1, 
+              # gg_insert,
+              ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(0.4, 3))      
+            
+            filename0 <- paste0(
+              ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
+              "_", file_end, 
+              "_", tolower(x))
+            
+            save_files(filename0 = filename0, 
+                       dat = dat,
+                       file_end = file_end, 
+                       dir_out = dir_out,
+                       height = height, 
+                       width = width,
+                       gg = gg1,
+                       ftp = ftp, 
+                       dir_googledrive_upload = dir_googledrive_upload, 
+                       max_date = max_date, 
+                       make_gifs = FALSE, 
+                       date_entered = date_entered, 
+                       dat_plot = dat_plot, 
+                       plot_title = plot_title, 
+                       grid_stations_plot = grid_stations_plot, 
+                       dat_planned = dat_planned)
+          
+          return(gg3)
+          
+        }) -> gg_region_list
+        
+ ### all cropped areas on one plot ---------------------------------------------
+        
+        if (SRVY == "AI") {
+          gg1 <- cowplot::plot_grid(
+            gg_region_list[[1]], gg_region_list[[2]], 
+            legend_temp, 
+            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.4))    
+          
+          gg2 <- cowplot::plot_grid(
+            gg_region_list[[3]], 
+            gg_region_list[[4]], 
+            gg_insert, 
+            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.25, 0.75, 0.6)) #+
+            # draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
+            # draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)  
+          
+        } else if (SRVY == "GOA") {
+          
+          gg1 <- cowplot::plot_grid(
+            gg_region_list[[1]], gg_region_list[[2]], gg_region_list[[3]], 
+            cowplot::get_legend(legend_temp_tall), 
+            ncol = 4, nrow = 1, greedy = TRUE, rel_widths = c(2, 1, 1, 0.4))    
+          
+          gg2 <- cowplot::plot_grid(
+            gg_region_list[[4]], 
+            gg_region_list[[5]], 
+            gg_insert, 
+            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.5, 1, 1)) #+
+            # draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
+            # draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)       
+          
+        }
         gg <- cowplot::plot_grid(header_row, gg1, gg2, 
-                                 ncol = 1, nrow = 3, greedy = TRUE, rel_heights = c(0.4, 1, 1))
+                                 ncol = 1, nrow = 3, 
+                                 greedy = TRUE, 
+                                 rel_heights = c(0.4, 1, 1))
       } else {
         gg <- cowplot::plot_grid(header_row, gg_insert, 
                                  ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(0.4, 2))
@@ -1175,129 +1311,22 @@ make_figure <- function(
       ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
       "_", file_end)
     
-    ### PNG -------------------------------------------------------------------------
-    ggsave(filename = paste0(filename0,'.png'), 
-           path = dir_out,
-           height = height, 
-           width = width,
-           plot = gg, 
-           dpi = 320,
-           bg = "white", 
-           device = "png") 
-    
-    ### PDF -------------------------------------------------------------------------
-    
-    # Create main PDF
-    # if (file_end %in% c("grid", "daily")) {
-    rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
-                      output_dir = dir_out,
-                      output_file = paste0(filename0, ".pdf"))
-    file.remove(list.files(path = paste0(dir_wd, "/code/"), 
-                           pattern = ".log", full.names = TRUE))
-    
-    # } else if (file_end %in% c("anom", "mean")) {
-    #   ggsave(filename = paste0(filename0,'.pdf'),
-    #          path = dir_out,
-    #          height = height,
-    #          width = width,
-    #          plot = gg,
-    #          dpi = 320, 
-    #          bg = "white", 
-    #          device ="pdf") # pdfs are great for editing later
-    # }
-    
-    # Create Binded PDF
-    if (file_end %in% c("daily")) { # "anom", 
-      
-      # remove file if already exists - qpdf::pdf_combine() will not overwrite
-      if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
-        file.remove(paste0(dir_out, filename0, "_bind.pdf"))
-      }
-      
-      if (as.character(date_entered[1]) == as.character(date_entered[i])) { # 
-        qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
-                                    ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
-                          output = c(paste0(dir_out, filename0, "_bind.pdf")))      
-      } else {
-        temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
-        temp <- temp[!grepl(pattern = "current", x = temp)]
-        temp <- strsplit(x = temp, split = "_")
-        temp <- as.Date(sort(sapply(temp,"[[",1)))
-        temp <- max(temp[as.Date(temp) < as.Date(max_date)])
-        
-        filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
-                                    as.character(temp)), 
-                             ifelse(file_end=="", "", paste0("_", file_end)), "_bind")
-        
-        qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"), 
-                                    paste0(dir_out, filename00,'.pdf')), 
-                          output = c(paste0(dir_out, filename0, "_bind.pdf")))      
-      }
-      
-    }
-    
-    ### GIF -------------------------------------------------------------------------
-    if (make_gifs) {
-      make_figure_gif(file_end = file_end, 
-                      max_date = max_date,
-                      dir_out = dir_out, 
-                      filename0 = filename0)
-    }
-    
-    ### rename "current" plots for easy finding ------------------------------------
-    # if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-    if (!(file_end  %in% c("mean", "grid"))) {
-      temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      for (iiii in 1:length(temp)) {
-        file.copy(from = temp[iiii], 
-                  overwrite = TRUE, 
-                  to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
-      }
-    }
-    
-    ### Upload to google drive ------------------------------------------------------
-    
-    # if (file_end != "anom") {
-    #   temp <- googledrive::drive_ls(path = dir_googledrive_upload, recursive = FALSE) 
-    #   
-    #   temp0 <- temp %>% 
-    #     dplyr::filter(grepl(pattern = "archive", x = name, fixed = TRUE))
-    #   
-    #   temp <- temp %>% 
-    #     dplyr::filter(grepl(pattern = ".", x = name, fixed = TRUE))
-    #   
-    #   googledrive::drive_mv(file = temp, path = )
-    # }
-    
-    if (!(is.null(dir_googledrive_upload))) {
-      temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-      if (file_end != "grid") {
-        temp <- c(temp, 
-                  list.files(path = dir_out, 
-                             pattern = sub(pattern = max_date, replacement = "current", x = filename0),
-                             full.names = TRUE))
-      }
-      for (iii in 1:length(temp)) {
-        drive_upload(
-          media = temp[iii], 
-          path = googledrive::as_id(dir_googledrive_upload),
-          #path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
-          overwrite = TRUE)
-      }
-    }
-    
-    ### send all current files to the FTP -------------------------------------------
-    if (ftp$ftp_dl){
-      upload_ftp( # vars here defined in ftp.R
-        dir_wd = dir_wd, 
-        dir_out = dir_out, 
-        maxyr = maxyr, 
-        SRVY = SRVY, 
-        dest = ftp$dev_ai, 
-        user = ftp$user, 
-        pass = ftp$pass)
-    }
+    save_files(filename0 = filename0, 
+               dat = dat,
+               file_end = file_end, 
+               dir_out = dir_out,
+               height = height, 
+               width = width,
+               gg = gg,
+               ftp = ftp, 
+               dir_googledrive_upload = dir_googledrive_upload, 
+               max_date = max_date, 
+               make_gifs = make_gifs, 
+               date_entered = date_entered, 
+               dat_plot = dat_plot, 
+               plot_title = plot_title, 
+               grid_stations_plot = grid_stations_plot, 
+               dat_planned = dat_planned)
     
     end_time <- Sys.time()
     print((end_time - start_time))
@@ -1306,7 +1335,147 @@ make_figure <- function(
   # return(gg)
 }
 
-
+save_files<- function(filename0, 
+                      dat,
+                      file_end, 
+                      dir_out,
+                      height, 
+                      width = 10.5,
+                      gg,
+                      ftp, 
+                      dir_googledrive_upload, 
+                      max_date, 
+                      make_gifs, 
+                      date_entered, 
+                      dat_plot, 
+                      plot_title, 
+                      grid_stations_plot = grid_stations_plot, 
+                      dat_planned) {
+  
+  ### PNG -------------------------------------------------------------------------
+  ggsave(filename = paste0(filename0,'.png'), 
+         path = dir_out,
+         height = height, 
+         width = width,
+         plot = gg, 
+         dpi = 320,
+         bg = "white", 
+         device = "png") 
+  
+  ### PDF -------------------------------------------------------------------------
+  
+  # Create main PDF
+  # if (file_end %in% c("grid", "daily")) {
+  rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
+                    output_dir = dir_out,
+                    output_file = paste0(filename0, ".pdf"))
+  file.remove(list.files(path = paste0(dir_wd, "/code/"), 
+                         pattern = ".log", full.names = TRUE))
+  
+  # } else if (file_end %in% c("anom", "mean")) {
+  #   ggsave(filename = paste0(filename0,'.pdf'),
+  #          path = dir_out,
+  #          height = height,
+  #          width = width,
+  #          plot = gg,
+  #          dpi = 320, 
+  #          bg = "white", 
+  #          device ="pdf") # pdfs are great for editing later
+  # }
+  
+  # Create Binded PDF
+  if (file_end %in% c("daily")) { # "anom", 
+    
+    # remove file if already exists - qpdf::pdf_combine() will not overwrite
+    if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
+      file.remove(paste0(dir_out, filename0, "_bind.pdf"))
+    }
+    
+    if (as.character(date_entered[1]) == as.character(date_entered[i])) { # 
+      qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
+                                  ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
+                        output = c(paste0(dir_out, filename0, "_bind.pdf")))      
+    } else {
+      temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
+      temp <- temp[!grepl(pattern = "current", x = temp)]
+      temp <- strsplit(x = temp, split = "_")
+      temp <- as.Date(sort(sapply(temp,"[[",1)))
+      temp <- max(temp[as.Date(temp) < as.Date(max_date)])
+      
+      filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
+                                  as.character(temp)), 
+                           ifelse(file_end=="", "", paste0("_", file_end)), "_bind")
+      
+      qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"), 
+                                  paste0(dir_out, filename00,'.pdf')), 
+                        output = c(paste0(dir_out, filename0, "_bind.pdf")))      
+    }
+    
+  }
+  
+  ### GIF -------------------------------------------------------------------------
+  if (make_gifs) {
+    make_figure_gif(file_end = file_end, 
+                    max_date = max_date,
+                    dir_out = dir_out, 
+                    filename0 = filename0)
+  }
+  
+  ### rename "current" plots for easy finding ------------------------------------
+  # if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+  if (!(file_end  %in% c("mean", "grid"))) {
+    temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+    for (iiii in 1:length(temp)) {
+      file.copy(from = temp[iiii], 
+                overwrite = TRUE, 
+                to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
+    }
+  }
+  
+  ### Upload to google drive ------------------------------------------------------
+  
+  # if (file_end != "anom") {
+  #   temp <- googledrive::drive_ls(path = dir_googledrive_upload, recursive = FALSE) 
+  #   
+  #   temp0 <- temp %>% 
+  #     dplyr::filter(grepl(pattern = "archive", x = name, fixed = TRUE))
+  #   
+  #   temp <- temp %>% 
+  #     dplyr::filter(grepl(pattern = ".", x = name, fixed = TRUE))
+  #   
+  #   googledrive::drive_mv(file = temp, path = )
+  # }
+  
+  if (!(is.null(dir_googledrive_upload))) {
+    temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+    #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
+    if (file_end != "grid") {
+      temp <- c(temp, 
+                list.files(path = dir_out, 
+                           pattern = sub(pattern = max_date, replacement = "current", x = filename0),
+                           full.names = TRUE))
+    }
+    for (iii in 1:length(temp)) {
+      drive_upload(
+        media = temp[iii], 
+        path = googledrive::as_id(dir_googledrive_upload),
+        #path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
+        overwrite = TRUE)
+    }
+  }
+  
+  ### send all current files to the FTP -------------------------------------------
+  if (ftp$ftp_dl){
+    upload_ftp( # vars here defined in ftp.R
+      dir_wd = dir_wd, 
+      dir_out = dir_out, 
+      maxyr = maxyr, 
+      SRVY = SRVY, 
+      dest = ftp$dev_ai, 
+      user = ftp$user, 
+      pass = ftp$pass)
+  }
+}
 
 #' gif compiler
 #'

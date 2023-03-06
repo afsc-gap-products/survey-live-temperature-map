@@ -35,7 +35,7 @@ output$survey_leaflet <- renderLeaflet({
       unique()
     
     code_str <- glue::glue('a <- a %>%
-        addPolygons(data = {df$stratum_shp}, 
+        addPolygons(data = {df$stratum_shp$survey.stratum}, 
                     weight = 1, 
                     opacity = 0.5, 
                     stroke = 1, 

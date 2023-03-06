@@ -95,7 +95,14 @@ haul <- racebase_foss_join_foss_cpue_haul0 %>%
     st = surface_temperature_c, 
     bt = bottom_temperature_c, 
   ) %>% 
-  dplyr::arrange(-year)
+  dplyr::arrange(-year) %>%
+  dplyr::mutate(stratum_shp = dplyr::case_when(
+    SRVY == "AI" ~ "shp_ai$survey_stratum",
+                                               SRVY == "ESSLOPE" ~ "shp_bsslope$survey_stratum", 
+                                               SRVY == "EBS" ~ "shp_ebs$survey_stratum",  
+                                               SRVY == "GOA" ~ "shp_goa$survey_stratum",  
+                                               SRVY == "NBS" ~ "shp_nbs$survey_stratum"))
+  
 
 # Load Design Based Estimates --------------------------------------------------
 

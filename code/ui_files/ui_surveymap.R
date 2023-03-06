@@ -10,8 +10,8 @@ ui.surveymap <- function() {
           
           tags$head(
             # Include our custom CSS
-            includeCSS("/code/styles.css"),
-            includeScript("/code/gomap.js")
+            includeCSS(paste0(dir_wd, "/code/styles.css")),
+            includeScript(paste0(dir_wd, "/code/gomap.js"))
           ),
           
           # If not using custom CSS, set height of leafletOutput to a number instead of percent
