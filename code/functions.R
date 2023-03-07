@@ -184,73 +184,6 @@ NOAA.Fonts<-"Proxima Nova"
 
 # Functions --------------------------------------------------------------------
 
-
-upload_ftp <- function(dir_wd, 
-                       dir_out, 
-                       maxyr, 
-                       SRVY, 
-                       dest, 
-                       user, 
-                       pass){
-  
-  dir_out <- paste0(dir_wd,"/output/",maxyr,"_",SRVY,"/")
-  temp <- list.files(path = dir_out, pattern = "current_daily", full.names = FALSE)
-  dest <- dev_ai
-  
-  for (iiii in 1:length(temp)) {
-    print(temp[iiii])
-    
-    RCurl::ftpUpload(
-      what = paste0(dir_out, "/", temp[iiii]),
-      asText = FALSE,
-      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", temp[iiii])),
-      userpwd = paste0(user,":", pass),
-      .opts=curlOptions(verbose=TRUE))
-  }
-}
-
-format_date_txt <- function(x = "1998-09-02", format0 = "%B %d") {
-  if (!(isClass(Class = "Date", where = x))) {x <- as.Date(x)}
-  x <- gsub("(\\D)0", "\\1", format(x, format0))
-  return(x)
-}
-
-#' Takes a string of words and combines them into a sentence that lists them.
-#'
-#' This function allows you to take a string of words and combine them into a sentence list. For example, 'apples', 'oranges', 'pears' would become 'apples, oranges, and pears'. This function uses oxford commas.
-#' @param x Character strings you want in your string.
-#' @param oxford T/F: would you like to use an oxford comma? Default = TRUE
-#' @param sep string. default = ", " but "; " or " " might be what you need!
-#' @param sep_last string. default = " and " but " & " or " , " might be what you need!
-#' @keywords strings
-#' @export
-#' @examples
-#' text_list(c(1,2,"hello",4,"world",6))
-#' text_list(c(1,"world"))
-#' text_list(c(1,2,"hello",4,"world",6), oxford = FALSE)
-#' paste0("here is a list of things: ",
-#'   text_list(paste0("list", 1:5), sep = " ", sep_last = ""))
-text_list<-function(x = "",
-                    oxford = TRUE,
-                    sep = ", ",
-                    sep_last = "and ") {
-  
-  x<-x[which(x!="")]
-  x<-x[which(!is.na(x))]
-  if (length(x)==2) {
-    str1<-paste(x, collapse = paste0(" ", sep_last))
-  } else if (length(x)>2) {
-    str1<-paste(x[1:(length(x)-1)], collapse = paste0(sep))
-    str1<-paste0(str1,
-                 ifelse(oxford == TRUE, sep, " "),
-                 sep_last, x[length(x)])
-  } else {
-    str1<-x
-  }
-  return(str1)
-}
-
-
 #' Wrapper function to produce daily or anomaly plots
 #' 
 #' This function prepares data to be used in the make_figures() function
@@ -320,7 +253,6 @@ make_varplot_wrapper <- function(
   }
   
   ## Wrangle Anomaly data -----------------------------------------------------
-  
   anom_years <- haul %>% 
     dplyr::filter(!(is.na(station)) &
                     year < maxyr &
@@ -426,7 +358,8 @@ make_varplot_wrapper <- function(
   dat <- dat %>%
     dplyr::mutate(reg_lab = paste0(region_long, "\n(", reg_dates, ")"), 
                   var0 = as.numeric(var0), 
-                  anom = as.numeric(ifelse(sum(var0 == 0) == nrow(.), var0-mean, NA))) %>%
+                  anom = var0-mean) %>%
+                  # anom = as.numeric(ifelse(sum(var0 == 0) == nrow(.), var0-mean, NA))) %>%
     dplyr::arrange(date) %>% 
     dplyr::ungroup()
   
@@ -453,7 +386,7 @@ make_varplot_wrapper <- function(
       SRVY = SRVY, 
       dat = dat %>%
         dplyr::filter(stratum != 0) %>% 
-        dplyr::mutate(reg_lab = region_long),
+        dplyr::mutate(reg_lab = paste0(region_long, "/n")),
       var_breaks = var_breaks, 
       plot_title = ifelse(SRVY %in% c("GOA", "AI"), "Survey Region", "Survey Grid"),
       plot_subtitle = plot_subtitle,
@@ -493,12 +426,13 @@ make_varplot_wrapper <- function(
       make_gifs = FALSE, 
       data_source = data_source,
       show_planned_stations = FALSE, 
-      height = height)
+      height = height, 
+      var00 = var00)
   }
   
   ### Daily --------------------------------------------------------------------
   if ("daily" %in% file_end0 & nrow(dat0)>0) {  
-    file_end = "daily"; print(paste0("------------", file_end, "------------"))
+    file_end <- "daily"; print(paste0("------------", file_end, "------------"))
     
     make_figure(
       SRVY = SRVY, 
@@ -517,7 +451,8 @@ make_varplot_wrapper <- function(
       make_gifs = TRUE, 
       data_source = data_source,
       show_planned_stations = show_planned_stations, 
-      height = height)
+      height = height, 
+      var00 = var00)
   }
   
   ### Anomaly ------------------------------------------------------------------
@@ -543,7 +478,8 @@ make_varplot_wrapper <- function(
       make_gifs = FALSE, 
       data_source = data_source,
       show_planned_stations = FALSE, 
-      height = height)
+      height = height, 
+      var00 = var00)
   }
   
   print("RUN COMPLETE")
@@ -585,7 +521,8 @@ make_figure <- function(
     dir_wd = "./",
     show_planned_stations = TRUE,
     data_source = "gd",
-    dir_googledrive_upload = NULL) {
+    dir_googledrive_upload = NULL, 
+    var00 = "") {
   
   # Create Directories
   dir.create(path = dir_out, showWarnings = FALSE)
@@ -618,8 +555,9 @@ make_figure <- function(
                                       var_breaks[i-1]," \u2013 ",var_breaks[i]) # ,"\u00B0C" "\u00B0"
                       ))
     }
-    var_color <- colorRamps::matlab.like(length(var_labels))
-    
+    # var_color <- colorRamps::matlab.like(length(var_labels))
+    var_color <- viridis::viridis_pal(end = 0.9, 
+                                      option = "B")(length(var_labels))
     # bin var
     dat <- dat %>%
       dplyr::mutate(var_bin = base::cut(x = as.numeric(dat$var),
@@ -673,7 +611,7 @@ make_figure <- function(
     iterate <- which((date_entered) %in% (dates0))
   }
   
-  # Make plots for each day of dates0 -----------------------------------------
+  ## Loop through dates -----------------------------------------
   for (i in iterate) {
     
     start_time <- Sys.time()
@@ -777,9 +715,9 @@ make_figure <- function(
     }
     
     gg <- ggplot() +
-      geom_sf(data = survey_area$akland, fill = "white") + 
+      geom_sf(data = survey_area$akland, fill = "black") + #ifelse(SRVY %in% c("GOA", "AI"), "black", "white")) + 
       geom_sf(data = survey_area$graticule, 
-              color = "grey70", 
+              color = "grey90", 
               alpha = 0.5) +
       coord_sf(xlim = survey_area$plot.boundary$x, 
                ylim = survey_area$plot.boundary$y) +
@@ -788,7 +726,7 @@ make_figure <- function(
       scale_y_continuous(name = "Latitude", 
                          breaks = survey_area$lat.breaks)  +
       theme( 
-        panel.background = element_rect(fill = "grey95"),
+        panel.background = element_rect(fill = "white"), #grey95
         plot.title = element_text(size=20), 
         plot.subtitle = element_text(size=14), 
         legend.text=element_text(size=10), 
@@ -812,14 +750,17 @@ make_figure <- function(
         theme(
           legend.text=element_text(size=13), 
           legend.title=element_text(size=16),
-          axis.text = element_text(size=14))
+          axis.text = element_text(size=14))  +
+        ggplot2::geom_sf(data = survey_area$survey.grid, 
+                         colour = "grey50",
+                         show.legend = legend_title)
       
-      if (as.character(dates0[1]) == "none") {
-        temp <-survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
+      if (file_end == "grid") {
+        temp <- survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
         gg <- gg +
-          ggplot2::geom_sf(data = survey_area$survey.grid, 
-                           colour = "grey50",
-                           show.legend = legend_title) +
+          ggspatial::coord_sf(
+            xlim = extent(grid_stations_plot)[1:2], 
+            ylim = extent(grid_stations_plot)[3:4]) +
           geom_sf(data = survey_area$bathymetry) +
           guides(colour = 
                    guide_legend(override.aes = 
@@ -833,17 +774,16 @@ make_figure <- function(
       }
       
       # Add temperature squares
-      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
+      if (file_end != "grid") { # If you are using any data from temp data
         
         gg <- gg +
           ggplot2::geom_sf(data = grid_stations_plot, 
-                           aes( # group = region, 
-                             fill = var_bin), 
+                           aes(fill = var_bin), 
                            colour = "grey50",
                            show.legend = legend_title) +
           ggplot2::scale_fill_manual(name = legend_title,
                                      values = var_color, 
-                                     labels = var_labels,
+                                     labels = var_labels, 
                                      drop = FALSE,
                                      na.translate = FALSE) +
           ggspatial::coord_sf(
@@ -855,7 +795,8 @@ make_figure <- function(
         geom_sf(data = survey_area$survey.area, 
                 aes(color = SURVEY), 
                 fill = NA,
-                size = 4,
+                na.value = "grey50", 
+                size = 10,
                 show.legend = TRUE) +
         scale_color_manual(name = "Survey Region", 
                            values = survey_area$survey.area$survey_reg_col,  
@@ -1069,7 +1010,7 @@ make_figure <- function(
       
       ### Create plots ---------------------------------------------------------
       
-      grid_stations_plot$region <- factor(grid_stations_plot$region)        
+      # grid_stations_plot$region <- factor(grid_stations_plot$region)        
       
       gg <- gg +
         ggplot2::geom_sf(
@@ -1109,8 +1050,15 @@ make_figure <- function(
             plot.title = element_text(size = 10, face = "bold"), 
             axis.title = element_blank(),
             plot.margin=unit(c(0,0,0,0), "cm"), 
-            axis.text = element_text(size=8)) + 
-          guides(color = FALSE) 
+            axis.text = element_text(size = 12), 
+            panel.border = element_rect(colour = "black", fill=NA, linewidth=.5))  +
+          ggplot2::scale_color_manual(
+            name = "",
+            values = var_color, 
+            labels = var_labels,
+            drop = FALSE,
+            na.translate = FALSE) +
+          ggplot2::guides(color = "none")
         
         legend_temp_tall <- cowplot::get_legend(
           gg2 +
@@ -1119,30 +1067,50 @@ make_figure <- function(
               values = var_color, 
               labels = var_labels,
               drop = FALSE,
-              na.translate = FALSE) ) # for extracting legend graphic
+              na.translate = FALSE)  +
+            ggplot2::guides(fill = guide_legend(ncol = 2)) ) # for extracting legend graphic
         
-        gg_whole <- gg2  +
+        legend_temp_tall_insert <- cowplot::plot_grid(
+          legend_temp_tall, 
+          gg_insert + ggtitle("") + theme(axis.text = element_blank()), 
+          ncol = 1, 
+          nrow = 2,
+          greedy = TRUE, 
+          align = "v", 
+          axis = "t", 
+          # rel_widths = c(1, 1), 
+          rel_heights = c(3, 2)
+        )
+        
+        legend_temp_tall_insert <- cowplot::plot_grid(
+          legend_temp_tall_insert, "", 
+          ncol = 2, 
+          nrow = 1, 
+          rel_widths = c(1, .01), 
+          rel_heights = c(1, 1) ) 
+        
+        gg_whole <- gg2 +
           ggsn::scalebar(data = grid_stations_plot,
-                         location = "topleft",
+                         location = "bottomright",
                          dist = 100,
                          dist_unit = "nm",
                          transform = FALSE,
                          st.dist = 0.06,
                          border.size = .25,
                          height = 0.03,
-                         st.bottom = TRUE,
+                         st.bottom = FALSE,
                          st.size = 3, 
-                         model = survey_area$crs) +
+                         model = survey_area$crs) + 
           ggplot2::scale_fill_manual(
             name = gsub(pattern = "\n", replacement = " ", x = legend_title),
-            values = var_color, 
+            values = var_color,
             labels = var_labels,
             drop = FALSE,
-            na.translate = FALSE, 
+            na.translate = FALSE,
             guide = guide_legend(
               direction = "horizontal",
               title.position = "top",
-              label.position = "bottom", 
+              label.position = "bottom",
               nrow = 1,
               label.hjust = 0.5,
               label.vjust = 0.5,
@@ -1153,19 +1121,82 @@ make_figure <- function(
         
         legend_temp_short <- cowplot::get_legend(gg_whole)
         
+        legend_temp_short_insert <- cowplot::plot_grid(
+          "",
+          legend_temp_short, 
+          gg_insert + ggtitle("") + theme(axis.text = element_blank()), 
+          "", 
+          ncol = 4, 
+          nrow = 1, 
+          greedy = TRUE, 
+          align = "center", 
+          rel_heights = c(1, 1, 1, 1), 
+          rel_widths = c(0.4, 3, 3, 0.4))
+        
+        # Draw bounding boxes
+        bb <- data.frame()
+        for (iiii in 1:length(unique(grid_stations_plot$region))) {
+          x <- unique(grid_stations_plot$region)[iiii]
+          grid_stations_plot1<-grid_stations_plot
+          grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
+          grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
+          
+          a <- extent(grid_stations_plot1)
+          b <- data.frame(t(matrix(a)))
+          names(b) <- c("xmin", "xmax", "ymin", "ymax")
+          b$lab <- x
+          # gsub(pattern = "and\n", replacement = "and ", 
+          #             x = gsub(pattern = " ", replacement = "\n", x = x, fixed = TRUE), 
+          #             fixed = TRUE)
+          b$x <- mean(a[1:2])
+          b$y <- a[4]
+          bb <- rbind.data.frame(bb, b)
+          
+          poly <- data.frame(a[3:4], a[1:2])
+          names(poly) <- c("lat", "lon") 
+          poly <- poly %>%
+            st_as_sf(coords = c("lon", "lat"), 
+                     crs = survey_area$crs) %>% 
+            st_bbox() %>% 
+            st_as_sfc()
+          
+          gg_whole <- gg_whole + 
+            geom_sf(data = poly, fill = NA, color = "grey60", size = .5)#+ 
+          # geom_text(mapping = aes(x = mean(a[1:2]), y = a[4]+10000, label = x))
+        }
+        
+        gg_whole <- gg_whole + 
+          ggspatial::coord_sf(
+            xlim = c(extent(grid_stations_plot)[1:2]),
+            ylim = c(extent(grid_stations_plot)[3], extent(grid_stations_plot)[4]+50000)) + 
+          geom_label(data = bb, 
+                     color = ifelse(SRVY == "AI", "black", "white"), 
+                     fill = ifelse(SRVY == "AI", NA, "black"),
+                     fontface = "bold",
+                     label.size = NA,
+                     label.r = unit(0, "pt"),
+                     mapping = 
+                       aes(x = x, 
+                           y = (y+25000), 
+                           label = lab), 
+                     size = 4) + 
+          # theme_minimal() + 
+          ggplot2::theme(
+            legend.position = "none", 
+            panel.border = element_rect(colour = "black", fill=NA, linewidth=.5))
+        
         gg_whole <- cowplot::plot_grid(
           header_row, 
           gg_whole, 
+          legend_temp_short, 
           ncol = 1, 
-          nrow = 2, 
+          nrow = 3, 
+          align = "v", 
+          axis = "l", 
           greedy = TRUE, 
-          rel_heights = c(0.4, 3))
+          rel_heights = c(0.5, 3, 1))
         
-        filename0 <- paste0(
-          ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
-          "_", file_end, "_whole")
-        
-        save_files(filename0 = filename0, 
+        save_files(addendum = "_whole", 
                    dat = dat,
                    file_end = file_end, 
                    dir_out = dir_out,
@@ -1180,118 +1211,153 @@ make_figure <- function(
                    dat_plot = dat_plot, 
                    plot_title = plot_title, 
                    grid_stations_plot = grid_stations_plot, 
-                   dat_planned = dat_planned)
+                   dat_planned = dat_planned, 
+                   SRVY = SRVY, 
+                   i = i, 
+                   dates0 = dates0, 
+                   params = list("var00" = var00))
         
         ### Crop to survey regions -----------------------------------------------
         
         reg <- unique(grid_stations_plot$region)
         lapply(reg, function(x) { # now we build a plot list
-          x <- as.character(x)
+          x <- reg0 <- as.character(x)
           print(x)
           grid_stations_plot1 <- grid_stations_plot
           grid_stations_plot1$region <- factor(grid_stations_plot1$region)
           grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
           
           # If you are using any data from temp data # Add temperature squares
-          xlim = c(extent(grid_stations_plot1)[1:2])
-          ylim = c(extent(grid_stations_plot1)[3:4])
+          # xlim = c(extent(grid_stations_plot1)[1:2])
+          # ylim = c(extent(grid_stations_plot1)[3:4])
           
           gg3 <- gg1 <- gg2 + 
             ggspatial::coord_sf(
               xlim = c(extent(grid_stations_plot1)[1:2]), 
               ylim = c(extent(grid_stations_plot1)[3:4])) +
-            ggtitle(x) + 
+            ggtitle(paste0(x, " Region")) +
+            theme(legend.position = "none")
+          
+          # for making 1 region only plots
+          gg1 <- gg1 + 
+            ggsn::scalebar(data = grid_stations_plot1,
+                           location = 
+                             dplyr::case_when(
+                               x %in% c("Western Aleutians", "Central Aleutians") ~ "topright", 
+                               x %in% c("Chirikof", "Kodiak", "Shumagin") ~ "bottomright", 
+                               x %in% c("Southeastern", "Yakutat") ~ "bottomleft", 
+                               TRUE ~ "topleft"),
+                           dist = 25,
+                           dist_unit = "nm",
+                           transform = FALSE,
+                           st.dist = 0.03,
+                           border.size = .25,
+                           height = 0.03,
+                           st.bottom = ifelse(SRVY %in% "GOA", FALSE, TRUE),
+                           st.size = 4, 
+                           model = survey_area$crs)
+          
+          # for making region segmented plots that will be in one figure
+          gg3 <- gg3 + 
             ggsn::scalebar(data = grid_stations_plot1,
                            location = 
                              dplyr::case_when(
                                x %in% c("Western Aleutians") ~ "topright", 
-                               x %in% c("Yakutat", "Southeastern") ~ "bottomright", 
+                               x %in% c("Chirikof", "Kodiak", "Shumagin") ~ "bottomright", 
+                               x %in% c("Southeastern", "Yakutat") ~ "bottomleft", 
                                TRUE ~ "topleft"),
-                           dist = 25,
+                           dist = 50,
                            dist_unit = "nm",
                            transform = FALSE,
                            st.dist = 0.06,
                            border.size = .25,
                            height = 0.03,
-                           st.bottom = TRUE,
+                           st.bottom = ifelse(SRVY %in% "GOA", FALSE, TRUE),
                            st.size = 3, 
-                           model = survey_area$crs) +
-            theme(legend.position = "none")
-            
-            if (x %in% c("Shumagin", "Yakutat", # GOA
-                         "Central Aleutians", "Eastern Aleutians" # AI
-                         )) {
-            gg1 <- cowplot::plot_grid(
-              gg1,legend_temp_short,
-              ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(3, 1))
-            } else {
-              gg1 <- cowplot::plot_grid(
-                gg1, legend_temp_tall,
-                ncol = 2, nrow = 1, greedy = TRUE, rel_widths = c(4, 1))
-            }
+                           model = survey_area$crs)
           
+          if (x %in% c("Shumagin", "Yakutat", # GOA
+                       "Central Aleutians", "Eastern Aleutians" # AI
+          )) {
+            
             gg1 <- cowplot::plot_grid(
-              header_row, 
-              gg1, 
-              # gg_insert,
-              ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(0.4, 3))      
+              gg1, legend_temp_short_insert,
+              ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(3, 1.5))
             
-            filename0 <- paste0(
-              ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
-              "_", file_end, 
-              "_", tolower(x))
+          } else {
             
-            save_files(filename0 = filename0, 
-                       dat = dat,
-                       file_end = file_end, 
-                       dir_out = dir_out,
-                       height = height, 
-                       width = width,
-                       gg = gg1,
-                       ftp = ftp, 
-                       dir_googledrive_upload = dir_googledrive_upload, 
-                       max_date = max_date, 
-                       make_gifs = FALSE, 
-                       date_entered = date_entered, 
-                       dat_plot = dat_plot, 
-                       plot_title = plot_title, 
-                       grid_stations_plot = grid_stations_plot, 
-                       dat_planned = dat_planned)
+            gg1 <- cowplot::plot_grid(
+              gg1, legend_temp_tall_insert,
+              ncol = 2, nrow = 1, greedy = TRUE, rel_widths = c(4, 2))
+          }
+          
+          gg1 <- cowplot::plot_grid(
+            header_row, 
+            gg1, 
+            ncol = 1, nrow = 2, greedy = TRUE, rel_heights = c(0.5, 3))      
+          
+          save_files(addendum = paste0("_", gsub(pattern = " ", replacement = "-", x = tolower(x))), 
+                     dat = dat,
+                     file_end = file_end, 
+                     dir_out = dir_out,
+                     height = height, 
+                     width = width,
+                     gg = gg1,
+                     ftp = ftp, 
+                     dir_googledrive_upload = dir_googledrive_upload, 
+                     max_date = max_date, 
+                     make_gifs = FALSE, 
+                     date_entered = date_entered, 
+                     dat_plot = dat_plot, 
+                     plot_title = plot_title, 
+                     grid_stations_plot = grid_stations_plot, 
+                     dat_planned = dat_planned, 
+                     SRVY = SRVY, 
+                     i = i, 
+                     dates0 = dates0, 
+                     params = list("var00" = var00, 
+                                   "reg0" = reg0))
           
           return(gg3)
           
         }) -> gg_region_list
         
- ### all cropped areas on one plot ---------------------------------------------
+        ### all cropped areas on one plot ---------------------------------------------
+        print("cropped combined")
         
         if (SRVY == "AI") {
           gg1 <- cowplot::plot_grid(
-            gg_region_list[[1]], gg_region_list[[2]], 
-            legend_temp, 
-            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.4))    
+            gg_region_list[[1]] + theme(axis.text = element_text(size = 8)), 
+            gg_region_list[[2]] + theme(axis.text = element_text(size = 8)), 
+            legend_temp_tall, 
+            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.1, 1.5, 0.5))    
           
           gg2 <- cowplot::plot_grid(
-            gg_region_list[[3]], 
-            gg_region_list[[4]], 
-            gg_insert, 
+            gg_region_list[[3]] + theme(axis.text = element_text(size = 8)), 
+            gg_region_list[[4]] + theme(axis.text = element_text(size = 8)), 
+            gg_insert + # ggtitle("") + 
+              theme(axis.text = element_blank()), 
             ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.25, 0.75, 0.6)) #+
-            # draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
-            # draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)  
+          # draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
+          # draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)  
           
         } else if (SRVY == "GOA") {
           
           gg1 <- cowplot::plot_grid(
-            gg_region_list[[1]], gg_region_list[[2]], gg_region_list[[3]], 
-            cowplot::get_legend(legend_temp_tall), 
-            ncol = 4, nrow = 1, greedy = TRUE, rel_widths = c(2, 1, 1, 0.4))    
+            gg_region_list[[1]] + theme(axis.text = element_text(size = 8)), 
+            gg_region_list[[2]] + theme(axis.text = element_text(size = 8)), 
+            gg_region_list[[3]] + theme(axis.text = element_text(size = 8)), 
+            legend_temp_tall, 
+            ncol = 4, nrow = 1, greedy = TRUE, rel_widths = c(2, 0.8, 0.9, 0.65)) # rel_heights = c(1,1,1,1)) #,   
           
           gg2 <- cowplot::plot_grid(
-            gg_region_list[[4]], 
-            gg_region_list[[5]], 
-            gg_insert, 
-            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(1.5, 1, 1)) #+
-            # draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
-            # draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)       
+            gg_region_list[[4]] + theme(axis.text = element_text(size = 8)), 
+            gg_region_list[[5]] + theme(axis.text = element_text(size = 8)), 
+            gg_insert + #ggtitle("") + 
+              theme(axis.text = element_blank()), 
+            ncol = 3, nrow = 1, greedy = TRUE, rel_widths = c(2, 0.8, 1.55)) # rel_heights = c(1,1,1)) #
+          # draw_label("Longitude", x = 0.4, y = 0, vjust = -0.5, angle = 0) +
+          # draw_label("Latitude", x = 0, y = 0.75, vjust = 1.5, angle = 90)       
           
         }
         gg <- cowplot::plot_grid(header_row, gg1, gg2, 
@@ -1307,11 +1373,7 @@ make_figure <- function(
     
     ## Save files --------------------------------------------------------------
     
-    filename0 <- paste0(
-      ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
-      "_", file_end)
-    
-    save_files(filename0 = filename0, 
+    save_files(addendum = "", 
                dat = dat,
                file_end = file_end, 
                dir_out = dir_out,
@@ -1326,8 +1388,46 @@ make_figure <- function(
                dat_plot = dat_plot, 
                plot_title = plot_title, 
                grid_stations_plot = grid_stations_plot, 
-               dat_planned = dat_planned)
+               dat_planned = dat_planned, 
+               SRVY = SRVY, 
+               i = i, 
+               dates0 = dates0, 
+               params = list("var00" = var00))
     
+  #   ### PDF Combined -----------------------------------------------------------------
+  #   # Create Binded PDF
+  #   print("test1")
+  #   if (file_end %in% c("anom", "daily")) { # 
+  #     print("test2")
+  #     # remove file if already exists - qpdf::pdf_combine() will not overwrite
+  #     if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
+  #       file.remove(paste0(dir_out, filename0, "_bind.pdf"))
+  #     }
+  #     print("test3")
+  #     
+  #     if (date_entered[1] == date_entered[i]) {
+  #       qpdf::pdf_combine(
+  #         input = c(paste0(dir_out, filename0,'.pdf'),
+  #                   ifelse(file.exists(paste0(dir_out,'_grid.pdf')), 
+  #                          paste0(dir_out,'_grid.pdf'), "")),
+  #         output = c(paste0(dir_out, filename0, "_bind.pdf")))
+  #       print("test4")
+  #     } else {
+  #       temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
+  #       temp <- temp[!grepl(pattern = "current", x = temp)]
+  #       temp <- strsplit(x = temp, split = "_")
+  #       temp <- as.Date(sort(sapply(temp,"[[",1)))
+  #       temp <- max(temp[temp < max_date])
+  #       
+  #       qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"),
+  #                                   paste0(dir_out, as.character(temp),"_", file_end, "_bind.pdf")),
+  #                         output = c(paste0(dir_out, filename0, "_bind.pdf")))
+  #       print("test5")
+  #       
+  #     }
+  #     print("test6")
+  #   }
+
     end_time <- Sys.time()
     print((end_time - start_time))
   }
@@ -1335,7 +1435,9 @@ make_figure <- function(
   # return(gg)
 }
 
-save_files<- function(filename0, 
+## figure helper functions -----------------------------------------------------
+
+save_files<- function(addendum = "", 
                       dat,
                       file_end, 
                       dir_out,
@@ -1346,11 +1448,20 @@ save_files<- function(filename0,
                       dir_googledrive_upload, 
                       max_date, 
                       make_gifs, 
-                      date_entered, 
+                      date_entered = as.Date("2022-01-01"), 
                       dat_plot, 
                       plot_title, 
                       grid_stations_plot = grid_stations_plot, 
-                      dat_planned) {
+                      dat_planned, 
+                      SRVY, 
+                      i, 
+                      dates0, 
+                      params = list()) {
+  
+  
+  filename0 <- paste0(
+    ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
+    "_", file_end, addendum)
   
   ### PNG -------------------------------------------------------------------------
   ggsave(filename = paste0(filename0,'.png'), 
@@ -1383,34 +1494,34 @@ save_files<- function(filename0,
   #          device ="pdf") # pdfs are great for editing later
   # }
   
+  ### PDF Combined -----------------------------------------------------------------
   # Create Binded PDF
-  if (file_end %in% c("daily")) { # "anom", 
-    
+  if (file_end %in% c("anom", "daily")) { #
+
     # remove file if already exists - qpdf::pdf_combine() will not overwrite
     if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
       file.remove(paste0(dir_out, filename0, "_bind.pdf"))
     }
-    
-    if (as.character(date_entered[1]) == as.character(date_entered[i])) { # 
-      qpdf::pdf_combine(input = c(paste0(dir_out, filename0,'.pdf'), 
-                                  ifelse(file.exists(paste0(dir_out,'_grid.pdf')), paste0(dir_out,'_grid.pdf'), "")), 
-                        output = c(paste0(dir_out, filename0, "_bind.pdf")))      
-    } else {
+
+    if (date_entered[1] == date_entered[i]) {
+      qpdf::pdf_combine(
+        input = c(paste0(dir_out, filename0,'.pdf'),
+                  ifelse(file.exists(paste0(dir_out,'_grid.pdf')),
+                         paste0(dir_out,'_grid.pdf'), "")),
+        output = c(paste0(dir_out, filename0, "_bind.pdf")))
+
+      } else {
       temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
       temp <- temp[!grepl(pattern = "current", x = temp)]
       temp <- strsplit(x = temp, split = "_")
       temp <- as.Date(sort(sapply(temp,"[[",1)))
-      temp <- max(temp[as.Date(temp) < as.Date(max_date)])
-      
-      filename00 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
-                                  as.character(temp)), 
-                           ifelse(file_end=="", "", paste0("_", file_end)), "_bind")
-      
-      qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"), 
-                                  paste0(dir_out, filename00,'.pdf')), 
-                        output = c(paste0(dir_out, filename0, "_bind.pdf")))      
+      temp <- max(temp[temp < max_date])
+
+      qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"),
+                                  paste0(dir_out, as.character(temp),"_", file_end, "_bind.pdf")),
+                        output = c(paste0(dir_out, filename0, "_bind.pdf")))
+
     }
-    
   }
   
   ### GIF -------------------------------------------------------------------------
@@ -1421,31 +1532,57 @@ save_files<- function(filename0,
                     filename0 = filename0)
   }
   
-  ### rename "current" plots for easy finding ------------------------------------
-  # if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-  if (!(file_end  %in% c("mean", "grid"))) {
-    temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-    for (iiii in 1:length(temp)) {
-      file.copy(from = temp[iiii], 
-                overwrite = TRUE, 
-                to = gsub(pattern = max_date, replacement = "current", x = temp[iiii]))
-    }
+  ### CURRENT plots for easy finding -------------------------------------------
+  # only make current if it is the last plot of the run
+  if (file_end %in% c("grid", "mean")) {
+    lastplotofrun <- TRUE
+  } else {
+  lastplotofrun <- (dates0 != "all" |
+      !(dates0 == "all" & date_entered[i] != date_entered[length(date_entered)])
+      ) 
   }
   
-  ### Upload to google drive ------------------------------------------------------
+  if (lastplotofrun) {
+    temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+  if (file_end  %in% c("anom", "daily")) {
+    for (iiii in 1:length(temp)) {
+      filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
+      filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
+                         replacement = paste0("current_", file_end, addendum, "_",tolower(SRVY),"."), 
+                         x = filename00, fixed = TRUE)
+      file.copy(from = temp[iiii], 
+                to = filename00, 
+                overwrite = TRUE)
+    }
+  } else if (file_end %in% c("grid", "mean")) {
+    for (iiii in 1:length(temp)) {
+    filename00 <- temp[iiii]
+    filename00 <- gsub(pattern = paste0("_", file_end,"."), 
+                       replacement = paste0("current_", file_end, addendum, "_",tolower(SRVY),"."), 
+                       x = filename00, 
+                       fixed = TRUE)
+    file.copy(from = temp[iiii], 
+              to = filename00, 
+              overwrite = TRUE)
+    }
+  }
+
+    ### FTP -------------------------------------------
+    # only make current if it is the last plot of the run
+      if (ftp$ftp_dl){
+        upload_ftp( # vars here defined in ftp.R
+          dir_wd = dir_wd, 
+          dir_out = dir_out, 
+          maxyr = maxyr, 
+          SRVY = SRVY, 
+          dest = ftp$dev_ai, 
+          user = ftp$user, 
+          pass = ftp$pass)
+      }
+    
+  }
   
-  # if (file_end != "anom") {
-  #   temp <- googledrive::drive_ls(path = dir_googledrive_upload, recursive = FALSE) 
-  #   
-  #   temp0 <- temp %>% 
-  #     dplyr::filter(grepl(pattern = "archive", x = name, fixed = TRUE))
-  #   
-  #   temp <- temp %>% 
-  #     dplyr::filter(grepl(pattern = ".", x = name, fixed = TRUE))
-  #   
-  #   googledrive::drive_mv(file = temp, path = )
-  # }
-  
+  ### GOOGLE DRIVE ------------------------------------------------------
   if (!(is.null(dir_googledrive_upload))) {
     temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
     #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
@@ -1464,17 +1601,6 @@ save_files<- function(filename0,
     }
   }
   
-  ### send all current files to the FTP -------------------------------------------
-  if (ftp$ftp_dl){
-    upload_ftp( # vars here defined in ftp.R
-      dir_wd = dir_wd, 
-      dir_out = dir_out, 
-      maxyr = maxyr, 
-      SRVY = SRVY, 
-      dest = ftp$dev_ai, 
-      user = ftp$user, 
-      pass = ftp$pass)
-  }
 }
 
 #' gif compiler
@@ -1530,503 +1656,68 @@ make_figure_gif<-function(file_end,
   
 }
 
-
-
-
-# save_figure <- function(gg,
-#                         dat, 
-#                         dat_plot, 
-#                         dat_planned = NULL, 
-#                         survey_area, 
-#                         grid_stations_plot, 
-#                         data_source, 
-#                         dir_out, 
-#                         dates0, 
-#                         max_date, 
-#                         file_end, 
-#                         height, 
-#                         width, 
-#                         dir_googledrive_upload = NULL, 
-#                         make_gifs = TRUE, 
-#                         date_entered) {
-#   
-#   filename0 <- paste0(ifelse(as.character(dates0[1]) == "none", "", 
-#                              max_date), 
-#                       ifelse(file_end=="", "", paste0("_", file_end)))
-#   
-#   ggsave(filename = paste0(filename0,'.png'),
-#          path = dir_out,
-#          height = height, 
-#          width = width,
-#          plot=gg, 
-#          dpi = 320, 
-#          device="png") # pdfs are great for editing later
-#   
-#   if (file_end %in% c("grid", "daily")){
-#     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
-#                       output_dir = dir_out,
-#                       output_file = paste0(filename0, ".pdf"))
-#     file.remove(list.files(path = paste0(dir_wd, "/code/"), 
-#                            pattern = ".log", full.names = TRUE))
-#     
-#   } else if (file_end == "anom"){
-#     ggsave(filename = paste0(filename0,'.pdf'),
-#            path = dir_out,
-#            height = height,
-#            width = width,
-#            plot = gg,
-#            dpi = 320, 
-#            device ="pdf") # pdfs are great for editing later
-#   }
-#   
-#   if (make_gifs | as.character(dates0[1]) != "none") {
-#     make_figure_gif(file_end = file_end, 
-#                     max_date = max_date,
-#                     dir_out = dir_out, 
-#                     filename0 = filename0)
-#   }
-#   
-#   if (!(is.null(dir_googledrive_upload))) {
-#     
-#     drive_upload(
-#       media = paste0(dir_out, filename0,'.png'), 
-#       path = dir_googledrive_upload, 
-#       overwrite = TRUE)
-#     
-#     drive_upload(
-#       media = paste0(dir_out, filename0,'.pdf'), 
-#       path = dir_googledrive_upload, 
-#       overwrite = TRUE)
-#     
-#     # change each day of the survey
-#     if (make_gifs | as.character(dates0[1]) != "none") {
-#       drive_upload(
-#         media = paste0(dir_out, filename0,'.gif'), 
-#         path = dir_googledrive_upload, 
-#         overwrite = TRUE)
-#     }
-#   }
-#   
-# }
-
-
-licence0 <- "Software code created by U.S. Government employees is not subject to copyright in the United States (17 U.S.C. §105). The United States/Department of Commerce reserve all rights to seek and obtain copyright protection in countries other than the United States for Software authored in its entirety by the Department of Commerce. To this end, the Department of Commerce hereby grants to Recipient a royalty-free, nonexclusive license to use, copy, and create derivative works of the Software outside of the United States."
-
-
-# Shiny functions --------------------------------------------------------------
-
-# https://stackoverflow.com/questions/37446283/creating-legend-with-circles-leaflet-r
-addLegendCustom <- function(map, position = "bottomright", title = "", colors, labels, sizes, opacity = 0.5){
-  colorAdditions <- paste0(colors, "; width:", sizes, "px; height:", sizes, "px")
-  labelAdditions <- paste0("<div style='display: inline-block;height: ", sizes, "px;margin-top: 4px;line-height: ", sizes, "px;'>", labels, "</div>")
+upload_ftp <- function(dir_wd, 
+                       dir_out, 
+                       maxyr, 
+                       SRVY, 
+                       dest, 
+                       user, 
+                       pass){
   
-  return(addLegend(map, position = position, title = title, colors = colorAdditions, labels = labelAdditions, opacity = opacity))
+  dir_out <- paste0(dir_wd,"/output/",maxyr,"_",SRVY,"/")
+  temp <- list.files(path = dir_out, pattern = "current_", full.names = FALSE)
+
+  for (iiii in 1:length(temp)) {
+    print(temp[iiii])
+    
+    RCurl::ftpUpload(
+      what = paste0(dir_out, "/", temp[iiii]),
+      asText = FALSE,
+      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", temp[iiii])),
+      userpwd = paste0(user,":", pass),
+      .opts=curlOptions(verbose=TRUE))
+  }
 }
 
-ageoffile<-function(path) {
-  # system("touch temp")
-  info <- file.info(path)
-  x<-format(info$mtime,"%B %d, %Y")
+## other helper functions ------------------------------------------------------
+
+format_date_txt <- function(x = "1998-09-02", format0 = "%B %d") {
+  if (!(isClass(Class = "Date", where = x))) {x <- as.Date(x)}
+  x <- gsub("(\\D)0", "\\1", format(x, format0))
   return(x)
 }
 
-# SameColNames<-function(df.ls) {
-#   #All column names
-#   colnames0<-c()
-#   for (i in 1:length(df.ls)){
-#     df0<-df.ls[[i]]
-#     # colnames(df0)<-toupper(colnames(df0))
-#     df0<-janitor::clean_names(df0)
-#     df.ls[[i]]<-df0
-#     colnames0<-c(colnames0, (colnames(df0)))
-#   }
-#   colnames0<-sort(unique(colnames0), decreasing = T)
-#   
-#   #New df's
-#   df.ls0<-list()
-#   df.rbind0<-c()
-#   for (i in 1:length(df.ls)){
-#     df0<-df.ls[[i]]
-#     colnames.out<-colnames0[!(colnames0 %in% colnames(df0))]
-#     if (length(colnames.out) != 0) {
-#       for (ii in 1:length(colnames.out)){
-#         df0[,(ncol(df0)+1)]<-NA
-#         names(df0)[ncol(df0)]<-colnames.out[ii]
-#       }
-#     }
-#     df0<-df0[,match(table =  colnames(df0), x = colnames0)]
-#     df.ls0[[i]]<-df0
-#     names(df.ls0)[i]<-names(df.ls)[i]
-#     df.rbind0<-rbind.data.frame(df.rbind0, df0)
-#   }
-#   return(df.rbind0)
-# }
-
-scale_values<-function(X) {
-  # X <- X[X != 0]
-  val <- ((X - min(X, na.rm = TRUE))/diff(range(X, na.rm = TRUE))) 
-  return(val)
+#' Takes a string of words and combines them into a sentence that lists them.
+#'
+#' This function allows you to take a string of words and combine them into a sentence list. For example, 'apples', 'oranges', 'pears' would become 'apples, oranges, and pears'. This function uses oxford commas.
+#' @param x Character strings you want in your string.
+#' @param oxford T/F: would you like to use an oxford comma? Default = TRUE
+#' @param sep string. default = ", " but "; " or " " might be what you need!
+#' @param sep_last string. default = " and " but " & " or " , " might be what you need!
+#' @keywords strings
+#' @export
+#' @examples
+#' text_list(c(1,2,"hello",4,"world",6))
+#' text_list(c(1,"world"))
+#' text_list(c(1,2,"hello",4,"world",6), oxford = FALSE)
+#' paste0("here is a list of things: ",
+#'   text_list(paste0("list", 1:5), sep = " ", sep_last = ""))
+text_list<-function(x = "",
+                    oxford = TRUE,
+                    sep = ", ",
+                    sep_last = "and ") {
+  
+  x<-x[which(x!="")]
+  x<-x[which(!is.na(x))]
+  if (length(x)==2) {
+    str1<-paste(x, collapse = paste0(" ", sep_last))
+  } else if (length(x)>2) {
+    str1<-paste(x[1:(length(x)-1)], collapse = paste0(sep))
+    str1<-paste0(str1,
+                 ifelse(oxford == TRUE, sep, " "),
+                 sep_last, x[length(x)])
+  } else {
+    str1<-x
+  }
+  return(str1)
 }
-
-make_idw_map0 <- 
-  function (x = NA, COMMON_NAME = NA, LATITUDE = NA, LONGITUDE = NA, 
-            CPUE_KGHA = NA, region = "bs.south", extrap.box = NA, 
-            set.breaks = "jenks", grid.cell = c(0.05, 0.05), in.crs = "+proj=longlat", 
-            out.crs = "auto", key.title = "auto", log.transform = FALSE, 
-            idw.nmax = 4, use.survey.bathymetry = TRUE, return.continuous.grid = TRUE) {
-    if (is.na(x)) {
-      x <- data.frame(COMMON_NAME = COMMON_NAME, 
-                      LATITUDE = LATITUDE, 
-                      LONGITUDE = LONGITUDE, 
-                      CPUE_KGHA = CPUE_KGHA)
-    }
-    if (key.title == "auto") {
-      key.title <- x$COMMON_NAME[1]
-    }
-    if (is.na(extrap.box)) {
-      if (region %in% c("bs.south", "sebs")) {
-        extrap.box = c(xmn = -179.5, xmx = -157, 
-                       ymn = 54, ymx = 63)
-      }
-      if (region %in% c("bs.all", "ebs")) {
-        extrap.box = c(xmn = -179.5, xmx = -157, 
-                       ymn = 54, ymx = 68)
-      }
-      if (region %in% c("bs.north", "nbs")) {
-        extrap.box = c(xmn = -176.5, xmx = -160, 
-                       ymn = 58, ymx = 66)
-      } 
-    }
-    
-    map_layers <- get_base_layers0(select.region = region, 
-                                   set.crs = out.crs)
-    out.crs <- map_layers$crs
-    if (use.survey.bathymetry) {
-      map_layers$bathymetry <- get_survey_bathymetry0(select.region = region, 
-                                                      set.crs = out.crs)
-    }
-    x <- sf::st_as_sf(x, coords = c(x = "LONGITUDE", y = "LATITUDE"), 
-                      crs = sf::st_crs(in.crs)) %>% 
-      sf::st_transform(crs = map_layers$crs)
-    idw_fit <- gstat::gstat(formula = CPUE_KGHA ~ 1, 
-                            locations = x, 
-                            nmax = idw.nmax)
-    stn.predict <- predict(idw_fit, x)
-    sp_extrap.raster <- raster::raster(xmn = extrap.box["xmn"], 
-                                       xmx = extrap.box["xmx"], 
-                                       ymn = extrap.box["ymn"], 
-                                       ymx = extrap.box["ymx"], 
-                                       ncol = (extrap.box["xmx"] - 
-                                                 extrap.box["xmn"])/grid.cell, 
-                                       nrow = (extrap.box["ymx"] - 
-                                                 extrap.box["ymn"])/grid.cell, 
-                                       crs = crs(in.crs)) 
-    if (as.character(crs(x)) != as.character(crs(sp_extrap.raster))) {
-      sp_extrap.raster <- sp_extrap.raster %>% 
-        projectRaster(crs = crs(x))
-    }
-    extrap.grid <- predict(idw_fit, 
-                           as(sp_extrap.raster, "SpatialPoints")) %>% 
-      sf::st_as_sf() %>% 
-      sf::st_transform(crs = crs(x)) %>% 
-      stars::st_rasterize() %>% 
-      sf::st_join(map_layers$survey.area, 
-                  join = st_intersects)
-    
-    if (return.continuous.grid) {
-      continuous.grid <- extrap.grid
-    } else {
-      continuous.grid <- NA
-    }
-    alt.round <- 0
-    if (is.character(set.breaks[1])) {
-      set.breaks <- tolower(set.breaks)
-      break.vals <- classInt::classIntervals(x$CPUE_KGHA, n = 5, 
-                                             style = set.breaks)$brks
-      alt.round <- floor(-1 * (min((log10(break.vals) - 2)[abs(break.vals) > 
-                                                             0])))
-      set.breaks <- c(-1, round(break.vals, alt.round))
-    }
-    if (min(set.breaks) > 0) {
-      set.breaks <- c(0, set.breaks)
-    }
-    if (min(set.breaks) == 0) {
-      set.breaks <- c(-1, set.breaks)
-    }
-    if (max(set.breaks) < max(stn.predict$var1.pred)) {
-      set.breaks[length(set.breaks)] <- max(stn.predict$var1.pred) + 1
-    }
-    
-    dig.lab <- 7
-    set.levels <- cut(x = stn.predict$var1.pred, set.breaks, right = TRUE, 
-                      dig.lab = dig.lab)
-    
-    # if (alt.round > 0) {
-    #   while (dig.lab > alt.round) {
-    #     dig.lab <- dig.lab - 1
-    #     set.levels <- cut(x = stn.predict$var1.pred,
-    #                       breaks = set.breaks,
-    #                       right = TRUE,
-    #                       dig.lab = dig.lab)
-    #   }
-    # } else {
-    #   while (length(grep("\\.", set.levels)) > 0) {
-    #     dig.lab <- dig.lab - 1
-    #     print(dig.lab)
-    #     set.levels <- base::cut(x = stn.predict$var1.pred,
-    #                       breaks = set.breaks,
-    #                       right = TRUE,
-    #                       dig.lab = dig.lab)
-    #   }
-    # }
-    
-    # if (alt.round > 0) {
-    #   while (dig.lab > alt.round) {
-    #     dig.lab <- dig.lab - 1
-    #     set.levels <- cut(stn.predict$var1.pred, set.breaks, 
-    #                       right = TRUE, dig.lab = dig.lab)
-    #   }
-    # }
-    # else {
-    #   while (length(grep("\\.", set.levels)) > 0) {
-    #     dig.lab <- dig.lab - 1
-    #     # print(dig.lab)
-    #     set.levels <- cut(stn.predict$var1.pred, set.breaks, 
-    #                       right = TRUE, dig.lab = dig.lab)
-    #   }
-    # }
-    
-    extrap.grid$var1.pred <- cut(extrap.grid$var1.pred, 
-                                 set.breaks, 
-                                 right = TRUE, 
-                                 dig.lab = dig.lab)
-    
-    sig.dig <- round(set.breaks[which(nchar(round(set.breaks)) >= 4)])
-    
-    make_level_labels <- function(vec, sig.dig) {
-      vec <- as.character(vec)
-      vec[grep("-1", vec)] <- "No catch"
-      vec <- sub("\\(", "\\>", vec)
-      vec <- sub("\\,", "–", vec)
-      vec <- sub("\\]", "", vec)
-      if (length(sig.dig) > 3) {
-        for (j in 1:length(sig.dig)) {
-          vec <- sub(sig.dig[j], format(sig.dig[j], nsmall = 0, 
-                                        big.mark = ","), vec)
-        }
-      }
-      return(vec)
-    }
-    
-    extrap.grid$var1.pred <- factor(make_level_labels(vec = extrap.grid$var1.pred, sig.dig), 
-                                    levels = make_level_labels(levels(set.levels), sig.dig))
-    
-    
-    n.breaks <- length(levels(set.levels))
-    
-    p1 <- ggplot() + 
-      geom_sf(data = map_layers$survey.area, fill = NA) + 
-      geom_stars(data = extrap.grid) + 
-      geom_sf(data = map_layers$survey.area, 
-              fill = NA) + 
-      # geom_sf(data = map_layers$akland$geometry[2],
-      #         fill = "grey80") +
-      geom_sf(data = map_layers$akland,
-              fill = "grey80") +
-      # geom_sf(data = sf::st_shift_longitude(sf::st_shift_longitude(map_layers$akland$geometry[1])),
-      #         fill = "grey80") +
-      # geom_sf(data = sf::st_wrap_dateline(map_layers$akland),
-      #         fill = "grey80") +
-      geom_sf(data = map_layers$bathymetry) + 
-      geom_sf(data = map_layers$graticule, 
-              color = alpha("grey70", 0.3)) + 
-      scale_fill_manual(name = paste0(key.title, "\nCPUE (kg/ha)"), 
-                        values = c("white", RColorBrewer::brewer.pal(9, name = "Blues")[c(2, 4, 6, 8, 9)]),
-                        na.translate = FALSE, 
-                        drop = FALSE) + 
-      scale_x_continuous(breaks = map_layers$lon.breaks) + 
-      scale_y_continuous(breaks = map_layers$lat.breaks) + 
-      coord_sf(xlim = map_layers$plot.boundary$x, 
-               ylim = map_layers$plot.boundary$y) + 
-      theme(panel.border = element_rect(color = "black", fill = NA), 
-            panel.background = element_rect(fill = NA, color = "black"), 
-            legend.key = element_rect(fill = NA, color = "grey70"), 
-            legend.position = c(0.12, 0.18), 
-            axis.title = element_blank(), 
-            axis.text = element_text(size = 10), 
-            legend.text = element_text(size = 10), 
-            legend.title = element_text(size = 10), 
-            plot.background = element_rect(fill = NA, color = NA))
-    
-    return(list(plot = p1, map_layers = map_layers, extrapolation.grid = extrap.grid, 
-                continuous.grid = continuous.grid, region = region, n.breaks = n.breaks, 
-                key.title = key.title, crs = out.crs))
-  }
-
-
-
-get_base_layers0 <- 
-  function (select.region, 
-            set.crs = "+proj=longlat +datum=NAD83", 
-            use.survey.bathymetry = FALSE) {
-    if (set.crs == "auto") {
-      region.crs <- c("+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=68.1 +lat_2=70.7 +lat_0=69.4 +lon_0=-162.6 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=60.8 +lat_2=67 +lat_0=63.9 +lon_0=-167 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
-      set.crs <- region.crs[match(select.region, c("bs.south", 
-                                                   "sebs", "bs.all", "ebs", "ecs", 
-                                                   "ebs.ecs", "bs.north", "nbs"))]
-    }
-    akland <- sf::st_read(system.file("data", "ak_russia.shp", 
-                                      package = "akgfmaps"), quiet = TRUE)
-    
-    bathymetry <- sf::st_read(system.file("data", "npac_0-200_meters.shp", 
-                                          package = "akgfmaps"), quiet = TRUE)
-    if (select.region %in% c("bs.south", "sebs")) {
-      survey.area <- sf::st_read(system.file("data", 
-                                             "sebs_survey_boundary.shp", package = "akgfmaps"), 
-                                 quiet = TRUE)
-      survey.strata <- sf::st_read(system.file("data", 
-                                               "sebs_strata.shp", package = "akgfmaps"), 
-                                   quiet = TRUE)
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(
-        x = c(-177.3, -154.3), 
-        y = c(54.5, 63.15)), 
-        out.crs = set.crs)
-      graticule <- st_graticule(lat = seq(54, 64, 2), 
-                                lon = seq(-180, -140, 5), 
-                                margin = 1e-05)
-      lon.breaks <- seq(-180, -154, 5)
-      lat.breaks <- seq(54, 64, 2)
-    }
-    if (select.region %in% c("bs.all", "ebs")) {
-      survey.area <- sf::st_read(system.file("data", 
-                                             "ebs_survey_boundary.shp", package = "akgfmaps"), 
-                                 quiet = TRUE)
-      survey.strata <- sf::st_read(system.file("data", 
-                                               "ebs_strata.shp", package = "akgfmaps"), 
-                                   quiet = TRUE)
-      
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(
-        x = c(-177.8, -154.7), 
-        y = c(54, 65.1)), 
-        out.crs = set.crs)
-      graticule <- st_graticule(lat = seq(54, 68, 2), 
-                                lon = seq(-180, -140, 5), 
-                                margin = 1e-05)
-      lon.breaks <- seq(-180, -154, 5)
-      lat.breaks <- seq(54, 66, 2)
-    }
-    if (select.region %in% c("bs.north", "nbs")) {
-      survey.area <- sf::st_read(system.file("data", 
-                                             "ebs_survey_boundary.shp", package = "akgfmaps"), 
-                                 quiet = TRUE)$geometry[2]
-      
-      survey.strata <- sf::st_read(system.file("data", 
-                                               "ebs_strata.shp", package = "akgfmaps"), 
-                                   quiet = TRUE) %>% 
-        dplyr::filter(STRATUM %in% c(70, 71, 81))
-      
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(
-        # x = c(-177.8, -154.7), 
-        # y = c(63.15, 65.1)), 
-        x = c(-176.5, -160), 
-        y = c(60, 66)), 
-        out.crs = set.crs)
-      
-      graticule <- st_graticule(lat = seq(64, 68, 2), 
-                                lon = seq(-180, -140, 5), 
-                                margin = 1e-05)
-      lon.breaks <- seq(-180, -154, 5)
-      lat.breaks <- seq(64, 66, 2)
-    }
-    if (select.region == "ecs") {
-      survey.area <- sf::st_read(system.file("data", 
-                                             "chukchi_survey_boundary.shp", package = "akgfmaps"), 
-                                 quiet = TRUE)
-      survey.strata <- sf::st_read(system.file("data", 
-                                               "chukchi_strata.shp", package = "akgfmaps"), 
-                                   quiet = TRUE)
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(-170, -156), 
-                                                                     y = c(65, 73)), 
-                                                          out.crs = set.crs)
-      graticule <- st_graticule(lat = seq(60, 76, 2), lon = seq(-180, -140, 5), margin = 1e-05)
-      lon.breaks <- seq(-180, -154, 5)
-      lat.breaks <- seq(66, 76, 2)
-    }
-    if (select.region == "ebs.ecs") {
-      survey.area <- sf::st_read(system.file("data", 
-                                             "ebs_chukchi_survey_boundary.shp", package = "akgfmaps"), 
-                                 quiet = TRUE)
-      survey.strata <- sf::st_read(system.file("data", 
-                                               "ebs_chukchi_strata.shp", package = "akgfmaps"), 
-                                   quiet = TRUE)
-      bathymetry <- sf::st_read(system.file("data", "npac_0-200_meters.shp", 
-                                            package = "akgfmaps"), quiet = TRUE)
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(-177, -151), 
-                                                                     y = c(54.5, 72.5)), 
-                                                          out.crs = set.crs)
-      graticule <- st_graticule(lat = seq(54, 78, 4), 
-                                lon = seq(-180, -140, 5), 
-                                margin = 1e-05)
-      lon.breaks <- seq(-180, -150, 5)
-      lat.breaks <- seq(54, 78, 4)
-    }
-    if (tolower(class(set.crs)) != "crs") {
-      set.crs <- sf::st_crs(set.crs)
-    }
-    akland <- akland %>% sf::st_transform(crs = set.crs)
-    survey.area <- survey.area %>% sf::st_transform(crs = set.crs)
-    survey.strata <- survey.strata %>% sf::st_transform(crs = set.crs)
-    bathymetry <- bathymetry %>% sf::st_transform(crs = set.crs)
-    place.labels <- read.csv(file = system.file("data",
-                                                "placenames.csv", package = "akgfmaps")) %>%
-      dplyr::filter(region == select.region) %>% akgfmaps::transform_data_frame_crs(out.crs = set.crs)
-    return(list(akland = akland, survey.area = survey.area, survey.strata = survey.strata, 
-                bathymetry = bathymetry, place.labels = place.labels, 
-                graticule = graticule, crs = set.crs, plot.boundary = plot.boundary, 
-                lon.breaks = lon.breaks, lat.breaks = lat.breaks))
-  }
-
-
-get_survey_bathymetry0 <- 
-  function (select.region, set.crs) {
-    
-    if (set.crs == "auto") {
-      region.crs <- c("+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=55 +lat_2=60 +lat_0=57.5 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=57 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=68.1 +lat_2=70.7 +lat_0=69.4 +lon_0=-162.6 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=60.8 +lat_2=67 +lat_0=63.9 +lon_0=-167 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs", 
-                      "+proj=aea +lat_1=60 +lat_2=63 +lat_0=59 +lon_0=-170 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
-      set.crs <- region.crs[match(select.region, c("bs.south", 
-                                                   "sebs", "bs.all", "ebs", "ecs", 
-                                                   "ebs.ecs", "bs.north", "nbs"))]
-    }
-    
-    if (select.region %in% c("bs.all", "ebs")) {
-      bathymetry <- sf::st_read(system.file("data", "ebs_survey_bathymetry.shp", 
-                                            package = "akgfmaps"), quiet = TRUE) %>% st_transform(crs = set.crs)
-    } else if (select.region %in% c("bs.south", "sebs")) {
-      bathymetry <- sf::st_read(system.file("data", "ebs_survey_bathymetry.shp", 
-                                            package = "akgfmaps"), quiet = TRUE) %>% st_transform(crs = set.crs) %>% 
-        dplyr::filter(FNODE_ != 5)
-    } else if (select.region %in% c("bs.north", "nbs")) {
-      bathymetry <- sf::st_read(system.file("data", "ebs_survey_bathymetry.shp", 
-                                            package = "akgfmaps"), quiet = TRUE) %>% st_transform(crs = set.crs) %>% 
-        dplyr::filter(FNODE_ == 5)
-    } else {
-      stop(paste0("No survey-specific bathymetry available for ", 
-                  select.region, ". If using make_idw_map, set use.survey.bathymetry = FALSE."))
-    }
-    return(bathymetry)
-  }
-
-

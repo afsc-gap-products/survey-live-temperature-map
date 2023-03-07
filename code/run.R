@@ -6,18 +6,25 @@
 #' ---------------------------
 
 
+# still need to fix:
+#   google drive batch load
+#   survey region color thickness?
+#   make sure latest survey includes last day of color
+#   one ftp folder?
+
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 ## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
 googledrive_dl <- FALSE
+if (googledrive_dl) {
 googledrive::drive_deauth()
 googledrive::drive_auth()
 1
+}
 
 # KNOWNS -----------------------------------------------------------------------
 
 maxyr <- 2023
 data_source <- "gd" # google drive
-data_source <- "oracle" # testing
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
@@ -55,7 +62,18 @@ if (ftp_dl) {
     pass = pass)
 }
 
+## Update README (sometimes) ---------------------------------------------------
+
+# rmarkdown::render(paste0("./README.Rmd"),
+#                   output_dir = "./", 
+#                   output_file = paste0("README.md"))
+
 # Map --------------------------------------------------------------------------
+
+data_source <- "oracle" # testing
+dates0 <- "all"
+dates0 <- "latest" # testing
+dates0 <- "first" # testing
 
 ## GOA --------------------------------------------------------------------------
 
@@ -66,7 +84,11 @@ if ("GOA" %in% dat_survreg$SRVY) {
   
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
-  dir_googledrive_upload <- (dir_googledrive_upload_bs)
+  if (googledrive_dl) {
+    dir_googledrive_upload <- dir_googledrive_upload_goa
+  } else {
+    dir_googledrive_upload <- NULL
+  }
   show_planned_stations <- FALSE
   survey_area <- shp_goa
   if(ftp_dl){ftp$dest <- dev_goa}
@@ -77,7 +99,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = "first", #dates0,
+                       dates0 = dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
@@ -90,9 +112,15 @@ if ("GOA" %in% dat_survreg$SRVY) {
 
 if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
   
+  maxyr <- 2022 # testing
+  
   SRVY <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
-  dir_googledrive_upload <- (dir_googledrive_upload_bs)
+  if (googledrive_dl) {
+    dir_googledrive_upload <- dir_googledrive_upload_bs
+  } else {
+    dir_googledrive_upload <- NULL
+  }
   show_planned_stations <- TRUE
   plot_anom <- TRUE
   survey_area <- shp_bs
@@ -104,7 +132,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = "first", # "all", # "first", # "latest", # dates0,
+                       dates0 = dates0, # "all", # "first", # "latest", # dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
@@ -122,7 +150,11 @@ if ("AI" %in% dat_survreg$SRVY) {
   
   SRVY <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-  dir_googledrive_upload <- (dir_googledrive_upload_ai)
+  if (googledrive_dl) {
+    dir_googledrive_upload <- dir_googledrive_upload_ai
+  } else {
+    dir_googledrive_upload <- NULL
+  }
   plot_anom <- FALSE
   show_planned_stations <- FALSE
   survey_area <- shp_ai
@@ -134,7 +166,7 @@ if ("AI" %in% dat_survreg$SRVY) {
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = "first",
+                       dates0 = dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,

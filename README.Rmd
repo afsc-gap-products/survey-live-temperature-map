@@ -1,0 +1,160 @@
+---
+output: 
+  md_document: 
+    variant: gfm
+csl: "https://raw.githubusercontent.com/citation-style-language/styles/master/apa-no-ampersand.csl"
+bibliography: "https://raw.githubusercontent.com/afsc-gap-products/citations/main/cite/bibliography.bib"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warnings = FALSE, error = FALSE, message = FALSE, comment = FALSE)
+link_repo <- "https://github.com/afsc-gap-products/survey-live-temperature-map"
+
+library(glue)
+
+print_figs <- function(string_id) {
+temp <- list.files(path = "./test/", pattern = string_id, full.names = TRUE)
+temp <- data.frame(
+  img = temp[grep(pattern = ".png", x = temp)], 
+  txt0 = temp[grep(pattern = ".txt", x = temp)], 
+  txt = NA)
+for (i in 1:nrow(temp)) {
+  temp$txt[i] <- paste0(read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."), collapse = " ")
+}
+str0 <- glue::glue("![{temp$txt}]({temp$img})\n\n")
+return(str0)
+}
+
+```
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# [RACE Groundfish and Crab Live Survey Temperature Maps](`r link_repo`) <img src="https://avatars.githubusercontent.com/u/91760178?s=96&amp;v=4" alt="Logo." align="right" width="139" height="139"/>
+
+> This code is always in development. Find code used for final products of this code in [releases](paste0(`r link_repo`, "/releases")).
+
+## This code is primarally maintained by:
+
+**Emily Markowitz** (Emily.Markowitz AT noaa.gov; [\@EmilyMarkowitz-NOAA](https://github.com/EmilyMarkowitz-NOAA))
+
+**Liz Dawson** (Liz.Dawson AT noaa.gov; [\@liz-dawson-NOAA](https://github.com/liz-dawson-NOAA))
+
+**Chris Anderson** (Christopher.Anderson AT noaa.gov; [\@ChrisAnderson-NOAA](https://github.com/ChrisAnderson-NOAA))
+
+
+**Caitlin Allen Akselrud** (past; caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
+
+Alaska Fisheries Science Center,
+
+National Marine Fisheries Service,
+
+National Oceanic and Atmospheric Administration,
+
+Seattle, WA 98115
+
+# Table of contents
+
+```{r toc, echo = FALSE, eval = TRUE, warning=FALSE}
+toc <- strsplit(x = readtext::readtext(file = "./README.Rmd", verbosity = 0)[[2]], split = "\n")
+toc <- toc[[1]][substr(x = toc[[1]], start = 1, stop = 1) == "#"]
+toc <- toc[-c(1:3)]
+toc_list <- toc
+toc_list <- gsub(pattern = "### ", replacement = ">      - [*", x = toc_list, fixed = TRUE)
+toc_list <- gsub(pattern = "## ", replacement = ">    - [*", x = toc_list, fixed = TRUE)
+toc_list <- gsub(pattern = "# ", replacement = ">  - [*", x = toc_list, fixed = TRUE)
+toc_link <- tolower(gsub(pattern = " ", replacement = "-", 
+                          x = gsub(pattern = "#", replacement = "", 
+                                   x = gsub(pattern = "# ", replacement = "", 
+                                            x = toc, fixed = TRUE), fixed = TRUE)))
+toc <- paste0(toc_list, "*](#", toc_link, ")", collapse = "\n")
+```
+
+`r toc`
+
+## Purpose
+
+These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website
+
+ - [2022 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-bering-sea-bottom-trawl-surveys-2022)
+ - [2022 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-aleutian-islands-bottom-trawl-surveys-2022) 
+ - [2021 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey)
+ - [2019 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/feature-story/2019-southeastern-bering-sea-shelf-bottom-trawl-survey-gets-underway)
+ - [2018 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2018-eastern-bering-sea-continental-shelf-and-northern-bering-sea-trawl-surveys)
+ - [2017 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2017-eastern-bering-sea-continental-shelf-and-northern-bering-sea-bottom-trawl)
+
+## Learn more about these surveys and ocean temperatures around Alaska
+
+**Eastern Bering Sea Shelf (EBS) and Northern Bering Sea (NBS)** 
+[@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2022]
+
+**Aleutian Islands (AI)** 
+[@AI2018]
+
+**Gulf of Alaska (GOA)** 
+[@GOA2018]
+
+**Cold pool research**
+[@RohanColdPool]
+
+<div id="refs"></div>
+
+## Notes
+
+How to set up the task scheduler: https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
+
+Where the files will be saved to: https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq
+
+Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. The latest version is here: https://github.com/jgm/pandoc/releases/tag/2.18. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
+
+## Plot Examples 
+
+Find more plot examples [here](`r paste0(link_repo, "/tree/main/test")`). 
+
+### Final stacked gifs
+
+```{r}
+print_figs(string_id = "current_daily_", file_type = "gif")
+```
+
+### Blank, Grid-only Plot
+
+```{r}
+print_figs(string_id = "current_grid_")
+```
+### Mean Plot
+
+```{r}
+print_figs(string_id = "current_mean_")
+```
+
+### Anomaly Plot
+
+```{r}
+print_figs(string_id = "current_anom_")
+```
+
+
+# Suggestions and Comments
+
+If you see that the data, product, or metadata can be improved, you are invited to create a 
+[pull request](`r paste0(link_repo, "/pulls")`), 
+[submit an issue to the GitHub organization](`r "https://github.com/afsc-gap-products/data-requests/issues"`), or 
+[submit an issue to the code's repository](`r paste0(link_repo, "/issues")`).
+
+## R Version Metadata
+
+```{r}
+sessionInfo()
+```
+
+## NOAA README
+
+This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project code is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
+
+## NOAA License
+
+Software code created by U.S. Government employees is not subject to copyright in the United States (17 U.S.C. §105). The United States/Department of Commerce reserve all rights to seek and obtain copyright protection in countries other than the United States for Software authored in its entirety by the Department of Commerce. To this end, the Department of Commerce hereby grants to Recipient a royalty-free, nonexclusive license to use, copy, and create derivative works of the Software outside of the United States.
+
+<img src="https://raw.githubusercontent.com/nmfs-general-modeling-tools/nmfspalette/main/man/figures/noaa-fisheries-rgb-2line-horizontal-small.png" alt="NOAA Fisheries" height="75"/>
+
+[U.S. Department of Commerce](https://www.commerce.gov/) \| [National Oceanographic and Atmospheric Administration](https://www.noaa.gov) \| [NOAA Fisheries](https://www.fisheries.noaa.gov/)

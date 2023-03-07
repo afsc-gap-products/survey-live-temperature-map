@@ -102,12 +102,6 @@ haul <- racebase_foss_join_foss_cpue_haul0 %>%
                                                SRVY == "EBS" ~ "shp_ebs$survey_stratum",  
                                                SRVY == "GOA" ~ "shp_goa$survey_stratum",  
                                                SRVY == "NBS" ~ "shp_nbs$survey_stratum"))
-  
-
-# Load Design Based Estimates --------------------------------------------------
-
-load(here::here("data", "publicdata", "all_data.Rdata"))
-lastdl <- ageoffile(here::here("data", "publicdata", "all_data.Rdata"))
 
 # Load shape files -------------------------------------------------------------
 

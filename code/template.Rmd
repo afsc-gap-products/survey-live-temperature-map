@@ -27,66 +27,72 @@ vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
 
-if (file_end %in% c("mean")) {
-  
-    temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
-  
-    fig_cap <- fig_alt <- paste0(
-    gsub(pattern = "\n", 
-         replacement = paste0(": "), 
-         x = plot_title), 
-    ". Credit: NOAA Fisheries. ")
+surveys <- gsub(pattern = " Sea", replacement = " sea", 
+                x = unique(dat_plot$region_long))
+SRVYs <- unique(dat_plot$SRVY)
 
-} else if (file_end %in% c("anom")) {
-  
-    temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
-  
-    fig_cap <- fig_alt <- paste0(
-    gsub(pattern = "\n", 
-         replacement = paste0(", comparing bottom temperatures from ", maxyr, " to "), 
-         x = plot_title), 
-    ". Credit: NOAA Fisheries. ")
-  
-} else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
-  
-  temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
-  
-  if (SRVY %in% c("BS", "NBS", "EBS")) {
-  fig_cap <- fig_alt <- paste0(
+goaai_regions <- ifelse(SRVY %in% c("AI", "GOA"), 
+                       paste0("This survey covers the ", text_list(unique(survey_area$survey.grid$region)), 
+           " regions, which are randomly sampled each year. "), 
+                       "")
+
+intro0 <- paste0(
     "NOAA Fisheries conducted the ", 
-    text_list(x = gsub(pattern = "\n", 
-                       replacement = "", 
-                       x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
-    " survey",
-    ifelse(length(temp1)>1, "s", "")
-    ," in ", maxyr, 
-    # "aboard the ",
-    # vess,
-    ". This figure includes the empty grid of stations across the survey area",
-    ifelse(length(temp1)>1, "s", ""),
-    ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
-    paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
-  } else if (SRVY %in% c("GOA", "AI")){
-    fig_cap <- fig_alt <- paste0(maxyr, " ", plot_subtitle, " Regions. ")
+      text_list(surveys),
+      " bottom trawl survey",
+      ifelse(length(surveys)>1, "s", "")
+      ," in ", maxyr, 
+      " aboard the ",
+      vess,
+      ". ", 
+    ifelse(names(params) %in% "reg0", 
+           paste0("This map highlights survey progress in ", 
+                  params$reg0, " region. "),
+           ""), 
+    goaai_regions)
+
+foss0 <- paste0("Data have ", 
+                ifelse(data_source == "gd", "NOT ", ""), 
+                "been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
+
+if (file_end %in% c("mean")) {
+  temp <- strsplit(x = plot_title, split = "\n", fixed = TRUE)[[1]][[2]]
+  for (iiii in 1:length(SRVYs)) {
+    temp <- gsub(pattern = SRVYs[iiii], 
+         replacement = paste0(surveys[iiii]), 
+         x = temp)
   }
   
   
-# } else if (file_end = "mean") {
-#   
-#     temp1<-unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])
-#   
-#   fig_cap <- fig_alt <- paste0(
-#     "NOAA Fisheries conducted the ", 
-#     text_list(x = gsub(pattern = "\n", replacement = "", x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)]))),
-#     " survey",
-#     ifelse(length(temp1)>1, "s", "")
-#     ," in ", maxyr, 
-#     # "aboard the ",
-#     # vess,
-#     ". This figure includes the empty grid of stations across the survey area",
-#     ifelse(length(temp1)>1, "s", ""),
-#     ifelse(SRVY != "BS", ". Note that only a random sample of these stations are surveyed each year. ", 
-#     paste0(" and ",text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m"))," bathymetry. ")))
+  fig_cap <- paste0(
+    "Mean ", tolower(params$var00), "s in the ", 
+    temp, ". ", 
+    foss0)
+  
+} else if (file_end %in% c("anom")) {
+  
+  fig_cap <- paste0(
+    intro0,
+"The ", 
+    gsub(pattern = "\n", 
+         replacement = paste0("is compared to ", params$var00," from ", maxyr, " to "), 
+         x = plot_title), 
+    ". ", 
+    foss0)
+  
+} else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
+  
+  if (SRVY %in% c("BS", "NBS", "EBS")) {
+    fig_cap <- paste0( 
+      "The empty grid of stations across the ",text_list(surveys)," bottom trawl survey area",
+      ifelse(length(surveys)>1, "s", ""),
+             paste0(" and ", text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m")),
+                    " bathymetry. "))
+  } else if (SRVY %in% c("GOA", "AI")) {
+    fig_cap <- paste0(
+      "NOAA Fisheries ", surveys, " bottom trawl survey regions. ", 
+      goaai_regions)
+  }
   
 } else if (file_end == "daily") {
   
@@ -123,24 +129,24 @@ if (file_end %in% c("mean")) {
     
     temp <- c()
     for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
-      temp1 <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
+      surveys <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
       temp <- c(temp, 
-                paste0(# nrow(temp1), 
-                       # " station",
-                       # ifelse(nrow(temp1)>1, "s", "")," with ",
-                       ifelse(nrow(temp1)>1, "", "a "), "station", # ID", 
-                       ifelse(nrow(temp1)>1, "s", ""), " ", #" of ",
-                       text_list(x = 
-                                   paste0(temp1$station,
-                                            " (",temp1$lat,"°N, ",temp1$lon,"°W; ",
-                                            gsub(pattern = " ", 
-                                                 replacement = "", 
-                                                 x = temp1$var_bin, fixed = TRUE),"°C)")), 
-                       " ", ifelse(nrow(temp1)>1, "were", "was"), " surveyed by the F/V \\textit{",
-                       gsub(pattern = "F/V ", 
-                            replacement = "", 
-                            fixed = TRUE,
-                            x = unique(temp1$vessel_name[!is.na(temp1$vessel_name)])),"}") )
+                paste0(# nrow(surveys), 
+                  # " station",
+                  # ifelse(nrow(surveys)>1, "s", "")," with ",
+                  ifelse(nrow(surveys)>1, "", "a "), "station", # ID", 
+                  ifelse(nrow(surveys)>1, "s", ""), " ", #" of ",
+                  text_list(x = 
+                              paste0(surveys$station,
+                                     " (",surveys$lat,"°N, ",surveys$lon,"°W; ",
+                                     gsub(pattern = " ", 
+                                          replacement = "", 
+                                          x = surveys$var_bin, fixed = TRUE),"°C)")), 
+                  " ", ifelse(nrow(surveys)>1, "were", "was"), " surveyed by the F/V \\textit{",
+                  gsub(pattern = "F/V ", 
+                       replacement = "", 
+                       fixed = TRUE,
+                       x = unique(surveys$vessel_name[!is.na(surveys$vessel_name)])),"}") )
     }
     
     stations1 <- paste0(text_list(temp))
@@ -160,7 +166,7 @@ if (file_end %in% c("mean")) {
         } else {
           stations1 <- 
             paste0(stations1, ". There are ",
-                              nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
+                   nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
                    format_date_txt(x = (as.Date(max_date)+1)), ". ")
         }
       }
@@ -169,43 +175,32 @@ if (file_end %in% c("mean")) {
     }
   }
   
-  fig_cap <- fig_alt <- paste0(
+  fig_cap <- paste0(intro0, 
     "Near real-time ocean bottom temperatures collected ", 
     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
            paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
            paste0(" ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
                   "-", 
-           format_date_txt(x = as.Date(max_date), "%B %d %Y"))), 
-    " during the ",
-    text_list(x = gsub(pattern = " - ", 
-                       replacement = "-", 
-                       x = gsub(pattern = "\n", replacement = " ", 
-                                x = unique(dat_plot$reg_lab[!is.na(dat$reg_shapefile)])))),
-    " survey", ifelse(length(unique(dat$SRVY))>1, "s", ""),
-    " aboard the ",
-    vess,
-    ". On ", format_date_txt(as.Date(max_date)), ", ",
-    stations1, 
-    
-    ifelse(data_source == "gd", 
-           "Data have NOT been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). ", 
-           "Data have been through final review. Final, validated haul and catch data collected at each station), are be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::). "))
+                  format_date_txt(x = as.Date(max_date), "%B %d %Y"))), ". ", 
+    "On ", format_date_txt(as.Date(max_date)), ", ",
+    stations1)
   
 }
 
-fig_cap <- fig_alt <- paste0(fig_cap, "\\textit{Credit: NOAA Fisheries}")
+fig_alt <- fig_cap <- paste0(fig_cap, "\\textit{Credit: NOAA Fisheries}")
 
 fig_alt <- gsub(pattern = "\\textit{", replacement = "", x = fig_alt, fixed = TRUE)
 fig_alt <- gsub(pattern = "}", replacement = "", x = fig_alt, fixed = TRUE)
-fig_alt <- gsub(pattern = " (https://www.fisheries.noaa.gov/foss/f?p=215:200:1899488600966:Mail:NO:::)", 
-                replacement = "", 
-                x = fig_alt, fixed = TRUE)
+# fig_alt <- gsub(pattern = " (https://www.fisheries.noaa.gov/foss)",
+#                 replacement = "", 
+#                 x = fig_alt, 
+#                 fixed = TRUE)
 
 readr::write_lines(x = fig_alt, file = paste0(dir_out, filename0, ".txt"))
 
 ```
 
 ```{r, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5, dpi = 320}
-gg #+ labs(alt = fig_alt)
+gg
 ```
 

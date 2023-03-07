@@ -6,16 +6,11 @@
 
 **Emily Markowitz** (Emily.Markowitz AT noaa.gov)
 
-Research Fisheries Biologist
-
 **Liz Dawson** (Liz.Dawson AT noaa.gov)
 
-Fisheries Biologist
+**Chris Anderson** (Chris.Anderson AT noaa.gov)
 
-**Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov)
-
-Research Fisheries Biologist
-
+**Caitlin Allen Akselrud** (past; caitlin.allen_akselrud AT noaa.gov)
 
 Alaska Fisheries Science Center, 
 
@@ -46,11 +41,11 @@ Troubleshooting: if the task scheduler fails to run the code, but you can run th
 
 ## Plot Examples
 
-### Final combined gifs
+### Final stacked gifs
 
-![2021 Bering Sea Survey](./test/2021-08-16_daily.gif)
+![Bering Sea Survey](./test/current_daily_bs.gif)
 
-![2018 Aluetian Islands Survey](./test/2021-08-08_daily.gif)
+![Aluetian Islands Survey](./test/current_daily_ai.gif)
 
 ### Blank, Grid-only Plot
 
@@ -60,11 +55,11 @@ Troubleshooting: if the task scheduler fails to run the code, but you can run th
 
 ### Daily Plot
 
-![Daily Temperatrues](./test/2021-06-04_daily.png)
+![Daily Temperatrues](./test/current_daily_bs.png)
 
 ### Anomaly Plot
 
-![Anomaly Temperatrues](./test/2021-06-04_anom.png)
+![Anomaly Temperatrues](./test/current_anom_bs.png)
 
 ## NOAA README
 
