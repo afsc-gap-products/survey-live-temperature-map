@@ -87,26 +87,27 @@ PKG <- c(
   # Oracle
   "RODBC", 
   
-  #shiny
-  "shiny", # Need for running Shiny apps
-  "shinydashboard", 
-  "shinythemes", 
-  "shinyauthr", 
-  "htmltools", 
-  "htmlwidgets",
-  "shinyjs",   # Use Java Script
-  "shinyBS", 
-  "V8", 
-  
-  # For table formatting
-  "DT", 
-  "kableExtra", 
-  "formattable", 
-  
-  # leaflet
-  "leaflet", 
-  "leafem", 
-  "leafpop")
+  # #shiny
+  # "shiny", # Need for running Shiny apps
+  # "shinydashboard", 
+  # "shinythemes", 
+  # "shinyauthr", 
+  # "htmltools", 
+  # "htmlwidgets",
+  # "shinyjs",   # Use Java Script
+  # "shinyBS", 
+  # "V8", 
+  # 
+  # # For table formatting
+  # "DT", 
+  "kableExtra"
+  # "formattable", 
+  # 
+  # # leaflet
+  # "leaflet", 
+  # "leafem", 
+  # "leafpop"
+  )
 
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {  
@@ -789,21 +790,6 @@ make_figure <- function(
           ggspatial::coord_sf(
             xlim = extent(grid_stations_plot)[1:2], 
             ylim = extent(grid_stations_plot)[3:4]) 
-      }
-      
-      gg <- gg  +
-        geom_sf(data = survey_area$survey.area, 
-                aes(color = SURVEY), 
-                fill = NA,
-                na.value = "grey50", 
-                size = 10,
-                show.legend = TRUE) +
-        scale_color_manual(name = "Survey Region", 
-                           values = survey_area$survey.area$survey_reg_col,  
-                           breaks = survey_area$survey.area$SURVEY, 
-                           labels = survey_area$survey.area$reg_lab) 
-      
-      if (as.character(dates0[1]) != "none") { # If you are using any data from temp data
         
         # if we are showing planned stations
         if (show_planned_stations) {
@@ -843,9 +829,6 @@ make_figure <- function(
       }
       
       gg <- gg +
-        ggspatial::coord_sf(
-          xlim = c(extent(survey_area$survey.grid)[1:2]),
-          ylim = c(extent(survey_area$survey.grid)[3:4])) +
         ggsn::scalebar(data = survey_area$survey.grid,
                        location = "bottomleft",
                        dist = 100,
@@ -858,7 +841,21 @@ make_figure <- function(
                           x = quantile(extent(survey_area$survey.grid)[1]:extent(survey_area$survey.grid)[2], .9), 
                           y = quantile(extent(survey_area$survey.grid)[3]:extent(survey_area$survey.grid)[4], .7), 
                           label = "Alaska", 
-                          color = "black", size = 10) 
+                          color = "black", 
+                          size = 10)   +
+        geom_sf(data = survey_area$survey.area, 
+                aes(color = reg_lab), 
+                linewidth = 1.5, 
+                fill = "NA",
+                show.legend = TRUE) +
+        scale_color_manual(name = "Survey Region", 
+                           values = survey_area$survey.area$survey_reg_col,  
+                           breaks = survey_area$survey.area$reg_lab, 
+                           labels = survey_area$survey.area$reg_lab)  +
+        ggspatial::coord_sf(
+          xlim = extent(grid_stations_plot)[1:2], 
+          ylim = extent(grid_stations_plot)[3:4])
+      
       
       if (file_end %in% c("daily", "anom")) {
         gg <- gg +
@@ -1584,14 +1581,14 @@ save_files<- function(addendum = "",
   
   ### GOOGLE DRIVE ------------------------------------------------------
   if (!(is.null(dir_googledrive_upload))) {
-    temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+    temp <- list.files(path = paste0(dir_out, "current_"), pattern = filename0, full.names = TRUE)
     #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-    if (file_end != "grid") {
-      temp <- c(temp, 
-                list.files(path = dir_out, 
-                           pattern = sub(pattern = max_date, replacement = "current", x = filename0),
-                           full.names = TRUE))
-    }
+    # if (file_end != "grid") {
+    #   temp <- c(temp, 
+    #             list.files(path = dir_out, 
+    #                        pattern = sub(pattern = max_date, replacement = "current", x = filename0),
+    #                        full.names = TRUE))
+    # }
     for (iii in 1:length(temp)) {
       drive_upload(
         media = temp[iii], 

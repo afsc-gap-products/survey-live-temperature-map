@@ -8,7 +8,6 @@
 
 # still need to fix:
 #   google drive batch load
-#   survey region color thickness?
 #   make sure latest survey includes last day of color
 #   one ftp folder?
 
@@ -72,8 +71,8 @@ if (ftp_dl) {
 
 data_source <- "oracle" # testing
 dates0 <- "all"
-dates0 <- "latest" # testing
-dates0 <- "first" # testing
+# dates0 <- "latest" # testing
+# dates0 <- "first" # testing
 
 ## GOA --------------------------------------------------------------------------
 

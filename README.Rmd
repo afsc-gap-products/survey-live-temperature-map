@@ -12,10 +12,10 @@ link_repo <- "https://github.com/afsc-gap-products/survey-live-temperature-map"
 
 library(glue)
 
-print_figs <- function(string_id) {
+print_figs <- function(string_id, file_type = ".png") {
 temp <- list.files(path = "./test/", pattern = string_id, full.names = TRUE)
 temp <- data.frame(
-  img = temp[grep(pattern = ".png", x = temp)], 
+  img = temp[grep(pattern = file_type, x = temp)], 
   txt0 = temp[grep(pattern = ".txt", x = temp)], 
   txt = NA)
 for (i in 1:nrow(temp)) {
