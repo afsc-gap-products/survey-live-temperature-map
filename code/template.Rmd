@@ -56,17 +56,8 @@ foss0 <- paste0("Data have ",
                 "been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
 
 if (file_end %in% c("mean")) {
-  temp <- strsplit(x = plot_title, split = "\n", fixed = TRUE)[[1]][[2]]
-  for (iiii in 1:length(SRVYs)) {
-    temp <- gsub(pattern = SRVYs[iiii], 
-         replacement = paste0(surveys[iiii]), 
-         x = temp)
-  }
-  
-  
-  fig_cap <- paste0(
-    "Mean ", tolower(params$var00), "s in the ", 
-    temp, ". ", 
+  fig_cap <- paste0(stringr::str_to_sentence(plot_title), "s (\u2013C) in the ", 
+                 gsub(x = plot_subtitle, pattern = "\n", replacement = " "), ". ", 
     foss0)
   
 } else if (file_end %in% c("anom")) {

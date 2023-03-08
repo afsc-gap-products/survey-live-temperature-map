@@ -51,6 +51,9 @@ source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
 
+# dat_survreg <- dat_survreg %>%
+#   dplyr::filter(year == maxyr)
+
 ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
 if (ftp_dl) {
@@ -70,7 +73,7 @@ if (ftp_dl) {
 # Map --------------------------------------------------------------------------
 
 data_source <- "oracle" # testing
-dates0 <- "all"
+dates0 <- "first"
 # dates0 <- "latest" # testing
 # dates0 <- "first" # testing
 
