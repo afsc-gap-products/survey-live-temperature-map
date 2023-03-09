@@ -8,7 +8,6 @@
 
 # still need to fix:
 #   google drive batch load
-#   make sure latest survey includes last day of color
 #   one ftp folder?
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
@@ -139,7 +138,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = "anom", #c("daily", "anom", "grid", "mean"),
+                       file_end0 = c("daily", "anom", "grid", "mean"),
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }

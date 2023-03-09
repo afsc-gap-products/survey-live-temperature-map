@@ -291,11 +291,13 @@ make_varplot_wrapper <- function(
   dat0 <- dat
   
   if (nrow(dat0) == 0) {
-    dat <- dplyr::right_join(
+    dat <- dplyr::left_join(
+    multiple = "all", 
       x = dat_anom, 
       y = dat_survreg %>% 
         dplyr::select(SRVY, reg_dates, region_long) %>% 
-        dplyr::distinct()) %>% 
+        dplyr::distinct(), 
+    by = "SRVY") %>% 
       dplyr::mutate(var0 = 0, 
                     date = as.Date(paste0(maxyr, "-01-01")),
                     vessel_id = "", 
@@ -346,11 +348,13 @@ make_varplot_wrapper <- function(
   
   survey_area$survey.grid <- survey_area$survey.grid %>% 
     dplyr::mutate(id = paste0(stratum, "_", station)) %>% 
-    dplyr::left_join(x = ., 
+    dplyr::left_join(
+      x = ., 
                      y = dat  %>%
                        dplyr::mutate(in_survey = TRUE, 
                                      id = paste0(stratum, "_", station)) %>% 
-                       dplyr::select(in_survey, id),
+                       dplyr::select(in_survey, id) %>% 
+        dplyr::distinct(),
                      by = c("id")) %>% 
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
@@ -525,7 +529,8 @@ make_figure <- function(
     y = dat %>% 
       dplyr::select(region_long, reg_lab, SRVY) %>% 
       dplyr::distinct() %>% 
-      dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7)))) %>% 
+      dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))), 
+    by = "SRVY") %>% 
     dplyr::arrange(desc(SRVY))
   
   # Colors and bins for var ----------------------------------------------
@@ -539,7 +544,7 @@ make_figure <- function(
                                       var_breaks[i]), # ,"\u00B0C" <=
                         i==(length(var_breaks)) ~ paste0("> ", var_breaks[i-1]), # , "\u00B0C"
                         TRUE ~ paste0("> ",
-                                      var_breaks[i-1]," \u2013 ",var_breaks[i]) # ,"\u00B0C" "\u00B0"
+                                      var_breaks[i-1],"\u2013",var_breaks[i]) # ,"\u00B0C" "\u00B0"
                       ))
     }
     # var_color <- colorRamps::matlab.like(length(var_labels))
@@ -574,7 +579,7 @@ make_figure <- function(
   survey_area$survey.grid <- 
     dplyr::left_join(
       x = survey_area$survey.grid, 
-              y = dat %>%
+      y = dat %>%
                 dplyr::select(station, stratum, var_bin, # reg_shapefile, 
                               region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
                 dplyr::distinct(), 
@@ -729,7 +734,7 @@ make_figure <- function(
         panel.background = element_rect(fill = "white"), #grey95
         plot.title = element_text(size = 20, face = "bold"), 
         plot.subtitle = element_text(size=14), 
-        legend.text=element_text(size=13), 
+        legend.text=element_text(size=12), 
         legend.position="right",
         legend.direction="vertical",
         legend.justification="left",
@@ -921,7 +926,7 @@ make_figure <- function(
         # fix extent
         ggspatial::coord_sf(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-          ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+30000)) 
+          ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
 
       ### Create temperature plots ---------------------------------------------------------
       if (file_end != 'grid') {
@@ -992,9 +997,9 @@ make_figure <- function(
           #                st.size = 3, 
           #                model = survey_area$crs) +
           # fix extent
-          ggspatial::coord_sf(
-            xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-            ylim = c(sf::st_bbox(grid_stations_plot)[c(2,4)])) 
+        ggspatial::coord_sf(
+          xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
+          ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
 
       }
       
@@ -1011,6 +1016,13 @@ make_figure <- function(
       ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
       "_", file_end)
     
+    # only make current if it is the last plot of the run
+    if (file_end %in% c("grid", "mean")) {
+      lastplotofrun <- TRUE
+    } else {
+      lastplotofrun <- (date_entered[i] == date_entered[length(date_entered)])
+    }
+    
     ### PNG -------------------------------------------------------------------------
     ggsave(filename = paste0(filename0,'.png'), 
            path = dir_out,
@@ -1022,25 +1034,11 @@ make_figure <- function(
            device = "png") 
     
     ### PDF -------------------------------------------------------------------------
-    
-    # Create main PDF
-    # if (file_end %in% c("grid", "daily")) {
     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(filename0, ".pdf"))
     file.remove(list.files(path = paste0(dir_wd, "/code/"), 
                            pattern = ".log", full.names = TRUE))
-    
-    # } else if (file_end %in% c("anom", "mean")) {
-    #   ggsave(filename = paste0(filename0,'.pdf'),
-    #          path = dir_out,
-    #          height = height,
-    #          width = width,
-    #          plot = gg,
-    #          dpi = 320, 
-    #          bg = "white", 
-    #          device ="pdf") # pdfs are great for editing later
-    # }
     
     ### PDF Combined -----------------------------------------------------------------
     # Create Binded PDF
@@ -1052,12 +1050,11 @@ make_figure <- function(
       }
       
       if (date_entered[1] == date_entered[i]) {
+        input0 <- paste0(dir_out, filename0,'.pdf')
+        if (file.exists(paste0(dir_out,'current_grid.pdf'))) { input0 <- c(input0, paste0(dir_out,'current_grid.pdf'))}
         qpdf::pdf_combine(
-          input = c(paste0(dir_out, filename0,'.pdf'),
-                    ifelse(file.exists(paste0(dir_out,'_grid.pdf')),
-                           paste0(dir_out,'_grid.pdf'), "")),
+          input = input0,
           output = c(paste0(dir_out, filename0, "_bind.pdf")))
-        
       } else {
         temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
         temp <- temp[!grepl(pattern = "current", x = temp)]
@@ -1081,15 +1078,6 @@ make_figure <- function(
     }
     
     ### CURRENT plots for easy finding -------------------------------------------
-    # only make current if it is the last plot of the run
-    if (file_end %in% c("grid", "mean")) {
-      lastplotofrun <- TRUE
-    } else {
-      lastplotofrun <- (dates0 != "all" |
-                          !(dates0 == "all" & date_entered[i] != date_entered[length(date_entered)])
-      ) 
-    }
-    
     if (lastplotofrun) {
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       temp <- temp[!grepl(pattern = "current_", x = temp)]
@@ -1335,7 +1323,7 @@ make_figure_gif<-function(file_end,
   
   temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
   temp <- temp[!grepl(pattern = "current", x = temp)]
-  
+
   if (length(temp) != 0) {
     temp <- as.Date(sort(sapply(temp,"[[",1)))
     temp <- max(temp[as.Date(temp) < as.Date(max_date)])
