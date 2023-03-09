@@ -37,9 +37,9 @@ dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3O
 ## the tasks scheduler, which has no concept of a project root folder. 
 locations <- c(
   "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
-  "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-  "Z:/Projects/survey-live-temperature-map/", 
-  "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/")
+  "C:/Users/christopher.anderson/Work/survey-live-temperature-map/", 
+  "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/",
+  "Z:/Projects/survey-live-temperature-map/")
 
 for (i in 1:length(locations)){
   if (file.exists(locations[i])) {
@@ -73,9 +73,9 @@ if (ftp_dl) {
 # Map --------------------------------------------------------------------------
 
 data_source <- "oracle" # testing
-dates0 <- "first"
-# dates0 <- "latest" # testing
-# dates0 <- "first" # testing
+dates0 <- "all"
+dates0 <- "latest" # testing
+dates0 <- "first" # testing
 
 ## GOA --------------------------------------------------------------------------
 
@@ -139,7 +139,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "anom", "grid", "mean"),
+                       file_end0 = "anom", #c("daily", "anom", "grid", "mean"),
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }

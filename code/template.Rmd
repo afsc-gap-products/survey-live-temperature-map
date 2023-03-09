@@ -45,10 +45,6 @@ intro0 <- paste0(
       " aboard the ",
       vess,
       ". ", 
-    ifelse(names(params) %in% "reg0", 
-           paste0("This map highlights survey progress in ", 
-                  params$reg0, " region. "),
-           ""), 
     goaai_regions)
 
 foss0 <- paste0("Data have ", 
@@ -56,7 +52,7 @@ foss0 <- paste0("Data have ",
                 "been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
 
 if (file_end %in% c("mean")) {
-  fig_cap <- paste0(stringr::str_to_sentence(plot_title), "s (\u2013C) in the ", 
+  fig_cap <- paste0(stringr::str_to_sentence(plot_title), "s in the ", 
                  gsub(x = plot_subtitle, pattern = "\n", replacement = " "), ". ", 
     foss0)
   
@@ -66,7 +62,7 @@ if (file_end %in% c("mean")) {
     intro0,
 "The ", 
     gsub(pattern = "\n", 
-         replacement = paste0("is compared to ", params$var00," from ", maxyr, " to "), 
+         replacement = paste0("is compared to ", var00," from ", maxyr, " to "), 
          x = plot_title), 
     ". ", 
     foss0)
@@ -95,25 +91,29 @@ if (file_end %in% c("mean")) {
     stations1 <- "no stations were sampled. "
   } else {
     
-    dat_max_date <- as(grid_stations_plot, 'Spatial') %>%
-      sp::spTransform(x = ., CRS("+proj=longlat +datum=WGS84"))
+    dat_max_date <- grid_stations_plot %>% 
+      sf::st_transform(x = ., crs = CRS("+proj=longlat +datum=WGS84"))
     
-    dat_max_date <- 
-      cbind.data.frame(station = dat_max_date$station, 
-                       stratum = dat_max_date$stratum, 
-                       sp::coordinates(dat_max_date)) %>% 
-      dplyr::rename(lon = "1", 
-                    lat = "2") %>%
-      dplyr::mutate(stratum = as.character(stratum)) %>%
-      data.frame() %>%
+    dat_max_date <- grid_stations_plot %>% 
+          sf::st_simplify(TRUE, dTolerance = 5000) %>% 
+          sf::st_cast("MULTIPOLYGON") %>% 
+          sf::st_centroid() %>%
+          sf::st_coordinates() %>%
+          data.frame() %>% 
+          dplyr::rename(lon = X, 
+                        lat = Y) %>% 
+          dplyr::mutate(
+            station = grid_stations_plot$station, 
+            stratum = grid_stations_plot$stratum, 
+            stratum = as.character(stratum)) %>%
       dplyr::left_join(y = ., 
                        x = loc %>% 
                          dplyr::mutate(stratum = as.character(stratum)) %>% 
                          dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
                        by = c("stratum", "station"))  %>%
       dplyr::arrange(vessel_shape) %>% 
-      dplyr::mutate(lon = round(x = lon, digits = 3), 
-                    lat = round(x = lat, digits = 3)) 
+      dplyr::mutate(lon = round(x = lon, digits = 2), 
+                    lat = round(x = lat, digits = 2)) 
     
     dat_max_date <- dat_max_date %>% 
       dplyr::filter(!is.na(lon))

@@ -95,13 +95,7 @@ haul <- racebase_foss_join_foss_cpue_haul0 %>%
     st = surface_temperature_c, 
     bt = bottom_temperature_c, 
   ) %>% 
-  dplyr::arrange(-year) %>%
-  dplyr::mutate(stratum_shp = dplyr::case_when(
-    SRVY == "AI" ~ "shp_ai$survey_stratum",
-                                               SRVY == "ESSLOPE" ~ "shp_bsslope$survey_stratum", 
-                                               SRVY == "EBS" ~ "shp_ebs$survey_stratum",  
-                                               SRVY == "GOA" ~ "shp_goa$survey_stratum",  
-                                               SRVY == "NBS" ~ "shp_nbs$survey_stratum"))
+  dplyr::arrange(-year)
 
 # Load shape files -------------------------------------------------------------
 
@@ -110,12 +104,12 @@ survey_area <- akgfmaps::get_base_layers(select.region = "bs.all", set.crs = "au
 survey_area$survey.grid <- survey_area$survey.grid %>% 
   sf::st_transform(x = ., survey_area$crs$input) %>%
   dplyr::rename(station = STATIONID) %>%
-  sp::merge(x = ., 
+  dplyr::left_join(x = ., 
             y = haul %>%
               # dplyr::rename(station = stationid) %>% 
               dplyr::select(station, stratum) %>% 
               dplyr::distinct(), 
-            all.x = TRUE) %>% 
+            by = "station") %>% 
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 survey_area$survey.area <- survey_area$survey.area %>% 
@@ -135,49 +129,13 @@ survey_area$survey.area <- shp_bs$survey.area %>%
 shp_nbs <- survey_area
 
 ## AI  ------------------------------------------------------------------------
-# J:\RACE_GF\GOA\GOA 2021\Files for boats\ArcGIS\GOAGRID_2021
-# J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018 - ERRORS,do not use!
-# G:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawable_thru2018_Emily.shp
-
-# shp_ai <- get_base_layers(select.region = "ai", 
-#                           set.crs = "+proj=longlat +datum=WGS84")$survey.strata
-
-
-# survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
-# survey_area$survey.grid <-  
-#   sp::merge(
-#     x = survey_area$survey.grid %>%
-#       dplyr::rename(station = ID, 
-#                     stratum = STRATUM),
-#     y = goa_goa_strata0 %>%
-#       dplyr::filter(survey == "AI") %>%
-#       dplyr::mutate(SRVY = "AI",
-#                     region = stringr::str_to_title(inpfc_area),
-#                     region = dplyr::case_when(
-#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-#                       TRUE ~ region)) %>%
-#       dplyr::select(SRVY, stratum, region) %>%
-#       dplyr::distinct(),
-#     all.x = TRUE)  %>% 
-#   dplyr::arrange(region) %>% 
-#   dplyr::filter(!is.na(region))
-# survey_area$survey.area <- survey_area$survey.area %>% 
-#   dplyr::mutate(SURVEY = "AI", 
-#                 SRVY = "AI")
-# shp_ai <- survey_area
-
+# akgfmaps
 survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
-survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/data/shapefiles/'),# Prepare map objects
-                                          layer = "aigrid_trawable_thru2018_Emily",
-                                          verbose=F) %>%
-  sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-  st_as_sf(x = .) %>%
-  dplyr::rename(station = ID,
-                stratum = STRATUM) %>%
-  dplyr::filter(stratum %in% unique(goa_goa_strata0$stratum) &
-                  stratum != 0) %>% # land
-  sp::merge(
-    x = .,
+survey_area$survey.grid <-
+  dplyr::left_join(
+    x = survey_area$survey.grid %>%
+      dplyr::rename(station = ID,
+                    stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "AI") %>%
       dplyr::mutate(SRVY = "AI",
@@ -187,13 +145,46 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/data/shapefiles
                       TRUE ~ region)) %>%
       dplyr::select(SRVY, stratum, region) %>%
       dplyr::distinct(),
-    all.x = TRUE)  %>%
+    by = "stratum")  %>%
   dplyr::arrange(region) %>%
-  dplyr::mutate(AIGRID_ID = as.double(AIGRID_ID))
+  dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>%
   dplyr::mutate(SURVEY = "AI",
                 SRVY = "AI")
 shp_ai <- survey_area
+
+# J:\RACE_GF\GOA\GOA 2021\Files for boats\ArcGIS\GOAGRID_2021
+# J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018 - ERRORS,do not use!
+# G:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawable_thru2018_Emily.shp
+# library(sp)
+# survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
+# survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/data/shapefiles/'),# Prepare map objects
+#                                           layer = "aigrid_trawable_thru2018_Emily",
+#                                           verbose=F) %>%
+#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
+#   st_as_sf(x = .) %>%
+#   dplyr::rename(station = ID,
+#                 stratum = STRATUM) %>%
+#   dplyr::filter(stratum %in% unique(goa_goa_strata0$stratum) &
+#                   stratum != 0) %>% # land
+#   sp::merge(
+#     x = .,
+#     y = goa_goa_strata0 %>%
+#       dplyr::filter(survey == "AI") %>%
+#       dplyr::mutate(SRVY = "AI",
+#                     region = stringr::str_to_title(inpfc_area),
+#                     region = dplyr::case_when(
+#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
+#                       TRUE ~ region)) %>%
+#       dplyr::select(SRVY, stratum, region) %>%
+#       dplyr::distinct(),
+#     all.x = TRUE)  %>%
+#   dplyr::arrange(region) %>%
+#   dplyr::mutate(AIGRID_ID = as.double(AIGRID_ID))
+# survey_area$survey.area <- survey_area$survey.area %>%
+#   dplyr::mutate(SURVEY = "AI",
+#                 SRVY = "AI")
+# shp_ai <- survey_area
 
 # 
 # 
@@ -246,21 +237,17 @@ shp_ai <- survey_area
 ## GOA  ------------------------------------------------------------------------
 survey_area <- akgfmaps::get_base_layers(select.region = "goa", set.crs = "auto")
 survey_area$survey.grid <-  
-  sp::merge(
+  dplyr::left_join(
     x = survey_area$survey.grid %>%
       dplyr::rename(station = ID, 
                     stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "GOA") %>%
       dplyr::mutate(SRVY = "GOA",
-                    region = stringr::str_to_title(inpfc_area)#,
-                    # region = dplyr::case_when(
-                    #   region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-                    #   TRUE ~ region)
-      ) %>%
+                    region = stringr::str_to_title(inpfc_area) ) %>%
       dplyr::select(SRVY, stratum, region) %>%
       dplyr::distinct(),
-    all.x = TRUE)  %>% 
+    by = "stratum")  %>% 
   dplyr::arrange(region) %>% 
   dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>% 
