@@ -57,9 +57,9 @@ dat_survreg <-
       SRVY == "GOA" ~ "Gulf of Alaska", 
       SRVY == "AI" ~ "Aleutian Islands"), 
     reg_dates = paste0(
-      format(x = as.Date(start_date), "%b %d"),
+      format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
       " - ", 
-      format(x = as.Date(end_date), "%b %d"))) %>% 
+      format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
   dplyr::select(year, SRVY, reg_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, region_long) %>% 
   dplyr::distinct()
 
@@ -116,17 +116,17 @@ survey_area$survey.area <- survey_area$survey.area %>%
   dplyr::mutate(SRVY = ifelse(SURVEY == "EBS_SHELF", "EBS", "NBS"))
 shp_bs <- survey_area
 
-## EBS  ------------------------------------------------------------------------
-survey_area <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = "auto")
-survey_area$survey.area <- shp_bs$survey.area %>% 
-  dplyr::filter(SRVY == "EBS")
-shp_ebs <- survey_area
-
-## NBS  ------------------------------------------------------------------------
-survey_area <- akgfmaps::get_base_layers(select.region = "bs.north", set.crs = "auto")
-survey_area$survey.area <- shp_bs$survey.area %>% 
-  dplyr::filter(SRVY == "NBS")
-shp_nbs <- survey_area
+# ## EBS  ------------------------------------------------------------------------
+# survey_area <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = "auto")
+# survey_area$survey.area <- shp_bs$survey.area %>% 
+#   dplyr::filter(SRVY == "EBS")
+# shp_ebs <- survey_area
+# 
+# ## NBS  ------------------------------------------------------------------------
+# survey_area <- akgfmaps::get_base_layers(select.region = "bs.north", set.crs = "auto")
+# survey_area$survey.area <- shp_bs$survey.area %>% 
+#   dplyr::filter(SRVY == "NBS")
+# shp_nbs <- survey_area
 
 ## AI  ------------------------------------------------------------------------
 # akgfmaps

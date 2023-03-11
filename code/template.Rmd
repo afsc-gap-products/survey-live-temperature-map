@@ -142,13 +142,13 @@ if (file_end %in% c("mean")) {
   # Are stations planned for the next day?
   if (show_planned_stations) {
     if (!is.null(dat_planned) & length(dat_planned) == 0) {
-            stations1 <- paste0(stations1, ". There are no stations planned for ", 
-                                format_date_txt(x = (as.Date(max_date)+1)))
+            stations1 <- paste0(stations1, "There are no stations planned for ", 
+                                format_date_txt(x = (as.Date(max_date)+1)), ". ")
       } else {
             stations1 <- 
-              paste0(stations1, ". There are ",
+              paste0(stations1, "There are ",
                      nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 
-                     format_date_txt(x = (as.Date(max_date)+1)))
+                     format_date_txt(x = (as.Date(max_date)+1)), ". ")
     }
   } else if (SRVY %in% c("GOA", "AI") &
              !(date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0)) { # not the last day of the survey

@@ -213,9 +213,9 @@ make_varplot_wrapper <- function(
   
   height <- ifelse(SRVY %in% c("AI", "GOA"), 6, 8)
   
-  dat_survreg <- dat_survreg %>% 
+  dat_survreg <- dat_survreg %>%
     dplyr::filter(SRVY %in% SRVY1 & year == maxyr)
-  
+
   # Define var
   if (!is.null(var)){
     if (var == "bt") {
@@ -304,24 +304,26 @@ make_varplot_wrapper <- function(
                     vessel_shape = "", 
                     vessel_name = "")
   } else {
+    
     if (show_planned_stations) {
-      # vess <- as.character(unique(dat_survreg$vessel_shape[dat_survreg$SRVY == SRVY1[1]]))
-      temp <- data.frame(matrix(data = NA,
+    temp <- data.frame(matrix(data = NA,
                                 ncol = ncol(dat),
-                                nrow = nrow(dat_survreg)))
+                                nrow = nrow(dat_survreg)))    
       names(temp) <- names(dat)
+      temp <- temp %>% 
+        dplyr::mutate(
+          SRVY = dat_survreg$SRVY,
+          stratum = 0,
+          station = "0",
+          var0 = NA,
+          region_long = dat_survreg$region_long, 
+          reg_dates  = dat_survreg$reg_dates, 
+          date = (min(as.Date(dat$date), na.rm = TRUE)-1),
+          vessel_name = dat_survreg$vessel_name,
+          vessel_shape = dat_survreg$vessel_shape)
+    
       dat <- dplyr::bind_rows(
-        temp %>% 
-          dplyr::mutate(
-            SRVY = dat_survreg$SRVY,
-            stratum = 0,
-            station = "0",
-            var0 = NA,
-            region_long = dat_survreg$region_long, 
-            reg_dates  = dat_survreg$reg_dates, 
-            date = (min(as.Date(dat$date), na.rm = TRUE)-1),
-            vessel_name = dat_survreg$vessel_name,
-            vessel_shape = dat_survreg$vessel_shape),
+        temp,
         dat %>%
           dplyr::mutate(
             SRVY = as.character(SRVY),
@@ -359,7 +361,9 @@ make_varplot_wrapper <- function(
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
   
+  no_plot <- FALSE
   if (nrow(dat0)==0) {
+    no_plot <- TRUE
     print("No observation data was available and no daily or anomaly plots were created. ")
   }
   
@@ -421,7 +425,7 @@ make_varplot_wrapper <- function(
   }
   
   ### Daily --------------------------------------------------------------------
-  if ("daily" %in% file_end0 & nrow(dat0)>0) {  
+  if ("daily" %in% file_end0 & no_plot) {  
     file_end <- "daily"; print(paste0("------------", file_end, "------------"))
     
     make_figure(
@@ -446,7 +450,7 @@ make_varplot_wrapper <- function(
   }
   
   ### Anomaly ------------------------------------------------------------------
-  if ("anom" %in% file_end0 & nrow(dat0)>0) {  
+  if ("anom" %in% file_end0 & no_plot) {  
     file_end <- "anom"; print(paste0("------------", file_end, "------------"))
     
     make_figure(
@@ -547,9 +551,7 @@ make_figure <- function(
                                       var_breaks[i-1],"\u2013",var_breaks[i]) # ,"\u00B0C" "\u00B0"
                       ))
     }
-    # var_color <- colorRamps::matlab.like(length(var_labels))
-    var_color <- viridis::viridis_pal(begin = 0.1, end = 0.9,
-                                      option = "B")(length(var_labels))
+    var_color <- viridis::viridis_pal(begin = 0.1, end = 0.9, option = "B")(length(var_labels))
     # bin var
     dat <- dat %>%
       dplyr::mutate(var_bin = base::cut(x = as.numeric(dat$var),
@@ -871,11 +873,6 @@ make_figure <- function(
                    color = "black", size = 5, fontface=2) 
       }
       
-      gg <- ggdraw(gg) +
-        draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                   x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
-                   scale = .15 )
-      
     } else if (SRVY %in% c("AI", "GOA")) {
       ## Aleutian Islands and Gulf of Alaska ----------------------------------
       
@@ -885,9 +882,9 @@ make_figure <- function(
       bb <- data.frame()
       for (iiii in 1:length(unique(grid_stations_plot$region))) {
         x <- unique(grid_stations_plot$region)[iiii]
-        grid_stations_plot1<-grid_stations_plot
+        grid_stations_plot1 <- grid_stations_plot
         grid_stations_plot1$region <- factor(grid_stations_plot1$region)        
-        grid_stations_plot1<-grid_stations_plot1[grid_stations_plot1$region == x,]
+        grid_stations_plot1 <- grid_stations_plot1[grid_stations_plot1$region == x,]
         
         a <- sf::st_bbox(grid_stations_plot1)
         b <- data.frame(t(as.numeric(unlist(a))))
@@ -939,6 +936,23 @@ make_figure <- function(
           dplyr::mutate(
             var_bin = grid_stations_plot$var_bin[!is.na(grid_stations_plot$var_bin)])
         
+        if (nrow(grid_stations_plot_visited)==0) {
+          
+          grid_stations_plot_visited <- grid_stations_plot %>% 
+            sf::st_centroid() %>% 
+            st_geometry() %>% 
+            data.frame()  %>%
+            dplyr::mutate(var_bin = 1:nrow(.)) %>% 
+            dplyr::filter(var_bin == 1) %>%
+            dplyr::mutate(
+              var_bin = factor(levels(grid_stations_plot$var_bin)[1], 
+                   levels = levels(grid_stations_plot$var_bin), 
+                   labels = levels(grid_stations_plot$var_bin)))
+          
+          grid_stations_plot_visited$geometry[[1]][1] <- 0
+          grid_stations_plot_visited$geometry[[1]][2] <- 0
+        }
+
         gg <- gg +
           # allocated station grid
           ggplot2::geom_sf(
@@ -956,8 +970,8 @@ make_figure <- function(
             data = grid_stations_plot_visited,
             mapping = aes(geometry = geometry,
                           fill = var_bin,
-                          color = var_bin),
-            size = 3,
+                          color = var_bin), na.rm = TRUE, 
+            size = 3, 
             show.legend = legend_title)  + 
           ggplot2::scale_fill_manual(
             name = gsub(pattern = "\n", replacement = " ", x = legend_title),
@@ -1003,14 +1017,14 @@ make_figure <- function(
 
       }
       
-      gg <- ggdraw(gg) +
-        draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                   x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
-                   scale = .15 )
-      
     }
     
     ## Save files --------------------------------------------------------------
+    
+    gg <- ggdraw(gg) +
+      draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
+                 x = .37, y = .43, # x = 0, y = 0, hjust = -4.12, vjust = -.45, width = .19
+                 scale = .15 )
     
     filename0 <- paste0(
       ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
