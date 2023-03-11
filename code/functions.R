@@ -11,68 +11,22 @@
 PKG <- c(
   # Mapping
   "akgfmaps", # devtools::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = TRUE)
-  # "maps", 
-  # "sp",    # Used for the spsample function
-  # "rgeos",
   "sf",
-  # "ggsn",
-  
-  # Spatial
-  # "rlist", 
-  # "jsonlite",   # For outputting JS files
-  # "prettymapr",
-  # "rgdal", 
-  # "rosm", 
-  # "shadowtext", 
   "ggspatial", 
-  # "digest", 
-  # "ps", 
-  # "backports", 
-  # "callr", 
-  # "labeling", 
-  # "gstat",
-  # "raster", 
-  # "reshape", 
-  # "stars",
-  # "mapview",
-  # "maptools", 
-  # "spatialEco", 
-  # "KernSmooth", 
-  
+
   #images
-  # "png",
-  # "grid",
   "cowplot",
   "magick", 
   "qpdf",
   "ggplot2", # Create Elegant Data Visualisations Using the Grammar of Graphics
-  # "nmfspalette",  # devtools::install_github("nmfs-general-modeling-tools/nmfspalette" # oceans, waves, seagrass, urchin, crusteacean, coral
-  # https://drive.google.com/file/d/1EwZOVAzzqwniXczu611yk6uXs4_TuRwH/view?usp=sharing
-  # "colorRamps",
   "viridis", 
   
-  # "extrafont", # install.packages("extrafont")
-  # loadfonts()
-  # extrafont::font_import()
-  # windowsFonts()
-  
-  # data management
-  # "bindrcpp", 
-  # "janitor", 
-  
-  # "tinytex",
-  # "RCurl",
-  
-  # tidyverse, 
-  # "broom", 
   "readr", 
-  # "glue",
   "rmarkdown", 
   "dplyr",
   "googledrive",
   "magrittr",
   "stringr", 
-  # "data.table",
   "tidyr", 
   
   # For creating R Markdown Docs
@@ -81,11 +35,6 @@ PKG <- c(
   # File Management
   # "here", # For finding the root directory of your scripts and thus, find your files
   "officer"
-  
-  # For editing XML files
-  # "XML", 
-
-  # "kableExtra"
 )
 
 for (p in PKG) {
@@ -361,9 +310,9 @@ make_varplot_wrapper <- function(
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
   
-  no_plot <- FALSE
+  no_plot <- TRUE
   if (nrow(dat0)==0) {
-    no_plot <- TRUE
+    no_plot <- FALSE
     print("No observation data was available and no daily or anomaly plots were created. ")
   }
   
@@ -938,6 +887,7 @@ make_figure <- function(
         
         if (nrow(grid_stations_plot_visited)==0) {
           
+          # still need the temperature legend, so adding in fake data off the map
           grid_stations_plot_visited <- grid_stations_plot %>% 
             sf::st_centroid() %>% 
             st_geometry() %>% 
@@ -949,8 +899,8 @@ make_figure <- function(
                    levels = levels(grid_stations_plot$var_bin), 
                    labels = levels(grid_stations_plot$var_bin)))
           
-          grid_stations_plot_visited$geometry[[1]][1] <- 0
-          grid_stations_plot_visited$geometry[[1]][2] <- 0
+          grid_stations_plot_visited$geometry[[1]][1] <- 1e12 # somewhere off the map
+          grid_stations_plot_visited$geometry[[1]][2] <- 1e12 # somewhere off the map
         }
 
         gg <- gg +
@@ -1034,7 +984,7 @@ make_figure <- function(
     if (file_end %in% c("grid", "mean")) {
       lastplotofrun <- TRUE
     } else {
-      lastplotofrun <- (date_entered[i] == date_entered[length(date_entered)])
+      lastplotofrun <- (iterate[i] == iterate[length(iterate)])
     }
     
     ### PNG -------------------------------------------------------------------------
@@ -1056,7 +1006,7 @@ make_figure <- function(
     
     ### PDF Combined -----------------------------------------------------------------
     # Create Binded PDF
-    if (file_end %in% c("anom", "daily")) { #
+    if (file_end %in% c("anom", "daily")) { 
       
       # remove file if already exists - qpdf::pdf_combine() will not overwrite
       if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
