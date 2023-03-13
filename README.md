@@ -34,7 +34,7 @@ Seattle, WA 98115
 > - [*Learn more about these surveys and ocean temperatures around
 >   Alaska*](#learn-more-about-these-surveys-and-ocean-temperatures-around-alaska)
 > - [*Notes*](#notes)
-> - [*Plot Examples *](#plot-examples-)
+> - [*Plot Examples*](#plot-examples)
 >   - [*Final stacked gifs*](#final-stacked-gifs)
 >   - [*Blank, Grid-only Plot*](#blank,-grid-only-plot)
 >   - [*Mean Plot*](#mean-plot)
@@ -256,19 +256,14 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE [1] glue_1.6.2
+    FALSE [1] glue_1.6.2     dplyr_1.1.0    magrittr_2.0.3
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] qpdf_1.3.0         tidyselect_1.2.0   xfun_0.37          janitor_2.2.0      purrr_1.0.1        sf_1.0-9           gargle_1.3.0      
-    FALSE  [8] snakecase_0.11.0   colorspace_2.1-0   vctrs_0.5.2        generics_0.1.3     htmltools_0.5.4    viridisLite_0.4.1  yaml_2.3.7        
-    FALSE [15] readtext_0.81      utf8_1.2.3         rlang_1.0.6        e1071_1.7-13       pillar_1.8.1       DBI_1.1.3          readxl_1.4.2      
-    FALSE [22] lifecycle_1.0.3    stringr_1.5.0      munsell_0.5.0      gtable_0.3.1       cellranger_1.1.0   evaluate_0.20      knitr_1.42        
-    FALSE [29] fastmap_1.1.0      class_7.3-20       fansi_1.0.4        Rcpp_1.0.10        KernSmooth_2.23-20 akgfmaps_2.3.1     scales_1.2.1      
-    FALSE [36] classInt_0.4-9     magick_2.7.4       fs_1.6.1           gridExtra_2.3      ggplot2_3.4.1      askpass_1.1        digest_0.6.31     
-    FALSE [43] ggspatial_1.1.7    stringi_1.7.12     dplyr_1.1.0        grid_4.2.2         cli_3.6.0          tools_4.2.2        bitops_1.0-7      
-    FALSE [50] magrittr_2.0.3     RCurl_1.98-1.10    proxy_0.4-27       tibble_3.1.8       crayon_1.5.2       pkgconfig_2.0.3    data.table_1.14.6 
-    FALSE [57] googledrive_2.0.0  lubridate_1.9.2    timechange_0.2.0   httr_1.4.5         rmarkdown_2.20     rstudioapi_0.14    viridis_0.6.2     
-    FALSE [64] R6_2.5.1           units_0.8-1        compiler_4.2.2
+    FALSE  [1] rstudioapi_0.14   knitr_1.42        tidyselect_1.2.0  R6_2.5.1          rlang_1.0.6       fastmap_1.1.0     fansi_1.0.4      
+    FALSE  [8] httr_1.4.5        tools_4.2.2       data.table_1.14.6 xfun_0.37         utf8_1.2.3        cli_3.6.0         withr_2.5.0      
+    FALSE [15] htmltools_0.5.4   yaml_2.3.7        digest_0.6.31     tibble_3.1.8      gargle_1.3.0      lifecycle_1.0.3   purrr_1.0.1      
+    FALSE [22] vctrs_0.5.2       fs_1.6.1          evaluate_0.20     rmarkdown_2.20    stringi_1.7.12    compiler_4.2.2    pillar_1.8.1     
+    FALSE [29] generics_0.1.3    readtext_0.81     googledrive_2.0.0 pkgconfig_2.0.3
 
 ## NOAA README
 

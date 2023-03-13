@@ -10,6 +10,8 @@ bibliography: "https://raw.githubusercontent.com/afsc-gap-products/citations/mai
 knitr::opts_chunk$set(echo = FALSE, warnings = FALSE, error = FALSE, message = FALSE, comment = FALSE)
 link_repo <- "https://github.com/afsc-gap-products/survey-live-temperature-map"
 
+library(magrittr)
+library(dplyr)
 library(glue)
 
 print_figs <- function(string_id, file_type = ".png") {
@@ -17,7 +19,16 @@ temp <- list.files(path = "./test/", pattern = string_id, full.names = TRUE)
 temp <- data.frame(
   img = temp[grep(pattern = file_type, x = temp)], 
   txt0 = temp[grep(pattern = ".txt", x = temp)], 
-  txt = NA)
+  txt = NA) %>% 
+  dplyr::mutate(
+    srvy = sapply(X = strsplit(x = txt0, split = ".", fixed = TRUE), "[[", 2), 
+    srvy = gsub(pattern = paste0("current_", string_id, "_"), replacement = "", x = srvy),
+    order = dplyr::case_when(
+      srvy == "bs" ~ 1, 
+      srvy == "ai" ~ 2, 
+      srvy == "goa" ~ 3
+    )) %>% 
+  dplyr::arrange(order)
 for (i in 1:nrow(temp)) {
   temp$txt[i] <- paste0(read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."), collapse = " ")
 }
@@ -106,7 +117,7 @@ These scripts create daily survey station daily temperature and anomaly plots as
 
 Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
 
-## Plot Examples 
+## Plot Examples
 
 Find more plot examples [here](`r paste0(link_repo, "/tree/main/test")`). 
 
