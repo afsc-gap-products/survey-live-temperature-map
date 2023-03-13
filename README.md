@@ -242,26 +242,22 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE Matrix products: default
     FALSE 
     FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8 
-    FALSE [2] LC_CTYPE=English_United States.utf8   
-    FALSE [3] LC_MONETARY=English_United States.utf8
-    FALSE [4] LC_NUMERIC=C                          
-    FALSE [5] LC_TIME=English_United States.utf8    
+    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
     FALSE 
     FALSE attached base packages:
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE [1] glue_1.6.2     dplyr_1.1.0    magrittr_2.0.3
+    FALSE  [1] glue_1.6.2        officer_0.6.1     knitr_1.42        tidyr_1.3.0       stringr_1.5.0     googledrive_2.0.0 rmarkdown_2.20    readr_2.1.4       viridis_0.6.2     viridisLite_0.4.1 qpdf_1.3.0        magick_2.7.4      cowplot_1.1.1     akgfmaps_2.3.1    stars_0.6-0      
+    FALSE [16] abind_1.4-5       shadowtext_0.1.2  sf_1.0-9          raster_3.6-20     sp_1.6-0          rmapshaper_0.4.6  magrittr_2.0.3    gstat_2.1-0       ggspatial_1.1.7   ggplot2_3.4.1     dplyr_1.1.0       classInt_0.4-9   
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] rstudioapi_0.14   knitr_1.42        tidyselect_1.2.0  R6_2.5.1         
-    FALSE  [5] rlang_1.0.6       fastmap_1.1.0     fansi_1.0.4       httr_1.4.5       
-    FALSE  [9] tools_4.2.2       data.table_1.14.6 xfun_0.37         utf8_1.2.3       
-    FALSE [13] cli_3.6.0         withr_2.5.0       htmltools_0.5.4   yaml_2.3.7       
-    FALSE [17] digest_0.6.31     tibble_3.1.8      lifecycle_1.0.3   vctrs_0.5.2      
-    FALSE [21] evaluate_0.20     rmarkdown_2.20    stringi_1.7.12    compiler_4.2.2   
-    FALSE [25] pillar_1.8.1      generics_0.1.3    readtext_0.81     pkgconfig_2.0.3
+    FALSE  [1] fs_1.6.1           xts_0.13.0         lubridate_1.9.2    bit64_4.0.5        httr_1.4.5         tools_4.2.2        utf8_1.2.3         R6_2.5.1           KernSmooth_2.23-20 DBI_1.1.3          colorspace_2.1-0   withr_2.5.0        tidyselect_1.2.0   gridExtra_2.3     
+    FALSE [15] bit_4.0.5          curl_5.0.0         compiler_4.2.2     textshaping_0.3.6  cli_3.6.0          xml2_1.3.3         scales_1.2.1       proxy_0.4-27       askpass_1.1        rappdirs_0.3.3     systemfonts_1.0.4  digest_0.6.31      pkgconfig_2.0.3    htmltools_0.5.4   
+    FALSE [29] fastmap_1.1.0      jsonvalidate_1.3.2 rlang_1.0.6        rstudioapi_0.14    httpcode_0.3.0     FNN_1.1.3.1        farver_2.1.1       generics_0.1.3     zoo_1.8-11         jsonlite_1.8.4     vroom_1.6.1        zip_2.2.2          Rcpp_1.0.10        munsell_0.5.0     
+    FALSE [43] fansi_1.0.4        lifecycle_1.0.3    terra_1.7-18       yaml_2.3.7         stringi_1.7.12     snakecase_0.11.0   grid_4.2.2         parallel_4.2.2     crayon_1.5.2       lattice_0.20-45    hms_1.1.2          pillar_1.8.1       uuid_1.1-0         spacetime_1.2-8   
+    FALSE [57] geojsonlint_0.4.0  codetools_0.2-18   readtext_0.81      crul_1.3           evaluate_0.20      V8_4.2.2           data.table_1.14.6  vctrs_0.5.2        tzdb_0.3.0         gtable_0.3.1       openssl_2.0.5      purrr_1.0.1        xfun_0.37          janitor_2.2.0     
+    FALSE [71] lwgeom_0.2-11      e1071_1.7-13       ragg_1.2.5         class_7.3-20       gargle_1.3.0       tibble_3.1.8       intervals_0.15.2   tinytex_0.44       units_0.8-1        timechange_0.2.0   ellipsis_0.3.2
 
 ## NOAA README
 

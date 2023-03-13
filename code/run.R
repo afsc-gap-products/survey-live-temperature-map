@@ -141,7 +141,9 @@ dates0 <- "all"
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "anom", "grid", "mean"),
+                       file_end0 = c("daily", 
+                                     "grid", "mean", 
+                                     "anom"),
                        dir_wd = dir_wd, 
                        ftp = ftp)
 # }

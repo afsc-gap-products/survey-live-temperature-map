@@ -1058,11 +1058,11 @@ make_figure <- function(
       for (iiii in 1:length(temp)) {
         if (file_end  %in% c("anom", "daily")) {
           filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
-          filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
-                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
-                             x = filename00, fixed = TRUE)
+          filename00 <- gsub(pattern = paste0("."), 
+                             replacement = paste0("_",tolower(SRVY),"."), 
+                             x = filename00, 
+                             fixed = TRUE)
         } else if (file_end %in% c("grid", "mean")) {
-          file
           filename00 <- gsub(pattern = paste0("_", file_end), 
                              replacement = paste0("current_", file_end, "_",tolower(SRVY)), 
                              x = temp[iiii], 
@@ -1078,6 +1078,7 @@ make_figure <- function(
       ### FTP -------------------------------------------
       # only make current if it is the last plot of the run
       if (ftp$ftp_dl){
+        print("uploading to ftp")
         upload_ftp( # vars here defined in ftp.R
           dir_out = dir_out, 
           dir_in = filename1[grepl(pattern = "_current", x = filename1)], 
@@ -1090,6 +1091,7 @@ make_figure <- function(
     
     ### GOOGLE DRIVE ------------------------------------------------------
     if (!(is.null(dir_googledrive_upload))) {
+      print("uploading to googledrive")
       for (iii in 1:length(filename1)) { 
         drive_upload(
           media = filename1[iii], 
