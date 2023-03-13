@@ -8,6 +8,8 @@
 # *** Oracle -------------------------------------------------------------------
 
 # This has a specific username and password because I DONT want people to have access to this!
+source("https://raw.githubusercontent.com/afsc-gap-products/metadata/main/code/functions_oracle.R")
+
 locations <- c("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R", 
                "Z:/Projects/ConnectToOracle.R", 
                "C:/Users/emily.markowitz/Work/Projects/ConnectToOracle.R")
@@ -33,42 +35,16 @@ for (i in 1:length(locations)){
 # odbcGetInfo(channel)
 
 locations<-c(
-  "RACE_DATA.VESSELS", 
-  # "AI.AIGRID_GIS", 
-  # "GOA.GOAGRID_GIS", 
-  "GOA.GOA_STRATA", # To get regions for each stratum
-  "RACEBASE.HAUL", 
-  "RACE_DATA.V_CRUISES"
+  # "RACE_DATA.VESSELS", 
+  "GOA.GOA_STRATA", 
+  "RACE_DATA.V_CRUISES",
+  # "AI.AIGRID_GIS",
+  # "RACEBASE.HAUL", 
+  # "RACE_DATA.V_CRUISES"
+  "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL"
 )
 
-
-#sinks the data into connection as text file
-sink("./data/oracle/metadata.txt")
-
-print(Sys.Date())
-
-for (i in 1:length(locations)){
-  print(locations[i])
-  if (locations[i] == "RACEBASE.HAUL") { # that way I can also extract TIME
-    
-    a<-RODBC::sqlQuery(channel, paste0("SELECT * FROM ", locations[i]))
-    
-    a<-RODBC::sqlQuery(channel, paste0("SELECT ",
-                                       paste0(names(a)[names(a) != "START_TIME"], sep = ",", collapse = " "),
-                                       " TO_CHAR(START_TIME,'MM/DD/YYYY HH24:MI:SS') START_TIME  FROM ", 
-                                       locations[i]))
-  } else {
-    a<-RODBC::sqlQuery(channel, paste0("SELECT * FROM ", locations[i]))
-  }
-  write.csv(x=a, 
-            paste0("./data/oracle/",
-                   tolower(strsplit(x = locations[i], 
-                                    split = ".", 
-                                    fixed = TRUE)[[1]][2]),
-                   ".csv"))
-  remove(a)
-}
-
-sink()
-
-
+oracle_dl(
+  locations = locations, 
+  channel = channel, 
+  dir_out = paste0(dir_wd, "/data/oracle/"))
