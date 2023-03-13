@@ -113,13 +113,14 @@ Find more plot examples [here](`r paste0(link_repo, "/tree/main/test")`).
 ### Final stacked gifs
 
 ```{r}
-print_figs(string_id = "current_daily_", file_type = "gif")
+cat(print_figs(string_id = "current_daily_", file_type = "gif"))
 ```
 
 ### Blank, Grid-only Plot
 
 ```{r}
-print_figs(string_id = "current_grid_")
+a <- print_figs(string_id = "current_grid_")
+print(a)
 ```
 ### Mean Plot
 
@@ -130,9 +131,10 @@ print_figs(string_id = "current_mean_")
 ### Anomaly Plot
 
 ```{r}
-print_figs(string_id = "current_anom_")
+a <- print_figs(string_id = "current_anom_")
 ```
 
+`r a`
 
 # Suggestions and Comments
 
