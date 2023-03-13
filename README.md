@@ -17,33 +17,29 @@
 **Chris Anderson** (Christopher.Anderson AT noaa.gov;
 [@ChrisAnderson-NOAA](https://github.com/ChrisAnderson-NOAA))
 
-**Caitlin Allen Akselrud** (past; caitlin.allen_akselrud AT noaa.gov;
+And previously, **Caitlin Allen Akselrud** (caitlin.allen_akselrud AT
+noaa.gov;
 [@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
 
-Alaska Fisheries Science Center,
-
-National Marine Fisheries Service,
-
-National Oceanic and Atmospheric Administration,
-
-Seattle, WA 98115
+Alaska Fisheries Science Center, National Marine Fisheries Service,
+National Oceanic and Atmospheric Administration, Seattle, WA 98115
 
 # Table of contents
 
 > - [*Purpose*](#purpose)
-> - [*Publications*](#publications)
 > - [*Notes*](#notes)
 > - [*Plot Examples*](#plot-examples)
 >   - [*Final stacked gifs*](#final-stacked-gifs)
 >   - [*Blank, Grid-only Plot*](#blank,-grid-only-plot)
 >   - [*Mean Plot*](#mean-plot)
 >   - [*Anomaly Plot*](#anomaly-plot)
+> - [*Relevant publications*](#relevant-publications)
 > - [*Suggestions and Comments*](#suggestions-and-comments)
 >   - [*R Version Metadata*](#r-version-metadata)
 >   - [*NOAA README*](#noaa-readme)
 >   - [*NOAA License*](#noaa-license)
 
-## Purpose
+# Purpose
 
 These scripts create daily survey station daily temperature and anomaly
 plots as the ships work their way through the Bering Sea. These ships
@@ -66,7 +62,81 @@ communications team. These plots are displayed on the AFSC website
 - [2017 Eastern and Northern Bering Sea Bottom Trawl
   Survey](https://www.fisheries.noaa.gov/resource/document/2017-eastern-bering-sea-continental-shelf-and-northern-bering-sea-bottom-trawl)
 
-## Publications
+# Notes
+
+- [How to set up the task
+  scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
+- [Where the files will be saved
+  to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
+- Troubleshooting: if the task scheduler fails to run the code, but you
+  can run the script in R or Rstudio, you may need to update Pandoc. If
+  you are on a NOAA machine, ask IT to install the .msi file for you.
+  Close and reopen everything and try again.
+
+# Plot Examples
+
+Find more plot examples
+[here](https://github.com/afsc-gap-products/survey-live-temperature-map/tree/main/test).
+
+## Final stacked gifs
+
+![NOAA Fisheries conducted the Eastern Bering sea and Northern Bering
+sea bottom trawl surveys in 2022 aboard the F/V Vesteraalen and F/V
+Alaska Knight. The near real-time ocean bottom temperatures depicted
+were collected May 29-August 20 On August 20, stations R-18 (60.67°N,
+-168.69°W; \>8°C), R-01 (60.67°N, -168.01°W; \>8°C), and R-02 (60.67°N,
+-167.32°W; \>8°C) were surveyed by the F/V Alaska Knight. There are 0
+stations planned for August 21 Credit: NOAA
+Fisheries](./test/current_daily_bs.gif) , ![NOAA Fisheries conducted the
+Aleutian Islands bottom trawl survey in 2022 aboard the F/V Ocean
+Explorer and F/V Alaska Provider. This survey covers the Central
+Aleutians, Eastern Aleutians, Southern Bering Sea, and Western Aleutians
+regions, which are randomly sampled each year. The near real-time ocean
+bottom temperatures depicted were collected June 10-August 13 No
+stations were sampled on August 13 Allocated stations that have not yet
+been sampled are shown as grey dots. Credit: NOAA
+Fisheries](./test/current_daily_ai.gif) , ![NOAA Fisheries conducted the
+Gulf of Alaska bottom trawl survey in 2021 aboard the F/V Ocean Explorer
+and F/V Alaska Provider. This survey covers the Chirikof, Kodiak,
+Shumagin, Southeastern, and Yakutat regions, which are randomly sampled
+each year. The near real-time ocean bottom temperatures depicted were
+collected May 23-August 14 No stations were sampled on August 14
+Allocated stations that have not yet been sampled are shown as grey
+dots. Credit: NOAA Fisheries](./test/current_daily_goa.gif)
+
+## Blank, Grid-only Plot
+
+![The empty grid of stations across the Eastern Bering sea and Northern
+Bering sea bottom trawl survey areas and 50m, 100m, and 200m bathymetry.
+Credit: NOAA Fisheries](./test/current_grid_bs.png) , ![NOAA Fisheries
+Aleutian Islands bottom trawl survey regions. This survey covers the
+Central Aleutians, Eastern Aleutians, Southern Bering Sea, and Western
+Aleutians regions, which are randomly sampled each year. Credit: NOAA
+Fisheries](./test/current_grid_ai.png) , ![NOAA Fisheries Gulf of Alaska
+bottom trawl survey regions. This survey covers the Chirikof, Kodiak,
+Shumagin, Southeastern, and Yakutat regions, which are randomly sampled
+each year. Credit: NOAA Fisheries](./test/current_grid_goa.png)
+
+## Mean Plot
+
+![Timeseries mean bottom temperatures in the NOAA Fisheries Eastern
+Bering Sea 1982-2021 (39 years) and Northern Bering Sea 2010-2021 (4
+years) Bottom Trawl Surveys. Data have been through final review. Final,
+validated haul and catch data will be publicly accessible on FOSS
+platform (<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
+Fisheries](./test/current_mean_bs.png)
+
+## Anomaly Plot
+
+![NOAA Fisheries conducted the Eastern Bering sea and Northern Bering
+sea bottom trawl surveys in 2022 aboard the F/V Vesteraalen and F/V
+Alaska Knight. The 2022 Bottom Temperature Anomaly. Data have been
+through final review. Final, validated haul and catch data will be
+publicly accessible on FOSS platform
+(<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
+Fisheries](./test/current_anom_bs.png)
+
+# Relevant publications
 
 **Learn more about these surveys and ocean temperatures around Alaska**
 (Markowitz, Dawson, Charriere, Prohaska, Rohan, Stevenson, et al.,
@@ -149,80 +219,6 @@ Commer. <https://repository.library.noaa.gov/view/noaa/26367>
 
 </div>
 
-## Notes
-
-- [How to set up the task
-  scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
-- [Where the files will be saved
-  to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
-- Troubleshooting: if the task scheduler fails to run the code, but you
-  can run the script in R or Rstudio, you may need to update Pandoc. If
-  you are on a NOAA machine, ask IT to install the .msi file for you.
-  Close and reopen everything and try again.
-
-## Plot Examples
-
-Find more plot examples
-[here](https://github.com/afsc-gap-products/survey-live-temperature-map/tree/main/test).
-
-### Final stacked gifs
-
-![NOAA Fisheries conducted the Eastern Bering sea and Northern Bering
-sea bottom trawl surveys in 2022 aboard the F/V Vesteraalen and F/V
-Alaska Knight. The near real-time ocean bottom temperatures depicted
-were collected May 29-August 20 On August 20, stations R-18 (60.67°N,
--168.69°W; \>8°C), R-01 (60.67°N, -168.01°W; \>8°C), and R-02 (60.67°N,
--167.32°W; \>8°C) were surveyed by the F/V Alaska Knight. There are 0
-stations planned for August 21 Credit: NOAA
-Fisheries](./test/current_daily_bs.gif) , ![NOAA Fisheries conducted the
-Aleutian Islands bottom trawl survey in 2022 aboard the F/V Ocean
-Explorer and F/V Alaska Provider. This survey covers the Central
-Aleutians, Eastern Aleutians, Southern Bering Sea, and Western Aleutians
-regions, which are randomly sampled each year. The near real-time ocean
-bottom temperatures depicted were collected June 10-August 13 No
-stations were sampled on August 13 Allocated stations that have not yet
-been sampled are shown as grey dots. Credit: NOAA
-Fisheries](./test/current_daily_ai.gif) , ![NOAA Fisheries conducted the
-Gulf of Alaska bottom trawl survey in 2021 aboard the F/V Ocean Explorer
-and F/V Alaska Provider. This survey covers the Chirikof, Kodiak,
-Shumagin, Southeastern, and Yakutat regions, which are randomly sampled
-each year. The near real-time ocean bottom temperatures depicted were
-collected May 23-August 14 No stations were sampled on August 14
-Allocated stations that have not yet been sampled are shown as grey
-dots. Credit: NOAA Fisheries](./test/current_daily_goa.gif)
-
-### Blank, Grid-only Plot
-
-![The empty grid of stations across the Eastern Bering sea and Northern
-Bering sea bottom trawl survey areas and 50m, 100m, and 200m bathymetry.
-Credit: NOAA Fisheries](./test/current_grid_bs.png) , ![NOAA Fisheries
-Aleutian Islands bottom trawl survey regions. This survey covers the
-Central Aleutians, Eastern Aleutians, Southern Bering Sea, and Western
-Aleutians regions, which are randomly sampled each year. Credit: NOAA
-Fisheries](./test/current_grid_ai.png) , ![NOAA Fisheries Gulf of Alaska
-bottom trawl survey regions. This survey covers the Chirikof, Kodiak,
-Shumagin, Southeastern, and Yakutat regions, which are randomly sampled
-each year. Credit: NOAA Fisheries](./test/current_grid_goa.png)
-
-### Mean Plot
-
-![Timeseries mean bottom temperatures in the NOAA Fisheries Eastern
-Bering Sea 1982-2021 (39 years) and Northern Bering Sea 2010-2021 (4
-years) Bottom Trawl Surveys. Data have been through final review. Final,
-validated haul and catch data will be publicly accessible on FOSS
-platform (<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
-Fisheries](./test/current_mean_bs.png)
-
-### Anomaly Plot
-
-![NOAA Fisheries conducted the Eastern Bering sea and Northern Bering
-sea bottom trawl surveys in 2022 aboard the F/V Vesteraalen and F/V
-Alaska Knight. The 2022 Bottom Temperature Anomaly. Data have been
-through final review. Final, validated haul and catch data will be
-publicly accessible on FOSS platform
-(<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
-Fisheries](./test/current_anom_bs.png)
-
 # Suggestions and Comments
 
 If you see that the data, product, or metadata can be improved, you are
@@ -249,13 +245,24 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE [1] glue_1.6.2     dplyr_1.1.0    magrittr_2.0.3
+    FALSE  [1] officer_0.6.1     knitr_1.42        tidyr_1.3.0       stringr_1.5.0     googledrive_2.0.0 rmarkdown_2.20    readr_2.1.4      
+    FALSE  [8] viridis_0.6.2     viridisLite_0.4.1 qpdf_1.3.0        magick_2.7.4      cowplot_1.1.1     akgfmaps_2.3.1    stars_0.6-0      
+    FALSE [15] abind_1.4-5       shadowtext_0.1.2  sf_1.0-9          raster_3.6-20     sp_1.6-0          rmapshaper_0.4.6  gstat_2.1-0      
+    FALSE [22] ggspatial_1.1.7   ggplot2_3.4.1     classInt_0.4-9    glue_1.6.2        dplyr_1.1.0       magrittr_2.0.3   
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] rstudioapi_0.14   knitr_1.42        tidyselect_1.2.0  R6_2.5.1          rlang_1.0.6       fastmap_1.1.0     fansi_1.0.4      
-    FALSE  [8] httr_1.4.5        tools_4.2.2       data.table_1.14.6 xfun_0.37         utf8_1.2.3        cli_3.6.0         withr_2.5.0      
-    FALSE [15] htmltools_0.5.4   yaml_2.3.7        digest_0.6.31     tibble_3.1.8      lifecycle_1.0.3   vctrs_0.5.2       evaluate_0.20    
-    FALSE [22] rmarkdown_2.20    stringi_1.7.12    compiler_4.2.2    pillar_1.8.1      generics_0.1.3    readtext_0.81     pkgconfig_2.0.3
+    FALSE  [1] fs_1.6.1           xts_0.13.0         lubridate_1.9.2    bit64_4.0.5        httr_1.4.5         tools_4.2.2        rgdal_1.6-5       
+    FALSE  [8] utf8_1.2.3         R6_2.5.1           KernSmooth_2.23-20 DBI_1.1.3          colorspace_2.1-0   withr_2.5.0        tidyselect_1.2.0  
+    FALSE [15] gridExtra_2.3      bit_4.0.5          curl_5.0.0         compiler_4.2.2     textshaping_0.3.6  cli_3.6.0          xml2_1.3.3        
+    FALSE [22] scales_1.2.1       proxy_0.4-27       askpass_1.1        rappdirs_0.3.3     systemfonts_1.0.4  digest_0.6.31      pkgconfig_2.0.3   
+    FALSE [29] htmltools_0.5.4    fastmap_1.1.0      jsonvalidate_1.3.2 rlang_1.0.6        rstudioapi_0.14    httpcode_0.3.0     FNN_1.1.3.1       
+    FALSE [36] farver_2.1.1       generics_0.1.3     zoo_1.8-11         jsonlite_1.8.4     vroom_1.6.1        zip_2.2.2          Rcpp_1.0.10       
+    FALSE [43] munsell_0.5.0      fansi_1.0.4        lifecycle_1.0.3    terra_1.7-18       stringi_1.7.12     yaml_2.3.7         snakecase_0.11.0  
+    FALSE [50] grid_4.2.2         parallel_4.2.2     crayon_1.5.2       lattice_0.20-45    hms_1.1.2          pillar_1.8.1       uuid_1.1-0        
+    FALSE [57] spacetime_1.2-8    geojsonlint_0.4.0  codetools_0.2-18   crul_1.3           readtext_0.81      evaluate_0.20      V8_4.2.2          
+    FALSE [64] data.table_1.14.6  vctrs_0.5.2        tzdb_0.3.0         gtable_0.3.1       openssl_2.0.5      purrr_1.0.1        xfun_0.37         
+    FALSE [71] mime_0.12          janitor_2.2.0      lwgeom_0.2-11      e1071_1.7-13       ragg_1.2.5         class_7.3-20       gargle_1.3.0      
+    FALSE [78] tibble_3.1.8       intervals_0.15.2   tinytex_0.44       units_0.8-1        timechange_0.2.0   ellipsis_0.3.2
 
 ## NOAA README
 

@@ -51,15 +51,11 @@ return(str0)
 
 **Chris Anderson** (Christopher.Anderson AT noaa.gov; [\@ChrisAnderson-NOAA](https://github.com/ChrisAnderson-NOAA))
 
-
-**Caitlin Allen Akselrud** (past; caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
+And previously, **Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
 
 Alaska Fisheries Science Center,
-
 National Marine Fisheries Service,
-
 National Oceanic and Atmospheric Administration,
-
 Seattle, WA 98115
 
 # Table of contents
@@ -81,7 +77,7 @@ toc <- paste0(toc_list, "*](#", toc_link, ")", collapse = "\n")
 
 `r toc`
 
-## Purpose
+# Purpose
 
 These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website
 
@@ -92,53 +88,45 @@ These scripts create daily survey station daily temperature and anomaly plots as
  - [2018 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2018-eastern-bering-sea-continental-shelf-and-northern-bering-sea-trawl-surveys)
  - [2017 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2017-eastern-bering-sea-continental-shelf-and-northern-bering-sea-bottom-trawl)
 
-## Publications
-
-**Learn more about these surveys and ocean temperatures around Alaska** [@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2022; @AI2018; @GOA2018; @RohanColdPool]
-
-<div id="refs"></div>
-
-## Notes
+# Notes
 
  - [How to set up the task scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
  - [Where the files will be saved to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
  - Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
 
-## Plot Examples
+# Plot Examples
 
 Find more plot examples [here](`r paste0(link_repo, "/tree/main/test")`). 
 
-### Final stacked gifs
-
+## Final stacked gifs
 ```{r}
 a <- print_figs(string_id = "current_daily_", file_type = "gif")
 ```
-
 `r a`
 
-### Blank, Grid-only Plot
-
+## Blank, Grid-only Plot
 ```{r}
 a <- print_figs(string_id = "current_grid_")
 ```
-
 `r a`
 
-### Mean Plot
-
+## Mean Plot
 ```{r}
 a <- print_figs(string_id = "current_mean_")
 ```
-
 `r a`
 
-### Anomaly Plot
-
+## Anomaly Plot
 ```{r}
 a <- print_figs(string_id = "current_anom_")
 ```
-
 `r a`
+
+# Relevant publications
+
+**Learn more about these surveys and ocean temperatures around Alaska** [@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2022; @AI2018; @GOA2018; @RohanColdPool]
+
+<div id="refs"></div>
 
 # Suggestions and Comments
 

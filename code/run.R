@@ -12,7 +12,6 @@ data_source <- "gd" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
 
-
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
 ## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
@@ -75,8 +74,6 @@ dir_googledrive_upload_ai = temp$id[temp$name=="2022_AI"]
 dir_googledrive_upload_goa = temp$id[temp$name=="2021_GOA"]
 data_source <- "oracle" # testing
 dates0 <- "all"
-# dates0 <- "latest" # testing
-# dates0 <- "first" # testing
 
 # Map --------------------------------------------------------------------------
 
