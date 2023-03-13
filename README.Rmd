@@ -39,9 +39,9 @@ return(str0)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# [RACE Groundfish and Crab Live Survey Temperature Maps](`r link_repo`) <img src="https://avatars.githubusercontent.com/u/91760178?s=96&amp;v=4" alt="Logo." align="right" width="139" height="139"/>
+# [Near Real-Time Survey Progress and Temperature Maps](`r link_repo`) <img src="https://avatars.githubusercontent.com/u/91760178?s=96&amp;v=4" alt="Logo." align="right" width="139" height="139"/>
 
-> This code is always in development. Find code used for final products of this code in [releases](paste0(`r link_repo`, "/releases")).
+*This code is always in development. Find code used for final products of this code in [releases](paste0(`r link_repo`, "/releases")).*
 
 ## This code is primarally maintained by:
 
@@ -54,8 +54,11 @@ return(str0)
 And previously, **Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
 
 Alaska Fisheries Science Center,
+
 National Marine Fisheries Service,
+
 National Oceanic and Atmospheric Administration,
+
 Seattle, WA 98115
 
 # Table of contents
@@ -82,7 +85,7 @@ toc <- paste0(toc_list, "*](#", toc_link, ")", collapse = "\n")
 These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website
 
  - [2022 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-bering-sea-bottom-trawl-surveys-2022)
- - [2022 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-aleutian-islands-bottom-trawl-surveys-2022) 
+ - [2022 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-aleutian-islands-bottom-trawl-survey-2022) 
  - [2021 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey)
  - [2019 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/feature-story/2019-southeastern-bering-sea-shelf-bottom-trawl-survey-gets-underway)
  - [2018 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2018-eastern-bering-sea-continental-shelf-and-northern-bering-sea-trawl-surveys)
