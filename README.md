@@ -71,8 +71,7 @@ communications team. These plots are displayed on the AFSC website
 
 - [How to set up the task
   scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
-- [Where the files will be saved
-  to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
+- Files are saved to our internal dev FTP server and google drive.
 - Troubleshooting: if the task scheduler fails to run the code, but you
   can run the script in R or Rstudio, you may need to update Pandoc. If
   you are on a NOAA machine, ask IT to install the .msi file for you.
