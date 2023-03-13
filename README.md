@@ -238,26 +238,35 @@ sessionInfo()
     FALSE Matrix products: default
     FALSE 
     FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8 
-    FALSE [2] LC_CTYPE=English_United States.utf8   
-    FALSE [3] LC_MONETARY=English_United States.utf8
-    FALSE [4] LC_NUMERIC=C                          
-    FALSE [5] LC_TIME=English_United States.utf8    
+    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+    FALSE [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
     FALSE 
     FALSE attached base packages:
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE [1] glue_1.6.2
+    FALSE  [1] glue_1.6.2        officer_0.6.1     knitr_1.42        tidyr_1.3.0       stringr_1.5.0     googledrive_2.0.0 rmarkdown_2.20   
+    FALSE  [8] readr_2.1.4       viridis_0.6.2     viridisLite_0.4.1 qpdf_1.3.0        magick_2.7.4      cowplot_1.1.1     akgfmaps_2.3.1   
+    FALSE [15] stars_0.6-0       abind_1.4-5       shadowtext_0.1.2  sf_1.0-9          raster_3.6-20     sp_1.6-0          rmapshaper_0.4.6 
+    FALSE [22] magrittr_2.0.3    gstat_2.1-0       ggspatial_1.1.7   ggplot2_3.4.1     dplyr_1.1.0       classInt_0.4-9   
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] fansi_1.0.4       crayon_1.5.2      utf8_1.2.3        digest_0.6.31    
-    FALSE  [5] R6_2.5.1          lifecycle_1.0.3   magrittr_2.0.3    evaluate_0.20    
-    FALSE  [9] pillar_1.8.1      httr_1.4.5        stringi_1.7.12    rlang_1.0.6      
-    FALSE [13] cli_3.6.0         data.table_1.14.8 rstudioapi_0.14   vctrs_0.5.2      
-    FALSE [17] rmarkdown_2.20    tools_4.2.2       xfun_0.37         yaml_2.3.7       
-    FALSE [21] fastmap_1.1.0     compiler_4.2.2    pkgconfig_2.0.3   readtext_0.81    
-    FALSE [25] htmltools_0.5.4   knitr_1.42        tibble_3.1.8
+    FALSE  [1] colorspace_2.1-0    ellipsis_0.3.2      class_7.3-20        readtext_0.81       rgdal_1.6-5         snakecase_0.11.0   
+    FALSE  [7] fs_1.6.1            httpcode_0.3.0      rstudioapi_0.14     proxy_0.4-27        ggsn_0.5.0          bit64_4.0.5        
+    FALSE [13] fansi_1.0.4         lubridate_1.9.2     xml2_1.3.3          codetools_0.2-18    geojsonlint_0.4.0   jsonlite_1.8.4     
+    FALSE [19] png_0.1-8           compiler_4.2.2      httr_1.4.5          fastmap_1.1.0       gargle_1.3.0        cli_3.6.0          
+    FALSE [25] htmltools_0.5.4     tools_4.2.2         ggmap_3.0.1         gtable_0.3.1        rappdirs_0.3.3      V8_4.2.2           
+    FALSE [31] Rcpp_1.0.10         cellranger_1.1.0    vctrs_0.5.2         crul_1.3            lwgeom_0.2-11       xfun_0.37          
+    FALSE [37] timechange_0.2.0    lifecycle_1.0.3     terra_1.7-18        zoo_1.8-11          scales_1.2.1        vroom_1.6.1        
+    FALSE [43] ragg_1.2.5          hms_1.1.2           parallel_4.2.2      yaml_2.3.7          curl_5.0.0          gridExtra_2.3      
+    FALSE [49] stringi_1.7.12      jsonvalidate_1.3.2  maptools_1.1-6      e1071_1.7-13        zip_2.2.2           intervals_0.15.2   
+    FALSE [55] RgoogleMaps_1.4.5.3 rlang_1.0.6         pkgconfig_2.0.3     systemfonts_1.0.4   bitops_1.0-7        evaluate_0.20      
+    FALSE [61] lattice_0.20-45     purrr_1.0.1         bit_4.0.5           tidyselect_1.2.0    plyr_1.8.8          R6_2.5.1           
+    FALSE [67] generics_0.1.3      DBI_1.1.3           pillar_1.8.1        foreign_0.8-84      withr_2.5.0         units_0.8-1        
+    FALSE [73] xts_0.13.0          RCurl_1.98-1.10     tibble_3.1.8        spacetime_1.2-8     janitor_2.2.0       crayon_1.5.2       
+    FALSE [79] uuid_1.1-0          KernSmooth_2.23-20  utf8_1.2.3          tzdb_0.3.0          jpeg_0.1-10         grid_4.2.2         
+    FALSE [85] readxl_1.4.2        data.table_1.14.6   FNN_1.1.3.1         digest_0.6.31       textshaping_0.3.6   openssl_2.0.5      
+    FALSE [91] munsell_0.5.0       askpass_1.1
 
 ## NOAA README
 
