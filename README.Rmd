@@ -22,12 +22,11 @@ temp <- data.frame(
   txt = NA) %>% 
   dplyr::mutate(
     srvy = sapply(X = strsplit(x = txt0, split = ".", fixed = TRUE), "[[", 2), 
-    srvy = gsub(pattern = paste0("current_", string_id, "_"), replacement = "", x = srvy),
+    srvy = gsub(pattern = paste0("/test/", string_id), replacement = "", x = srvy),
     order = dplyr::case_when(
       srvy == "bs" ~ 1, 
       srvy == "ai" ~ 2, 
-      srvy == "goa" ~ 3
-    )) %>% 
+      srvy == "goa" ~ 3 )) %>% 
   dplyr::arrange(order)
 for (i in 1:nrow(temp)) {
   temp$txt[i] <- paste0(read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."), collapse = " ")
@@ -93,29 +92,17 @@ These scripts create daily survey station daily temperature and anomaly plots as
  - [2018 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2018-eastern-bering-sea-continental-shelf-and-northern-bering-sea-trawl-surveys)
  - [2017 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/resource/document/2017-eastern-bering-sea-continental-shelf-and-northern-bering-sea-bottom-trawl)
 
-## Learn more about these surveys and ocean temperatures around Alaska
+## Publications
 
-**Eastern Bering Sea Shelf (EBS) and Northern Bering Sea (NBS)** 
-[@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2022]
-
-**Aleutian Islands (AI)** 
-[@AI2018]
-
-**Gulf of Alaska (GOA)** 
-[@GOA2018]
-
-**Cold pool research**
-[@RohanColdPool]
+**Learn more about these surveys and ocean temperatures around Alaska** [@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2022; @AI2018; @GOA2018; @RohanColdPool]
 
 <div id="refs"></div>
 
 ## Notes
 
-[How to set up the task scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
-
-[Where the files will be saved to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
-
-Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
+ - [How to set up the task scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
+ - [Where the files will be saved to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
+ - Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
 
 ## Plot Examples
 
