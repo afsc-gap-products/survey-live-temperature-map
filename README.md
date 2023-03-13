@@ -157,18 +157,16 @@ Commer. <https://repository.library.noaa.gov/view/noaa/26367>
 
 ## Notes
 
-How to set up the task scheduler:
-<https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit>
+[How to set up the task
+scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
 
-Where the files will be saved to:
-<https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq>
+[Where the files will be saved
+to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
 
 Troubleshooting: if the task scheduler fails to run the code, but you
-can run the script in R or Rstudio, you may need to update Pandoc. The
-latest version is here:
-<https://github.com/jgm/pandoc/releases/tag/2.18>. If you are on a NOAA
-machine, ask IT to install the .msi file for you. Close and reopen
-everything and try again.
+can run the script in R or Rstudio, you may need to update Pandoc. If
+you are on a NOAA machine, ask IT to install the .msi file for you.
+Close and reopen everything and try again.
 
 ## Plot Examples
 
@@ -177,40 +175,52 @@ Find more plot examples
 
 ### Final stacked gifs
 
-``` r
-cat(print_figs(string_id = "current_daily_", file_type = "gif"))
-```
-
-    FALSE ![NOAA Fisheries conducted the Aleutian Islands bottom trawl survey in 2022 aboard the F/V Ocean Explorer and F/V Alaska Provider. This survey covers the Central Aleutians, Eastern Aleutians, Southern Bering Sea, and Western Aleutians regions, which are randomly sampled each year. The near real-time ocean bottom temperatures depicted were collected June 10-August 13 No stations were sampled on August 13 Allocated stations that have not yet been sampled are shown as grey dots. Credit: NOAA Fisheries](./test/current_daily_ai.gif)
-    FALSE  ![NOAA Fisheries conducted the Eastern Bering sea and Northern Bering sea bottom trawl surveys in 2022 aboard the F/V Vesteraalen and F/V Alaska Knight. The near real-time ocean bottom temperatures depicted were collected May 29-August 20 On August 20, stations R-18 (60.67°N, -168.69°W; >8°C), R-01 (60.67°N, -168.01°W; >8°C), and R-02 (60.67°N, -167.32°W; >8°C) were surveyed by the F/V Alaska Knight. There are 0 stations planned for August 21 Credit: NOAA Fisheries](./test/current_daily_bs.gif)
-    FALSE  ![NOAA Fisheries conducted the Gulf of Alaska bottom trawl survey in 2021 aboard the F/V Ocean Explorer and F/V Alaska Provider. This survey covers the Chirikof, Kodiak, Shumagin, Southeastern, and Yakutat regions, which are randomly sampled each year. The near real-time ocean bottom temperatures depicted were collected May 23-August 14 No stations were sampled on August 14 Allocated stations that have not yet been sampled are shown as grey dots. Credit: NOAA Fisheries](./test/current_daily_goa.gif)
+![NOAA Fisheries conducted the Aleutian Islands bottom trawl survey in
+2022 aboard the F/V Ocean Explorer and F/V Alaska Provider. This survey
+covers the Central Aleutians, Eastern Aleutians, Southern Bering Sea,
+and Western Aleutians regions, which are randomly sampled each year. The
+near real-time ocean bottom temperatures depicted were collected June
+10-August 13 No stations were sampled on August 13 Allocated stations
+that have not yet been sampled are shown as grey dots. Credit: NOAA
+Fisheries](./test/current_daily_ai.gif) , ![NOAA Fisheries conducted the
+Eastern Bering sea and Northern Bering sea bottom trawl surveys in 2022
+aboard the F/V Vesteraalen and F/V Alaska Knight. The near real-time
+ocean bottom temperatures depicted were collected May 29-August 20 On
+August 20, stations R-18 (60.67°N, -168.69°W; \>8°C), R-01 (60.67°N,
+-168.01°W; \>8°C), and R-02 (60.67°N, -167.32°W; \>8°C) were surveyed by
+the F/V Alaska Knight. There are 0 stations planned for August 21
+Credit: NOAA Fisheries](./test/current_daily_bs.gif) , ![NOAA Fisheries
+conducted the Gulf of Alaska bottom trawl survey in 2021 aboard the F/V
+Ocean Explorer and F/V Alaska Provider. This survey covers the Chirikof,
+Kodiak, Shumagin, Southeastern, and Yakutat regions, which are randomly
+sampled each year. The near real-time ocean bottom temperatures depicted
+were collected May 23-August 14 No stations were sampled on August 14
+Allocated stations that have not yet been sampled are shown as grey
+dots. Credit: NOAA Fisheries](./test/current_daily_goa.gif)
 
 ### Blank, Grid-only Plot
 
-``` r
-a <- print_figs(string_id = "current_grid_")
-print(a)
-```
-
-    FALSE ![NOAA Fisheries Aleutian Islands bottom trawl survey regions. This survey covers the Central Aleutians, Eastern Aleutians, Southern Bering Sea, and Western Aleutians regions, which are randomly sampled each year. Credit: NOAA Fisheries](./test/current_grid_ai.png)
-    FALSE 
-    FALSE ![The empty grid of stations across the Eastern Bering sea and Northern Bering sea bottom trawl survey areas and 50m, 100m, and 200m bathymetry. Credit: NOAA Fisheries](./test/current_grid_bs.png)
-    FALSE 
-    FALSE ![NOAA Fisheries Gulf of Alaska bottom trawl survey regions. This survey covers the Chirikof, Kodiak, Shumagin, Southeastern, and Yakutat regions, which are randomly sampled each year. Credit: NOAA Fisheries](./test/current_grid_goa.png)
+![NOAA Fisheries Aleutian Islands bottom trawl survey regions. This
+survey covers the Central Aleutians, Eastern Aleutians, Southern Bering
+Sea, and Western Aleutians regions, which are randomly sampled each
+year. Credit: NOAA Fisheries](./test/current_grid_ai.png) , ![The empty
+grid of stations across the Eastern Bering sea and Northern Bering sea
+bottom trawl survey areas and 50m, 100m, and 200m bathymetry. Credit:
+NOAA Fisheries](./test/current_grid_bs.png) , ![NOAA Fisheries Gulf of
+Alaska bottom trawl survey regions. This survey covers the Chirikof,
+Kodiak, Shumagin, Southeastern, and Yakutat regions, which are randomly
+sampled each year. Credit: NOAA Fisheries](./test/current_grid_goa.png)
 
 ### Mean Plot
 
-``` r
-print_figs(string_id = "current_mean_")
-```
-
-    FALSE ![Timeseries mean bottom temperatures in the NOAA Fisheries Eastern Bering Sea 1982-2021 (39 years) and Northern Bering Sea 2010-2021 (4 years) Bottom Trawl Surveys. Data have been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (https://www.fisheries.noaa.gov/foss). Credit: NOAA Fisheries](./test/current_mean_bs.png)
+![Timeseries mean bottom temperatures in the NOAA Fisheries Eastern
+Bering Sea 1982-2021 (39 years) and Northern Bering Sea 2010-2021 (4
+years) Bottom Trawl Surveys. Data have been through final review. Final,
+validated haul and catch data will be publicly accessible on FOSS
+platform (<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
+Fisheries](./test/current_mean_bs.png)
 
 ### Anomaly Plot
-
-``` r
-a <- print_figs(string_id = "current_anom_")
-```
 
 ![NOAA Fisheries conducted the Eastern Bering sea and Northern Bering
 sea bottom trawl surveys in 2022 aboard the F/V Vesteraalen and F/V
@@ -231,10 +241,6 @@ or [submit an issue to the code’s
 repository](https://github.com/afsc-gap-products/survey-live-temperature-map/issues).
 
 ## R Version Metadata
-
-``` r
-sessionInfo()
-```
 
     FALSE R version 4.2.2 (2022-10-31 ucrt)
     FALSE Platform: x86_64-w64-mingw32/x64 (64-bit)

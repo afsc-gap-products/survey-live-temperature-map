@@ -7,7 +7,7 @@ bibliography: "https://raw.githubusercontent.com/afsc-gap-products/citations/mai
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warnings = FALSE, error = FALSE, message = FALSE, comment = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warnings = FALSE, error = FALSE, message = FALSE, comment = FALSE)
 link_repo <- "https://github.com/afsc-gap-products/survey-live-temperature-map"
 
 library(glue)
@@ -100,11 +100,11 @@ These scripts create daily survey station daily temperature and anomaly plots as
 
 ## Notes
 
-How to set up the task scheduler: https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit
+[How to set up the task scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
 
-Where the files will be saved to: https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq
+[Where the files will be saved to](https://drive.google.com/drive/u/2/folders/1BSMOHWQO_oWxF6AmOFI6sudiSbFLvToq)
 
-Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. The latest version is here: https://github.com/jgm/pandoc/releases/tag/2.18. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
+Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 
 
 ## Plot Examples 
 
@@ -113,20 +113,26 @@ Find more plot examples [here](`r paste0(link_repo, "/tree/main/test")`).
 ### Final stacked gifs
 
 ```{r}
-cat(print_figs(string_id = "current_daily_", file_type = "gif"))
+a <- print_figs(string_id = "current_daily_", file_type = "gif")
 ```
+
+`r a`
 
 ### Blank, Grid-only Plot
 
 ```{r}
 a <- print_figs(string_id = "current_grid_")
-print(a)
 ```
+
+`r a`
+
 ### Mean Plot
 
 ```{r}
-print_figs(string_id = "current_mean_")
+a <- print_figs(string_id = "current_mean_")
 ```
+
+`r a`
 
 ### Anomaly Plot
 
