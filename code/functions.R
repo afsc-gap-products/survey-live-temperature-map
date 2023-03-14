@@ -170,15 +170,9 @@ make_varplot_wrapper <- function(
     if (var == "bt") {
       var00 = 'Bottom Temperature'
       unit0 <- '(\u00B0C)'
-      if (SRVY == "BS") {
-        var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50)
-      } else {
-        var_breaks <- c(-10, seq(from = 2, to = 8, by = 0.5), 50)
-      }
     } else if (var == "st") {
       var00 = 'Surface Temperature'
       unit0 <- '(\u00B0C)'
-      var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50) # if anom DOES NOT exist (straight temps!)
     }
   }
   
@@ -347,6 +341,19 @@ make_varplot_wrapper <- function(
   if ("mean" %in% file_end0) {
     file_end <- "mean"; print(paste0("------------", file_end, "------------"))
     
+    # Define temperature bins
+    if (!is.null(var)){
+      if (var == "bt") {
+        if (SRVY == "BS") {
+          var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
+        } else if (SRVY %in% c("GOA", "AI")) {
+          var_breaks <- c(-10, seq(from = 2, to = 10, by = 1), 50)
+        }
+      } else if (var == "st") {
+        var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50) # if anom DOES NOT exist (straight temps!)
+      }
+    }
+    
     make_figure(
       SRVY = SRVY, 
       dat = dat %>% # Mean plot
@@ -376,6 +383,19 @@ make_varplot_wrapper <- function(
   ### Daily --------------------------------------------------------------------
   if ("daily" %in% file_end0 & no_plot) {  
     file_end <- "daily"; print(paste0("------------", file_end, "------------"))
+    
+    # Define temperature bins
+    if (!is.null(var)){
+      if (var == "bt") {
+        if (SRVY == "BS") {
+          var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
+        } else if (SRVY %in% c("GOA", "AI")) {
+          var_breaks <- c(-10, seq(from = 2, to = 10, by = 1), 50)
+        }
+      } else if (var == "st") {
+        var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50) # if anom DOES NOT exist (straight temps!)
+      }
+    }
     
     make_figure(
       SRVY = SRVY, 
@@ -407,7 +427,7 @@ make_varplot_wrapper <- function(
       dat = dat %>% # Anomaly plot
         dplyr::mutate(var = anom, 
                       reg_lab = paste0(region_long, "\n ")),
-      var_breaks = c(-10, seq(from = -2, to = 3, by = 0.5), 50), 
+      var_breaks = c(-10, seq(from = -2, to = 3, by = 1), 50), 
       plot_title = paste0(maxyr,  " ", var00, ' Anomaly' ),
       plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
                            x = paste0("NOAA Fisheries ", 
@@ -690,7 +710,7 @@ make_figure <- function(
         legend.direction="vertical",
         legend.justification="left",
         legend.background = element_blank(),
-        legend.title=element_text(size=16),
+        legend.title=element_text(size=14),
         axis.text = element_text(size=14), 
         legend.box.background = element_blank(),
         legend.key = element_blank(), 
@@ -856,7 +876,8 @@ make_figure <- function(
           geom_sf(data = poly, fill = NA, color = "black", size = .5)
       }
       
-      # label regions
+      if (file_end == 'grid') {
+        # label regions
       gg <- gg + 
         geom_label(data = bb, 
                    color = ifelse(SRVY == "AI", "black", "white"), 
@@ -873,9 +894,9 @@ make_figure <- function(
         ggspatial::coord_sf(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
-
+      
+      } else if (file_end != 'grid') {
       ### Create temperature plots ---------------------------------------------------------
-      if (file_end != 'grid') {
         
         grid_stations_plot_visited <- grid_stations_plot %>% 
           dplyr::filter(!is.na(var_bin)) %>% 
@@ -939,7 +960,8 @@ make_figure <- function(
               label.vjust = 0.5,
             ) ) +
           ggplot2::theme(
-            legend.position = "bottom") +
+            legend.position = "bottom", 
+            legend.spacing.x = unit(.5, 'cm')) +
           # legend managment
           ggplot2::scale_color_manual(
             name = "",
@@ -986,7 +1008,7 @@ make_figure <- function(
     if (file_end %in% c("grid", "mean")) {
       lastplotofrun <- TRUE
     } else {
-      lastplotofrun <- (iterate[i] == iterate[length(iterate)])
+      lastplotofrun <- (i == iterate[length(iterate)])
     }
     
     ### PNG -------------------------------------------------------------------------

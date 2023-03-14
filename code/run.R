@@ -66,6 +66,7 @@ if (ftp_dl) {
 #                   output_file = paste0("README.md"))
 
 ## Testing ---------------------------------------------------------------------
+googledrive_dl <- FALSE
 
 dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1MrAq9jtQL1YBlYQcbeGiHh751EpPybY2"
 temp <- googledrive::drive_ls(googledrive::as_id(dir_googledrive_upload_test))
