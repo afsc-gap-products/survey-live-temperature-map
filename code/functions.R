@@ -389,8 +389,10 @@ make_varplot_wrapper <- function(
       if (var == "bt") {
         if (SRVY == "BS") {
           var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
-        } else if (SRVY %in% c("GOA", "AI")) {
-          var_breaks <- c(-10, seq(from = 2, to = 10, by = 1), 50)
+        } else if (SRVY %in% c("GOA")) {
+          var_breaks <- c(-10, seq(from = 3, to = 10, by = 1), 50)
+        } else if (SRVY %in% c("AI")) {
+          var_breaks <- c(-10, seq(from = 3, to = 6, by = 0.5), 50)
         }
       } else if (var == "st") {
         var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50) # if anom DOES NOT exist (straight temps!)

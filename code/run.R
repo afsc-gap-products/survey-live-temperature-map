@@ -85,8 +85,7 @@ dates0 <- "all"
 # if ("GOA" %in% dat_survreg$SRVY) {
   
   maxyr <- 2021 # testing
-  data_source <- "oracle" # testing
-  
+
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
   if (googledrive_dl) {
@@ -153,8 +152,7 @@ dates0 <- "all"
 # if ("AI" %in% dat_survreg$SRVY) {
   
   maxyr <- 2022 # testing
-  data_source <- "oracle" # testing
-  
+
   SRVY <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
   if (googledrive_dl) {

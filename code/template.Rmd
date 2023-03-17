@@ -27,10 +27,12 @@ vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
 
-surveys <- gsub(pattern = " Eastern", replacement = " eastern", 
+surveys <- gsub(pattern = "Eastern", 
+                replacement = "eastern", 
                 x = unique(dat_plot$region_long))
-surveys <- gsub(pattern = " Northern", replacement = " northern", 
-                x = unique(dat_plot$region_long))
+surveys <- gsub(pattern = "Northern", 
+                replacement = "northern", 
+                x = surveys)
 SRVYs <- unique(dat_plot$SRVY)
 
 
