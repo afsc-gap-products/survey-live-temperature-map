@@ -5,18 +5,14 @@
 #' purpose: run script
 #' ---------------------------
 
-
-# still need to fix:
-#   google drive batch load
-#   one ftp folder?
-
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
+
 ## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
 googledrive_dl <- FALSE
 if (googledrive_dl) {
-googledrive::drive_deauth()
-googledrive::drive_auth()
-1
+  googledrive::drive_deauth()
+  googledrive::drive_auth()
+  1
 }
 
 # KNOWNS -----------------------------------------------------------------------
@@ -32,6 +28,7 @@ dir_googledrive_upload_ai = dir_googledrive_upload_test
 dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3OOCKsKzMX-UzTwKGVVGFsOW"
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
+
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
 locations <- c(
@@ -49,9 +46,6 @@ for (i in 1:length(locations)){
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
-
-# dat_survreg <- dat_survreg %>%
-#   dplyr::filter(year == maxyr)
 
 ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
@@ -71,6 +65,13 @@ if (ftp_dl) {
 
 # Map --------------------------------------------------------------------------
 
+## production ------------------------------------------------------------------
+
+# dat_survreg <- dat_survreg %>%
+#   dplyr::filter(year == maxyr)
+
+## testing ---------------------------------------------------------------------
+
 data_source <- "oracle" # testing
 dates0 <- "all"
 dates0 <- "latest" # testing
@@ -81,8 +82,7 @@ dates0 <- "first" # testing
 if ("GOA" %in% dat_survreg$SRVY) {
   
   maxyr <- 2021 # testing
-  data_source <- "oracle" # testing
-  
+
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
   if (googledrive_dl) {
@@ -147,8 +147,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
 if ("AI" %in% dat_survreg$SRVY) {
   
   maxyr <- 2022 # testing
-  data_source <- "oracle" # testing
-  
+
   SRVY <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
   if (googledrive_dl) {
