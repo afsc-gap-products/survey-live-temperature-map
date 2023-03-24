@@ -259,9 +259,9 @@ sessionInfo()
     FALSE [25] htmltools_0.5.4    fastmap_1.1.0      jsonvalidate_1.3.2 rlang_1.0.6        readxl_1.4.2       rstudioapi_0.14   
     FALSE [31] httpcode_0.3.0     FNN_1.1.3.1        generics_0.1.3     zoo_1.8-11         jsonlite_1.8.4     vroom_1.6.1       
     FALSE [37] RCurl_1.98-1.10    Rcpp_1.0.10        munsell_0.5.0      fansi_1.0.4        lifecycle_1.0.3    terra_1.7-18      
-    FALSE [43] stringi_1.7.12     yaml_2.3.7         snakecase_0.11.0   grid_4.2.3         parallel_4.2.3     crayon_1.5.2      
+    FALSE [43] yaml_2.3.7         stringi_1.7.12     snakecase_0.11.0   grid_4.2.3         parallel_4.2.3     crayon_1.5.2      
     FALSE [49] lattice_0.20-45    hms_1.1.2          knitr_1.42         pillar_1.8.1       spacetime_1.2-8    geojsonlint_0.4.0 
-    FALSE [55] codetools_0.2-19   crul_1.3           readtext_0.81      evaluate_0.20      V8_4.2.2           data.table_1.14.8 
+    FALSE [55] codetools_0.2-19   readtext_0.81      crul_1.3           evaluate_0.20      V8_4.2.2           data.table_1.14.8 
     FALSE [61] vctrs_0.5.2        tzdb_0.3.0         cellranger_1.1.0   gtable_0.3.1       purrr_1.0.1        xfun_0.37         
     FALSE [67] lwgeom_0.2-11      e1071_1.7-13       class_7.3-21       gargle_1.3.0       tibble_3.1.8       intervals_0.15.2  
     FALSE [73] units_0.8-1        timechange_0.2.0   ellipsis_0.3.2

@@ -47,24 +47,61 @@ intro0 <- paste0(
       ". ", 
     goaai_regions)
 
-foss0 <- paste0("Data have ", 
-                # ifelse(data_source == "gd", "NOT ", ""), 
-                "been through final review. Final, validated haul and catch data will be publicly accessible on FOSS platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
+foss_not <- paste0("The final, validated haul and catch data will be publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}) after the survey is complete. ")
+foss_avail <- paste0("These data are publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
+foss0 <- ifelse(data_source == "gd", foss_not, foss_avail)
 
 if (file_end %in% c("mean")) {
-  fig_cap <- paste0(stringr::str_to_sentence(plot_title), "s in the ", 
-                 gsub(x = plot_subtitle, pattern = "\n", replacement = " "), ". ", 
-    foss0)
+  
+  temp <- gsub(pattern = "[a-zA-Z]+", replacement = "", x = plot_subtitle)
+  temp <- strsplit(x = trimws(temp), split = " \n ")[[1]]
+  temp <- gsub(pattern = " )", replacement = " years)", x = temp)
+  temp <- trimws(temp)
+  temp <- gsub(pattern = " (", replacement = "; ", x = temp,fixed = TRUE)
+  temp <- paste0(surveys, " (", temp)
+  
+  temp <- paste0(
+    "The timeseries mean ",
+    tolower(var00), 
+    "s from the NOAA Fisheries ", 
+    text_list(temp), 
+    " bottom trawl survey", 
+    ifelse(length(surveys)>1, "s", ""),
+    ". ")  
+  
+  fig_cap <- paste0(
+    temp, 
+    # stringr::str_to_sentence(plot_title), "s in the ", 
+    #              gsub(x = plot_subtitle, pattern = "\n", replacement = " "), ". ", 
+    foss_avail)
   
 } else if (file_end %in% c("anom")) {
   
+  temp <- gsub(pattern = "[a-zA-Z]+", replacement = "", x = plot_subtitle)
+  temp <- strsplit(x = trimws(temp), split = " \n ")[[1]]
+  temp <- gsub(pattern = " )", replacement = " years)", x = temp)
+  temp <- trimws(temp)
+  temp <- gsub(pattern = " (", replacement = "; ", x = temp,fixed = TRUE)
+  temp <- paste0(surveys, " (", temp)
+  
+  temp <- paste0(
+    "The timeseries mean ",
+    tolower(var00), 
+    "s from the ", 
+    text_list(temp), 
+    " bottom trawl survey", 
+    ifelse(length(surveys)>1, "s are", " is"), 
+    " compared to ",
+    ifelse(length(surveys)>1, 
+           paste0("their respective ", maxyr, " surveys"), 
+           paste0("the ", maxyr, " survey")),
+    ". "
+    )
+  
   fig_cap <- paste0(
+    plot_title, ". ", 
     intro0,
-"The ", 
-    gsub(pattern = "\n", 
-         replacement = paste0("is compared to ", var00," from ", maxyr, " to "), 
-         x = plot_title), 
-    ". ", 
+    temp, 
     foss0)
   
 } else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
@@ -90,7 +127,7 @@ if (file_end %in% c("mean")) {
   if (firstplotofrun) {
     stations1 <- "This is the first day of the survey. "
   # } else if (date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0) {
-  } else if (lastplotofrun) {
+  } else if (lastdayofsurvey) {
     stations1 <- "This is the last day of the survey. "
   } else if (nrow(loc) == 0) {
     stations1 <- paste0("No stations were sampled on ", format_date_txt(x = as.Date(max_date)),". ")
@@ -147,7 +184,9 @@ if (file_end %in% c("mean")) {
     if (!is.null(dat_planned) & length(dat_planned) == 0) {
             stations1 <- paste0(stations1, "There are no stations planned for ", 
                                 format_date_txt(x = (as.Date(max_date)+1)), ". ")
-      } else {
+      } 
+    
+    if (!lastdayofsurvey) {
             stations1 <- 
               paste0(stations1, "There are ",
                      nrow(dat_planned[dat_planned$planned == "Y",])," stations planned for ", 

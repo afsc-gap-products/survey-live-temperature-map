@@ -644,6 +644,7 @@ make_figure <- function(
                          colour = "grey50",
                          show.legend = legend_title)
       
+      ### grid map ---------------------------------------------------
       if (file_end == "grid") {
         temp <- survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
         gg <- gg +
@@ -659,6 +660,7 @@ make_figure <- function(
         }
       }
       
+      ### temperature plots ---------------------------------------------------------
       
       gg <- gg +
         # ggsn::scalebar(data = survey_area$survey.grid,
@@ -762,7 +764,7 @@ make_figure <- function(
     } else if (SRVY %in% c("AI", "GOA")) {
       ## Aleutian Islands and Gulf of Alaska ----------------------------------
       
-      ### Prepare grid map ---------------------------------------------------
+      ### grid map ---------------------------------------------------
 
       # Draw bounding boxes
       bb <- data.frame()
@@ -811,7 +813,7 @@ make_figure <- function(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
 
-      ### Create temperature plots ---------------------------------------------------------
+      ### temperature plots ---------------------------------------------------------
       if (file_end != 'grid') {
         
         grid_stations_plot_visited <- grid_stations_plot %>% 
@@ -921,10 +923,10 @@ make_figure <- function(
     if (file_end %in% c("grid", "mean")) {
       lastplotofrun <- TRUE
     } else {
-      lastplotofrun <- (iterate[i] == iterate[length(iterate)])
+      lastplotofrun <- (i == iterate[length(iterate)])
     }
-    
-    firstplotofrun <- (iterate[i] == iterate[1])
+    lastdayofsurvey <- ((sum(is.na(dat_plot$date))) == 0)
+    firstplotofrun <- (i == 1)
     
     ### PNG -------------------------------------------------------------------------
     ggsave(filename = paste0(filename0,'.png'), 
