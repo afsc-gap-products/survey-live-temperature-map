@@ -448,7 +448,8 @@ make_figure <- function(
     # Create new temperature maps
     date_entered <- sort(unique(dat$date))
     date_entered <- date_entered[!is.na(date_entered)]
-    date_entered <- c(min(date_entered)-1, date_entered)
+    date_entered <- c(#min(date_entered),#-1, 
+                      date_entered)
     if (show_planned_stations & 
         (data_source == "oracle" | 
          sum(is.na(dat$var)) == 0)) { #survey is finished
@@ -512,9 +513,11 @@ make_figure <- function(
       
       max_date <- date_entered[i]
       print(max_date)
-      next_date <- ifelse(date_entered[i]==date_entered[length(date_entered)], 
-                          date_entered+1, 
-                          date_entered[i+1])
+      if (date_entered[i]==date_entered[length(date_entered)]) {
+        next_date <- date_entered[i]
+      } else {
+        next_date <- date_entered[i+1]
+      }
       
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
@@ -534,9 +537,10 @@ make_figure <- function(
         
         # planned stations
         loc <- dat_plot %>% 
-          dplyr::filter(is.na(var) & 
-                          !is.na(vessel_shape) & 
-                          date == next_date) %>% 
+          dplyr::filter(
+            is.na(var) &
+              !is.na(vessel_shape) & 
+              date == next_date) %>% 
           dplyr::mutate(planned = "Y")
         
         dat_planned <- grid_stations_plot %>% 
@@ -919,6 +923,8 @@ make_figure <- function(
     } else {
       lastplotofrun <- (iterate[i] == iterate[length(iterate)])
     }
+    
+    firstplotofrun <- (iterate[i] == iterate[1])
     
     ### PNG -------------------------------------------------------------------------
     ggsave(filename = paste0(filename0,'.png'), 

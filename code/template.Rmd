@@ -87,7 +87,10 @@ if (file_end %in% c("mean")) {
   loc <- dat_plot %>% 
     dplyr::filter(!is.na(var) & 
                     date == max_date) 
-  if (date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0) {
+  if (firstplotofrun) {
+    stations1 <- "This is the first day of the survey. "
+  # } else if (date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0) {
+  } else if (lastplotofrun) {
     stations1 <- "This is the last day of the survey. "
   } else if (nrow(loc) == 0) {
     stations1 <- paste0("No stations were sampled on ", format_date_txt(x = as.Date(max_date)),". ")

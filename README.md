@@ -231,33 +231,40 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
 sessionInfo()
 ```
 
-    FALSE R version 4.2.2 (2022-10-31 ucrt)
+    FALSE R version 4.2.3 (2023-03-15 ucrt)
     FALSE Platform: x86_64-w64-mingw32/x64 (64-bit)
     FALSE Running under: Windows 10 x64 (build 19045)
     FALSE 
     FALSE Matrix products: default
     FALSE 
     FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8 
-    FALSE [2] LC_CTYPE=English_United States.utf8   
-    FALSE [3] LC_MONETARY=English_United States.utf8
-    FALSE [4] LC_NUMERIC=C                          
-    FALSE [5] LC_TIME=English_United States.utf8    
+    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+    FALSE [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
     FALSE 
     FALSE attached base packages:
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE [1] glue_1.6.2
+    FALSE  [1] glue_1.6.2        RODBC_1.3-20      stringr_1.5.0     googledrive_2.0.0 tidyr_1.3.0       rmarkdown_2.20   
+    FALSE  [7] readr_2.1.4       viridis_0.6.2     viridisLite_0.4.1 janitor_2.2.0     qpdf_1.3.0        magick_2.7.4     
+    FALSE [13] cowplot_1.1.1     akgfmaps_2.3.1    stars_0.6-0       abind_1.4-5       shadowtext_0.1.2  sf_1.0-9         
+    FALSE [19] raster_3.6-20     sp_1.6-0          rmapshaper_0.4.6  magrittr_2.0.3    gstat_2.1-0       ggspatial_1.1.7  
+    FALSE [25] ggplot2_3.4.1     dplyr_1.1.0       classInt_0.4-9   
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] fansi_1.0.4       crayon_1.5.2      utf8_1.2.3        digest_0.6.31    
-    FALSE  [5] R6_2.5.1          lifecycle_1.0.3   magrittr_2.0.3    evaluate_0.20    
-    FALSE  [9] pillar_1.8.1      httr_1.4.5        stringi_1.7.12    rlang_1.0.6      
-    FALSE [13] cli_3.6.0         data.table_1.14.8 rstudioapi_0.14   vctrs_0.5.2      
-    FALSE [17] rmarkdown_2.20    tools_4.2.2       xfun_0.37         yaml_2.3.7       
-    FALSE [21] fastmap_1.1.0     compiler_4.2.2    pkgconfig_2.0.3   readtext_0.81    
-    FALSE [25] htmltools_0.5.4   knitr_1.42        tibble_3.1.8
+    FALSE  [1] bitops_1.0-7       fs_1.6.1           xts_0.13.0         lubridate_1.9.2    bit64_4.0.5        httr_1.4.5        
+    FALSE  [7] tools_4.2.3        utf8_1.2.3         R6_2.5.1           KernSmooth_2.23-20 DBI_1.1.3          colorspace_2.1-0  
+    FALSE [13] withr_2.5.0        tidyselect_1.2.0   gridExtra_2.3      bit_4.0.5          curl_5.0.0         compiler_4.2.3    
+    FALSE [19] cli_3.6.0          scales_1.2.1       proxy_0.4-27       askpass_1.1        digest_0.6.31      pkgconfig_2.0.3   
+    FALSE [25] htmltools_0.5.4    fastmap_1.1.0      jsonvalidate_1.3.2 rlang_1.0.6        readxl_1.4.2       rstudioapi_0.14   
+    FALSE [31] httpcode_0.3.0     FNN_1.1.3.1        generics_0.1.3     zoo_1.8-11         jsonlite_1.8.4     vroom_1.6.1       
+    FALSE [37] RCurl_1.98-1.10    Rcpp_1.0.10        munsell_0.5.0      fansi_1.0.4        lifecycle_1.0.3    terra_1.7-18      
+    FALSE [43] stringi_1.7.12     yaml_2.3.7         snakecase_0.11.0   grid_4.2.3         parallel_4.2.3     crayon_1.5.2      
+    FALSE [49] lattice_0.20-45    hms_1.1.2          knitr_1.42         pillar_1.8.1       spacetime_1.2-8    geojsonlint_0.4.0 
+    FALSE [55] codetools_0.2-19   crul_1.3           readtext_0.81      evaluate_0.20      V8_4.2.2           data.table_1.14.8 
+    FALSE [61] vctrs_0.5.2        tzdb_0.3.0         cellranger_1.1.0   gtable_0.3.1       purrr_1.0.1        xfun_0.37         
+    FALSE [67] lwgeom_0.2-11      e1071_1.7-13       class_7.3-21       gargle_1.3.0       tibble_3.1.8       intervals_0.15.2  
+    FALSE [73] units_0.8-1        timechange_0.2.0   ellipsis_0.3.2
 
 ## NOAA README
 
