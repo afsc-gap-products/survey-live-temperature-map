@@ -18,23 +18,22 @@ PKG <- c(
   "cowplot",
   "magick", 
   "qpdf",
+  "janitor",
   "ggplot2", # Create Elegant Data Visualisations Using the Grammar of Graphics
   "viridis", 
   
+  # tidy
   "readr", 
   "rmarkdown", 
+  "tidyr", 
   "dplyr",
   "googledrive",
   "magrittr",
   "stringr", 
-  "tidyr", 
+  # "knitr", # A general-purpose tool for dynamic report generation in R
+  # "officer"
   
-  # For creating R Markdown Docs
-  "knitr", # A general-purpose tool for dynamic report generation in R
-  
-  # File Management
-  # "here", # For finding the root directory of your scripts and thus, find your files
-  "officer"
+  "RODBC"
 )
 
 for (p in PKG) {
@@ -44,72 +43,6 @@ for (p in PKG) {
 }
 
 # colors -----------------------------------------------------------------------
-
-NOAAFisheries.Colors<-list(
-  
-  Oceans = list(
-    "Process Blue" = "#0093D0", 
-    "Reflex Blue" = "#0055A4", #Nav Bar Hover
-    "PMS 541" = "#00467F", # Nav Bar
-    "White" = "#FFFFFF"
-  ), 
-  
-  Waves = list(
-    "PMS 319" = "#1ECAD3", 
-    "PMS 321" = "#008998", 
-    "PMS 322" = "#00708", 
-    "Gray 10%" = "#E8E8E8"
-  ),
-  
-  Seagrass = list(
-    "PMS 375" = "#93D500", 
-    "PMS 362" = "#4C9C2E", 
-    "PMS 322" = "#007078", 
-    "Gray 20%" = "#D0D0D0"
-  ), 
-  
-  Urchin = list(
-    "Custom" = "#7F7FFF", 
-    "PMS 2725" = "#625BC4", 
-    "PMS 7670" = "#575195",
-    "Gray 40%" = "#9A9A9A"
-  ), 
-  
-  Crustacean = list(
-    "PMS 151" = "#FF8300", 
-    "PMS 717" = "#D65F00", 
-    "PMS 7670" = "#575195", 
-    "Gray 50%" = "#7B7B7B"
-  ), 
-  
-  Coral = list(
-    "Warm Red" = "#FF4438", 
-    "PMS 711" = "D02C2F", 
-    "PMS 1805" = "#B2292E", 
-    "Gray 70%" = "#646464"
-  ),
-  
-  "NOAA Colors" = list(
-    
-    #Primary Colors
-    "REFLEX BLUE" = "#0A4595", 
-    "PROCESS BLUE" = "#0099D8", 
-    "DARK SLATE GREY" = "#333333", 
-    "WHITE" = "#FFFFFF", 
-    
-    #Secondary Colors
-    "DARK GREY" = "#575757", 
-    "MEDIUM GREY" = "#666666",
-    "LIGHT GREY" = "#ACACAC",
-    "FADED BLUE" = "#6B84B4",
-    "RICH BLUE GREY" = "#28282A"
-  )
-  
-)
-
-NOAA.Fonts<-"Proxima Nova"
-
-
 
 # Functions --------------------------------------------------------------------
 
@@ -537,7 +470,8 @@ make_figure <- function(
     # Create new temperature maps
     date_entered <- sort(unique(dat$date))
     date_entered <- date_entered[!is.na(date_entered)]
-    date_entered <- c(min(date_entered)-1, date_entered)
+    date_entered <- c(#min(date_entered),#-1, 
+                      date_entered)
     if (show_planned_stations & 
         (data_source == "oracle" | 
          sum(is.na(dat$var)) == 0)) { #survey is finished
@@ -601,9 +535,11 @@ make_figure <- function(
       
       max_date <- date_entered[i]
       print(max_date)
-      next_date <- ifelse(date_entered[i]==date_entered[length(date_entered)], 
-                          date_entered+1, 
-                          date_entered[i+1])
+      if (date_entered[i]==date_entered[length(date_entered)]) {
+        next_date <- date_entered[i]
+      } else {
+        next_date <- date_entered[i+1]
+      }
       
       # only use dates including this date and before this date
       dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
@@ -623,9 +559,10 @@ make_figure <- function(
         
         # planned stations
         loc <- dat_plot %>% 
-          dplyr::filter(is.na(var) & 
-                          !is.na(vessel_shape) & 
-                          date == next_date) %>% 
+          dplyr::filter(
+            is.na(var) &
+              !is.na(vessel_shape) & 
+              date == next_date) %>% 
           dplyr::mutate(planned = "Y")
         
         dat_planned <- grid_stations_plot %>% 
@@ -729,6 +666,7 @@ make_figure <- function(
                          colour = "grey50",
                          show.legend = legend_title)
       
+      ### grid map ---------------------------------------------------
       if (file_end == "grid") {
         temp <- survey_area$place.labels[survey_area$place.labels$type == "bathymetry",]
         gg <- gg +
@@ -744,6 +682,7 @@ make_figure <- function(
         }
       }
       
+      ### temperature plots ---------------------------------------------------------
       
       gg <- gg +
         # ggsn::scalebar(data = survey_area$survey.grid,
@@ -847,7 +786,7 @@ make_figure <- function(
     } else if (SRVY %in% c("AI", "GOA")) {
       ## Aleutian Islands and Gulf of Alaska ----------------------------------
       
-      ### Prepare grid map ---------------------------------------------------
+      ### grid map ---------------------------------------------------
 
       # Draw bounding boxes
       bb <- data.frame()
@@ -896,10 +835,10 @@ make_figure <- function(
         ggspatial::coord_sf(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
-      
-      } else if (file_end != 'grid') {
+          } 
+          
+      if (file_end != 'grid') {
       ### Create temperature plots ---------------------------------------------------------
-        
         grid_stations_plot_visited <- grid_stations_plot %>% 
           dplyr::filter(!is.na(var_bin)) %>% 
           sf::st_centroid() %>% 
@@ -1012,6 +951,8 @@ make_figure <- function(
     } else {
       lastplotofrun <- (i == iterate[length(iterate)])
     }
+    lastdayofsurvey <- ((sum(is.na(dat_plot$date))) == 0)
+    firstplotofrun <- (i == 1)
     
     ### PNG -------------------------------------------------------------------------
     filename1 <- c(filename1, 

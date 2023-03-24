@@ -46,9 +46,6 @@ source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
 
-# dat_survreg <- dat_survreg %>%
-#   dplyr::filter(year == maxyr)
-
 ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
 if (ftp_dl) {
@@ -68,11 +65,18 @@ if (ftp_dl) {
 ## Testing ---------------------------------------------------------------------
 googledrive_dl <- FALSE
 
+## production ------------------------------------------------------------------
+
+# dat_survreg <- dat_survreg %>%
+#   dplyr::filter(year == maxyr)
+
+## testing ---------------------------------------------------------------------
 dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1MrAq9jtQL1YBlYQcbeGiHh751EpPybY2"
 temp <- googledrive::drive_ls(googledrive::as_id(dir_googledrive_upload_test))
 dir_googledrive_upload_bs = temp$id[temp$name=="2022_BS"]
 dir_googledrive_upload_ai = temp$id[temp$name=="2022_AI"]
 dir_googledrive_upload_goa = temp$id[temp$name=="2021_GOA"]
+
 data_source <- "oracle" # testing
 dates0 <- "all"
 # dates0 <- "latest" # testing
@@ -136,14 +140,12 @@ dates0 <- "all"
                        dat_survreg = dat_survreg,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = dates0, # "all", # "first", # "latest", # dates0,
+                       dates0 = dates0,
                        survey_area = survey_area,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", 
-                                     "grid", "mean", 
-                                     "anom"),
+                       file_end0 = c("grid", "daily", "mean", "anom"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 # }

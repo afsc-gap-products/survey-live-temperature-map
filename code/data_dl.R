@@ -18,21 +18,38 @@ for (i in 1:length(locations)){
     source(locations[i])
   }
 }
-# I set up a ConnectToOracle.R that looks like this: 
-#   
-#   PKG <- c("RODBC")
-# for (p in PKG) {
-#   if(!require(p,character.only = TRUE)) {  
-#     install.packages(p)
-#     require(p,character.only = TRUE)}
-# }
-# 
-# channel<-odbcConnect(dsn = "AFSC",
-#                      uid = "USERNAME", # change
-#                      pwd = "PASSWORD", #change
-#                      believeNRows = FALSE)
-# 
-# odbcGetInfo(channel)
+#' # I set up a ConnectToOracle.R that looks like this: 
+#' #   
+#' #' Define RODBC connection to ORACLE
+#' #'
+#' #' @param schema default = 'AFSC'. 
+#' #'
+#' #' @return oracle channel connection
+#' #' @export
+#' #'
+#' #' @examples
+#' #' # Not run
+#' #' # channel <- oracle_connect()
+#' oracle_connect <- function(
+#'     schema='AFSC', 
+#'     username = NULL, 
+#'     passowrd = NULL){(echo=FALSE)
+#'   
+#'   library("RODBC")
+#'   library("getPass")
+#'   if (is.null(username)) {
+#'     username <- getPass(msg = "Enter your ORACLE Username: ")
+#'   }
+#'   if (is.null(password)) {
+#'     password <- getPass(msg = "Enter your ORACLE Password: ")
+#'   }
+#'   channel  <- RODBC::odbcConnect(
+#'     paste(schema),
+#'     paste(username),
+#'     paste(password), 
+#'     believeNRows=FALSE)
+#'   return(channel)
+#' }
 
 locations<-c(
   # "RACE_DATA.VESSELS", 
