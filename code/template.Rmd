@@ -27,32 +27,50 @@ vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
 
-surveys <- gsub(pattern = " Sea", replacement = " sea", 
+surveys <- gsub(pattern = "Eastern", 
+                replacement = "eastern", 
                 x = unique(dat_plot$region_long))
+surveys <- gsub(pattern = "Northern", 
+                replacement = "northern", 
+                x = surveys)
 SRVYs <- unique(dat_plot$SRVY)
 
-goaai_regions <- ifelse(SRVY %in% c("AI", "GOA"), 
-                       paste0("This survey covers the ", text_list(unique(survey_area$survey.grid$region)), 
-           " regions, which are randomly sampled each year. "), 
-                       "")
+
+# find regions in west to east
+if (SRVY %in% c("AI", "GOA")) {
+  goaai_regions <- survey_area$survey.grid %>% 
+    st_centroid() %>% 
+    st_transform(crs = CRS("+proj=longlat")) %>%
+    st_coordinates() %>% 
+    data.frame() %>%
+    dplyr::mutate(region = unlist(survey_area$survey.grid$region)) %>% 
+    dplyr::group_by(region) %>% 
+    dplyr::summarise(minlon = min(X, na.rm = TRUE)) %>% 
+    dplyr::arrange(minlon)
+  
+  goaai_regions <- paste0("This survey covers the ", 
+                          text_list(goaai_regions$region), 
+                          " regions, which are sampled randomly each year. ")
+} else {
+  goaai_regions <- ""
+}
 
 intro0 <- paste0(
-    "NOAA Fisheries conducted the ", 
-      text_list(surveys),
-      " bottom trawl survey",
-      ifelse(length(surveys)>1, "s", "")
-      ," in ", maxyr, 
-      " aboard the ",
-      vess,
-      ". ", 
-    goaai_regions)
+  "NOAA Fisheries Alaska Fisheries Science Center's Groundfish Assessment Program conducted the ", 
+  text_list(surveys),
+  " bottom trawl survey",
+  ifelse(length(surveys)>1, "s", "")
+  ," in ", maxyr, 
+  " aboard the ",
+  vess,
+  ". ", 
+  goaai_regions)
 
 foss_not <- paste0("The final, validated haul and catch data will be publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}) after the survey is complete. ")
 foss_avail <- paste0("These data are publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
 foss0 <- ifelse(data_source == "gd", foss_not, foss_avail)
 
-if (file_end %in% c("mean")) {
-  
+if (file_end %in% c("mean")) {  
   temp <- gsub(pattern = "[a-zA-Z]+", replacement = "", x = plot_subtitle)
   temp <- strsplit(x = trimws(temp), split = " \n ")[[1]]
   temp <- gsub(pattern = " )", replacement = " years)", x = temp)
@@ -108,10 +126,11 @@ if (file_end %in% c("mean")) {
   
   if (SRVY %in% c("BS", "NBS", "EBS")) {
     fig_cap <- paste0( 
-      "The empty grid of stations across the ",text_list(surveys)," bottom trawl survey area",
-      ifelse(length(surveys)>1, "s", ""),
-             paste0(" and ", text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m")),
-                    " bathymetry. "))
+      "The grid of designated stations in the ",text_list(surveys)," bottom trawl survey area",
+      ifelse(length(surveys)>1, "s", ""), 
+      " as well as the ", 
+      text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m")),
+      " bathymetric boundaries. ")
   } else if (SRVY %in% c("GOA", "AI")) {
     fig_cap <- paste0(
       "NOAA Fisheries ", surveys, " bottom trawl survey regions. ", 
@@ -119,7 +138,7 @@ if (file_end %in% c("mean")) {
   }
   
 } else if (file_end == "daily") {
-
+  
   # Find what stations were sampled on this day
   loc <- dat_plot %>% 
     dplyr::filter(!is.na(var) & 
@@ -134,17 +153,17 @@ if (file_end %in% c("mean")) {
   } else {
     
     dat_max_date <- grid_stations_plot %>% 
-          sf::st_cast("MULTIPOLYGON") %>% 
-          sf::st_centroid()  %>% 
-          sf::st_transform(x = ., crs = CRS("+proj=longlat +datum=WGS84"))%>%
-          sf::st_coordinates() %>%
-          data.frame() %>% 
-          dplyr::rename(lon = X, 
-                        lat = Y) %>% 
-          dplyr::mutate(
-            station = grid_stations_plot$station, 
-            stratum = grid_stations_plot$stratum, 
-            stratum = as.character(stratum)) %>%
+      sf::st_cast("MULTIPOLYGON") %>% 
+      sf::st_centroid()  %>% 
+      sf::st_transform(x = ., crs = CRS("+proj=longlat +datum=WGS84"))%>%
+      sf::st_coordinates() %>%
+      data.frame() %>% 
+      dplyr::rename(lon = X, 
+                    lat = Y) %>% 
+      dplyr::mutate(
+        station = grid_stations_plot$station, 
+        stratum = grid_stations_plot$stratum, 
+        stratum = as.character(stratum)) %>%
       dplyr::left_join(y = ., 
                        x = loc %>% 
                          dplyr::mutate(stratum = as.character(stratum)) %>% 
@@ -194,17 +213,17 @@ if (file_end %in% c("mean")) {
     }
   } else if (SRVY %in% c("GOA", "AI") &
              !(date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0)) { # not the last day of the survey
-    stations1 <- paste0(stations1, "Allocated stations that have not yet been sampled are shown as grey dots. ")
+    stations1 <- paste0(stations1, "Allocated stations that have not yet been sampled are shown as gray dots. ")
   }
   
   fig_cap <- paste0(intro0, 
-    "The near real-time ocean bottom temperatures depicted were collected ", 
-    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-           paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
-           paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
-                  "-", 
-                  format_date_txt(x = as.Date(max_date), "%B %d"))), ". ", 
-    stations1)
+                    "The near real-time ocean bottom temperatures depicted were collected ", 
+                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                           paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
+                           paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                                  "-", 
+                                  format_date_txt(x = as.Date(max_date), "%B %d"))), ". ", 
+                    stations1)
   
 }
 

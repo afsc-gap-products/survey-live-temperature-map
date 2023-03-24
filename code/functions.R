@@ -103,15 +103,9 @@ make_varplot_wrapper <- function(
     if (var == "bt") {
       var00 = 'Bottom Temperature'
       unit0 <- '(\u00B0C)'
-      if (SRVY == "BS") {
-        var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50)
-      } else {
-        var_breaks <- c(-10, seq(from = 2, to = 8, by = 0.5), 50)
-      }
     } else if (var == "st") {
       var00 = 'Surface Temperature'
       unit0 <- '(\u00B0C)'
-      var_breaks <- c(-10, seq(from = -2, to = 8, by = 0.5), 50) # if anom DOES NOT exist (straight temps!)
     }
   }
   
@@ -280,6 +274,19 @@ make_varplot_wrapper <- function(
   if ("mean" %in% file_end0) {
     file_end <- "mean"; print(paste0("------------", file_end, "------------"))
     
+    # Define temperature bins
+    if (!is.null(var)){
+      if (var == "bt") {
+        if (SRVY == "BS") {
+          var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
+        } else if (SRVY %in% c("GOA", "AI")) {
+          var_breaks <- c(-10, seq(from = 2, to = 10, by = 1), 50)
+        }
+      } else if (var == "st") {
+        var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50) # if anom DOES NOT exist (straight temps!)
+      }
+    }
+    
     make_figure(
       SRVY = SRVY, 
       dat = dat %>% # Mean plot
@@ -309,6 +316,21 @@ make_varplot_wrapper <- function(
   ### Daily --------------------------------------------------------------------
   if ("daily" %in% file_end0 & no_plot) {  
     file_end <- "daily"; print(paste0("------------", file_end, "------------"))
+    
+    # Define temperature bins
+    if (!is.null(var)){
+      if (var == "bt") {
+        if (SRVY == "BS") {
+          var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
+        } else if (SRVY %in% c("GOA")) {
+          var_breaks <- c(-10, seq(from = 3, to = 10, by = 1), 50)
+        } else if (SRVY %in% c("AI")) {
+          var_breaks <- c(-10, seq(from = 3, to = 6, by = 0.5), 50)
+        }
+      } else if (var == "st") {
+        var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50) # if anom DOES NOT exist (straight temps!)
+      }
+    }
     
     make_figure(
       SRVY = SRVY, 
@@ -340,7 +362,7 @@ make_varplot_wrapper <- function(
       dat = dat %>% # Anomaly plot
         dplyr::mutate(var = anom, 
                       reg_lab = paste0(region_long, "\n ")),
-      var_breaks = c(-10, seq(from = -2, to = 3, by = 0.5), 50), 
+      var_breaks = c(-10, seq(from = -2, to = 3, by = 1), 50), 
       plot_title = paste0(maxyr,  " ", var00, ' Anomaly' ),
       plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
                            x = paste0("NOAA Fisheries ", 
@@ -627,7 +649,7 @@ make_figure <- function(
         legend.direction="vertical",
         legend.justification="left",
         legend.background = element_blank(),
-        legend.title=element_text(size=16),
+        legend.title=element_text(size=14),
         axis.text = element_text(size=14), 
         legend.box.background = element_blank(),
         legend.key = element_blank(), 
@@ -795,7 +817,8 @@ make_figure <- function(
           geom_sf(data = poly, fill = NA, color = "black", size = .5)
       }
       
-      # label regions
+      if (file_end == 'grid') {
+        # label regions
       gg <- gg + 
         geom_label(data = bb, 
                    color = ifelse(SRVY == "AI", "black", "white"), 
@@ -812,10 +835,10 @@ make_figure <- function(
         ggspatial::coord_sf(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
-
-      ### temperature plots ---------------------------------------------------------
+          } 
+          
       if (file_end != 'grid') {
-        
+      ### Create temperature plots ---------------------------------------------------------
         grid_stations_plot_visited <- grid_stations_plot %>% 
           dplyr::filter(!is.na(var_bin)) %>% 
           sf::st_centroid() %>% 
@@ -878,7 +901,8 @@ make_figure <- function(
               label.vjust = 0.5,
             ) ) +
           ggplot2::theme(
-            legend.position = "bottom") +
+            legend.position = "bottom", 
+            legend.spacing.x = unit(.5, 'cm')) +
           # legend managment
           ggplot2::scale_color_manual(
             name = "",
@@ -919,6 +943,8 @@ make_figure <- function(
       ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
       "_", file_end)
     
+    filename1 <- c()
+    
     # only make current if it is the last plot of the run
     if (file_end %in% c("grid", "mean")) {
       lastplotofrun <- TRUE
@@ -929,6 +955,8 @@ make_figure <- function(
     firstplotofrun <- (i == 1)
     
     ### PNG -------------------------------------------------------------------------
+    filename1 <- c(filename1, 
+                   paste0(dir_out, filename0,'.png'))
     ggsave(filename = paste0(filename0,'.png'), 
            path = dir_out,
            height = height, 
@@ -939,16 +967,20 @@ make_figure <- function(
            device = "png") 
     
     ### PDF -------------------------------------------------------------------------
+    filename1 <- c(filename1, 
+                   paste0(dir_out, filename0,'.pdf'), 
+                   paste0(dir_out, filename0,'.txt'))
     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(filename0, ".pdf"))
     file.remove(list.files(path = paste0(dir_wd, "/code/"), 
                            pattern = ".log", full.names = TRUE))
     
-    ### PDF Combined -----------------------------------------------------------------
-    # Create Binded PDF
+    ### Combined PDF -----------------------------------------------------------------
+    
     if (file_end %in% c("anom", "daily")) { 
-      
+      filename1 <- c(filename1, 
+                     paste0(dir_out, filename0,'_bind.pdf'))
       # remove file if already exists - qpdf::pdf_combine() will not overwrite
       if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
         file.remove(paste0(dir_out, filename0, "_bind.pdf"))
@@ -976,6 +1008,8 @@ make_figure <- function(
     
     ### GIF -------------------------------------------------------------------------
     if (make_gifs) {
+      filename1 <- c(filename1, 
+                     paste0(dir_out, filename0,'.gif'))
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
@@ -984,21 +1018,23 @@ make_figure <- function(
     
     ### CURRENT plots for easy finding -------------------------------------------
     if (lastplotofrun) {
-      temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+      temp <- filename1
       temp <- temp[!grepl(pattern = "current_", x = temp)]
       for (iiii in 1:length(temp)) {
         if (file_end  %in% c("anom", "daily")) {
           filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
-          filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
-                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
-                             x = filename00, fixed = TRUE)
+          filename00 <- gsub(pattern = paste0("."), 
+                             replacement = paste0("_",tolower(SRVY),"."), 
+                             x = filename00, 
+                             fixed = TRUE)
         } else if (file_end %in% c("grid", "mean")) {
-          filename00 <- gsub(pattern = paste0("_", file_end,"."), 
-                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
+          filename00 <- gsub(pattern = paste0("_", file_end), 
+                             replacement = paste0("current_", file_end, "_",tolower(SRVY)), 
                              x = temp[iiii], 
                              fixed = TRUE)
         }
-        
+        filename1 <- c(filename1, 
+                       filename00)
         file.copy(from = temp[iiii], 
                   to = filename00, 
                   overwrite = TRUE)
@@ -1007,11 +1043,10 @@ make_figure <- function(
       ### FTP -------------------------------------------
       # only make current if it is the last plot of the run
       if (ftp$ftp_dl){
+        print("uploading to ftp")
         upload_ftp( # vars here defined in ftp.R
-          dir_wd = dir_wd, 
           dir_out = dir_out, 
-          maxyr = maxyr, 
-          SRVY = SRVY, 
+          dir_in = filename1[grepl(pattern = "_current", x = filename1)], 
           dest = ftp$dev_ai, 
           user = ftp$user, 
           pass = ftp$pass)
@@ -1021,19 +1056,11 @@ make_figure <- function(
     
     ### GOOGLE DRIVE ------------------------------------------------------
     if (!(is.null(dir_googledrive_upload))) {
-      temp <- list.files(path = paste0(dir_out, "current_"), pattern = filename0, full.names = TRUE)
-      #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-      # if (file_end != "grid") {
-      #   temp <- c(temp, 
-      #             list.files(path = dir_out, 
-      #                        pattern = sub(pattern = max_date, replacement = "current", x = filename0),
-      #                        full.names = TRUE))
-      # }
-      for (iii in 1:length(temp)) {
+      print("uploading to googledrive")
+      for (iii in 1:length(filename1)) { 
         drive_upload(
-          media = temp[iii], 
+          media = filename1[iii], 
           path = googledrive::as_id(dir_googledrive_upload),
-          #path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
           overwrite = TRUE)
       }
     }
@@ -1046,168 +1073,6 @@ make_figure <- function(
 }
 
 ## figure helper functions -----------------------------------------------------
-
-# save_files<- function(addendum = "", 
-#                       dat,
-#                       file_end, 
-#                       dir_out,
-#                       height, 
-#                       width = 10.5,
-#                       gg,
-#                       ftp, 
-#                       dir_googledrive_upload, 
-#                       max_date, 
-#                       make_gifs = TRUE, 
-#                       date_entered = as.Date("2022-01-01"), 
-#                       dat_plot, 
-#                       plot_title, 
-#                       grid_stations_plot = grid_stations_plot, 
-#                       dat_planned, 
-#                       SRVY, 
-#                       i, 
-#                       dates0, 
-#                       params = list()) {
-#   
-#   
-#   filename0 <- paste0(
-#     ifelse((file_end %in% c("grid", "mean")), "", as.character(max_date)), 
-#     "_", file_end, addendum)
-#   
-#   ### PNG -------------------------------------------------------------------------
-#   ggsave(filename = paste0(filename0,'.png'), 
-#          path = dir_out,
-#          height = height, 
-#          width = width,
-#          plot = gg, 
-#          dpi = 320,
-#          bg = "white", 
-#          device = "png") 
-#   
-#   ### PDF -------------------------------------------------------------------------
-#   
-#   # Create main PDF
-#   # if (file_end %in% c("grid", "daily")) {
-#   rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
-#                     output_dir = dir_out,
-#                     output_file = paste0(filename0, ".pdf"))
-#   file.remove(list.files(path = paste0(dir_wd, "/code/"), 
-#                          pattern = ".log", full.names = TRUE))
-#   
-#   # } else if (file_end %in% c("anom", "mean")) {
-#   #   ggsave(filename = paste0(filename0,'.pdf'),
-#   #          path = dir_out,
-#   #          height = height,
-#   #          width = width,
-#   #          plot = gg,
-#   #          dpi = 320, 
-#   #          bg = "white", 
-#   #          device ="pdf") # pdfs are great for editing later
-#   # }
-#   
-#   ### PDF Combined -----------------------------------------------------------------
-#   # Create Binded PDF
-#   if (file_end %in% c("anom", "daily")) { #
-#     
-#     # remove file if already exists - qpdf::pdf_combine() will not overwrite
-#     if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
-#       file.remove(paste0(dir_out, filename0, "_bind.pdf"))
-#     }
-#     
-#     if (date_entered[1] == date_entered[i]) {
-#       qpdf::pdf_combine(
-#         input = c(paste0(dir_out, filename0,'.pdf'),
-#                   ifelse(file.exists(paste0(dir_out,'_grid.pdf')),
-#                          paste0(dir_out,'_grid.pdf'), "")),
-#         output = c(paste0(dir_out, filename0, "_bind.pdf")))
-#       
-#     } else {
-#       temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
-#       temp <- temp[!grepl(pattern = "current", x = temp)]
-#       temp <- strsplit(x = temp, split = "_")
-#       temp <- as.Date(sort(sapply(temp,"[[",1)))
-#       temp <- max(temp[temp < max_date])
-#       
-#       qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"),
-#                                   paste0(dir_out, as.character(temp),"_", file_end, "_bind.pdf")),
-#                         output = c(paste0(dir_out, filename0, "_bind.pdf")))
-#       
-#     }
-#   }
-#   
-#   ### GIF -------------------------------------------------------------------------
-#   if (make_gifs) {
-#     make_figure_gif(file_end = file_end, 
-#                     max_date = max_date,
-#                     dir_out = dir_out, 
-#                     filename0 = filename0)
-#   }
-#   
-#   ### CURRENT plots for easy finding -------------------------------------------
-#   # only make current if it is the last plot of the run
-#   if (file_end %in% c("grid", "mean")) {
-#     lastplotofrun <- TRUE
-#   } else {
-#     lastplotofrun <- (dates0 != "all" |
-#                         !(dates0 == "all" & date_entered[i] != date_entered[length(date_entered)])
-#     ) 
-#   }
-#   
-#   if (lastplotofrun) {
-#     temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-#     temp <- temp[!grepl(pattern = "current_", x = temp)]
-#     for (iiii in 1:length(temp)) {
-#       if (file_end  %in% c("anom", "daily")) {
-#         filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
-#         filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
-#                            replacement = paste0("current_", file_end, addendum, "_",tolower(SRVY),"."), 
-#                            x = filename00, fixed = TRUE)
-#       } else if (file_end %in% c("grid", "mean")) {
-#         filename00 <- gsub(pattern = paste0("_", file_end,"."), 
-#                            replacement = paste0("current_", file_end, addendum, "_",tolower(SRVY),"."), 
-#                            x = temp[iiii], 
-#                            fixed = TRUE)
-#       }
-#       
-#       file.copy(from = temp[iiii], 
-#                 to = filename00, 
-#                 overwrite = TRUE)
-#     }
-#   
-#   ### FTP -------------------------------------------
-#   # only make current if it is the last plot of the run
-#   if (ftp$ftp_dl){
-#     upload_ftp( # vars here defined in ftp.R
-#       dir_wd = dir_wd, 
-#       dir_out = dir_out, 
-#       maxyr = maxyr, 
-#       SRVY = SRVY, 
-#       dest = ftp$dev_ai, 
-#       user = ftp$user, 
-#       pass = ftp$pass)
-#   }
-#   
-# }
-# 
-# ### GOOGLE DRIVE ------------------------------------------------------
-# if (!(is.null(dir_googledrive_upload))) {
-#   temp <- list.files(path = paste0(dir_out, "current_"), pattern = filename0, full.names = TRUE)
-#   #if (i == iterate[length(iterate)] & file_end %in% c("anom", "daily")) {
-#   # if (file_end != "grid") {
-#   #   temp <- c(temp, 
-#   #             list.files(path = dir_out, 
-#   #                        pattern = sub(pattern = max_date, replacement = "current", x = filename0),
-#   #                        full.names = TRUE))
-#   # }
-#   for (iii in 1:length(temp)) {
-#     drive_upload(
-#       media = temp[iii], 
-#       path = googledrive::as_id(dir_googledrive_upload),
-#       #path = ifelse(class(dir_googledrive_upload)[1] == "drive_id", dir_googledrive_upload, googledrive::as_id(dir_googledrive_upload)), 
-#       overwrite = TRUE)
-#   }
-# }
-# 
-# }
 
 #' gif compiler
 #'
@@ -1262,24 +1127,19 @@ make_figure_gif<-function(file_end,
   
 }
 
-upload_ftp <- function(dir_wd, 
-                       dir_out, 
-                       maxyr, 
-                       SRVY, 
+upload_ftp <- function(dir_out, 
+                       dir_in, 
                        dest, 
                        user, 
                        pass){
-  
-  dir_out <- paste0(dir_wd,"/output/",maxyr,"_",SRVY,"/")
-  temp <- list.files(path = dir_out, pattern = "current_", full.names = FALSE)
-  
-  for (iiii in 1:length(temp)) {
-    print(temp[iiii])
+
+  for (iiii in 1:length(dir_in)) {
+    print(dir_in[iiii])
     
     RCurl::ftpUpload(
-      what = paste0(dir_out, "/", temp[iiii]),
+      what = paste0(dir_out, "/", dir_in[iiii]),
       asText = FALSE,
-      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", temp[iiii])),
+      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", dir_in[iiii])),
       userpwd = paste0(user,":", pass),
       .opts=curlOptions(verbose=TRUE))
   }
