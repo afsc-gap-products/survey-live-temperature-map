@@ -56,7 +56,13 @@ if (SRVY %in% c("AI", "GOA")) {
 }
 
 intro0 <- paste0(
-  "NOAA Fisheries Alaska Fisheries Science Center's Groundfish Assessment Program conducted the ", 
+  "NOAA Fisheries AFSC Groundfish Assessment Program conducted the ", 
+  text_list(surveys),
+  " bottom trawl survey",
+  ifelse(length(surveys)>1, "s", ""), ". ")
+
+intro_vess <- paste0(
+  "NOAA Fisheries AFSC Groundfish Assessment Program conducted the ", 
   text_list(surveys),
   " bottom trawl survey",
   ifelse(length(surveys)>1, "s", "")
@@ -118,7 +124,7 @@ if (file_end %in% c("mean")) {
   
   fig_cap <- paste0(
     plot_title, ". ", 
-    intro0,
+    intro_vess,
     temp, 
     foss0)
   
@@ -216,7 +222,7 @@ if (file_end %in% c("mean")) {
     stations1 <- paste0(stations1, "Allocated stations that have not yet been sampled are shown as gray dots. ")
   }
   
-  fig_cap <- paste0(intro0, 
+  fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
                     "The near real-time ocean bottom temperatures depicted were collected ", 
                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                            paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 

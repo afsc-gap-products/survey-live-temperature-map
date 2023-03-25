@@ -1018,23 +1018,21 @@ make_figure <- function(
     
     ### CURRENT plots for easy finding -------------------------------------------
     if (lastplotofrun) {
-      temp <- filename1
+      temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       temp <- temp[!grepl(pattern = "current_", x = temp)]
       for (iiii in 1:length(temp)) {
         if (file_end  %in% c("anom", "daily")) {
           filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
-          filename00 <- gsub(pattern = paste0("."), 
-                             replacement = paste0("_",tolower(SRVY),"."), 
-                             x = filename00, 
-                             fixed = TRUE)
+          filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
+                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
+                             x = filename00, fixed = TRUE)
         } else if (file_end %in% c("grid", "mean")) {
-          filename00 <- gsub(pattern = paste0("_", file_end), 
-                             replacement = paste0("current_", file_end, "_",tolower(SRVY)), 
+          filename00 <- gsub(pattern = paste0("_", file_end,"."), 
+                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
                              x = temp[iiii], 
                              fixed = TRUE)
         }
-        filename1 <- c(filename1, 
-                       filename00)
+        
         file.copy(from = temp[iiii], 
                   to = filename00, 
                   overwrite = TRUE)
@@ -1043,10 +1041,11 @@ make_figure <- function(
       ### FTP -------------------------------------------
       # only make current if it is the last plot of the run
       if (ftp$ftp_dl){
-        print("uploading to ftp")
         upload_ftp( # vars here defined in ftp.R
+          dir_wd = dir_wd, 
           dir_out = dir_out, 
-          dir_in = filename1[grepl(pattern = "_current", x = filename1)], 
+          maxyr = maxyr, 
+          SRVY = SRVY, 
           dest = ftp$dev_ai, 
           user = ftp$user, 
           pass = ftp$pass)
