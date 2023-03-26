@@ -124,7 +124,13 @@ if (file_end %in% c("mean")) {
   
   fig_cap <- paste0(
     plot_title, ". ", 
-    intro_vess,
+    intro_vess, 
+    "The near real-time ocean bottom temperatures depicted were collected ", 
+                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                           paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
+                           paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
+                                  "-", 
+                                  format_date_txt(x = as.Date(max_date), "%B %d"))), ". ", 
     temp, 
     foss0)
   
@@ -200,8 +206,22 @@ if (file_end %in% c("mean")) {
                        x = unique(surveys$vessel_name[!is.na(surveys$vessel_name)])),"}") )
     }
     
+    temp1 <- ""
+    temp11 <- unique(dat_plot$vessel_shape); temp11 <- temp11[!is.na(temp11)] # vessels in data
+    temp12 <- unique(dat_max_date$vessel_shape) # vessels from maxdate
+    temp13 <- setdiff(temp11, temp12)
+    if (length(temp13)>0) {
+      temp1 <- paste0("No stations were surveyed by the F/V \\textit{", 
+                      gsub(pattern = "F/V ", 
+                       replacement = "", 
+                       fixed = TRUE,
+                       x = setdiff(unique(dat_plot$vessel_name[!is.na(dat_plot$vessel_name)]), 
+              unique(dat_max_date$vessel_name))), 
+                      "}. ")
+    }
+    
     stations1 <- paste0("On ", format_date_txt(as.Date(max_date)), ", ",
-                        text_list(temp), ". ")
+                        text_list(temp), ". ", temp1)
   }
   
   # Are stations planned for the next day?

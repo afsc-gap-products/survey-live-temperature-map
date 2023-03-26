@@ -951,7 +951,12 @@ make_figure <- function(
     } else {
       lastplotofrun <- (i == iterate[length(iterate)])
     }
-    lastdayofsurvey <- ((sum(is.na(dat_plot$date))) == 0)
+    # is this the first or last day of the survey?
+      lastdayofsurvey <- ((sum(is.na(dat_plot$date))) == 0)
+    if (show_planned_stations) {
+      lastdayofsurvey <- (lastdayofsurvey & 
+                            nrow(dat_planned[!is.na(dat_planned$date),])==0)
+    }
     firstplotofrun <- (i == 1)
     
     ### PNG -------------------------------------------------------------------------
