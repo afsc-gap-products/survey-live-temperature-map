@@ -119,18 +119,23 @@ if (file_end %in% c("mean")) {
     ifelse(length(surveys)>1, 
            paste0("their respective ", maxyr, " surveys"), 
            paste0("the ", maxyr, " survey")),
-    ". "
-    )
-  
-  fig_cap <- paste0(
-    plot_title, ". ", 
-    intro_vess, 
-    "The near real-time ocean bottom temperatures depicted were collected ", 
-                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+    "(", 
+    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                            paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
                            paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
                                   "-", 
-                                  format_date_txt(x = as.Date(max_date), "%B %d"))), ". ", 
+                                  format_date_txt(x = as.Date(max_date), "%B %d"))),
+    "). "
+    )
+  
+  fig_cap <- paste0(
+    
+    "The ", maxyr,
+    " near real-time ocean bottom temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment Program ",
+    text_list(surveys),
+    " bottom trawl survey",
+    ifelse(length(surveys)>1, "s", ""),
+    ". ",
     temp, 
     foss0)
   
