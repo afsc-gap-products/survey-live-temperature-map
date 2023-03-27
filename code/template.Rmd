@@ -119,7 +119,7 @@ if (file_end %in% c("mean")) {
     ifelse(length(surveys)>1, 
            paste0("their respective ", maxyr, " surveys"), 
            paste0("the ", maxyr, " survey")),
-    "(", 
+    " (", 
     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                            paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
                            paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
@@ -131,7 +131,7 @@ if (file_end %in% c("mean")) {
   fig_cap <- paste0(
     
     "The ", maxyr,
-    " near real-time ocean bottom temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment Program ",
+    " near real-time ocean bottom temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment Program's ",
     text_list(surveys),
     " bottom trawl survey",
     ifelse(length(surveys)>1, "s", ""),
@@ -160,12 +160,17 @@ if (file_end %in% c("mean")) {
   loc <- dat_plot %>% 
     dplyr::filter(!is.na(var) & 
                     date == max_date) 
+  
+  stations_first_last <- ""
   if (firstplotofrun) {
-    stations1 <- "This is the first day of the survey. "
+    stations_first_last <- "This is the first day of the survey. "
   # } else if (date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0) {
-  } else if (lastdayofsurvey) {
-    stations1 <- "This is the last day of the survey. "
-  } else if (nrow(loc) == 0) {
+  } else if (lastdayofsurvey & 
+             SRVY %in% c("BS", "EBS", "NBS")) {
+    stations_first_last <- "This is the last day of the survey. "
+  } 
+  
+  if (nrow(loc) == 0) {
     stations1 <- paste0("No stations were sampled on ", format_date_txt(x = as.Date(max_date)),". ")
   } else {
     
@@ -212,7 +217,7 @@ if (file_end %in% c("mean")) {
     }
     
     temp1 <- ""
-    temp11 <- unique(dat_plot$vessel_shape); temp11 <- temp11[!is.na(temp11)] # vessels in data
+    temp11 <- as.character(unique(dat_survreg$vessel_shape)); temp11 <- temp11[!is.na(temp11)] # vessels in data
     temp12 <- unique(dat_max_date$vessel_shape) # vessels from maxdate
     temp13 <- setdiff(temp11, temp12)
     if (length(temp13)>0) {
@@ -254,6 +259,7 @@ if (file_end %in% c("mean")) {
                            paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
                                   "-", 
                                   format_date_txt(x = as.Date(max_date), "%B %d"))), ". ", 
+                    stations_first_last, 
                     stations1)
   
 }
