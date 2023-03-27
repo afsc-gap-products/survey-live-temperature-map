@@ -218,7 +218,7 @@ if (file_end %in% c("mean")) {
     
     temp1 <- ""
     temp11 <- as.character(unique(dat_survreg$vessel_shape)); temp11 <- temp11[!is.na(temp11)] # vessels in data
-    temp12 <- unique(dat_max_date$vessel_shape) # vessels from maxdate
+    temp12 <- as.character(unique(dat_max_date$vessel_shape)) # vessels from maxdate
     temp13 <- setdiff(temp11, temp12)
     if (length(temp13)>0) {
       temp1 <- paste0("No stations were surveyed by the F/V \\textit{", 

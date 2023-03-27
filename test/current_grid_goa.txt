@@ -1,1 +1,1 @@
-NOAA Fisheries Gulf of Alaska bottom trawl survey regions. This survey covers the Chirikof, Kodiak, Shumagin, Southeastern, and Yakutat regions, which are randomly sampled each year. Credit: NOAA Fisheries
+NOAA Fisheries Gulf of Alaska bottom trawl survey regions. This survey covers the Shumagin, Chirikof, Kodiak, Yakutat, and Southeastern regions, which are sampled randomly each year. Credit: NOAA Fisheries
