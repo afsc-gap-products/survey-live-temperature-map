@@ -79,8 +79,8 @@ dir_googledrive_upload_goa = temp$id[temp$name=="2021_GOA"]
 
 data_source <- "oracle" # testing
 dates0 <- "all"
-dates0 <- "latest" # testing
-dates0 <- "first" # testing
+# dates0 <- "latest" # testing
+# dates0 <- "first" # testing
 
 # Map --------------------------------------------------------------------------
 

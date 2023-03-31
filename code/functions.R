@@ -892,15 +892,17 @@ make_figure <- function(
             drop = FALSE,
             na.translate = FALSE,
             guide = guide_legend(
-              direction = "horizontal",
-              title.position = "top",
+              # direction = "horizontal",
               label.position = "bottom",
+              legend.justification = "center",
               nrow = 1,
               # label.theme = element_text(angle = 90)
               label.hjust = 0.5,
               label.vjust = 0.5,
             ) ) +
           ggplot2::theme(
+            legend.direction = "horizontal", 
+            legend.box = "horizontal", 
             legend.position = "bottom", 
             legend.spacing.x = unit(.5, 'cm')) +
           # legend managment

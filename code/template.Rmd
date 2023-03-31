@@ -48,6 +48,9 @@ if (SRVY %in% c("AI", "GOA")) {
     dplyr::summarise(minlon = min(X, na.rm = TRUE)) %>% 
     dplyr::arrange(minlon)
   
+  goaai_regions0 <- paste0("This survey covers the ", 
+                          text_list(goaai_regions$region), 
+                          " regions. ")
   goaai_regions <- paste0("This survey covers the ", 
                           text_list(goaai_regions$region), 
                           " regions, which are sampled randomly each year. ")
@@ -150,8 +153,8 @@ if (file_end %in% c("mean")) {
       " bathymetric boundaries. ")
   } else if (SRVY %in% c("GOA", "AI")) {
     fig_cap <- paste0(
-      "NOAA Fisheries ", surveys, " bottom trawl survey regions. ", 
-      goaai_regions)
+      "The Gulf of Alaska bottom trawl survey.", 
+      goaai_regions0)
   }
   
 } else if (file_end == "daily") {
