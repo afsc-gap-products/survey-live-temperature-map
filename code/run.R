@@ -12,19 +12,16 @@ data_source <- "gd" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
 
-# SIGN INTO GOOGLE DRIVE--------------------------------------------------------
-
-## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
-googledrive_dl <- TRUE
-# if (googledrive_dl) {
-googledrive::drive_deauth()
-googledrive::drive_auth()
-1
-# }
-
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
 dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1V9GLy2DkOz8UbMTw6eC0GxjMfWa5FeHm"
 dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3OOCKsKzMX-UzTwKGVVGFsOW"
+
+# SIGN INTO GOOGLE DRIVE--------------------------------------------------------
+
+googledrive_dl <- TRUE
+googledrive::drive_deauth()
+googledrive::drive_auth()
+1
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 
@@ -46,6 +43,12 @@ source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
 
+# What surveys should be run for this year and obtain necessary metadata
+dat_survreg <- dat_survreg %>%
+  dplyr::filter(year == maxyr)
+
+# SIGN INTO FTP ----------------------------------------------------------------
+
 ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
 if (ftp_dl) {
@@ -56,39 +59,17 @@ if (ftp_dl) {
     pass = pass)
 }
 
-## Update README (sometimes) ---------------------------------------------------
+## UPDATE README (sometimes) ---------------------------------------------------
 
 # rmarkdown::render(paste0("./README.Rmd"),
 #                   output_dir = "./",
 #                   output_file = paste0("README.md"))
 
-## Testing ---------------------------------------------------------------------
-googledrive_dl <- FALSE
-
-## production ------------------------------------------------------------------
-
-# dat_survreg <- dat_survreg %>%
-#   dplyr::filter(year == maxyr)
-
-## testing ---------------------------------------------------------------------
-dir_googledrive_upload_test = "https://drive.google.com/drive/folders/1MrAq9jtQL1YBlYQcbeGiHh751EpPybY2"
-temp <- googledrive::drive_ls(googledrive::as_id(dir_googledrive_upload_test))
-dir_googledrive_upload_bs = temp$id[temp$name=="2022_BS"]
-dir_googledrive_upload_ai = temp$id[temp$name=="2022_AI"]
-dir_googledrive_upload_goa = temp$id[temp$name=="2021_GOA"]
-
-data_source <- "oracle" # testing
-dates0 <- "all"
-# dates0 <- "latest" # testing
-# dates0 <- "first" # testing
-
 # Map --------------------------------------------------------------------------
 
 ## GOA --------------------------------------------------------------------------
 
-# if ("GOA" %in% dat_survreg$SRVY) {
-  
-  maxyr <- 2021 # testing
+if ("GOA" %in% dat_survreg$SRVY) {
 
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
@@ -101,7 +82,7 @@ dates0 <- "all"
   survey_area <- shp_goa
   if(ftp_dl){ftp$dest <- dev_goa}
   
-  make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
+  make_varplot_wrapper(maxyr = maxyr, 
                        SRVY = SRVY,
                        haul = haul,
                        dat_survreg = dat_survreg,
@@ -112,15 +93,13 @@ dates0 <- "all"
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "grid"),# "mean", "anom"
+                       file_end0 = c("daily"),
                        dir_wd = dir_wd)
-# }
+}
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
-# if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
-  
-  maxyr <- 2022 # testing
+if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
   
   SRVY <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
@@ -134,7 +113,7 @@ dates0 <- "all"
   survey_area <- shp_bs
   if(ftp_dl){ftp$dest <- dev_bs}
   
-  make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
+  make_varplot_wrapper(maxyr = maxyr,
                        SRVY = SRVY,
                        haul = haul,
                        dat_survreg = dat_survreg,
@@ -145,15 +124,13 @@ dates0 <- "all"
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("grid", "daily", "mean", "anom"), 
+                       file_end0 = c("daily", "anom"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
-# }
+}
 
 ## AI --------------------------------------------------------------------------
-# if ("AI" %in% dat_survreg$SRVY) {
-  
-  maxyr <- 2022 # testing
+if ("AI" %in% dat_survreg$SRVY) { # won't run in 2023 because is not in dat_survreg
 
   SRVY <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
@@ -167,7 +144,7 @@ dates0 <- "all"
   survey_area <- shp_ai
   if(ftp_dl){ftp$dest <- dev_ai}
   
-  make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
+  make_varplot_wrapper(maxyr = maxyr, 
                        SRVY = SRVY,
                        haul = haul,
                        dat_survreg = dat_survreg,
@@ -178,7 +155,7 @@ dates0 <- "all"
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("grid", "daily"), #"mean", "anom"
+                       file_end0 = c("daily"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
-# }
+}
