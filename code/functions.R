@@ -30,6 +30,7 @@ PKG <- c(
   "googledrive",
   "magrittr",
   "stringr", 
+  "readxl",
   # "knitr", # A general-purpose tool for dynamic report generation in R
   # "officer"
   
