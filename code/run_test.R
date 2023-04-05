@@ -46,7 +46,8 @@ source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
 
-ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
+ftp_dl <- FALSE
+# ftp_dl <-(googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
 if (ftp_dl) {
   source(file = paste0(dir_wd, "code/ftp.R")) # removed in gitignore - ask for permission
