@@ -935,10 +935,10 @@ make_figure <- function(
           gg <- gg +
             annotate("text", 
                      x = quantile(sf::st_bbox(survey_area$survey.grid)[1]:sf::st_bbox(survey_area$survey.grid)[3], .12), 
-                     y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .83), 
+                     y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .80), 
                      label = ifelse(is.na(max_date), 
                                     "", 
-                                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
                                            paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
                                            paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
                                                   " \u2013\n", 
