@@ -237,9 +237,9 @@ make_varplot_wrapper <- function(
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
   
-  no_plot <- TRUE
+  is_there_data_to_plot <- TRUE
   if (nrow(dat0)==0) {
-    no_plot <- FALSE
+    is_there_data_to_plot <- FALSE
     print("No observation data was available and no daily or anomaly plots were created. ")
   }
   
@@ -314,7 +314,7 @@ make_varplot_wrapper <- function(
   }
   
   ### Daily --------------------------------------------------------------------
-  if ("daily" %in% file_end0 & no_plot) {  
+  if ("daily" %in% file_end0 & is_there_data_to_plot) {  
     file_end <- "daily"; print(paste0("------------", file_end, "------------"))
     
     # Define temperature bins
@@ -354,7 +354,7 @@ make_varplot_wrapper <- function(
   }
   
   ### Anomaly ------------------------------------------------------------------
-  if ("anom" %in% file_end0 & no_plot) {  
+  if ("anom" %in% file_end0 & is_there_data_to_plot) {  
     file_end <- "anom"; print(paste0("------------", file_end, "------------"))
     
     make_figure(
@@ -929,6 +929,22 @@ make_figure <- function(
         ggspatial::coord_sf(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
+        
+        # if (file_end %in% c("daily", "anom")) {
+          gg <- gg +
+            annotate("text", 
+                     x = quantile(sf::st_bbox(survey_area$survey.grid)[1]:sf::st_bbox(survey_area$survey.grid)[3], .10), 
+                     y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .85), 
+                     label = ifelse(is.na(max_date), 
+                                    "", 
+                                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
+                                           paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
+                                           paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
+                                                  " \u2013\n", 
+                                                  format(x = as.Date(max_date), format = "%b %d, %Y")))), 
+                     color = "black", size = 5, fontface=2) 
+        # }
+        
 
       }
       
