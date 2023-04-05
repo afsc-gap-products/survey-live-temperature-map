@@ -19,7 +19,7 @@ PKG <- c(
   "magick", 
   "qpdf",
   "janitor",
-  "ggplot2", # Create Elegant Data Visualisations Using the Grammar of Graphics
+  "ggplot2", # Create Elegant Data Visualizations Using the Grammar of Graphics
   "viridis", 
   
   # tidy
@@ -934,8 +934,8 @@ make_figure <- function(
         # if (file_end %in% c("daily", "anom")) {
           gg <- gg +
             annotate("text", 
-                     x = quantile(sf::st_bbox(survey_area$survey.grid)[1]:sf::st_bbox(survey_area$survey.grid)[3], .10), 
-                     y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .85), 
+                     x = quantile(sf::st_bbox(survey_area$survey.grid)[1]:sf::st_bbox(survey_area$survey.grid)[3], .12), 
+                     y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .83), 
                      label = ifelse(is.na(max_date), 
                                     "", 
                                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
