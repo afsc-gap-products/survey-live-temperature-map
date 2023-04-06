@@ -4,6 +4,8 @@
 #' maintained: Emily Markowitz and Liz Dawson (May 2022)
 #' purpose: run script
 #' ---------------------------
+# LOG --------------------------------------------------------------------------
+
 
 # KNOWNS -----------------------------------------------------------------------
 
@@ -51,14 +53,14 @@ dat_survreg <- dat_survreg %>%
 # SIGN INTO FTP ----------------------------------------------------------------
 ftp_dl <- FALSE # test
 # ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
-# ftp <- list(ftp_dl = ftp_dl)
-# if (ftp_dl) {
-#   source(file = paste0(dir_wd, "code/ftp.R")) # removed in gitignore - ask for permission
-#   ftp <- list(
-#     ftp_dl = ftp_dl, 
-#     user = user, 
-#     pass = pass)
-# }
+ftp <- list(ftp_dl = ftp_dl)
+if (ftp_dl) {
+  source(file = paste0(dir_wd, "code/ftp.R")) # removed in gitignore - ask for permission
+  ftp <- list(
+    ftp_dl = ftp_dl,
+    user = user,
+    pass = pass)
+}
 
 ## UPDATE README (sometimes) ---------------------------------------------------
 
@@ -94,7 +96,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"),
+                       file_end0 = c("daily", "grid"),
                        dir_wd = dir_wd)
 }
 
@@ -125,7 +127,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "anom", "grid"), 
+                       file_end0 = c("daily", "grid"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
