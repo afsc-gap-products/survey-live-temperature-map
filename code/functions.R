@@ -538,6 +538,7 @@ make_figure <- function(
       
       max_date <- date_entered[i]
       print(max_date)
+      message(max_date)
       if (date_entered[i]==date_entered[length(date_entered)]) {
         next_date <- date_entered[i]
       } else {
@@ -1017,6 +1018,7 @@ make_figure <- function(
         file.remove(paste0(dir_out, filename0, "_bind.pdf"))
       }
       
+      # if the first day of the survey
       if (date_entered[1] == date_entered[i]) {
         input0 <- paste0(dir_out, filename0,'.pdf')
         if (file.exists(paste0(dir_out,'_grid.pdf'))) { 
@@ -1029,7 +1031,7 @@ make_figure <- function(
           output = c(paste0(dir_out, filename0, "_bind.pdf")))
       } else {
         temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
-        if (length(temp)) {
+        if (length(temp)==0) {
           stop("ERROR: There are no other *_bind.pdf files in your utput directory. Check and make sure you have run previous days of the surey before running this plot. ") 
         }
         temp <- temp[!grepl(pattern = "current", x = temp)]
@@ -1097,6 +1099,7 @@ make_figure <- function(
     ### GOOGLE DRIVE ------------------------------------------------------
     if (!(is.null(dir_googledrive_upload))) {
       message("Uploading files to googledrive")
+      filename1 <- unique(filename1)
       for (iii in 1:length(filename1)) { 
         drive_upload(
           media = filename1[iii], 
