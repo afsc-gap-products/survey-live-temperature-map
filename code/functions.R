@@ -168,7 +168,8 @@ make_varplot_wrapper <- function(
   dat0 <- dat
   
   if (nrow(dat0) == 0) {
-    dat <- dplyr::left_join(
+    
+  dat <- dplyr::left_join(
     multiple = "all", 
       x = dat_anom, 
       y = dat_survreg %>% 
@@ -241,7 +242,7 @@ make_varplot_wrapper <- function(
   is_there_data_to_plot <- TRUE
   if (nrow(dat0)==0) {
     is_there_data_to_plot <- FALSE
-    print("No observation data was available and no daily or anomaly plots were created. ")
+    warning("WARNING: There is no _grid.pdf file to append this *_daily.pdf or *_anom.pdf file to in the *_bind.pdf to. ") 
   }
   
   ### Grid ----------------------------------------------------------------------
@@ -361,6 +362,7 @@ make_varplot_wrapper <- function(
     make_figure(
       SRVY = SRVY, 
       dat = dat %>% # Anomaly plot
+        dplyr::filter(station != 0) %>% # because show_planned_stations = FALSE
         dplyr::mutate(var = anom, 
                       reg_lab = paste0(region_long, "\n ")),
       var_breaks = c(-10, seq(from = -2, to = 3, by = 1), 50), 
@@ -384,7 +386,7 @@ make_varplot_wrapper <- function(
       var00 = var00)
   }
   
-  print("RUN COMPLETE")
+  message("RUN COMPLETE")
 }
 
 #' Create temperature and anomaly plots
@@ -979,6 +981,7 @@ make_figure <- function(
     firstplotofrun <- (i == 1)
     
     ### PNG -------------------------------------------------------------------------
+    message("Create PNG")
     filename1 <- c(filename1, 
                    paste0(dir_out, filename0,'.png'))
     ggsave(filename = paste0(filename0,'.png'), 
@@ -991,6 +994,8 @@ make_figure <- function(
            device = "png") 
     
     ### PDF -------------------------------------------------------------------------
+    message("Create PDF")
+    
     filename1 <- c(filename1, 
                    paste0(dir_out, filename0,'.pdf'), 
                    paste0(dir_out, filename0,'.txt'))
@@ -1003,6 +1008,8 @@ make_figure <- function(
     ### Combined PDF -----------------------------------------------------------------
     
     if (file_end %in% c("anom", "daily")) { 
+      message("Create combined PDF of all daily/anom pdfs")
+      
       filename1 <- c(filename1, 
                      paste0(dir_out, filename0,'_bind.pdf'))
       # remove file if already exists - qpdf::pdf_combine() will not overwrite
@@ -1012,12 +1019,19 @@ make_figure <- function(
       
       if (date_entered[1] == date_entered[i]) {
         input0 <- paste0(dir_out, filename0,'.pdf')
-        if (file.exists(paste0(dir_out,'current_grid.pdf'))) { input0 <- c(input0, paste0(dir_out,'current_grid.pdf'))}
+        if (file.exists(paste0(dir_out,'_grid.pdf'))) { 
+          input0 <- c(input0, paste0(dir_out,'_grid.pdf'))
+        } else {
+          warning("WARNING: There is no _grid.pdf file to append this *_daily.pdf or *_anom.pdf file to in the *_bind.pdf to. ") 
+        }
         qpdf::pdf_combine(
           input = input0,
           output = c(paste0(dir_out, filename0, "_bind.pdf")))
       } else {
         temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
+        if (length(temp)) {
+          stop("ERROR: There are no other *_bind.pdf files in your utput directory. Check and make sure you have run previous days of the surey before running this plot. ") 
+        }
         temp <- temp[!grepl(pattern = "current", x = temp)]
         temp <- strsplit(x = temp, split = "_")
         temp <- as.Date(sort(sapply(temp,"[[",1)))
@@ -1032,6 +1046,7 @@ make_figure <- function(
     
     ### GIF -------------------------------------------------------------------------
     if (make_gifs) {
+      message("Make GIF")
       filename1 <- c(filename1, 
                      paste0(dir_out, filename0,'.gif'))
       make_figure_gif(file_end = file_end, 
@@ -1042,6 +1057,7 @@ make_figure <- function(
     
     ### CURRENT plots for easy finding -------------------------------------------
     if (lastplotofrun) {
+      message("Make current_* files")
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       temp <- temp[!grepl(pattern = "current_", x = temp)]
       for (iiii in 1:length(temp)) {
@@ -1056,7 +1072,7 @@ make_figure <- function(
                              x = temp[iiii], 
                              fixed = TRUE)
         }
-        
+        filename1 <- c(filename1, filename00) # add current files to list of files to upload
         file.copy(from = temp[iiii], 
                   to = filename00, 
                   overwrite = TRUE)
@@ -1065,6 +1081,7 @@ make_figure <- function(
       ### FTP -------------------------------------------
       # only make current if it is the last plot of the run
       if (ftp$ftp_dl){
+        message("Uploading files to FTP")
         upload_ftp( # vars here defined in ftp.R
           dir_wd = dir_wd, 
           dir_out = dir_out, 
@@ -1079,7 +1096,7 @@ make_figure <- function(
     
     ### GOOGLE DRIVE ------------------------------------------------------
     if (!(is.null(dir_googledrive_upload))) {
-      print("uploading to googledrive")
+      message("Uploading files to googledrive")
       for (iii in 1:length(filename1)) { 
         drive_upload(
           media = filename1[iii], 

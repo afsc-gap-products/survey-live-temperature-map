@@ -4,8 +4,6 @@
 #' maintained: Emily Markowitz and Liz Dawson (May 2022)
 #' purpose: run script
 #' ---------------------------
-# LOG --------------------------------------------------------------------------
-
 
 # KNOWNS -----------------------------------------------------------------------
 
@@ -25,23 +23,27 @@ googledrive::drive_deauth()
 googledrive::drive_auth()
 1
 
-# SOURCE SUPPORT SCRIPTS -------------------------------------------------------
-
+# Set Working Directory --------------------------------------------------------
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
-# locations <- c(
-#   "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
-#   "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-#   "Z:/Projects/survey-live-temperature-map/", 
-#   "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/")
-# 
-# for (i in 1:length(locations)){
-#   if (file.exists(locations[i])) {
-#     dir_wd  <- locations[i]
-#   }
-# }
-dir_wd <- "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+locations <- c(
+  "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
+  "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
+  "Z:/Projects/survey-live-temperature-map/",
+  "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/")
 
+for (i in 1:length(locations)){
+  if (file.exists(locations[i])) {
+    dir_wd  <- locations[i]
+  }
+}
+# dir_wd <- "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+
+
+# LOG --------------------------------------------------------------------------
+sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
+
+# SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
@@ -127,7 +129,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "grid"), 
+                       file_end0 = c("daily", "anom", "grid"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
@@ -158,7 +160,12 @@ if ("AI" %in% dat_survreg$SRVY) { # won't run in 2023 because is not in dat_surv
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"), 
+                       file_end0 = c("daily", "grid"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
+
+# Log --------------------------------------------------------------------------
+
+sink() 
+
