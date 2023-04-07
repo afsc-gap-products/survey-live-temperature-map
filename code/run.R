@@ -18,7 +18,7 @@ dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3O
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
-googledrive_dl <- TRUE
+googledrive_dl <- FALSE
 googledrive::drive_deauth()
 googledrive::drive_auth()
 1

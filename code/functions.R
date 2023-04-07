@@ -513,7 +513,9 @@ make_figure <- function(
     iterate <- length(date_entered) # if you want to just run todays/a specific date:
     if (sum(is.na(dat$var))!=0 & # if the survey is not yet complete
         show_planned_stations & # if we plan to show planned stations
-        sum(is.na(dat$var) & !is.na(dat$vessel_shape))>0) { # and if there are planned stations to show
+        sum(is.na(dat$var) &  # and if there are planned stations to show
+            dat$station != 0 & # not including dummy stations
+            !is.na(dat$vessel_shape))>0) {
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
