@@ -87,34 +87,19 @@ Find more plot examples
 ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the
 eastern Bering Sea and northern Bering Sea bottom trawl surveys. The
 near real-time ocean bottom temperatures depicted were collected May
-29-July 13 On July 13, stations E-22 (56.33°N, -170.62°W; \>4–5°C) and
-F-23 (56.67°N, -171.29°W; \>3–4°C) were surveyed by the F/V Alaska
-Knight and stations M-23 (59°N, -171.77°W; \>0–1°C), N-23 (59.33°N,
--171.84°W; \>-1–0°C), N-22 (59.33°N, -171.18°W; \>-1–0°C), and O-22
-(59.67°N, -171.25°W; \>-1–0°C) were surveyed by the F/V Vesteraalen.
-There are 8 stations planned for July 14 Credit: NOAA
+29-August 20 This is the last day of the survey. On August 20, stations
+R-18 (60.67°N, -168.69°W; \>8°C), R-01 (60.67°N, -168.01°W; \>8°C), and
+R-02 (60.67°N, -167.32°W; \>8°C) were surveyed by the F/V Alaska Knight.
+No stations were surveyed by the F/V Vesteraalen. Credit: NOAA
 Fisheries](./examples/current_daily_bs.gif) , ![NOAA Fisheries AFSC
 Groundfish Assessment Program conducted the Aleutian Islands bottom
 trawl survey. The near real-time ocean bottom temperatures depicted were
-collected June 10-July 13 On July 13, a station 171-15 (51.6°N,
--177.22°W; \>4–4.5°C) was surveyed by the F/V Alaska Provider and
-stations 125-7 (51.27°N, 179.32°W; \>4.5–5°C), 123-10 (51.38°N,
-179.17°W; \>5.5–6°C), 120-9 (51.35°N, 178.95°W; \>4.5–5°C), 118-11
-(51.45°N, 178.76°W; \>4.5–5°C), and 118-11 (51.43°N, 178.8°W; \>4.5–5°C)
-were surveyed by the F/V Ocean Explorer. Allocated stations that have
-not yet been sampled are shown as gray dots. Credit: NOAA
-Fisheries](./examples/current_daily_ai.gif) , ![NOAA Fisheries AFSC
-Groundfish Assessment Program conducted the Gulf of Alaska bottom trawl
-survey. The near real-time ocean bottom temperatures depicted were
-collected May 23-July 13 On July 13, stations 201-159 (59.25°N,
--153.4°W; \>9–10°C), 204-163 (59.44°N, -153.15°W; \>9–10°C), 211-168
-(59.68°N, -152.57°W; \>9–10°C), 203-166 (59.58°N, -153.23°W; \>10°C),
-and 203-165 (59.54°N, -153.23°W; \>10°C) were surveyed by the F/V Alaska
-Provider and stations 278-168 (59.68°N, -147.04°W; \>5–6°C), 288-170
-(59.78°N, -146.21°W; \>6–7°C), 297-172 (59.87°N, -145.46°W; \>5–6°C),
-and 301-173 (59.92°N, -145.13°W; \>5–6°C) were surveyed by the F/V Ocean
-Explorer. Allocated stations that have not yet been sampled are shown as
-gray dots. Credit: NOAA Fisheries](./examples/current_daily_goa.gif)
+collected June 10-August 13 On August 13, stations 162-16 (51.65°N,
+-177.89°W; \>5.5–6°C) and 184-16 (51.66°N, -176.25°W; \>5–5.5°C) were
+surveyed by the F/V Alaska Provider. No stations were surveyed by the
+F/V Ocean Explorer. Allocated stations that have not yet been sampled
+are shown as gray dots. Credit: NOAA
+Fisheries](./examples/current_daily_ai.gif)
 
 ## Blank, Grid-only Plot
 
@@ -124,10 +109,7 @@ bathymetric boundaries. Credit: NOAA
 Fisheries](./examples/current_grid_bs.png) , ![The Gulf of Alaska bottom
 trawl survey. This survey covers the Central Aleutians, Eastern
 Aleutians, Southern Bering Sea, and Western Aleutians regions. Credit:
-NOAA Fisheries](./examples/current_grid_ai.png) , ![The Gulf of Alaska
-bottom trawl survey. This survey covers the Shumagin, Chirikof, Kodiak,
-Yakutat, and Southeastern regions. Credit: NOAA
-Fisheries](./examples/current_grid_goa.png)
+NOAA Fisheries](./examples/current_grid_ai.png)
 
 ## Mean Plot
 
@@ -145,7 +127,7 @@ Fisheries AFSC Groundfish Assessment Program’s eastern Bering Sea and
 northern Bering Sea bottom trawl surveys. The timeseries mean bottom
 temperatures from the eastern Bering Sea (1982-2021; 39 years) and
 northern Bering Sea (2010-2021; 4 years) bottom trawl surveys are
-compared to their respective 2022 surveys (May 30-July 13). These data
+compared to their respective 2022 surveys (May 30-August 20). These data
 are publicly accessible on Fisheries One Stop Shop data platform
 (<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
 Fisheries](./examples/current_anom_bs.png)
@@ -252,10 +234,8 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE Matrix products: default
     FALSE 
     FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8 
-    FALSE [2] LC_CTYPE=English_United States.utf8   
-    FALSE [3] LC_MONETARY=English_United States.utf8
-    FALSE [4] LC_NUMERIC=C                          
+    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8   
+    FALSE [3] LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                          
     FALSE [5] LC_TIME=English_United States.utf8    
     FALSE 
     FALSE attached base packages:
@@ -265,13 +245,12 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE [1] glue_1.6.2     dplyr_1.1.1    magrittr_2.0.3
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] fansi_1.0.4       utf8_1.2.3        digest_0.6.31     R6_2.5.1         
-    FALSE  [5] lifecycle_1.0.3   evaluate_0.20     httr_1.4.5        pillar_1.9.0     
-    FALSE  [9] stringi_1.7.12    rlang_1.1.0       cli_3.6.1         data.table_1.14.8
-    FALSE [13] rstudioapi_0.14   vctrs_0.6.1       generics_0.1.3    rmarkdown_2.20   
-    FALSE [17] tools_4.2.3       xfun_0.38         yaml_2.3.7        fastmap_1.1.1    
-    FALSE [21] compiler_4.2.3    pkgconfig_2.0.3   readtext_0.81     htmltools_0.5.5  
-    FALSE [25] tidyselect_1.2.0  knitr_1.42        tibble_3.2.1
+    FALSE  [1] rstudioapi_0.14   knitr_1.42        tidyselect_1.2.0  R6_2.5.1          rlang_1.1.0       fastmap_1.1.1    
+    FALSE  [7] fansi_1.0.4       httr_1.4.5        tools_4.2.3       data.table_1.14.8 xfun_0.38         utf8_1.2.3       
+    FALSE [13] cli_3.6.1         htmltools_0.5.5   yaml_2.3.7        digest_0.6.31     tibble_3.2.1      gargle_1.3.0     
+    FALSE [19] lifecycle_1.0.3   purrr_1.0.1       vctrs_0.6.1       fs_1.6.1          evaluate_0.20     rmarkdown_2.20   
+    FALSE [25] stringi_1.7.12    compiler_4.2.3    pillar_1.9.0      generics_0.1.3    readtext_0.81     googledrive_2.1.0
+    FALSE [31] pkgconfig_2.0.3
 
 ## NOAA README
 
