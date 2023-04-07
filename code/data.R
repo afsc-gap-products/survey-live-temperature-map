@@ -129,7 +129,6 @@ shp_bs <- survey_area
 # shp_nbs <- survey_area
 
 ## AI  ------------------------------------------------------------------------
-# akgfmaps
 survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
 survey_area$survey.grid <-
   dplyr::left_join(
@@ -152,87 +151,6 @@ survey_area$survey.area <- survey_area$survey.area %>%
   dplyr::mutate(SURVEY = "AI",
                 SRVY = "AI")
 shp_ai <- survey_area
-
-# J:\RACE_GF\GOA\GOA 2021\Files for boats\ArcGIS\GOAGRID_2021
-# J:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawlable_thru2018 - ERRORS,do not use!
-# G:\RACE_GF\ALEUTIAN\AI 2022\ArcGIS\Chart Products\aigrid_trawable_thru2018_Emily.shp
-# library(sp)
-# survey_area <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
-# survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/data/shapefiles/'),# Prepare map objects
-#                                           layer = "aigrid_trawable_thru2018_Emily",
-#                                           verbose=F) %>%
-#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-#   st_as_sf(x = .) %>%
-#   dplyr::rename(station = ID,
-#                 stratum = STRATUM) %>%
-#   dplyr::filter(stratum %in% unique(goa_goa_strata0$stratum) &
-#                   stratum != 0) %>% # land
-#   sp::merge(
-#     x = .,
-#     y = goa_goa_strata0 %>%
-#       dplyr::filter(survey == "AI") %>%
-#       dplyr::mutate(SRVY = "AI",
-#                     region = stringr::str_to_title(inpfc_area),
-#                     region = dplyr::case_when(
-#                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-#                       TRUE ~ region)) %>%
-#       dplyr::select(SRVY, stratum, region) %>%
-#       dplyr::distinct(),
-#     all.x = TRUE)  %>%
-#   dplyr::arrange(region) %>%
-#   dplyr::mutate(AIGRID_ID = as.double(AIGRID_ID))
-# survey_area$survey.area <- survey_area$survey.area %>%
-#   dplyr::mutate(SURVEY = "AI",
-#                 SRVY = "AI")
-# shp_ai <- survey_area
-
-# 
-# 
-# temp1 <- shp_ai$survey.grid %>%
-#   dplyr::mutate(area = sf::st_area(shp_ai$survey.grid$geometry), 
-#                 perimeter = sf::st_length(shp_ai$survey.grid$geometry)#, 
-#                 # area_diff = (AREA - area), 
-#                 # perimeter_diff = (PERIMETER - perimeter)
-#                 ) %>%
-#   data.frame() %>%
-#   dplyr::select(region, AIGRID_ID, stratum, station, area, perimeter)
-# names(temp1) <- paste0("r_", names(temp1))
-# 
-# temp2 <- data.frame(survey_area$survey.grid) %>%
-#   dplyr::mutate(area = sf::st_area(survey_area$survey.grid$geometry), 
-#                 perimeter = sf::st_length(survey_area$survey.grid$geometry)#, 
-#                 # area_diff = AREA != area, 
-#                 # perimeter_diff = PERIMETER != perimeter
-#                 ) %>%
-#   data.frame() %>%
-#   dplyr::select(region, AIGRID_ID, stratum, station, area, perimeter)
-# names(temp2) <- paste0("a_", names(temp2))
-# 
-# temp3 <- ai_aigrid_gis0[order(ai_aigrid_gis0$aigrid_id),] %>%
-#   dplyr::select(AIGRID_ID = aigrid_id, stratum, station = stationid , AREA = area_km2, PERIMETER = perimeter_km2) %>% 
-#   dplyr::mutate(region = NA)
-# names(temp3) <- paste0("t_", names(temp3))
-# 
-# temp <- dplyr::full_join(
-#   x = temp1,
-#   y = temp2,
-#   by = c("r_AIGRID_ID" = "a_AIGRID_ID")) %>%
-#   dplyr::mutate(diff_region = r_region != a_region,
-#                 diff_stratum = r_stratum != a_stratum,
-#                 diff_station = r_station != a_station,
-#                 diff_area = as.numeric(r_area) != as.numeric(a_area), 
-#                 diff_perim = as.numeric(r_perimeter) != as.numeric(a_perimeter))
-# 
-# temp <- dplyr::full_join(
-#   x = temp1,
-#   y = temp3,
-#   by = c("r_AIGRID_ID" = "t_AIGRID_ID")) %>%
-#   dplyr::mutate(
-#     #diff_region = r_region != t_region,
-#                 diff_stratum = r_stratum != t_stratum,
-#                 diff_station = r_station != t_station,
-#                 diff_area = r_AREA != t_AREA, 
-#                 diff_perim = r_PERIMETER != t_PERIMETER)
 
 ## GOA  ------------------------------------------------------------------------
 survey_area <- akgfmaps::get_base_layers(select.region = "goa", set.crs = "auto")

@@ -496,7 +496,7 @@ make_figure <- function(
       by = c("stratum", "station")) 
   
   ## Date range of figures to create ------------------------------------
-  if (length(dates0)>1) { # if there is a specific range of dates
+  if (!(dates0[1] %in% c("none", "all", "first", "last"))) { # if there is a specific range of dates
     iterate <- which(as.character(date_entered) %in% dates0)
   } else if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
