@@ -99,7 +99,14 @@ collected June 10-August 13 On August 13, stations 162-16 (51.65°N,
 surveyed by the F/V Alaska Provider. No stations were surveyed by the
 F/V Ocean Explorer. Allocated stations that have not yet been sampled
 are shown as gray dots. Credit: NOAA
-Fisheries](./examples/current_daily_ai.gif)
+Fisheries](./examples/current_daily_ai.gif) , ![NOAA Fisheries AFSC
+Groundfish Assessment Program conducted the Gulf of Alaska bottom trawl
+survey. The near real-time ocean bottom temperatures depicted were
+collected May 23-August 14 On August 14, a station 447-60 (54.79°N,
+-133.07°W; \>6–7°C) was surveyed by the F/V Alaska Provider. No stations
+were surveyed by the F/V Ocean Explorer. Allocated stations that have
+not yet been sampled are shown as gray dots. Credit: NOAA
+Fisheries](./examples/current_daily_goa.gif)
 
 ## Blank, Grid-only Plot
 
@@ -109,7 +116,10 @@ bathymetric boundaries. Credit: NOAA
 Fisheries](./examples/current_grid_bs.png) , ![The Gulf of Alaska bottom
 trawl survey. This survey covers the Central Aleutians, Eastern
 Aleutians, Southern Bering Sea, and Western Aleutians regions. Credit:
-NOAA Fisheries](./examples/current_grid_ai.png)
+NOAA Fisheries](./examples/current_grid_ai.png) , ![The Gulf of Alaska
+bottom trawl survey. This survey covers the Shumagin, Chirikof, Kodiak,
+Yakutat, and Southeastern regions. Credit: NOAA
+Fisheries](./examples/current_grid_goa.png)
 
 ## Mean Plot
 
@@ -198,17 +208,17 @@ NMFS-AFSC-456; p. 42). U.S. Dep. Commer.
 
 <div id="ref-GOA2018" class="csl-entry">
 
-Von Szalay, P. G., and Raring, N. W. (2018). *Data report: 2017 gulf of
-alaska bottom trawl survey* (NOAA Tech. Memo. NMFS-AFSC-374). U.S. Dep.
-Commer.
+Von Szalay, P. G., and Raring, N. W. (2018). *Data report: 2017 <span
+class="nocase">Gulf of Alaska</span> bottom trawl survey* (NOAA Tech.
+Memo. NMFS-AFSC-374). U.S. Dep. Commer.
 <https://apps-afsc.fisheries.noaa.gov/Publications/AFSC-TM/NOAA-TM-AFSC-374.pdf>
 
 </div>
 
 <div id="ref-AI2018" class="csl-entry">
 
-Von Szalay, P. G., and Raring, N. W. (2020). *Data report: 2018 aleutian
-islands bottom trawl survey* (NOAA Tech. Memo. NMFS-AFSC-409). U.S. Dep.
+Von Szalay, P. G., and Raring, N. W. (2020). *Data report: 2018 Aleutian
+Islands bottom trawl survey* (NOAA Tech. Memo. NMFS-AFSC-409). U.S. Dep.
 Commer. <https://repository.library.noaa.gov/view/noaa/26367>
 
 </div>
@@ -234,8 +244,10 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE Matrix products: default
     FALSE 
     FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8   
-    FALSE [3] LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                          
+    FALSE [1] LC_COLLATE=English_United States.utf8 
+    FALSE [2] LC_CTYPE=English_United States.utf8   
+    FALSE [3] LC_MONETARY=English_United States.utf8
+    FALSE [4] LC_NUMERIC=C                          
     FALSE [5] LC_TIME=English_United States.utf8    
     FALSE 
     FALSE attached base packages:
@@ -245,12 +257,13 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE [1] glue_1.6.2     dplyr_1.1.1    magrittr_2.0.3
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] rstudioapi_0.14   knitr_1.42        tidyselect_1.2.0  R6_2.5.1          rlang_1.1.0       fastmap_1.1.1    
-    FALSE  [7] fansi_1.0.4       httr_1.4.5        tools_4.2.3       data.table_1.14.8 xfun_0.38         utf8_1.2.3       
-    FALSE [13] cli_3.6.1         htmltools_0.5.5   yaml_2.3.7        digest_0.6.31     tibble_3.2.1      gargle_1.3.0     
-    FALSE [19] lifecycle_1.0.3   purrr_1.0.1       vctrs_0.6.1       fs_1.6.1          evaluate_0.20     rmarkdown_2.20   
-    FALSE [25] stringi_1.7.12    compiler_4.2.3    pillar_1.9.0      generics_0.1.3    readtext_0.81     googledrive_2.1.0
-    FALSE [31] pkgconfig_2.0.3
+    FALSE  [1] fansi_1.0.4       utf8_1.2.3        digest_0.6.31     R6_2.5.1         
+    FALSE  [5] lifecycle_1.0.3   evaluate_0.20     httr_1.4.5        pillar_1.9.0     
+    FALSE  [9] stringi_1.7.12    rlang_1.1.0       cli_3.6.1         data.table_1.14.8
+    FALSE [13] rstudioapi_0.14   vctrs_0.6.1       generics_0.1.3    rmarkdown_2.20   
+    FALSE [17] tools_4.2.3       xfun_0.38         yaml_2.3.7        fastmap_1.1.1    
+    FALSE [21] compiler_4.2.3    pkgconfig_2.0.3   readtext_0.81     htmltools_0.5.5  
+    FALSE [25] tidyselect_1.2.0  knitr_1.42        tibble_3.2.1
 
 ## NOAA README
 

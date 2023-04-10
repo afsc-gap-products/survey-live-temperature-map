@@ -186,15 +186,15 @@ gg <- ggplot() +
   # ggplot2::geom_sf(data = survey_area$graticule, 
   #                  color = "grey90", 
   #                  alpha = 0.5) +
-  # ggplot2::scale_x_continuous(name = "Longitude", 
-  #                             breaks = survey_area$lon.breaks) + 
+  ggplot2::scale_x_continuous(name = "Longitude",
+                              breaks = c(-180, -170, -160, -150, -140)) + # survey_area$lon.breaks) +
   # ggplot2::scale_y_continuous(name = "Latitude", 
   #                             breaks = survey_area$lat.breaks) +
   # ggtitle(label = plot_title, 
   #         subtitle = plot_subtitle) +
   ggplot2::theme_classic() + 
   ggplot2::theme(
-    panel.border = element_rect(colour = "grey50", fill=NA, linewidth=.5), 
+    # panel.border = element_rect(colour = "grey50", fill=NA, linewidth=.5), 
     # panel.grid.major = element_rect(fill = "transparent"), 
     # panel.grid.minor = element_rect(fill = "transparent"), 
     plot.margin=unit(c(0,0,0,0), "cm") , 
