@@ -257,7 +257,7 @@ if (file_end %in% c("mean")) {
     }
   } else if (SRVY %in% c("GOA", "AI") &
              !(date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0)) { # not the last day of the survey
-    stations1 <- paste0(stations1, "Allocated stations that have not yet been sampled are shown as gray dots. ")
+    stations1 <- paste0(stations1, "Stations yet to be sampled are shown as gray dots. ")
   }
   
   fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
