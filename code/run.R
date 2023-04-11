@@ -41,7 +41,7 @@ for (i in 1:length(locations)){
 
 
 # LOG --------------------------------------------------------------------------
-sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
+# sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 source(file = paste0(dir_wd,"code/functions.R"))
@@ -167,5 +167,5 @@ if ("AI" %in% dat_survreg$SRVY) { # won't run in 2023 because is not in dat_surv
 
 # Log --------------------------------------------------------------------------
 
-sink() 
+# sink() 
 
