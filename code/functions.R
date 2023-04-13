@@ -496,9 +496,8 @@ make_figure <- function(
       by = c("stratum", "station")) 
   
   ## Date range of figures to create ------------------------------------
-  if (!(dates0[1] %in% c("none", "all", "first", "last"))) { # if there is a specific range of dates
-    iterate <- which(as.character(date_entered) %in% dates0)
-  } else if (dates0 == "none") { # If you are not using any data from temp data
+  
+  if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
@@ -519,8 +518,10 @@ make_figure <- function(
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
-    iterate <- which((date_entered) %in% (dates0))
-  }
+  #   iterate <- which((date_entered) %in% (dates0))
+  # } if else(!(dates0[1] %in% c("none", "all", "first", "last","latest"))) { # if there is a specific range of dates
+    iterate <- which(as.character(date_entered) %in% dates0)
+  }  
   
   ## Loop through dates -----------------------------------------
   for (i in iterate) {

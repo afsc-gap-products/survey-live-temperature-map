@@ -18,7 +18,7 @@ dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3O
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
-googledrive_dl <- FALSE
+googledrive_dl <- TRUE
 googledrive::drive_deauth()
 googledrive::drive_auth()
 1
@@ -98,7 +98,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "grid"),
+                       file_end0 = c("daily"), #, "grid"),
                        dir_wd = dir_wd)
 }
 
