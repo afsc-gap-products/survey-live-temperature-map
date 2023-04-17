@@ -240,7 +240,7 @@ make_varplot_wrapper <- function(
     dplyr::select(-in_survey)
   
   is_there_data_to_plot <- TRUE
-  if (nrow(dat0)==0) {
+  if (nrow(dat0[!is.na(dat0$var0),])==0) {
     is_there_data_to_plot <- FALSE
     warning("WARNING: There is no _grid.pdf file to append this *_daily.pdf or *_anom.pdf file to in the *_bind.pdf to. ") 
   }
