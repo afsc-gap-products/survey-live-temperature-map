@@ -260,13 +260,16 @@ if (file_end %in% c("mean")) {
     stations1 <- paste0(stations1, "Stations yet to be sampled are shown as gray dots. ")
   }
   
-  fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
-                    "The near real-time ocean bottom temperatures depicted were collected ", 
+  temp00 <- paste0("The near real-time ocean bottom temperatures depicted were collected ", 
                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                            paste0("on ", format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d %Y")), 
                            paste0(format_date_txt(x = min(as.Date(dat$date), na.rm = TRUE), "%B %d"), 
                                   "-", 
-                                  format_date_txt(x = as.Date(max_date), "%B %d"))), ". ", 
+                                  format_date_txt(x = as.Date(max_date), "%B %d"))), ". ")
+    temp01 <- paste0("The near real-time ocean bottom temperatures will be depicted in the next survey day's map. ")
+  
+  fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
+                    ifelse(firstplotofrun, temp01, temp00), 
                     stations_first_last, 
                     stations1)
   
