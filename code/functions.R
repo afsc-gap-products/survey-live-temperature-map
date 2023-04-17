@@ -783,8 +783,8 @@ make_figure <- function(
                    label = ifelse(is.na(max_date), 
                                   "", 
                                   ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                         paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
-                                         paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
+                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
+                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
                                                 " \u2013\n", 
                                                 format(x = as.Date(max_date), format = "%b %d, %Y")))), 
                    color = "black", size = 5, fontface=2) 
@@ -945,10 +945,10 @@ make_figure <- function(
                      label = ifelse(is.na(max_date), 
                                     "", 
                                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
-                                           paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d, %Y")), 
-                                           paste0(format(x = min(as.Date(dat_plot$date), na.rm = TRUE), "%b %d"), 
+                                           paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
+                                           paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
                                                   " \u2013\n", 
-                                                  format(x = as.Date(max_date), format = "%b %d, %Y")))), 
+                                                  format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
                      color = "black", size = 5, fontface=2) 
         # }
         
