@@ -1088,11 +1088,11 @@ make_figure <- function(
       if (ftp$ftp_dl){
         message("Uploading files to FTP")
         upload_ftp( # vars here defined in ftp.R
-          dir_wd = dir_wd, 
+          dir_in = filename1[grepl(pattern = "current_", x = filename1)],
           dir_out = dir_out, 
-          maxyr = maxyr, 
-          SRVY = SRVY, 
-          dest = ftp$dev_ai, 
+          #maxyr = maxyr, 
+          #SRVY = SRVY, 
+          dest = ftp$dest, 
           user = ftp$user, 
           pass = ftp$pass)
       }

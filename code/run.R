@@ -26,18 +26,18 @@ googledrive::drive_auth()
 # Set Working Directory --------------------------------------------------------
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
-locations <- c(
-  "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
-  "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-  "Z:/Projects/survey-live-temperature-map/",
-  "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/")
-
-for (i in 1:length(locations)){
-  if (file.exists(locations[i])) {
-    dir_wd  <- locations[i]
-  }
-}
-# dir_wd <- "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+# locations <- c(
+#   "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
+#   "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
+#   "Z:/Projects/survey-live-temperature-map/",
+#   "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/")
+# 
+# for (i in 1:length(locations)){
+#   if (file.exists(locations[i])) {
+#     dir_wd  <- locations[i]
+#   }
+# }
+dir_wd <- "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
 
 
 # LOG --------------------------------------------------------------------------
@@ -53,7 +53,7 @@ dat_survreg <- dat_survreg %>%
   dplyr::filter(year == maxyr)
 
 # SIGN INTO FTP ----------------------------------------------------------------
-ftp_dl <- FALSE # test
+ftp_dl <- TRUE # test
 # ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
 if (ftp_dl) {
@@ -98,7 +98,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"), #, "grid"),
+                       file_end0 = c("daily", "grid"),
                        dir_wd = dir_wd)
 }
 
