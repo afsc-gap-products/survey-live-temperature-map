@@ -34,7 +34,8 @@ PKG <- c(
   # "knitr", # A general-purpose tool for dynamic report generation in R
   # "officer"
   
-  "RODBC"
+  "RODBC", 
+  "RCurl" # for ftp connection
 )
 
 for (p in PKG) {
@@ -240,9 +241,9 @@ make_varplot_wrapper <- function(
     dplyr::select(-in_survey)
   
   is_there_data_to_plot <- TRUE
-  if (nrow(dat0[!is.na(dat0$var0),])==0) {
+  if (nrow(dat0[!is.na(dat0$date),])==0) {
     is_there_data_to_plot <- FALSE
-    warning("WARNING: There is no _grid.pdf file to append this *_daily.pdf or *_anom.pdf file to in the *_bind.pdf to. ") 
+    message("NOTE: There are no daily data to plot. No daily or anomaly plots will be created. ") 
   }
   
   ### Grid ----------------------------------------------------------------------
@@ -1011,7 +1012,7 @@ make_figure <- function(
     
     ### Combined PDF -----------------------------------------------------------------
     
-    if (file_end %in% c("anom", "daily")) { 
+    if (file_end %in% c("anom", "daily")) {
       message("Create combined PDF of all daily/anom pdfs")
       
       filename1 <- c(filename1, 
@@ -1087,11 +1088,8 @@ make_figure <- function(
       # only make current if it is the last plot of the run
       if (ftp$ftp_dl){
         message("Uploading files to FTP")
-        upload_ftp( # vars here defined in ftp.R
-          dir_in = filename1[grepl(pattern = "current_", x = filename1)],
-          dir_out = dir_out, 
-          #maxyr = maxyr, 
-          #SRVY = SRVY, 
+        upload_ftp(
+          dir_in = filename1, # [grepl(pattern = "current_", x = filename1)],
           dest = ftp$dest, 
           user = ftp$user, 
           pass = ftp$pass)
@@ -1173,8 +1171,7 @@ make_figure_gif<-function(file_end,
   
 }
 
-upload_ftp <- function(dir_out, 
-                       dir_in, 
+upload_ftp <- function(dir_in, 
                        dest, 
                        user, 
                        pass){
@@ -1182,10 +1179,13 @@ upload_ftp <- function(dir_out,
   for (iiii in 1:length(dir_in)) {
     print(dir_in[iiii])
     
+    filename0 <- strsplit(x = dir_in[iiii], split = "/", fixed = TRUE)[[1]]
+    filename0 <- filename0[length(filename0)]
+    
     RCurl::ftpUpload(
-      what = paste0(dir_out, "/", dir_in[iiii]),
+      what = paste0(dir_in[iiii]), 
       asText = FALSE,
-      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", dir_in[iiii])),
+      to = paste0(glue::glue("{protocol}://STOR@{server}/{dest}/", filename0)),
       userpwd = paste0(user,":", pass),
       .opts=curlOptions(verbose=TRUE))
   }
