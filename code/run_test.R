@@ -19,7 +19,7 @@ googledrive_dl <- TRUE
 # if (googledrive_dl) {
 googledrive::drive_deauth()
 googledrive::drive_auth()
-1
+2
 # }
 
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"

@@ -1054,11 +1054,11 @@ make_figure <- function(
     if (make_gifs) {
       message("Make GIF")
       filename1 <- c(filename1, 
-                     paste0(dir_out, filename0,'.gif'))
+                     paste0(dir_out, filename0,'_bind.gif'))
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
-                      filename0 = filename0)
+                      filename0 = paste0(filename0, '_bind'))
     }
     
     ### CURRENT plots for easy finding -------------------------------------------
@@ -1071,6 +1071,9 @@ make_figure <- function(
           filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
           filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
                              replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
+                             x = filename00, fixed = TRUE)
+          filename00 <- gsub(pattern = paste0("current_", file_end, "_bind."), 
+                             replacement = paste0("current_", file_end, "_bind_",tolower(SRVY),"."), 
                              x = filename00, fixed = TRUE)
         } else if (file_end %in% c("grid", "mean")) {
           filename00 <- gsub(pattern = paste0("_", file_end,"."), 

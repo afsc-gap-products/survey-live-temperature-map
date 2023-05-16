@@ -123,35 +123,55 @@ Fisheries](./examples/current_grid_goa.png)
 
 ## Mean Plot
 
-![The timeseries mean bottom temperatures from the NOAA Fisheries
-eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea
-(2010-2021; 4 years) bottom trawl surveys. These data are publicly
-accessible on Fisheries One Stop Shop data platform
-(<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
-Fisheries](./examples/current_mean_bs.png)
+<figure>
+<img src="./examples/current_mean_bs.png"
+alt="The timeseries mean bottom temperatures from the NOAA Fisheries eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years) bottom trawl surveys. These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss). Credit: NOAA Fisheries" />
+<figcaption aria-hidden="true">The timeseries mean bottom temperatures
+from the NOAA Fisheries eastern Bering Sea (1982-2021; 39 years) and
+northern Bering Sea (2010-2021; 4 years) bottom trawl surveys. These
+data are publicly accessible on Fisheries One Stop Shop data platform
+(<a href="https://www.fisheries.noaa.gov/foss"
+class="uri">https://www.fisheries.noaa.gov/foss</a>). Credit: NOAA
+Fisheries</figcaption>
+</figure>
 
 ## Anomaly Plot
 
-![The 2022 near real-time ocean bottom temperature anomaly in the NOAA
-Fisheries AFSC Groundfish Assessment Program’s eastern Bering Sea and
-northern Bering Sea bottom trawl surveys. The timeseries mean bottom
-temperatures from the eastern Bering Sea (1982-2021; 39 years) and
-northern Bering Sea (2010-2021; 4 years) bottom trawl surveys are
-compared to their respective 2022 surveys (May 30-August 20). These data
-are publicly accessible on Fisheries One Stop Shop data platform
-(<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
-Fisheries](./examples/current_anom_bs.png)
+<figure>
+<img src="./examples/current_anom_bs.png"
+alt="The 2022 near real-time ocean bottom temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment Program’s eastern Bering Sea and northern Bering Sea bottom trawl surveys. The timeseries mean bottom temperatures from the eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years) bottom trawl surveys are compared to their respective 2022 surveys (May 30-August 20). These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss). Credit: NOAA Fisheries" />
+<figcaption aria-hidden="true">The 2022 near real-time ocean bottom
+temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment
+Program’s eastern Bering Sea and northern Bering Sea bottom trawl
+surveys. The timeseries mean bottom temperatures from the eastern Bering
+Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years)
+bottom trawl surveys are compared to their respective 2022 surveys (May
+30-August 20). These data are publicly accessible on Fisheries One Stop
+Shop data platform (<a href="https://www.fisheries.noaa.gov/foss"
+class="uri">https://www.fisheries.noaa.gov/foss</a>). Credit: NOAA
+Fisheries</figcaption>
+</figure>
 
 # Relevant publications
 
 **Learn more about these surveys and ocean temperatures around Alaska**
 (Markowitz, Dawson, Charriere, Prohaska, Rohan, Stevenson, et al.,
-2022b, 2022a, In review; Markowitz, Dawson, Charriere, Prohaska, Rohan,
-Haehn, et al., 2022; Rohan et al., 2022; Von Szalay and Raring, 2018,
-2020)
+2022b, 2022a; Markowitz, Dawson, Charriere, Prohaska, Rohan, Haehn, et
+al., 2022; Markowitz et al., 2023; Rohan et al., 2022; Von Szalay and
+Raring, 2018, 2020)
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 line-spacing="2">
+
+<div id="ref-2022NEBS2023" class="csl-entry">
+
+Markowitz, E. H., Dawson, E. J., Anderson, A. B., Rohan, S. K.,
+Charriere, N. E., Prohaska, B. K., and Stevenson, D. E. (2023). *Results
+of the 2022 eastern and northern Bering Sea continental shelf bottom
+trawl survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
+NMFS-AFSC-469; p. 213). U.S. Dep. Commer.
+
+</div>
 
 <div id="ref-2018EBS2022" class="csl-entry">
 
@@ -159,7 +179,7 @@ Markowitz, E. H., Dawson, E. J., Charriere, N. E., Prohaska, B. K.,
 Rohan, S. K., Haehn, R. A., Stevenson, D. E., and Britt, L. L. (2022).
 *Results of the 2018 eastern Bering Sea continental shelf bottom trawl
 survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
-NMFS-F/SPO-450; p. 183). U.S. Dep. Commer.
+NMFS-AFSC-450; p. 183). U.S. Dep. Commer.
 <https://doi.org/10.25923/m4pw-t510>
 
 </div>
@@ -170,7 +190,7 @@ Markowitz, E. H., Dawson, E. J., Charriere, N. E., Prohaska, B. K.,
 Rohan, S. K., Stevenson, D. E., and Britt, L. L. (2022a). *Results of
 the 2019 eastern and northern Bering Sea continental shelf bottom trawl
 survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
-NMFS-F/SPO-451; p. 225). U.S. Dep. Commer.
+NMFS-AFSC-451; p. 225). U.S. Dep. Commer.
 <https://doi.org/10.25923/d641-xb21>
 
 </div>
@@ -181,18 +201,8 @@ Markowitz, E. H., Dawson, E. J., Charriere, N. E., Prohaska, B. K.,
 Rohan, S. K., Stevenson, D. E., and Britt, L. L. (2022b). *Results of
 the 2021 eastern and northern Bering Sea continental shelf bottom trawl
 survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
-NMFS-F/SPO-452; p. 227). U.S. Dep. Commer.
+NMFS-AFSC-452; p. 227). U.S. Dep. Commer.
 <https://doi.org/10.25923/g1ny-y360>
-
-</div>
-
-<div id="ref-2022NEBS2022" class="csl-entry">
-
-Markowitz, E. H., Dawson, E. J., Charriere, N. E., Prohaska, B. K.,
-Rohan, S. K., Stevenson, D. E., and Britt, L. L. (In review). *Results
-of the 2022 eastern and northern Bering Sea continental shelf bottom
-trawl survey of groundfish and invertebrate fauna* \[NOAA Tech. Memo.\].
-U.S. Dep. Commer.
 
 </div>
 
@@ -208,10 +218,11 @@ NMFS-AFSC-456; p. 42). U.S. Dep. Commer.
 
 <div id="ref-GOA2018" class="csl-entry">
 
-Von Szalay, P. G., and Raring, N. W. (2018). *Data report: 2017 <span
-class="nocase">Gulf of Alaska</span> bottom trawl survey* (NOAA Tech.
-Memo. NMFS-AFSC-374). U.S. Dep. Commer.
-<https://apps-afsc.fisheries.noaa.gov/Publications/AFSC-TM/NOAA-TM-AFSC-374.pdf>
+Von Szalay, P. G., and Raring, N. W. (2018). *Data report: 2017
+<span class="nocase">Gulf of Alaska</span> bottom trawl survey* (NOAA
+Tech. Memo. NMFS-AFSC-374). U.S. Dep. Commer.
+https://doi.org/[http://doi.org/10.7289/V5/TM-AFSC-374
+](http://doi.org/10.7289/V5/TM-AFSC-374 )
 
 </div>
 
@@ -219,7 +230,7 @@ Memo. NMFS-AFSC-374). U.S. Dep. Commer.
 
 Von Szalay, P. G., and Raring, N. W. (2020). *Data report: 2018 Aleutian
 Islands bottom trawl survey* (NOAA Tech. Memo. NMFS-AFSC-409). U.S. Dep.
-Commer. <https://repository.library.noaa.gov/view/noaa/26367>
+Commer. <https://doi.org/10.25923/qe5v-fz70>
 
 </div>
 
@@ -237,11 +248,12 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
 
 ## R Version Metadata
 
-    FALSE R version 4.2.3 (2023-03-15 ucrt)
+    FALSE R version 4.3.0 (2023-04-21 ucrt)
     FALSE Platform: x86_64-w64-mingw32/x64 (64-bit)
     FALSE Running under: Windows 10 x64 (build 19045)
     FALSE 
     FALSE Matrix products: default
+    FALSE 
     FALSE 
     FALSE locale:
     FALSE [1] LC_COLLATE=English_United States.utf8 
@@ -250,20 +262,23 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE [4] LC_NUMERIC=C                          
     FALSE [5] LC_TIME=English_United States.utf8    
     FALSE 
+    FALSE time zone: America/Los_Angeles
+    FALSE tzcode source: internal
+    FALSE 
     FALSE attached base packages:
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE [1] glue_1.6.2     dplyr_1.1.1    magrittr_2.0.3
+    FALSE [1] glue_1.6.2     dplyr_1.1.2    magrittr_2.0.3
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] fansi_1.0.4       utf8_1.2.3        digest_0.6.31     R6_2.5.1         
-    FALSE  [5] lifecycle_1.0.3   evaluate_0.20     httr_1.4.5        pillar_1.9.0     
-    FALSE  [9] stringi_1.7.12    rlang_1.1.0       cli_3.6.1         data.table_1.14.8
-    FALSE [13] rstudioapi_0.14   vctrs_0.6.1       generics_0.1.3    rmarkdown_2.20   
-    FALSE [17] tools_4.2.3       xfun_0.38         yaml_2.3.7        fastmap_1.1.1    
-    FALSE [21] compiler_4.2.3    pkgconfig_2.0.3   readtext_0.81     htmltools_0.5.5  
-    FALSE [25] tidyselect_1.2.0  knitr_1.42        tibble_3.2.1
+    FALSE  [1] vctrs_0.6.2       httr_1.4.5        cli_3.6.1         knitr_1.42       
+    FALSE  [5] rlang_1.1.1       xfun_0.39         stringi_1.7.12    readtext_0.82    
+    FALSE  [9] generics_0.1.3    data.table_1.14.8 htmltools_0.5.5   fansi_1.0.4      
+    FALSE [13] rmarkdown_2.21    evaluate_0.20     tibble_3.2.1      fastmap_1.1.1    
+    FALSE [17] yaml_2.3.7        lifecycle_1.0.3   compiler_4.3.0    pkgconfig_2.0.3  
+    FALSE [21] rstudioapi_0.14   digest_0.6.31     R6_2.5.1          tidyselect_1.2.0 
+    FALSE [25] utf8_1.2.3        pillar_1.9.0      tools_4.3.0
 
 ## NOAA README
 

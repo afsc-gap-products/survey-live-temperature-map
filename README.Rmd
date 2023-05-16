@@ -127,7 +127,7 @@ a <- print_figs(string_id = "current_anom_")
 
 # Relevant publications
 
-**Learn more about these surveys and ocean temperatures around Alaska** [@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2022; @AI2018; @GOA2018; @RohanColdPool]
+**Learn more about these surveys and ocean temperatures around Alaska** [@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2023; @AI2018; @GOA2018; @RohanColdPool]
 
 <div id="refs"></div>
 
