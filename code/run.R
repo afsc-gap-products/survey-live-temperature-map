@@ -97,7 +97,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "grid"),
+                       file_end0 = c("daily"),
                        dir_wd = dir_wd)
 }
 
@@ -128,7 +128,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "anom", "grid"), 
+                       file_end0 = c("daily", "anom"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }

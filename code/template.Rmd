@@ -266,14 +266,14 @@ if (file_end %in% c("mean")) {
                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                            paste0("on ", format_date_txt(x = min(as.Date(dat$date)+
                                                                    ifelse(show_planned_stations, 1, 0), 
-                                                                 na.rm = TRUE), "%B %d %Y")), 
+                                                                 na.rm = TRUE), "%B %d, %Y")), 
                            paste0(format_date_txt(x = min(as.Date(dat$date)+ifelse(show_planned_stations, 1, 0), 
                                                           na.rm = TRUE), "%B %d"), 
                                   "-", 
                                   format_date_txt(x = as.Date(max_date), "%B %d"))), ". ")
-    temp01 <- paste0("The near real-time ocean bottom temperatures will be depicted on ",
+    temp01 <- paste0("The near real-time ocean bottom temperatures depicted were collected on ",
                      format_date_txt(x = min(as.Date(dat$date)+ifelse(show_planned_stations, 1, 0), 
-                                             na.rm = TRUE), "%B %d %Y"),
+                                             na.rm = TRUE), "%B %d, %Y"),
                      ". ")
   
   fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
