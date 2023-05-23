@@ -1054,11 +1054,11 @@ make_figure <- function(
     if (make_gifs) {
       message("Make GIF")
       filename1 <- c(filename1, 
-                     paste0(dir_out, filename0,'_bind.gif'))
+                     paste0(dir_out, filename0,'.gif'))
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
-                      filename0 = paste0(filename0, '_bind'))
+                      filename0 = paste0(filename0))
     }
     
     ### CURRENT plots for easy finding -------------------------------------------
