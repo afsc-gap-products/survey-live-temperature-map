@@ -8,14 +8,14 @@
 # KNOWNS -----------------------------------------------------------------------
 
 maxyr <- 2023
-data_source <- "gd" # google drive
+data_source <- "oracle" # google drive
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
 ## This sign in needs to be here for the Task Scheduler to run, please do not comment out.
-googledrive_dl <- TRUE
+googledrive_dl <- FALSE
 # if (googledrive_dl) {
 googledrive::drive_deauth()
 googledrive::drive_auth()
@@ -33,8 +33,8 @@ dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3O
 locations <- c(
   "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
   "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-  "Z:/Projects/survey-live-temperature-map/", 
-  "C:/Users/emily.markowitz/Documents/Projects/survey-live-temperature-map/")
+  # "Z:/Projects/survey-live-temperature-map/", 
+  "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/")
 
 for (i in 1:length(locations)){
   if (file.exists(locations[i])) {
@@ -90,7 +90,7 @@ dates0 <- "all"
 
 # if ("GOA" %in% dat_survreg$SRVY) {
 
-maxyr <- 2021 # testing
+maxyr <- 2023 # testing
 
 SRVY <- "GOA"
 plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
@@ -101,6 +101,7 @@ if (googledrive_dl) {
 }
 show_planned_stations <- FALSE
 survey_area <- shp_goa
+# survey_area <- shp_surv[shp_surv$SRVY == "GOA"]
 if(ftp_dl){ftp$dest <- dev_goa}
 
 make_varplot_wrapper(maxyr = maxyr, 
@@ -114,7 +115,7 @@ make_varplot_wrapper(maxyr = maxyr,
                      plot_subtitle = plot_subtitle,
                      show_planned_stations = show_planned_stations,
                      data_source = data_source,
-                     file_end0 = c("daily", "grid"),# "mean", "anom"
+                     file_end0 = c("daily", "grid"),
                      dir_wd = dir_wd)
 # }
 
@@ -134,6 +135,8 @@ if (googledrive_dl) {
 show_planned_stations <- TRUE
 plot_anom <- TRUE
 survey_area <- shp_bs
+# survey_area <- shp_surv[shp_surv$SRVY %in% "NEBS"]
+
 if(ftp_dl){ftp$dest <- dev_bs}
 
 make_varplot_wrapper(maxyr = maxyr,
@@ -167,6 +170,8 @@ if (googledrive_dl) {
 plot_anom <- FALSE
 show_planned_stations <- FALSE
 survey_area <- shp_ai
+# survey_area <- shp_surv[shp_surv$SRVY == "AI"]
+
 if(ftp_dl){ftp$dest <- dev_ai}
 
 make_varplot_wrapper(maxyr = maxyr, 

@@ -998,57 +998,57 @@ make_figure <- function(
            bg = "white", 
            device = "png") 
     
-    ### PDF -------------------------------------------------------------------------
-    message("Create PDF")
-    
-    filename1 <- c(filename1, 
-                   paste0(dir_out, filename0,'.pdf'), 
-                   paste0(dir_out, filename0,'.txt'))
-    rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
-                      output_dir = dir_out,
-                      output_file = paste0(filename0, ".pdf"))
-    file.remove(list.files(path = paste0(dir_wd, "/code/"), 
-                           pattern = ".log", full.names = TRUE))
-    
-    ### Combined PDF -----------------------------------------------------------------
-    
-    if (file_end %in% c("anom", "daily")) {
-      message("Create combined PDF of all daily/anom pdfs")
-      
-      filename1 <- c(filename1, 
-                     paste0(dir_out, filename0,'_bind.pdf'))
-      # remove file if already exists - qpdf::pdf_combine() will not overwrite
-      if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
-        file.remove(paste0(dir_out, filename0, "_bind.pdf"))
-      }
-      
-      # if the first day of the survey
-      if (date_entered[1] == date_entered[i]) {
-        input0 <- paste0(dir_out, filename0,'.pdf')
-        if (file.exists(paste0(dir_out,'_grid.pdf'))) { 
-          input0 <- c(input0, paste0(dir_out,'_grid.pdf'))
-        } else {
-          warning("WARNING: There is no _grid.pdf file to append this *_daily.pdf or *_anom.pdf file to in the *_bind.pdf to. ") 
-        }
-        qpdf::pdf_combine(
-          input = input0,
-          output = c(paste0(dir_out, filename0, "_bind.pdf")))
-      } else {
-        temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
-        if (length(temp)==0) {
-          stop("ERROR: There are no other *_bind.pdf files in your utput directory. Check and make sure you have run previous days of the surey before running this plot. ") 
-        }
-        temp <- temp[!grepl(pattern = "current", x = temp)]
-        temp <- strsplit(x = temp, split = "_")
-        temp <- as.Date(sort(sapply(temp,"[[",1)))
-        temp <- max(temp[temp < max_date])
-        
-        qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"),
-                                    paste0(dir_out, as.character(temp),"_", file_end, "_bind.pdf")),
-                          output = c(paste0(dir_out, filename0, "_bind.pdf")))
-        
-      }
-    }
+    # ### PDF -------------------------------------------------------------------------
+    # message("Create PDF")
+    # 
+    # filename1 <- c(filename1, 
+    #                paste0(dir_out, filename0,'.pdf'), 
+    #                paste0(dir_out, filename0,'.txt'))
+    # rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
+    #                   output_dir = dir_out,
+    #                   output_file = paste0(filename0, ".pdf"))
+    # file.remove(list.files(path = paste0(dir_wd, "/code/"), 
+    #                        pattern = ".log", full.names = TRUE))
+    # 
+    # ### Combined PDF -----------------------------------------------------------------
+    # 
+    # if (file_end %in% c("anom", "daily")) {
+    #   message("Create combined PDF of all daily/anom pdfs")
+    #   
+    #   filename1 <- c(filename1, 
+    #                  paste0(dir_out, filename0,'_bind.pdf'))
+    #   # remove file if already exists - qpdf::pdf_combine() will not overwrite
+    #   if (length(list.files(path = dir_out, pattern = paste0(filename0, "_bind.pdf"))) != 0) {
+    #     file.remove(paste0(dir_out, filename0, "_bind.pdf"))
+    #   }
+    #   
+    #   # if the first day of the survey
+    #   if (date_entered[1] == date_entered[i]) {
+    #     input0 <- paste0(dir_out, filename0,'.pdf')
+    #     if (file.exists(paste0(dir_out,'_grid.pdf'))) { 
+    #       input0 <- c(input0, paste0(dir_out,'_grid.pdf'))
+    #     } else {
+    #       warning("WARNING: There is no _grid.pdf file to append this *_daily.pdf or *_anom.pdf file to in the *_bind.pdf to. ") 
+    #     }
+    #     qpdf::pdf_combine(
+    #       input = input0,
+    #       output = c(paste0(dir_out, filename0, "_bind.pdf")))
+    #   } else {
+    #     temp <- list.files(path = dir_out, pattern = paste0("_", file_end, "_bind.pdf"))
+    #     if (length(temp)==0) {
+    #       stop("ERROR: There are no other *_bind.pdf files in your utput directory. Check and make sure you have run previous days of the surey before running this plot. ") 
+    #     }
+    #     temp <- temp[!grepl(pattern = "current", x = temp)]
+    #     temp <- strsplit(x = temp, split = "_")
+    #     temp <- as.Date(sort(sapply(temp,"[[",1)))
+    #     temp <- max(temp[temp < max_date])
+    #     
+    #     qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"),
+    #                                 paste0(dir_out, as.character(temp),"_", file_end, "_bind.pdf")),
+    #                       output = c(paste0(dir_out, filename0, "_bind.pdf")))
+    #     
+    #   }
+    # }
     
     ### GIF -------------------------------------------------------------------------
     if (make_gifs) {
@@ -1073,7 +1073,7 @@ make_figure <- function(
                              replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
                              x = filename00, fixed = TRUE)
           filename00 <- gsub(pattern = paste0("current_", file_end, "_bind."), 
-                             replacement = paste0("current_", file_end, "_bind_",tolower(SRVY),"."), 
+                             replacement = paste0("current_", file_end, "_bind_", tolower(SRVY),"."), 
                              x = filename00, fixed = TRUE)
         } else if (file_end %in% c("grid", "mean")) {
           filename00 <- gsub(pattern = paste0("_", file_end,"."), 
@@ -1087,16 +1087,16 @@ make_figure <- function(
                   overwrite = TRUE)
       }
       
-      ### FTP -------------------------------------------
-      # only make current if it is the last plot of the run
-      if (ftp$ftp_dl){
-        message("Uploading files to FTP")
-        upload_ftp(
-          dir_in = filename1, # [grepl(pattern = "current_", x = filename1)],
-          dest = ftp$dest, 
-          user = ftp$user, 
-          pass = ftp$pass)
-      }
+      # ### FTP -------------------------------------------
+      # # only make current if it is the last plot of the run
+      # if (ftp$ftp_dl){
+      #   message("Uploading files to FTP")
+      #   upload_ftp(
+      #     dir_in = filename1, # [grepl(pattern = "current_", x = filename1)],
+      #     dest = ftp$dest, 
+      #     user = ftp$user, 
+      #     pass = ftp$pass)
+      # }
       
     }
     
@@ -1104,9 +1104,9 @@ make_figure <- function(
     if (!(is.null(dir_googledrive_upload))) {
       message("Uploading files to googledrive")
       filename1 <- unique(filename1)
-      for (iii in 1:length(filename1)) { 
+      for (iii in 1:length(filename1)) {
         drive_upload(
-          media = filename1[iii], 
+          media = filename1[iii],
           path = googledrive::as_id(dir_googledrive_upload),
           overwrite = TRUE)
       }

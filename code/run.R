@@ -74,7 +74,8 @@ if (ftp_dl) {
 ## GOA --------------------------------------------------------------------------
 
 if ("GOA" %in% dat_survreg$SRVY) {
-
+  data_source <- "oracle" # google drive
+  
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
   if (googledrive_dl) {
@@ -104,6 +105,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
 ## NBS + EBS Maps --------------------------------------------------------------
 
 if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
+  data_source <- "gd" # google drive
   
   SRVY <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
