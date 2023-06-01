@@ -66,9 +66,9 @@ if (ftp_dl) {
 
 ## UPDATE README (sometimes) ---------------------------------------------------
 
-# rmarkdown::render(paste0("./README.Rmd"),
+# rmarkdown::render(here::here("code", "README.Rmd"),
 #                   output_dir = "./",
-#                   output_file = paste0("README.md"))
+#                   output_file = "README.md")
 
 # Map --------------------------------------------------------------------------
 

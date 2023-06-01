@@ -1,0 +1,175 @@
+
+# Load data --------------------------------------------------------------------
+
+a <- list.files(path = here::here("data"))
+for (i in 1:length(a)){
+  b <- read_csv(file = here::here("data", a[i]))
+  b <- janitor::clean_names(b)
+  if (names(b)[1] %in% "x1"){
+    b$x1<-NULL
+  }
+  assign(x = gsub(pattern = "\\.csv", replacement = "", x = paste0(a[i], "0")), value = b)
+}
+
+dat_survreg <- 
+  dplyr::right_join( # get SRVY
+    x = racebase_foss_join_foss_cpue_haul0 %>% 
+      dplyr::select(SRVY = srvy, survey_definition_id, year, vessel_id) %>% 
+      dplyr::distinct(),
+    y = race_data_v_cruises0 %>% 
+      dplyr::select(year, cruise_id, vessel_id, start_date, end_date, survey_definition_id, vessel_name) %>% 
+      dplyr::distinct(),
+    by = c("survey_definition_id", 'year', 'vessel_id')) %>% 
+  dplyr::arrange(-year) %>%
+  dplyr::mutate(
+    vessel_shape = as.factor(substr(x = vessel_name, start = 1, stop = 1)), 
+    vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
+    vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)),
+    SRVY = dplyr::case_when(
+      survey_definition_id == 78 ~ "BSS", 
+      survey_definition_id == 98 ~ "EBS", 
+      survey_definition_id == 143 ~ "NBS", 
+      survey_definition_id == 47 ~ "GOA", 
+      survey_definition_id == 52 ~ "AI"), 
+    region_long = dplyr::case_when(
+      SRVY == "BSS" ~ "Bering Sea Slope", 
+      SRVY == "EBS" ~ "Eastern Bering Sea", 
+      SRVY == "NBS" ~ "Northern Bering Sea", 
+      SRVY == "GOA" ~ "Gulf of Alaska", 
+      SRVY == "AI" ~ "Aleutian Islands"), 
+    reg_dates = paste0(
+      format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
+      " - ", 
+      format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
+  dplyr::select(year, SRVY, cruise_id, reg_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, region_long) %>% 
+  dplyr::distinct()
+
+# > head(dat_survreg)
+# # A tibble: 6 × 6
+# year SRVY  reg_dates       vessel_id vessel_shape region_long       
+# <dbl> <chr> <chr>               <dbl> <chr>        <chr>             
+#   1  1982 EBS   May 29 - Aug 23        19 P            Eastern Bering Sea
+# 2  1982 EBS   May 29 - Aug 23         1 C            Eastern Bering Sea
+# 3  1982 EBS   May 29 - Aug 23        19 P            Eastern Bering Sea
+
+# New data ---------------------------------------------------------------------
+
+# This has a specific username and password because I DONT want people to have access to this!
+source("https://raw.githubusercontent.com/afsc-gap-products/metadata/main/code/functions_oracle.R")
+locations <- c("Z:/Projects/ConnectToOracle.R", 
+               "C:/Users/emily.markowitz/Documents/Projects/ConnectToOracle.R")
+for (i in 1:length(locations)){
+  if (file.exists(locations[i])) {source(locations[i])}
+}
+
+# I set up a ConnectToOracle.R that looks like this: 
+#   
+#   PKG <- c("RODBC")
+# for (p in PKG) {
+#   if(!require(p,character.only = TRUE)) {  
+#     install.packages(p)
+#     require(p,character.only = TRUE)}
+# }
+# 
+# channel<-odbcConnect(dsn = "AFSC",
+#                      uid = "USERNAME", # change
+#                      pwd = "PASSWORD", #change
+#                      believeNRows = FALSE)
+# 
+# odbcGetInfo(channel)
+
+lastdl <- Sys.Date()
+
+date_max <- RODBC::sqlQuery(channel, paste0("SELECT CREATE_DATE FROM RACE_DATA.EDIT_HAULS;"))
+date_max <- sort(as.numeric(unique(unlist(format(date_max, format = "%Y")))))
+date_max <- max(date_max[date_max<=format(Sys.Date(), format = "%Y")]) # sometimes there are dates that haven't happened yet b/c testing
+
+if (max(racebase_foss_join_foss_cpue_haul0$year) < date_max) { # if this year's data hasn't been entered into the production data
+
+  
+temperature_raw <- dplyr::left_join( 
+
+  x = RODBC::sqlQuery(channel, paste0( 
+"SELECT HAUL_ID, 
+EDIT_DATE_TIME, 
+EDIT_LATITUDE AS latitude_dd_start, 
+EDIT_LONGITUDE AS longitude_dd_start 
+FROM RACE_DATA.EDIT_EVENTS
+WHERE EVENT_TYPE_ID = 3;")) %>%  # 3	On bottom time
+  dplyr::rename(date = EDIT_DATE_TIME) %>%
+    dplyr::filter(format(date, format = "%Y") == date_max),
+  
+  y = RODBC::sqlQuery(channel, paste0( #  EDIT_GEAR_TEMPERATURE_UNITS, EDIT_SURFACE_TEMPERATURE_UNITS, ABUNDANCE_HAUL, CREATE_DATE, 
+    "SELECT HAUL_ID, CRUISE_ID, HAUL, STATION, STRATUM, 
+EDIT_SURFACE_TEMPERATURE AS surface_temperature_c, 
+EDIT_GEAR_TEMPERATURE AS bottom_temperature_c
+FROM RACE_DATA.EDIT_HAULS;")), 
+  
+  by = "HAUL_ID")  %>% 
+  janitor::clean_names() %>% 
+  dplyr::left_join(x = ., 
+                   y = dat_survreg %>% 
+                     dplyr::filter(year == date_max), 
+                   by = "cruise_id") %>% 
+    dplyr::rename(cruise = cruise_id) %>% 
+    dplyr::select(-haul_id) %>% 
+    dplyr::mutate(latitude_dd_start = latitude_dd_start/100, 
+                  longitude_dd_start = longitude_dd_start/100, 
+                  data_type = "raw") 
+  
+} else {
+  temperature_raw <- data.frame()
+}
+
+# Combined haul data --------------------------------------------------------------------
+
+dat <- haul <- racebase_foss_join_foss_cpue_haul0 %>% 
+  dplyr::rename(SRVY = srvy, 
+                date = date_time) %>%
+  dplyr::filter(
+    !(is.na(station)) &
+      !is.na(surface_temperature_c) &
+      !is.na(bottom_temperature_c) & 
+      # there shouldn't be bottom temps of 0 in the AI or GOA
+      ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
+      ((SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS")))) %>% 
+  dplyr::mutate(data_type = "offical") %>% 
+  dplyr::bind_rows(temperature_raw) %>% # incorporate new data
+  dplyr::select(-vessel_name, -vessel_ital, -vessel_shape) %>%
+  dplyr::mutate(date = as.Date(format(date, format = "%Y-%m-%d"))) %>%
+  dplyr::left_join( # get vessel info
+    x = ., 
+    y = dat_survreg %>% 
+      dplyr::select(SRVY, year, vessel_id, vessel_name), 
+    by = c("SRVY", "year", "vessel_id") ) %>% 
+  dplyr::select(
+    SRVY, year, stratum, station, date, region_long, reg_dates, data_type, 
+    vessel_id, vessel_name, #vessel_ital, vessel_shape, 
+    st = surface_temperature_c, 
+    bt = bottom_temperature_c, 
+    latitude = latitude_dd_start, 
+    longitude = longitude_dd_start ) %>% 
+  dplyr::arrange(-year)
+
+pal <- colorFactor(viridis(
+  option = "D", 
+  n = length(unique(dat$vessel_name)), 
+  begin = .2, 
+  end = .8), 
+  ordered = FALSE,
+  domain = levels(unique(dat$vessel_name)),
+  na.color = "black")
+
+dat <- dat %>% 
+  dplyr::mutate(vessel_color = pal(vessel_name))
+
+# Shapefiles -------------------------------------------------------------------
+
+load(file = here::here("data", "shp.rdata"))
+# shp_vess <- dplyr::left_join(
+#   dat %>% 
+#     dplyr::select(SRVY, year, date, station, stratum, vessel_id, vessel_shape, vessel_name, vessel_name), 
+#   shp_stn)
+  
+  
+  
