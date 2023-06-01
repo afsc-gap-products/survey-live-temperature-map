@@ -13,7 +13,7 @@ PKG <- c(
   "akgfmaps", # devtools::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = TRUE)
   "sf",
   "ggspatial", 
-
+  
   #images
   "cowplot",
   "magick", 
@@ -99,7 +99,7 @@ make_varplot_wrapper <- function(
   
   dat_survreg <- dat_survreg %>%
     dplyr::filter(SRVY %in% SRVY1 & year == maxyr)
-
+  
   # Define var
   if (!is.null(var)){
     if (var == "bt") {
@@ -170,13 +170,13 @@ make_varplot_wrapper <- function(
   
   if (nrow(dat0) == 0) {
     
-  dat <- dplyr::left_join(
-    multiple = "all", 
+    dat <- dplyr::left_join(
+      multiple = "all", 
       x = dat_anom, 
       y = dat_survreg %>% 
         dplyr::select(SRVY, reg_dates, region_long) %>% 
         dplyr::distinct(), 
-    by = "SRVY") %>% 
+      by = "SRVY") %>% 
       dplyr::mutate(var0 = 0, 
                     date = as.Date(paste0(maxyr, "-01-01")),
                     vessel_id = "", 
@@ -185,7 +185,7 @@ make_varplot_wrapper <- function(
   } else {
     
     if (show_planned_stations) {
-    temp <- data.frame(matrix(data = NA,
+      temp <- data.frame(matrix(data = NA,
                                 ncol = ncol(dat),
                                 nrow = nrow(dat_survreg)))    
       names(temp) <- names(dat)
@@ -200,7 +200,7 @@ make_varplot_wrapper <- function(
           date = (min(as.Date(dat$date), na.rm = TRUE)-1),
           vessel_name = dat_survreg$vessel_name,
           vessel_shape = dat_survreg$vessel_shape)
-    
+      
       dat <- dplyr::bind_rows(
         temp,
         dat %>%
@@ -231,12 +231,12 @@ make_varplot_wrapper <- function(
     dplyr::mutate(id = paste0(stratum, "_", station)) %>% 
     dplyr::left_join(
       x = ., 
-                     y = dat  %>%
-                       dplyr::mutate(in_survey = TRUE, 
-                                     id = paste0(stratum, "_", station)) %>% 
-                       dplyr::select(in_survey, id) %>% 
+      y = dat  %>%
+        dplyr::mutate(in_survey = TRUE, 
+                      id = paste0(stratum, "_", station)) %>% 
+        dplyr::select(in_survey, id) %>% 
         dplyr::distinct(),
-                     by = c("id")) %>% 
+      by = c("id")) %>% 
     dplyr::filter(!is.na(in_survey)) %>%
     dplyr::select(-in_survey)
   
@@ -370,9 +370,9 @@ make_varplot_wrapper <- function(
       plot_title = paste0(maxyr,  " ", var00, ' Anomaly' ),
       plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
                            x = paste0("NOAA Fisheries ", 
-                             text_list(paste0(anom_years$region_long, " ", anom_years$range)), 
-                             " Bottom Trawl Survey", 
-                             ifelse(nrow(anom_years)>1, "s", ""))),
+                                      text_list(paste0(anom_years$region_long, " ", anom_years$range)), 
+                                      " Bottom Trawl Survey", 
+                                      ifelse(nrow(anom_years)>1, "s", ""))),
       legend_title = paste0(var00, '\nAnomaly ', unit0),
       dates0 = dates0, 
       survey_area = survey_area,
@@ -475,7 +475,7 @@ make_figure <- function(
     date_entered <- sort(unique(dat$date))
     date_entered <- date_entered[!is.na(date_entered)]
     date_entered <- c(#min(date_entered),#-1, 
-                      date_entered)
+      date_entered)
     if (show_planned_stations & 
         (data_source == "oracle" | 
          sum(is.na(dat$var)) == 0)) { #survey is finished
@@ -491,9 +491,9 @@ make_figure <- function(
     dplyr::left_join(
       x = survey_area$survey.grid, 
       y = dat %>%
-                dplyr::select(station, stratum, var_bin, # reg_shapefile, 
-                              region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
-                dplyr::distinct(), 
+        dplyr::select(station, stratum, var_bin, # reg_shapefile, 
+                      region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
+        dplyr::distinct(), 
       by = c("stratum", "station")) 
   
   ## Date range of figures to create ------------------------------------
@@ -519,8 +519,8 @@ make_figure <- function(
       iterate <- iterate-1
     }
   } else { # if you want to run a specific date
-  #   iterate <- which((date_entered) %in% (dates0))
-  # } if else(!(dates0[1] %in% c("none", "all", "first", "last","latest"))) { # if there is a specific range of dates
+    #   iterate <- which((date_entered) %in% (dates0))
+    # } if else(!(dates0[1] %in% c("none", "all", "first", "last","latest"))) { # if there is a specific range of dates
     iterate <- which(as.character(date_entered) %in% dates0)
   }  
   
@@ -637,14 +637,14 @@ make_figure <- function(
     gg <- ggplot() +
       ggplot2::geom_sf(data = survey_area$akland, fill = "black") + #ifelse(SRVY %in% c("GOA", "AI"), "black", "white")) + 
       ggplot2::geom_sf(data = survey_area$graticule, 
-              color = "grey90", 
-              alpha = 0.5) +
+                       color = "grey90", 
+                       alpha = 0.5) +
       ggplot2::scale_x_continuous(name = "Longitude", 
-                         breaks = survey_area$lon.breaks) + 
+                                  breaks = survey_area$lon.breaks) + 
       ggplot2::scale_y_continuous(name = "Latitude", 
-                         breaks = survey_area$lat.breaks) +
+                                  breaks = survey_area$lat.breaks) +
       ggtitle(label = plot_title, 
-                subtitle = plot_subtitle) +
+              subtitle = plot_subtitle) +
       ggplot2::theme_minimal() + 
       ggplot2::theme(
         panel.border = element_rect(colour = "grey50", fill=NA, linewidth=.5), 
@@ -795,7 +795,7 @@ make_figure <- function(
       ## Aleutian Islands and Gulf of Alaska ----------------------------------
       
       ### grid map ---------------------------------------------------
-
+      
       # Draw bounding boxes
       bb <- data.frame()
       for (iiii in 1:length(unique(grid_stations_plot$region))) {
@@ -827,26 +827,26 @@ make_figure <- function(
       
       if (file_end == 'grid') {
         # label regions
-      gg <- gg + 
-        geom_label(data = bb, 
-                   color = ifelse(SRVY == "AI", "black", "white"), 
-                   fill = ifelse(SRVY == "AI", NA, "black"),
-                   fontface = "bold",
-                   label.size = NA,
-                   label.r = unit(0, "pt"),
-                   mapping = 
-                     aes(x = x, 
-                         y = (y+25000), 
-                         label = lab), 
-                   size = 4)  +
-        # fix extent
-        ggspatial::coord_sf(
-          xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-          ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
-          } 
-          
+        gg <- gg + 
+          geom_label(data = bb, 
+                     color = ifelse(SRVY == "AI", "black", "white"), 
+                     fill = ifelse(SRVY == "AI", NA, "black"),
+                     fontface = "bold",
+                     label.size = NA,
+                     label.r = unit(0, "pt"),
+                     mapping = 
+                       aes(x = x, 
+                           y = (y+25000), 
+                           label = lab), 
+                     size = 4)  +
+          # fix extent
+          ggspatial::coord_sf(
+            xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
+            ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
+      } 
+      
       if (file_end != 'grid') {
-      ### Create temperature plots ---------------------------------------------------------
+        ### Create temperature plots ---------------------------------------------------------
         grid_stations_plot_visited <- grid_stations_plot %>% 
           dplyr::filter(!is.na(var_bin)) %>% 
           sf::st_centroid() %>% 
@@ -866,13 +866,13 @@ make_figure <- function(
             dplyr::filter(var_bin == 1) %>%
             dplyr::mutate(
               var_bin = factor(levels(grid_stations_plot$var_bin)[1], 
-                   levels = levels(grid_stations_plot$var_bin), 
-                   labels = levels(grid_stations_plot$var_bin)))
+                               levels = levels(grid_stations_plot$var_bin), 
+                               labels = levels(grid_stations_plot$var_bin)))
           
           grid_stations_plot_visited$geometry[[1]][1] <- 1e12 # somewhere off the map
           grid_stations_plot_visited$geometry[[1]][2] <- 1e12 # somewhere off the map
         }
-
+        
         gg <- gg +
           # allocated station grid
           ggplot2::geom_sf(
@@ -932,28 +932,28 @@ make_figure <- function(
           #                height = 0.03,
           #                st.bottom = FALSE,
           #                st.size = 3, 
-          #                model = survey_area$crs) +
-          # fix extent
+        #                model = survey_area$crs) +
+        # fix extent
         ggspatial::coord_sf(
           xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
         
         # if (file_end %in% c("daily", "anom")) {
-          gg <- gg +
-            annotate("text", 
-                     x = quantile(sf::st_bbox(survey_area$survey.grid)[1]:sf::st_bbox(survey_area$survey.grid)[3], .15), 
-                     y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .80), 
-                     label = ifelse(is.na(max_date), 
-                                    "", 
-                                    ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
-                                           paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
-                                           paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
-                                                  " \u2013\n", 
-                                                  format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
-                     color = "black", size = 5, fontface=2) 
+        gg <- gg +
+          annotate("text", 
+                   x = quantile(sf::st_bbox(survey_area$survey.grid)[1]:sf::st_bbox(survey_area$survey.grid)[3], .15), 
+                   y = quantile(sf::st_bbox(survey_area$survey.grid)[2]:sf::st_bbox(survey_area$survey.grid)[4], .80), 
+                   label = ifelse(is.na(max_date), 
+                                  "", 
+                                  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
+                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
+                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
+                                                " \u2013\n", 
+                                                format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
+                   color = "black", size = 5, fontface=2) 
         # }
         
-
+        
       }
       
     }
@@ -978,7 +978,7 @@ make_figure <- function(
       lastplotofrun <- (i == iterate[length(iterate)])
     }
     # is this the first or last day of the survey?
-      lastdayofsurvey <- ((sum(is.na(dat_plot$date))) == 0)
+    lastdayofsurvey <- ((sum(is.na(dat_plot$date))) == 0)
     if (show_planned_stations) {
       lastdayofsurvey <- (lastdayofsurvey & 
                             nrow(dat_planned[!is.na(dat_planned$date),])==0)
@@ -1140,7 +1140,7 @@ make_figure_gif<-function(file_end,
   
   temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
   temp <- temp[!grepl(pattern = "current", x = temp)]
-
+  
   if (length(temp) != 0) {
     temp <- as.Date(sort(sapply(temp,"[[",1)))
     temp <- max(temp[as.Date(temp) < as.Date(max_date)])
@@ -1178,7 +1178,7 @@ upload_ftp <- function(dir_in,
                        dest, 
                        user, 
                        pass){
-
+  
   for (iiii in 1:length(dir_in)) {
     print(dir_in[iiii])
     

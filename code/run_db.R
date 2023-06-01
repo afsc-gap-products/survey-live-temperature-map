@@ -8,13 +8,13 @@
 # KNOWNS -----------------------------------------------------------------------
 
 maxyr <- 2023
-data_source <- "gd" # google drive
+data_source <- "oracle" 
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
 
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1V9GLy2DkOz8UbMTw6eC0GxjMfWa5FeHm"
-dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3OOCKsKzMX-UzTwKGVVGFsOW"
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1JHMlSm_hqnlQ9r9jZjWCAzMRIq8rKF-N" # TEST LINK
+dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1f94LUEGJXdeYaTpNOWB56M447__cLhQr" # TEST LINK
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
@@ -26,33 +26,34 @@ googledrive::drive_auth()
 # Set Working Directory --------------------------------------------------------
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
-locations <- c(
-  "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
-  "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-  "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/",
-  "Z:/Projects/survey-live-temperature-map/")
-
-for (i in 1:length(locations)){
-  if (file.exists(locations[i])) {
-    dir_wd  <- locations[i]
-  }
-}
+# locations <- c(
+#   "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
+#   "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
+#   "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/",
+#   "Z:/Projects/survey-live-temperature-map/")
+# 
+# for (i in 1:length(locations)){
+#   if (file.exists(locations[i])) {
+#     dir_wd  <- locations[i]
+#   }
+# }
 # dir_wd <- "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/"
+dir_wd <- paste0(here::here(), "/")
 
 # LOG --------------------------------------------------------------------------
 # sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
-source(file = paste0(dir_wd,"code/functions.R"))
+source(file = here::here("code","functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
-source(file = paste0(dir_wd, "code/data.R"))
+source(file = here::here("code", "data_db.R"))
 
 # What surveys should be run for this year and obtain necessary metadata
 dat_survreg <- dat_survreg %>%
   dplyr::filter(year == maxyr)
 
 # SIGN INTO FTP ----------------------------------------------------------------
-ftp_dl <- TRUE # test
+ftp_dl <- FALSE 
 # ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
 ftp <- list(ftp_dl = ftp_dl)
 if (ftp_dl) {
@@ -74,7 +75,7 @@ if (ftp_dl) {
 ## GOA --------------------------------------------------------------------------
 
 if ("GOA" %in% dat_survreg$SRVY) {
-  
+
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
   if (googledrive_dl) {
@@ -97,14 +98,14 @@ if ("GOA" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"),
+                       file_end0 = c("daily", "grid"),
                        dir_wd = dir_wd)
 }
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
 if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
-  
+
   SRVY <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
   if (googledrive_dl) {
@@ -112,8 +113,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
   } else {
     dir_googledrive_upload <- NULL
   }
-  show_planned_stations <- TRUE
-  plot_anom <- TRUE
+  show_planned_stations <- FALSE
   survey_area <- shp_bs
   if(ftp_dl){ftp$dest <- dev_bs}
   
@@ -128,7 +128,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "anom"), 
+                       file_end0 = c("daily", "anom", 'grid', "mean"), 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
@@ -164,6 +164,4 @@ if ("AI" %in% dat_survreg$SRVY) { # won't run in 2023 because is not in dat_surv
                        ftp = ftp)
 }
 
-# Log --------------------------------------------------------------------------
 
-# sink() 

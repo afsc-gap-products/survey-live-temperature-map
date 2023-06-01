@@ -40,7 +40,7 @@ SRVYs <- unique(dat_plot$SRVY)
 if (SRVY %in% c("AI", "GOA")) {
   goaai_regions <- survey_area$survey.grid %>% 
     st_centroid() %>% 
-    st_transform(crs = CRS("+proj=longlat")) %>%
+    st_transform(crs = "+proj=longlat +datum=WGS84") %>%
     st_coordinates() %>% 
     data.frame() %>%
     dplyr::mutate(region = unlist(survey_area$survey.grid$region)) %>% 
@@ -180,7 +180,7 @@ if (file_end %in% c("mean")) {
     dat_max_date <- grid_stations_plot %>% 
       sf::st_cast("MULTIPOLYGON") %>% 
       sf::st_centroid()  %>% 
-      sf::st_transform(x = ., crs = CRS("+proj=longlat +datum=WGS84"))%>%
+      sf::st_transform(x = ., crs = "+proj=longlat +datum=WGS84")%>%
       sf::st_coordinates() %>%
       data.frame() %>% 
       dplyr::rename(lon = X, 

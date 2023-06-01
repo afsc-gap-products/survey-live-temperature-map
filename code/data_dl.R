@@ -1,55 +1,37 @@
-#' ---------------------------
-#' title: Survey Daily and Anomally Temperature Plot
-#' OG author: Jason Conner
-#' maintained: Emily Markowitz and Liz Dawson (May 2021)
-#' purpose: download oracle data
-#' ---------------------------
+#' ---------------------------------------------
+#' title: Create public data 
+#' author: EH Markowitz
+#' start date: 2022-01-01
+#' Notes: 
+#' ---------------------------------------------
 
-# *** Oracle -------------------------------------------------------------------
+# Dowload oracle data ----------------------------------------------------------
 
 # This has a specific username and password because I DONT want people to have access to this!
 source("https://raw.githubusercontent.com/afsc-gap-products/metadata/main/code/functions_oracle.R")
 
 locations <- c("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R", 
                "Z:/Projects/ConnectToOracle.R", 
-               "C:/Users/emily.markowitz/Work/Projects/ConnectToOracle.R")
+               "C:/Users/emily.markowitz/Work/projects/ConnectToOracle.R")
+
 for (i in 1:length(locations)){
-  if (file.exists(locations[i])){
-    source(locations[i])
-  }
+  if (file.exists(locations[i])) {source(locations[i])}
 }
-#' # I set up a ConnectToOracle.R that looks like this: 
-#' #   
-#' #' Define RODBC connection to ORACLE
-#' #'
-#' #' @param schema default = 'AFSC'. 
-#' #'
-#' #' @return oracle channel connection
-#' #' @export
-#' #'
-#' #' @examples
-#' #' # Not run
-#' #' # channel <- oracle_connect()
-#' oracle_connect <- function(
-#'     schema='AFSC', 
-#'     username = NULL, 
-#'     passowrd = NULL){(echo=FALSE)
-#'   
-#'   library("RODBC")
-#'   library("getPass")
-#'   if (is.null(username)) {
-#'     username <- getPass(msg = "Enter your ORACLE Username: ")
-#'   }
-#'   if (is.null(password)) {
-#'     password <- getPass(msg = "Enter your ORACLE Password: ")
-#'   }
-#'   channel  <- RODBC::odbcConnect(
-#'     paste(schema),
-#'     paste(username),
-#'     paste(password), 
-#'     believeNRows=FALSE)
-#'   return(channel)
-#' }
+# I set up a ConnectToOracle.R that looks like this: 
+#   
+#   PKG <- c("RODBC")
+# for (p in PKG) {
+#   if(!require(p,character.only = TRUE)) {  
+#     install.packages(p)
+#     require(p,character.only = TRUE)}
+# }
+# 
+# channel<-odbcConnect(dsn = "AFSC",
+#                      uid = "USERNAME", # change
+#                      pwd = "PASSWORD", #change
+#                      believeNRows = FALSE)
+# 
+# odbcGetInfo(channel)
 
 locations<-c(
   # "RACE_DATA.VESSELS", 
@@ -64,4 +46,4 @@ locations<-c(
 oracle_dl(
   locations = locations, 
   channel = channel, 
-  dir_out = paste0(dir_wd, "/data/oracle/"))
+  dir_out = paste0(here::here("data"), "/"))

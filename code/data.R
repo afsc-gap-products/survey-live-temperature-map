@@ -18,9 +18,9 @@ if (googledrive_dl) {
 
 # Download data from oracle saved locally: -------------------------------------
 
-a<-list.files(path = paste0(dir_wd, "data/oracle/"))
+a<-list.files(path = paste0(dir_wd, "data/"))
 for (i in 1:length(a)){
-  b <- read_csv(file = paste0(dir_wd, "data/oracle/", a[i]))
+  b <- read_csv(file = paste0(dir_wd, "data/", a[i]))
   b <- janitor::clean_names(b)
   if (names(b)[1] %in% "x1"){
     b$x1<-NULL
@@ -35,7 +35,7 @@ for (i in 1:length(a)){
 dat_survreg <- 
   dplyr::right_join( # get SRVY
     x = racebase_foss_join_foss_cpue_haul0 %>% 
-      dplyr::select(SRVY = srvy, survey_definition_id = survey_id, year, vessel_id) %>% 
+      dplyr::select(SRVY = srvy, survey_definition_id, year, vessel_id) %>% 
       dplyr::distinct(),
     y = race_data_v_cruises0 %>% 
       dplyr::select(year, vessel_id, start_date, end_date, survey_definition_id, vessel_name) %>% 
@@ -105,11 +105,11 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   sf::st_transform(x = ., survey_area$crs$input) %>%
   dplyr::rename(station = STATIONID) %>%
   dplyr::left_join(x = ., 
-            y = haul %>%
-              # dplyr::rename(station = stationid) %>% 
-              dplyr::select(station, stratum) %>% 
-              dplyr::distinct(), 
-            by = "station") %>% 
+                   y = haul %>%
+                     # dplyr::rename(station = stationid) %>% 
+                     dplyr::select(station, stratum) %>% 
+                     dplyr::distinct(), 
+                   by = "station") %>% 
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 survey_area$survey.area <- survey_area$survey.area %>% 
