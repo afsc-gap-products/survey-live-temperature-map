@@ -68,7 +68,7 @@ googledrive_dl <- FALSE
 
 ## production ------------------------------------------------------------------
 
-# dat_survreg <- dat_survreg %>%
+# dat_survey <- dat_survey %>%
 #   dplyr::filter(year == maxyr)
 
 ## testing ---------------------------------------------------------------------
@@ -88,7 +88,7 @@ dates0 <- "all"
 
 ## GOA --------------------------------------------------------------------------
 
-# if ("GOA" %in% dat_survreg$SRVY) {
+# if ("GOA" %in% dat_survey$SRVY) {
 
 maxyr <- 2023 # testing
 
@@ -107,7 +107,7 @@ if(ftp_dl){ftp$dest <- dev_goa}
 make_varplot_wrapper(maxyr = maxyr, 
                      SRVY = SRVY,
                      haul = haul,
-                     dat_survreg = dat_survreg,
+                     dat_survey = dat_survey,
                      var = var,
                      dir_googledrive_upload = dir_googledrive_upload,
                      dates0 = dates0,
@@ -121,7 +121,7 @@ make_varplot_wrapper(maxyr = maxyr,
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
-# if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
+# if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
 
 maxyr <- 2022 # testing
 
@@ -142,7 +142,7 @@ if(ftp_dl){ftp$dest <- dev_bs}
 make_varplot_wrapper(maxyr = maxyr,
                      SRVY = SRVY,
                      haul = haul,
-                     dat_survreg = dat_survreg,
+                     dat_survey = dat_survey,
                      var = var,
                      dir_googledrive_upload = dir_googledrive_upload,
                      dates0 = dates0,
@@ -156,7 +156,7 @@ make_varplot_wrapper(maxyr = maxyr,
 # }
 
 ## AI --------------------------------------------------------------------------
-# if ("AI" %in% dat_survreg$SRVY) {
+# if ("AI" %in% dat_survey$SRVY) {
 
 maxyr <- 2022 # testing
 
@@ -177,7 +177,7 @@ if(ftp_dl){ftp$dest <- dev_ai}
 make_varplot_wrapper(maxyr = maxyr, 
                      SRVY = SRVY,
                      haul = haul,
-                     dat_survreg = dat_survreg,
+                     dat_survey = dat_survey,
                      var = var,
                      dir_googledrive_upload = dir_googledrive_upload,
                      dates0 = dates0,

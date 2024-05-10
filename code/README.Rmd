@@ -15,14 +15,14 @@ library(dplyr)
 library(glue)
 
 print_figs <- function(string_id, file_type = ".png") {
-temp <- list.files(path = "./examples/", pattern = string_id, full.names = TRUE)
+temp <- list.files(path = here::here("examples"), pattern = string_id, full.names = TRUE)
 temp <- data.frame(
   img = temp[grep(pattern = file_type, x = temp)], 
   txt0 = temp[grep(pattern = ".txt", x = temp)], 
   txt = NA) %>% 
   dplyr::mutate(
     srvy = sapply(X = strsplit(x = txt0, split = ".", fixed = TRUE), "[[", 2), 
-    srvy = gsub(pattern = paste0("/examples/", string_id), replacement = "", x = srvy),
+    srvy = gsub(pattern = paste0(here::here("examples"), "/", string_id), replacement = "", x = srvy),
     order = dplyr::case_when(
       srvy == "bs" ~ 1, 
       srvy == "ai" ~ 2, 
@@ -34,7 +34,6 @@ for (i in 1:nrow(temp)) {
 str0 <- glue::glue("![{temp$txt}]({temp$img})\n\n")
 return(str0)
 }
-
 ```
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -47,11 +46,13 @@ return(str0)
 
 **Emily Markowitz** (Emily.Markowitz AT noaa.gov; [\@EmilyMarkowitz-NOAA](https://github.com/EmilyMarkowitz-NOAA))
 
-**Liz Dawson** (Liz.Dawson AT noaa.gov; [\@liz-dawson-NOAA](https://github.com/liz-dawson-NOAA))
-
 **Chris Anderson** (Christopher.Anderson AT noaa.gov; [\@ChrisAnderson-NOAA](https://github.com/ChrisAnderson-NOAA))
 
-And previously, **Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
+And previously, 
+
+**Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
+
+**Liz Dawson** (Liz.Dawson AT noaa.gov; [\@liz-dawson-NOAA](https://github.com/liz-dawson-NOAA))
 
 Alaska Fisheries Science Center,
 
@@ -84,6 +85,12 @@ toc <- paste0(toc_list, "*](#", toc_link, ")", collapse = "\n")
 
 These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website
 
+ - [**Progress and temperature maps landing page**](https://www.fisheries.noaa.gov/alaska/science-data/bottom-trawl-survey-temperature-and-progress-maps)
+ - 2024 Eastern Bering Sea Bottom Trawl Survey *(coming soon!)*
+ - 2024 Aleutian Islands Bottom Trawl Survey *(coming soon!)*
+ - [2023 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey-2023)
+ - [2023 Gulf of Alaska Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-gulf-alaska-bottom-trawl-survey-2023) 
+ - [2023 Temperature Anomalies and Cold Pool Estimates from Bering Sea Bottom Trawl Surveys](https://www.fisheries.noaa.gov/alaska/science-data/temperature-anomalies-and-cold-pool-estimates-bering-sea-bottom-trawl-surveys-2023)
  - [2022 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-bering-sea-bottom-trawl-surveys-2022)
  - [2022 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-aleutian-islands-bottom-trawl-survey-2022) 
  - [2021 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey)
@@ -127,7 +134,11 @@ a <- print_figs(string_id = "current_anom_")
 
 # Relevant publications
 
-**Learn more about these surveys and ocean temperatures around Alaska** [@2021NEBS2022; @2018EBS2022; @2019NEBS2022; @2022NEBS2023; @AI2018; @GOA2018; @RohanColdPool]
+```{r source-current-tm, echo=FALSE}
+source("https://raw.githubusercontent.com/afsc-gap-products/citations/main/cite/current_data_tm.r") # srvy_cite 
+```
+
+**Learn more about these surveys and ocean temperatures around Alaska** [`r paste0("@", srvy_cite$CITE, collapse = "; ")`; @RohanColdPool]
 
 <div id="refs"></div>
 

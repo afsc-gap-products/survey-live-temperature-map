@@ -55,7 +55,7 @@ for (p in PKG) {
 #' @param maxyr Numeric. The 4 digit year (YYYY) of the year that the data is from. 
 #' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
 #' @param haul data.frame. Here, derived from the RACEBASE.HAUL and RACE_DATA.V_CRUISES oracle tables. See example in data.R script. 
-#' @param dat_survreg data.frame. Must include reg_shapefile (the name of the shapefile polygon), region_long (the formal name of the survey), SRVY ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), reg_dates (the planned dates of the survey).
+#' @param dat_survey data.frame. Must include reg_shapefile (the name of the shapefile polygon), region_long (the formal name of the survey), SRVY ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), survey_dates (the planned dates of the survey).
 #' @param var String. Default = "bt". "bt" will select the bottom temperature column and "st" will select the surface temperature column in haul data. 
 #' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 #' @param dates0 Default = "latest". A string of either the date to be plotted to ("YYYY-MM-DD"), a string of dates to be plotted (as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))), "all" which will plot all of the days where data was collected for in that year, "first" that uses the first date of the time series, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will be printed. 
@@ -73,8 +73,7 @@ for (p in PKG) {
 make_varplot_wrapper <- function(
     maxyr, 
     SRVY, 
-    haul, 
-    dat_survreg, 
+    dat_survey, 
     var = "bt", 
     dir_googledrive_upload = NULL, 
     dates0 = "latest", 
@@ -97,8 +96,15 @@ make_varplot_wrapper <- function(
   
   height <- ifelse(SRVY %in% c("AI", "GOA"), 6, 8)
   
-  dat_survreg <- dat_survreg %>%
+  dat_survey <- dat_survey %>%
     dplyr::filter(SRVY %in% SRVY1 & year == maxyr)
+  
+  haul <- dat_survey %>%
+    dplyr::select(
+      SRVY, year, stratum, station, date, survey, survey_dates,
+      vessel_shape, vessel_name, vessel_ital, st, bt
+    ) %>%
+    dplyr::distinct()
   
   # Define var
   if (!is.null(var)){
@@ -146,12 +152,12 @@ make_varplot_wrapper <- function(
       dplyr::select(SRVY, stratum, station, date, 
                     vessel_shape = vessel, var0 = dplyr::all_of(var)) %>% 
       dplyr::left_join(x = ., # obtain survey data
-                       y = dat_survreg %>% 
-                         dplyr::select(SRVY, reg_dates, region_long) %>% 
+                       y = dat_survey %>% 
+                         dplyr::select(SRVY, survey_dates, region_long) %>% 
                          dplyr::distinct(), 
                        by = c("SRVY")) %>% 
       dplyr::left_join(x = ., # obtain vessel data
-                       y = dat_survreg %>% 
+                       y = dat_survey %>% 
                          dplyr::select(SRVY, vessel_shape, vessel_name) %>% 
                          dplyr::distinct(), 
                        by = c("SRVY", "vessel_shape"))
@@ -162,7 +168,7 @@ make_varplot_wrapper <- function(
       dplyr::filter(year == maxyr &
                       SRVY %in% SRVY1) %>% 
       dplyr::select(SRVY, stratum, station, date, vessel_shape, vessel_name, 
-                    region_long, reg_dates, var0 = dplyr::all_of(var)) 
+                    region_long, survey_dates, var0 = dplyr::all_of(var)) 
     
   }
   
@@ -173,8 +179,8 @@ make_varplot_wrapper <- function(
     dat <- dplyr::left_join(
       multiple = "all", 
       x = dat_anom, 
-      y = dat_survreg %>% 
-        dplyr::select(SRVY, reg_dates, region_long) %>% 
+      y = dat_survey %>% 
+        dplyr::select(SRVY, survey_dates, region_long) %>% 
         dplyr::distinct(), 
       by = "SRVY") %>% 
       dplyr::mutate(var0 = 0, 
@@ -187,19 +193,19 @@ make_varplot_wrapper <- function(
     if (show_planned_stations) {
       temp <- data.frame(matrix(data = NA,
                                 ncol = ncol(dat),
-                                nrow = nrow(dat_survreg)))    
+                                nrow = nrow(dat_survey)))    
       names(temp) <- names(dat)
       temp <- temp %>% 
         dplyr::mutate(
-          SRVY = dat_survreg$SRVY,
+          SRVY = dat_survey$SRVY,
           stratum = 0,
           station = "0",
           var0 = NA,
-          region_long = dat_survreg$region_long, 
-          reg_dates  = dat_survreg$reg_dates, 
+          region_long = dat_survey$region_long, 
+          survey_dates  = dat_survey$survey_dates, 
           date = (min(as.Date(dat$date), na.rm = TRUE)-1),
-          vessel_name = dat_survreg$vessel_name,
-          vessel_shape = dat_survreg$vessel_shape)
+          vessel_name = dat_survey$vessel_name,
+          vessel_shape = dat_survey$vessel_shape)
       
       dat <- dplyr::bind_rows(
         temp,
@@ -220,7 +226,7 @@ make_varplot_wrapper <- function(
   }
   
   dat <- dat %>%
-    dplyr::mutate(reg_lab = paste0(region_long, "\n(", reg_dates, ")"), 
+    dplyr::mutate(reg_lab = paste0(region_long, "\n(", survey_dates, ")"), 
                   var0 = as.numeric(var0), 
                   anom = var0-mean) %>%
     # anom = as.numeric(ifelse(sum(var0 == 0) == nrow(.), var0-mean, NA))) %>%
@@ -492,7 +498,7 @@ make_figure <- function(
       x = survey_area$survey.grid, 
       y = dat %>%
         dplyr::select(station, stratum, var_bin, # reg_shapefile, 
-                      region_long, reg_dates, reg_lab, vessel_shape, date) %>% 
+                      region_long, survey_dates, reg_lab, vessel_shape, date) %>% 
         dplyr::distinct(), 
       by = c("stratum", "station")) 
   

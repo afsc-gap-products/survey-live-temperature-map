@@ -1,49 +1,85 @@
-#' ---------------------------------------------
-#' title: Create public data 
-#' author: EH Markowitz
-#' start date: 2022-01-01
-#' Notes: 
-#' ---------------------------------------------
 
-# Dowload oracle data ----------------------------------------------------------
+# Download oracle data ----------------------------------------------------------
 
-# This has a specific username and password because I DONT want people to have access to this!
-source("https://raw.githubusercontent.com/afsc-gap-products/metadata/main/code/functions_oracle.R")
+# Connect to oracle ------------------------------------------------------------
 
-locations <- c("C:/Users/liz.dawson/Work/Projects/ConnectToOracle.R", 
-               "Z:/Projects/ConnectToOracle.R", 
-               "C:/Users/emily.markowitz/Work/projects/ConnectToOracle.R")
+library(magrittr)
+library(readr)
+library(dplyr)
 
-for (i in 1:length(locations)){
-  if (file.exists(locations[i])) {source(locations[i])}
+if (file.exists("Z:/Projects/ConnectToOracle.R")) {
+  source("Z:/Projects/ConnectToOracle.R")
+  channel <- channel_products
+} else {
+  # # library(devtools)
+  # # devtools::install_github("afsc-gap-products/gapindex")
+  # library(gapindex)
+  # channel <- gapindex::get_connected()
+  
+  # or 
+  
+  # For those without a ConnectToOracle file
+  library(rstudioapi)
+  library(RODBC)
+  channel <- odbcConnect(dsn = "AFSC", 
+                         uid = rstudioapi::showPrompt(title = "Username", 
+                                                      message = "Oracle Username", default = ""), 
+                         pwd = rstudioapi::askForPassword("Enter Password"),
+                         believeNRows = FALSE)
 }
-# I set up a ConnectToOracle.R that looks like this: 
-#   
-#   PKG <- c("RODBC")
-# for (p in PKG) {
-#   if(!require(p,character.only = TRUE)) {  
-#     install.packages(p)
-#     require(p,character.only = TRUE)}
-# }
-# 
-# channel<-odbcConnect(dsn = "AFSC",
-#                      uid = "USERNAME", # change
-#                      pwd = "PASSWORD", #change
-#                      believeNRows = FALSE)
-# 
-# odbcGetInfo(channel)
+
+# locations <- c(
+#   "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL", 
+#   "RACE_DATA.V_CRUISES", 
+#   "GOA.GOA_STRATA"
+# )
 
 locations<-c(
-  # "RACE_DATA.VESSELS", 
-  "GOA.GOA_STRATA", 
-  "RACE_DATA.V_CRUISES",
+  "GAP_PRODUCTS.AKFIN_CRUISE",
+  "GAP_PRODUCTS.AKFIN_HAUL",
+  "GAP_PRODUCTS.AKFIN_AREA"
+  
+
   # "AI.AIGRID_GIS",
-  # "RACEBASE.HAUL", 
-  # "RACE_DATA.V_CRUISES"
-  "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL"
+  # "GOA.GOA_STRATA",
+  # # "RACE_DATA.VESSELS", 
+  # "RACE_DATA.V_CRUISES",
+  # # "RACEBASE.HAUL", 
+  # # "RACE_DATA.V_CRUISES"
+  # "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL"
 )
 
-oracle_dl(
-  locations = locations, 
-  channel = channel, 
-  dir_out = paste0(here::here("data"), "/"))
+error_loading <- c()
+for (i in 1:length(locations)){
+  print(locations[i])
+  
+  a <- RODBC::sqlQuery(channel = channel, 
+                       query = paste0("SELECT *
+    FROM ", locations[i], "
+    FETCH FIRST 1 ROWS ONLY;"))
+  
+  end0 <- c()
+  
+  start0 <- ifelse(!("START_TIME" %in% names(a)), 
+                   "*", 
+                   paste0(paste0(names(a)[names(a) != "START_TIME"], sep = ",", collapse = " "),
+                          " TO_CHAR(START_TIME,'MM/DD/YYYY HH24:MI:SS') START_TIME "))
+  
+  a <- RODBC::sqlQuery(channel = channel, 
+                       query = paste0("SELECT ", start0, " FROM ", locations[i], end0, "; "))
+  
+  if (is.null(nrow(a))) { # if (sum(grepl(pattern = "SQLExecDirect ", x = a))>1) {
+    error_loading <- c(error_loading, locations[i])
+  } else {
+    write.csv(x = a, 
+              here::here("data",
+                         paste0(tolower(gsub(pattern = '.', 
+                                             replacement = "_", 
+                                             x = locations[i], 
+                                             fixed = TRUE)),
+                                ".csv")))
+  }
+  remove(a)
+}
+error_loading
+

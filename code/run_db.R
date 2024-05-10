@@ -7,14 +7,19 @@
 
 # KNOWNS -----------------------------------------------------------------------
 
-maxyr <- 2023
-data_source <- "oracle" 
+maxyr <- 2024
+data_source <- "gd" # "oracle" 
 dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
+survey_definition_id0 <- c(52, 98) # Survey ID. The survey definition ID key code uniquely identifies a survey/survey design. Integer code that uniquely identifies survey. Full list of survey definition IDs are in RACE_DATA.SURVEY_DEFINITIONS. IDs used in GAP_PRODUCTS are: 47 (Gulf of Alaska); 52 (Aleutian Islands); 78 (Bering Sea Slope); 98 (Eastern Bering Sea Shelf); 143 (Northern Bering Sea Shelf). The column "survey_definition_id" is associated with the "srvy" and "survey" columns. For a complete list of surveys, review the [code books](https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual).
 
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1JHMlSm_hqnlQ9r9jZjWCAzMRIq8rKF-N" # TEST LINK
-dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1f94LUEGJXdeYaTpNOWB56M447__cLhQr" # TEST LINK
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1lszcLPkynLF28JI-GcOkEX94hAErFXJR" # TEST LINK
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1pYyox1MFBAUJUHqqvAupnfkEN1uSaFV3" # REAL LINK COLOR BLIND
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1sP34UMQiTQvci4U6PMOFcnlFI0vQ1BH9" # REAL LINK RAINBOW
+dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1lLFgva1E5h7aEvRc9w4Q-gEQkBOE5_80" # TEST LINK
+dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1N0L8yfTK_XbmsVgMD4OLbaeDJEeZtRG-" # REAL LINK COLOR BLIND
+dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1PK2nnSprqOYV12Ae80YE_avp3Qj5IKEL" # REAL LINK RAINBOW
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
@@ -49,7 +54,7 @@ source(file = here::here("code","functions.R"))
 source(file = here::here("code", "data_db.R"))
 
 # What surveys should be run for this year and obtain necessary metadata
-dat_survreg <- dat_survreg %>%
+dat_survey <- dat_survey %>%
   dplyr::filter(year == maxyr)
 
 # SIGN INTO FTP ----------------------------------------------------------------
@@ -74,7 +79,7 @@ if (ftp_dl) {
 
 ## GOA --------------------------------------------------------------------------
 
-if ("GOA" %in% dat_survreg$SRVY) {
+if ("GOA" %in% dat_survey$SRVY) {
 
   SRVY <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
@@ -90,7 +95,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
   make_varplot_wrapper(maxyr = maxyr, 
                        SRVY = SRVY,
                        haul = haul,
-                       dat_survreg = dat_survreg,
+                       dat_survey = dat_survey,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
                        dates0 = dates0,
@@ -104,7 +109,7 @@ if ("GOA" %in% dat_survreg$SRVY) {
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
-if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
+if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
 
   SRVY <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
@@ -120,7 +125,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
   make_varplot_wrapper(maxyr = maxyr,
                        SRVY = SRVY,
                        haul = haul,
-                       dat_survreg = dat_survreg,
+                       dat_survey = dat_survey,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
                        dates0 = dates0,
@@ -134,7 +139,7 @@ if ("NBS" %in% dat_survreg$SRVY & "EBS" %in% dat_survreg$SRVY) {
 }
 
 ## AI --------------------------------------------------------------------------
-if ("AI" %in% dat_survreg$SRVY) { # won't run in 2023 because is not in dat_survreg
+if ("AI" %in% dat_survey$SRVY) { # won't run in 2023 because is not in dat_survey
   
   SRVY <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
@@ -151,7 +156,7 @@ if ("AI" %in% dat_survreg$SRVY) { # won't run in 2023 because is not in dat_surv
   make_varplot_wrapper(maxyr = maxyr, 
                        SRVY = SRVY,
                        haul = haul,
-                       dat_survreg = dat_survreg,
+                       dat_survey = dat_survey,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
                        dates0 = dates0,

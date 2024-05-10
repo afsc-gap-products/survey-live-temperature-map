@@ -1,5 +1,5 @@
 #' ---------------------------
-#' title: Survey Daily and Anomally Temperature Plot
+#' title: Survey Daily and Anomaly Temperature Plot
 #' OG author: Jason Conner
 #' maintained: Emily Markowitz and Liz Dawson (May 2021)
 #' purpose: download oracle data
@@ -32,7 +32,7 @@ for (i in 1:length(a)){
 
 ## Cruise data -----------------------------------------------------------------
 
-dat_survreg <- 
+dat_survey <- 
   dplyr::right_join( # get SRVY
     x = racebase_foss_join_foss_cpue_haul0 %>% 
       dplyr::select(SRVY = srvy, survey_definition_id, year, vessel_id) %>% 
@@ -51,21 +51,21 @@ dat_survreg <-
       survey_definition_id == 143 ~ "NBS", 
       survey_definition_id == 47 ~ "GOA", 
       survey_definition_id == 52 ~ "AI"), 
-    region_long = dplyr::case_when(
+    survey_long = dplyr::case_when(
       SRVY == "EBS" ~ "Eastern Bering Sea", 
       SRVY == "NBS" ~ "Northern Bering Sea", 
       SRVY == "GOA" ~ "Gulf of Alaska", 
       SRVY == "AI" ~ "Aleutian Islands"), 
-    reg_dates = paste0(
+    survey_dates = paste0(
       format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
       " - ", 
       format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
-  dplyr::select(year, SRVY, cruise_id, cruise, reg_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, region_long) %>% 
+  dplyr::select(year, SRVY, cruise_id, cruise, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey_long) %>% 
   dplyr::distinct()
 
-# > dat_survreg
+# > dat_survey
 # # A tibble: 742 × 9
-# year SRVY  cruise_id reg_dates       vessel_id vessel_shape vessel_name            vessel_ital              region_long
+# year SRVY  cruise_id survey_dates       vessel_id vessel_shape vessel_name            vessel_ital              survey_long
 # <dbl> <chr>     <dbl> <chr>               <dbl> <fct>        <chr>                  <chr>                    <chr>      
 #   1  2023 GOA         765 Mar 10 - Aug 24       148 O            F/V Ocean Explorer     F/V *Ocean Explorer*     Gulf of Al…
 # 2  2023 GOA         766 Mar 10 - Aug 24       176 A            F/V Alaska Provider    F/V *Alaska Provider*    Gulf of Al…
@@ -130,7 +130,7 @@ FROM RACE_DATA.EDIT_HAULS;")),
     by = "HAUL_ID")  %>% 
     janitor::clean_names() %>% 
     dplyr::left_join(
-      y = dat_survreg %>% 
+      y = dat_survey %>% 
         dplyr::select(cruise_id, SRVY, vessel_id), 
       by = "cruise_id")
   
@@ -152,7 +152,7 @@ FROM RACE_DATA.EDIT_HAULS;")),
     dplyr::select(SRVY, station, stratum) %>%
     unique()  %>% 
     dplyr::filter(!(station %in% temperature_raw$station[temperature_raw$SRVY %in% c("NBS", "EBS")])) # %>% 
-    # dplyr::left_join(y = dat_survreg %>% 
+    # dplyr::left_join(y = dat_survey %>% 
     #                    dplyr::filter(year == date_max &
     #                                    SRVY %in% c("NBS", "EBS")) %>% 
     #                    dplyr::select(SRVY))
@@ -161,7 +161,7 @@ FROM RACE_DATA.EDIT_HAULS;")),
     dplyr::bind_rows(temp1) %>% 
     dplyr::bind_rows(temp2) %>% 
     # dplyr::left_join(x = ., 
-    #                  y = dat_survreg %>% 
+    #                  y = dat_survey %>% 
     #                    dplyr::filter(year == date_max)) %>% 
     dplyr::mutate(
       year = date_max,
@@ -180,7 +180,7 @@ dat <- haul <- racebase_foss_join_foss_cpue_haul0 %>%
   dplyr::rename(SRVY = srvy, 
                 date = date_time) %>%
   dplyr::left_join(x = ., # get cruise_id
-                   y = dat_survreg %>%
+                   y = dat_survey %>%
                      dplyr::select(SRVY, year, cruise, cruise_id, vessel_id)) %>%
   dplyr::filter(
     !(is.na(station)) &
@@ -204,12 +204,12 @@ dat <- haul <- racebase_foss_join_foss_cpue_haul0 %>%
     longitude = longitude_dd_start ) %>%
   dplyr::left_join( # get SRVY info
     x = ., 
-    y = dat_survreg %>% 
-      dplyr::select(SRVY, region_long, reg_dates) %>% 
+    y = dat_survey %>% 
+      dplyr::select(SRVY, survey_long, survey_dates) %>% 
       unique()) %>%
   dplyr::left_join( # get vessel info
     x = ., 
-    y = dat_survreg %>% 
+    y = dat_survey %>% 
       dplyr::select(vessel_name, vessel_id, vessel_shape, vessel_ital) %>% 
       unique()) 
 

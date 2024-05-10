@@ -29,7 +29,7 @@ vess <- text_list(x = paste0("F/V \\textit{",
 
 surveys <- gsub(pattern = "Eastern", 
                 replacement = "eastern", 
-                x = unique(dat_plot$region_long))
+                x = unique(dat_plot$survey_long))
 surveys <- gsub(pattern = "Northern", 
                 replacement = "northern", 
                 x = surveys)
@@ -220,7 +220,7 @@ if (file_end %in% c("mean")) {
     }
     
     temp1 <- ""
-    temp11 <- as.character(unique(dat_survreg$vessel_shape)); temp11 <- temp11[!is.na(temp11)] # vessels in data
+    temp11 <- as.character(unique(dat_survey$vessel_shape)); temp11 <- temp11[!is.na(temp11)] # vessels in data
     temp12 <- as.character(unique(dat_max_date$vessel_shape)) # vessels from maxdate
     temp13 <- setdiff(temp11, temp12); temp13 <- temp13[!is.na(temp13)]
     if (length(temp13)>0) {
