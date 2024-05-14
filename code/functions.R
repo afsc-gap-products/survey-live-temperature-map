@@ -986,7 +986,8 @@ make_figure <- function(
         # if (file_end %in% c("daily", "anom")) {
         gg <- gg +
           annotate("text", 
-                   x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
+                   # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
+                   x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(SRVY == "AI", .15, .6)),  
                    y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], .80), 
                    label = ifelse(is.na(max_date), 
                                   "", 
