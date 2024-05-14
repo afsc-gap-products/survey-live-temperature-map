@@ -29,7 +29,7 @@ vess <- text_list(x = paste0("F/V \\textit{",
 
 surveys <- gsub(pattern = "Eastern", 
                 replacement = "eastern", 
-                x = unique(dat_plot$survey_long))
+                x = unique(dat_plot$survey))
 surveys <- gsub(pattern = "Northern", 
                 replacement = "northern", 
                 x = surveys)
@@ -38,21 +38,21 @@ SRVYs <- unique(dat_plot$SRVY)
 
 # find regions in west to east
 if (SRVY %in% c("AI", "GOA")) {
-  goaai_regions <- survey_area$survey.grid %>% 
+  goaai_regions <- shp$survey.grid %>% 
     st_centroid() %>% 
     st_transform(crs = "+proj=longlat +datum=WGS84") %>%
     st_coordinates() %>% 
     data.frame() %>%
-    dplyr::mutate(region = unlist(survey_area$survey.grid$region)) %>% 
-    dplyr::group_by(region) %>% 
+    dplyr::mutate(area_name = unlist(shp$survey.grid$area_name)) %>% 
+    dplyr::group_by(area_name) %>% 
     dplyr::summarise(minlon = min(X, na.rm = TRUE)) %>% 
     dplyr::arrange(minlon)
   
   goaai_regions0 <- paste0("This survey covers the ", 
-                           text_list(goaai_regions$region), 
+                           text_list(goaai_regions$area_name), 
                            " regions. ")
   goaai_regions <- paste0("This survey covers the ", 
-                          text_list(goaai_regions$region), 
+                          text_list(goaai_regions$area_name), 
                           " regions, which are sampled randomly each year. ")
 } else {
   goaai_regions <- ""
@@ -79,7 +79,7 @@ foss_not <- paste0("The final, validated haul and catch data will be publicly ac
 foss_avail <- paste0("These data are publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}). ")
 foss0 <- ifelse(data_source == "gd", foss_not, foss_avail)
 
-if (file_end %in% c("mean")) {  
+if (file_end %in% c("mean", "mean_cb")) {  
   temp <- gsub(pattern = "[a-zA-Z]+", replacement = "", x = plot_subtitle)
   temp <- strsplit(x = trimws(temp), split = " \n ")[[1]]
   temp <- gsub(pattern = " )", replacement = " years)", x = temp)
@@ -102,7 +102,7 @@ if (file_end %in% c("mean")) {
     #              gsub(x = plot_subtitle, pattern = "\n", replacement = " "), ". ", 
     foss_avail)
   
-} else if (file_end %in% c("anom")) {
+} else if (file_end %in% c("anom", "anom_cb")) {
   
   temp <- gsub(pattern = "[a-zA-Z]+", replacement = "", x = plot_subtitle)
   temp <- strsplit(x = trimws(temp), split = " \n ")[[1]]
@@ -146,10 +146,10 @@ if (file_end %in% c("mean")) {
   
   if (SRVY %in% c("BS", "NBS", "EBS")) {
     fig_cap <- paste0( 
-      "The grid of designated stations in the ",text_list(surveys)," bottom trawl survey area",
+      "The grid of designated stations in the ", text_list(surveys)," bottom trawl survey area",
       ifelse(length(surveys)>1, "s", ""), 
       " as well as the ", 
-      text_list(x = paste0(unique(survey_area$bathymetry$METERS), "m")),
+      text_list(x = paste0(unique(shp$bathymetry$meters), "m")),
       " bathymetric boundaries. ")
   } else if (SRVY %in% c("GOA", "AI")) {
     fig_cap <- paste0(
@@ -157,7 +157,7 @@ if (file_end %in% c("mean")) {
       goaai_regions0)
   }
   
-} else if (file_end == "daily") {
+} else if (file_end %in% c("daily", "daily_cb")) {
   
   # Find what stations were sampled on this day
   loc <- dat_plot %>% 

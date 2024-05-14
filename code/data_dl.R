@@ -10,7 +10,7 @@ library(dplyr)
 if (file.exists("Z:/Projects/ConnectToOracle.R")) {
   source("Z:/Projects/ConnectToOracle.R")
   channel <- channel_products
-} else {
+} else { # For those without a ConnectToOracle file
   # # library(devtools)
   # # devtools::install_github("afsc-gap-products/gapindex")
   # library(gapindex)
@@ -18,7 +18,6 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
   
   # or 
   
-  # For those without a ConnectToOracle file
   library(rstudioapi)
   library(RODBC)
   channel <- odbcConnect(dsn = "AFSC", 
@@ -37,7 +36,8 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
 locations<-c(
   "GAP_PRODUCTS.AKFIN_CRUISE",
   "GAP_PRODUCTS.AKFIN_HAUL",
-  "GAP_PRODUCTS.AKFIN_AREA"
+  "GAP_PRODUCTS.AKFIN_AREA",
+  "GAP_PRODUCTS.AKFIN_STRATUM_GROUPS"
   
 
   # "AI.AIGRID_GIS",

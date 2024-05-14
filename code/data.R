@@ -1,10 +1,8 @@
 #' ---------------------------
 #' title: Survey Daily and Anomally Temperature Plot
-#' OG author: Jason Conner
-#' maintained: Emily Markowitz and Liz Dawson (May 2021)
+#' maintained: Emily Markowitz
 #' purpose: download oracle data
 #' ---------------------------
-# Download data from oracle saved locally: -------------------------------------
 
 a <- list.files(path = paste0(dir_wd, "data/"))
 # a <- a[grepl(pattern = ".", x = a, fixed = TRUE)] # remove folders
@@ -25,10 +23,8 @@ for (i in 1:length(a)){
     value = b)
 }
 
-# Load new data ----------------------------------------------------------------
-
-if (data_source == "gd") {
-## Load data from Google Sheet -------------------------------------------------
+# if (data_source == "gd") {
+# Load new data from Google Sheet -------------------------------------------------
 
 if (googledrive_dl) {
   # https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE/edit?usp=sharing
@@ -39,28 +35,59 @@ if (googledrive_dl) {
 }
 a <- readxl::excel_sheets(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"))
 a <- a[grepl(pattern = maxyr, x = a)]
-dat <- data.frame()
-for (i in a) {
-  b <- readxl::read_xlsx(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"), sheet = i, skip = 1)
-  dat <- dplyr::bind_rows(dat, b)
+dat_googledrive <- data.frame()
+if (length(a)>0) { # if there are enteries for this year in the spreadsheet
+  for (i in a) {
+    b <- readxl::read_xlsx(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"), sheet = i, skip = 1)
+    dat_googledrive <- dplyr::bind_rows( 
+      dat_googledrive, 
+      b %>% 
+        dplyr::mutate(
+                      # data_type = i, 
+                      station = as.character(station), 
+                      stratum = as.numeric(stratum)))
+  }
+dat_googledrive <- dat_googledrive %>% 
+  dplyr::filter(!is.na(SRVY)) %>% 
+  dplyr::mutate(
+    data_type = "googledrive",
+                year = maxyr, # as.numeric(format(x = date, "%Y")), 
+                date = as.Date(date), 
+    survey_definition_id = dplyr::case_when(
+      SRVY == "EBS" ~ 98, 
+      SRVY == "NBS" ~ 143, 
+      SRVY == "BSS" ~ 78,
+      SRVY == "GOA" ~ 47, 
+      SRVY == "AI" ~ 52)) %>% 
+  dplyr::rename(date_time_start = date)
 }
 
-# dat <- dat %>% 
-#   dplyr::mutate(source = "google drive")
-
-
-} else if (data_source == "oracle") {
-  ## Load data from Oracle edit tables -------------------------------------------------
+# } else 
+  if (data_source == "oracle") {
+# Load data new from Oracle edit tables -------------------------------------------------
   
+    if (file.exists("Z:/Projects/ConnectToOracle.R")) {
+      source("Z:/Projects/ConnectToOracle.R")
+      channel <- channel
+    } else {
+      library(rstudioapi)
+      library(RODBC)
+      channel <- odbcConnect(dsn = "AFSC", 
+                             uid = rstudioapi::showPrompt(title = "Username", 
+                                                          message = "Oracle Username", default = ""), 
+                             pwd = rstudioapi::askForPassword("Enter Password"),
+                             believeNRows = FALSE)
+    }
+    
   lastdl <- Sys.Date()
   
   date_max <- RODBC::sqlQuery(channel, paste0("SELECT CREATE_DATE FROM RACE_DATA.EDIT_HAULS;"))
   date_max <- sort(as.numeric(unique(unlist(format(date_max, format = "%Y")))))
   date_max <- max(date_max[date_max<=format(Sys.Date(), format = "%Y")]) # sometimes there are dates that haven't happened yet b/c testing
   
-  if (max(racebase_foss_join_foss_cpue_haul0$year) < date_max) { # if this year's data hasn't been entered into the production data
+  if (format(max(gap_products_akfin_haul0$date_time_start), format = "%Y") < date_max) { # if this year's data hasn't been entered into the production data
     
-    temperature_raw <- dplyr::left_join( 
+    temperature_raw <- dplyr::left_join(
       
       x = RODBC::sqlQuery(channel, paste0( 
         "SELECT HAUL_ID, 
@@ -80,37 +107,6 @@ FROM RACE_DATA.EDIT_HAULS;")),
       
       by = "HAUL_ID")  %>% 
       janitor::clean_names() %>% 
-      dplyr::left_join(
-        y = dat_survey %>% 
-          dplyr::select(cruise_id, SRVY, vessel_id), 
-        by = "cruise_id")
-    
-    temp0 <- temperature_raw %>% 
-      dplyr::filter(SRVY %in% c("GOA")) %>% 
-      unique()
-    temp1 <- # add this year's allocated stations
-      readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
-                        sheet = "2023_GOA", 
-                        skip = 1) %>%
-      dplyr::select(SRVY, station, stratum) %>% 
-      dplyr::filter(!(paste0(stratum, "-", station) %in% paste0(temp0$stratum, "-", temp0$station))) %>%
-      unique() 
-    
-    temp2 <- # add this year's allocated stations
-      readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
-                        sheet = "2023_BS", 
-                        skip = 1) %>%
-      dplyr::select(SRVY, station, stratum) %>%
-      unique()  %>% 
-      dplyr::filter(!(station %in% temperature_raw$station[temperature_raw$SRVY %in% c("NBS", "EBS")])) # %>% 
-    # dplyr::left_join(y = dat_survey %>% 
-    #                    dplyr::filter(year == date_max &
-    #                                    SRVY %in% c("NBS", "EBS")) %>% 
-    #                    dplyr::select(SRVY))
-    
-    temperature_raw <- temperature_raw %>% 
-      dplyr::bind_rows(temp1) %>% 
-      dplyr::bind_rows(temp2) %>% 
       # dplyr::left_join(x = ., 
       #                  y = dat_survey %>% 
       #                    dplyr::filter(year == date_max)) %>% 
@@ -119,57 +115,15 @@ FROM RACE_DATA.EDIT_HAULS;")),
         latitude_dd_start = latitude_dd_start/100, 
         longitude_dd_start = longitude_dd_start/100, 
         data_type = "raw") %>% 
-      dplyr::select(-haul_id) 
-    
-  } else {
-    temperature_raw <- data.frame()
+      dplyr::select(-haul_id) %>% 
+      dplyr::left_join(
+        y = dat_googledrive %>%
+          dplyr::select(SRVY, station, stratum)) %>% 
+      dplyr::filter(!is.na(SRVY))
   }
-  
-  ## Combined Previous and New haul data --------------------------------------------------------------------
-  
-  dat <- haul <- racebase_foss_join_foss_cpue_haul0 %>% 
-    dplyr::rename(SRVY = srvy, 
-                  date = date_time) %>%
-    dplyr::left_join(x = ., # get cruise_id
-                     y = dat_survey %>%
-                       dplyr::select(SRVY, year, cruise, cruise_id, vessel_id)) %>%
-    dplyr::filter(
-      !(is.na(station)) &
-        !is.na(surface_temperature_c) &
-        !is.na(bottom_temperature_c)) %>% 
-    dplyr::mutate(data_type = "offical") %>% 
-    dplyr::filter( 
-      # there shouldn't be bottom temps of 0 in the AI or GOA
-      ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
-        ((SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS")))) %>% 
-    # dplyr::select(list(names(temperature_raw)))
-    dplyr::bind_rows(temperature_raw) %>% # incorporate new data
-    
-    dplyr::mutate(date = as.Date(format(date, format = "%Y-%m-%d"))) %>%
-    dplyr::select(
-      SRVY, year, stratum, station, date, data_type, cruise_id, 
-      vessel_id, 
-      st = surface_temperature_c,
-      bt = bottom_temperature_c,
-      latitude = latitude_dd_start,
-      longitude = longitude_dd_start ) %>%
-    dplyr::left_join( # get SRVY info
-      x = ., 
-      y = dat_survey %>% 
-        dplyr::select(SRVY, survey_long, survey_dates) %>% 
-        unique()) %>%
-    dplyr::left_join( # get vessel info
-      x = ., 
-      y = dat_survey %>% 
-        dplyr::select(vessel_name, vessel_id, vessel_shape, vessel_ital) %>% 
-        unique()) 
-  
-  # dat <- dat %>% 
-  #   dplyr::mutate(source = "oracle")
-    
 }
 
-# The surveys this script will be covering -------------------------------------
+# The official GAP_PRODUCTS data for previous years ----------------------------
 
 dat_survey <- 
   dplyr::right_join(
@@ -184,11 +138,24 @@ dat_survey <-
     y = gap_products_akfin_cruise0 %>% 
       dplyr::select(cruisejoin, year, vessel_id, date_start, date_end, survey_definition_id, vessel_name) %>% 
       dplyr::distinct()) %>% 
+  dplyr::mutate(data_type = "offical")
+
+if (data_source == "gd") {
+dat_survey <- dat_survey %>% 
+  dplyr::filter(year < maxyr)
+}
+
+if (max(dat_survey$year) < max(dat_googledrive$year, na.rm = TRUE)) {
+  dat_survey <- dat_survey %>% 
+    dplyr::bind_rows(dat_googledrive) # Combined previous and new haul data
+}
+
+dat_survey <- dat_survey %>% 
   dplyr::arrange(-year) %>%
   dplyr::mutate(
-    vessel_shape = as.factor(substr(x = vessel_name, start = 1, stop = 1)), 
-    vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
-    vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)),
+    vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
+    vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
+    vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name))),
     SRVY = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
@@ -212,8 +179,7 @@ dat_survey <-
         ((survey_definition_id %in% c(52, 47) & gear_temperature_c != 0) | 
            (survey_definition_id %in% c(78, 98, 143)))) %>% 
   dplyr::rename(st = surface_temperature_c, 
-                bt = gear_temperature_c) %>% 
-  dplyr::left_join(dat)
+                bt = gear_temperature_c) 
 # dplyr::select(year, SRVY, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey) %>% 
   # dplyr::distinct() 
 
@@ -254,43 +220,79 @@ areas <- gap_products_akfin_area0  %>%
   # find the most up to date design_year's
   dplyr::filter(eval(parse(text=paste0("(survey_definition_id == ", aa$survey_definition_id, 
                                        " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) %>%
-  dplyr::filter((survey_definition_id %in% c(52, 47) & area_type == "INPFC") | 
-                  (survey_definition_id %in% c(143, 98, 78) & area_type == "STRATUM")) %>% 
+  # dplyr::filter((survey_definition_id %in% c(52, 47) & area_type %in% c("INPFC", "STRATUM")) | 
+  #                 (survey_definition_id %in% c(143, 98, 78) & area_type == "STRATUM")) %>% 
+  dplyr::filter(area_type %in% c("STRATUM", "INPFC")) %>% 
   dplyr::mutate(#area_name = stringr::str_to_title(inpfc_area),
     area_name = dplyr::case_when(
       area_name %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-      TRUE ~ area_name)) %>% 
-  dplyr::select(survey_definition_id, stratum = area_id, area_type, area_name)
+      TRUE ~ area_name)#, 
+    # SRVY = dplyr::case_when(
+    #   survey_definition_id == 98 ~ "EBS", 
+    #   survey_definition_id == 143 ~ "NBS", 
+    #   survey_definition_id == 78 ~ "BSS",
+    #   survey_definition_id == 47 ~ "GOA", 
+    #   survey_definition_id == 52 ~ "AI")
+    ) %>% 
+  dplyr::select(survey_definition_id, area_id, area_type, area_name) 
 
-shp_all <- list(
+areas <- dplyr::bind_rows(
+  areas %>% 
+    dplyr::mutate(stratum = area_id) %>%
+    dplyr::filter(!(survey_definition_id %in% c(47, 52)) & 
+                    area_type == "STRATUM"), 
+    gap_products_akfin_stratum_groups0 %>% 
+                     dplyr::filter(eval(parse(text=paste0("(survey_definition_id == ", aa$survey_definition_id, 
+                                                          " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) %>%
+                     dplyr::filter(survey_definition_id %in% c(52, 47)) %>% 
+                     dplyr::filter(area_id %in% unique(areas$area_id[areas$area_type == "INPFC"])) %>%
+    dplyr::select(-design_year) %>% 
+      dplyr::left_join(areas %>% 
+                         dplyr::filter(area_type == "INPFC") ))  
+
+shp_all <- shp <- list(
   # Stratum
   survey.strata = dplyr::bind_rows(list(
   shp_bs$survey.strata %>%
     sf::st_transform(crs = "EPSG:3338") %>%
-    dplyr::mutate(SRVY = "BS"),
+    dplyr::mutate(SRVY = "BS", 
+                  survey_definition_id = ifelse(SURVEY == "EBS_SHELF", 98, 143),
+                  stratum = as.numeric(Stratum)) %>% 
+    dplyr::select(-Stratum),
   shp_ebs$survey.strata %>%
     sf::st_transform(crs = "EPSG:3338") %>%
-    dplyr::mutate(SRVY = "EBS"),
+    dplyr::mutate(SRVY = "EBS", 
+                  survey_definition_id = 98,
+                  stratum = as.numeric(Stratum)) %>% 
+    dplyr::select(-Stratum),
   shp_nbs$survey.strata  %>%
     sf::st_transform(crs = "EPSG:3338") %>%
-    dplyr::mutate(survey = "NBS"),
+    dplyr::mutate(survey = "NBS", 
+                  survey_definition_id = 143,
+                  stratum = as.numeric(Stratum)) %>% 
+    dplyr::select(-Stratum),
   shp_ai$survey.strata %>%
     sf::st_transform(crs = "EPSG:3338") %>%
     dplyr::mutate(SRVY = "AI", 
-                  Stratum = as.character(Stratum)),
+                  survey_definition_id = 52,
+                  stratum = as.numeric(STRATUM)) %>% 
+    dplyr::select(-STRATUM),
   shp_goa$survey.strata %>%
     sf::st_transform(crs = "EPSG:3338") %>%
-    dplyr::mutate(SRVY = "GOA", 
-                  Stratum = as.character(Stratum)),
+    dplyr::mutate(SRVY = "GOA",
+                  survey_definition_id = 47,
+                  stratum = as.numeric(STRATUM)) %>% 
+    dplyr::select(-STRATUM, -Stratum),
   shp_bss$survey.strata %>%
     sf::st_transform(crs = "EPSG:3338") %>%
     dplyr::mutate(SRVY = "BSS", 
-                  Stratum = as.character(STRATUM)))) %>%
-  dplyr::select(SRVY, stratum = Stratum, geometry) %>% 
-                     dplyr::mutate(stratum = as.numeric(stratum)) %>%
-  dplyr::left_join(y = dat_survey %>%
-                     dplyr::select(stratum, SRVY, survey, survey, survey_definition_id) %>% 
-                     dplyr::distinct()) %>% 
+                  survey_definition_id = 78,
+                  stratum = as.numeric(STRATUM)) %>% 
+    dplyr::select(-STRATUM))) %>%
+  dplyr::select(SRVY, survey_definition_id, stratum, geometry) %>%
+  # dplyr::left_join(y = dat_survey %>%
+  #                    dplyr::select(stratum, SRVY, survey, survey, survey_definition_id) %>% 
+  #                    dplyr::distinct()) %>% 
     dplyr::left_join(y = areas, relationship = "many-to-many"), 
   
   # Regions
@@ -314,10 +316,10 @@ shp_all <- list(
     shp_bss$survey.area %>%
       sf::st_transform(crs = "EPSG:3338") %>%
       dplyr::mutate(SRVY = "BSS"))) %>%
-    dplyr::select(SRVY, SRVY1, geometry) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(SRVY, survey, survey, survey_definition_id) %>% 
-                       dplyr::distinct()), 
+    dplyr::select(SRVY, SRVY1, geometry), #  %>%
+    # dplyr::left_join(y = dat_survey %>%
+    #                    dplyr::select(SRVY, survey, survey, survey_definition_id) %>% 
+    #                    dplyr::distinct()), 
   
   # Stations
   survey.grid = dplyr::bind_rows(list(
@@ -326,8 +328,8 @@ shp_all <- list(
       dplyr::mutate(SRVY = "BS", 
                     station = STATIONID) %>% 
       dplyr::left_join(y = dat_survey %>% 
-                         dplyr::filter(SRVY == "BS") %>% 
-                         dplyr::select(station, stratum) %>% 
+                         dplyr::filter(SRVY %in% c("EBS", "NBS")) %>% 
+                         dplyr::select(station, stratum, survey_definition_id) %>% 
                          dplyr::distinct()),
     shp_ebs$survey.grid %>%
       sf::st_transform(crs = "EPSG:3338") %>%
@@ -335,7 +337,7 @@ shp_all <- list(
                     station = STATIONID) %>% 
       dplyr::left_join(y = dat_survey %>% 
                          dplyr::filter(SRVY == "EBS") %>% 
-                         dplyr::select(station, stratum) %>% 
+                         dplyr::select(SRVY, station, stratum, survey_definition_id) %>% 
                          dplyr::distinct()),
     shp_nbs$survey.grid  %>%
       sf::st_transform(crs = "EPSG:3338") %>%
@@ -343,62 +345,123 @@ shp_all <- list(
                     station = STATIONID) %>% 
       dplyr::left_join(y = dat_survey %>% 
                          dplyr::filter(SRVY == "NBS") %>% 
-                         dplyr::select(station, stratum) %>% 
+                         dplyr::select(SRVY, station, stratum, survey_definition_id) %>% 
                          dplyr::distinct()),
     shp_ai$survey.grid %>%
       sf::st_transform(crs = "EPSG:3338") %>%
       dplyr::mutate(SRVY = "AI", 
+                    survey_definition_id = 52, 
                     station = ID, 
-                    stratum = STRATUM),
+                    stratum = STRATUM) %>% 
+      dplyr::left_join(y = dat_survey %>% 
+                         dplyr::filter(SRVY == "AI") %>% 
+                         dplyr::select(SRVY, station, stratum) %>% 
+                         dplyr::distinct()),
     shp_goa$survey.grid %>%
       sf::st_transform(crs = "EPSG:3338") %>%
-      dplyr::mutate(SRVY = "GOA",
+      dplyr::mutate(SRVY = "GOA", 
+                    survey_definition_id = 47, 
                     station = ID, 
-                    stratum = STRATUM)#,
-    # shp_bss$survey.grid %>%
-    #   sf::st_transform(crs = "EPSG:3338") %>%
-    #   dplyr::mutate(SRVY = "BSS")
+                    stratum = STRATUM) %>% 
+      dplyr::left_join(y = dat_survey %>% 
+                         dplyr::filter(SRVY == "GOA") %>% 
+                         dplyr::select(SRVY, station, stratum) %>% 
+                         dplyr::distinct())
+      # sf::st_transform(crs = "EPSG:3338") %>%
+      # dplyr::mutate(SRVY = "GOA",
+      #               station = ID, 
+      #               stratum = STRATUM) %>% 
+      # dplyr::left_join(y = dat_survey %>% 
+      #                    dplyr::filter(SRVY == "GOA") %>% 
+      #                    dplyr::select(SRVY, station, stratum, survey_definition_id) %>% 
+      #                    dplyr::distinct())
     )) %>%
-    dplyr::select(SRVY, station, stratum, geometry) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(station, stratum, SRVY, survey, survey, survey_definition_id) %>% 
-                       dplyr::distinct()) %>% 
+    dplyr::select(SRVY, survey_definition_id, station, stratum, geometry) %>%
     dplyr::left_join(y = areas, relationship = "many-to-many"), 
+  
+  # # plot.boundary
+  # plot.boundary = dplyr::bind_rows(list(
+  #   shp_bs$plot.boundary %>% 
+  #     dplyr::mutate(SRVY = "BS", 
+  #                   z = rownames(.)),
+  #   shp_ebs$plot.boundary %>% 
+  #     dplyr::mutate(SRVY = "EBS", 
+  #                   z = rownames(.)),
+  #   shp_nbs$plot.boundary %>% 
+  #     dplyr::mutate(SRVY = "NBS", 
+  #                   z = rownames(.)),
+  #   shp_bss$plot.boundary %>% 
+  #     dplyr::mutate(SRVY = "BSS", 
+  #                   z = rownames(.)),
+  #   shp_goa$plot.boundary %>% 
+  #     dplyr::mutate(SRVY = "GOA", 
+  #                   z = rownames(.)),
+  #   shp_ai$plot.boundary %>% 
+  #     dplyr::mutate(SRVY = "AI", 
+  #                   z = rownames(.))
+  # )), 
+    
+    # lon.breaks
+    lon.breaks = list(
+      "BS" = shp_bs$lon.breaks,
+      "EBS" = shp_ebs$lon.breaks,
+      "NBS" = shp_nbs$lon.breaks,
+      "BSS" = shp_bss$lon.breaks,
+      "GOA" = shp_goa$lon.breaks,
+      "AI" = shp_ai$lon.breaks
+    ), 
+    
+    # lat.breaks
+    lat.breaks = list(
+      "BS" = shp_bs$lat.breaks,
+      "EBS" = shp_ebs$lat.breaks,
+      "NBS" = shp_nbs$lat.breaks,
+      "BSS" = shp_bss$lat.breaks,
+      "GOA" = shp_goa$lat.breaks,
+      "AI" = shp_ai$lat.breaks
+    ), 
+  
+  # bathymetry
+  bathymetry = dplyr::bind_rows(list(
+    shp_bs$bathymetry %>% 
+      dplyr::mutate(SRVY = "BS") %>%
+      sf::st_transform(crs = "EPSG:3338"),
+    shp_ebs$bathymetry %>% 
+      dplyr::mutate(SRVY = "EBS") %>%
+      sf::st_transform(crs = "EPSG:3338"),
+    shp_nbs$bathymetry %>% 
+      dplyr::mutate(SRVY = "NBS") %>%
+      sf::st_transform(crs = "EPSG:3338"),
+    shp_bss$bathymetry %>% 
+      dplyr::mutate(SRVY = "BSS") %>%
+      sf::st_transform(crs = "EPSG:3338"),
+    shp_goa$bathymetry %>% 
+      dplyr::mutate(SRVY = "GOA") %>%
+      sf::st_transform(crs = "EPSG:3338"),
+    shp_ai$bathymetry %>% 
+      dplyr::mutate(SRVY = "AI") %>%
+      sf::st_transform(crs = "EPSG:3338")
+  )) %>% 
+    dplyr::select(geometry, SRVY, meters = METERS),
   
   # place labels
   place.labels = dplyr::bind_rows(list(
-    shp_bs$place.labels %>%
-      dplyr::mutate(y = dplyr::case_when(
-        lab == "200 m" ~ -60032.7, 
-        TRUE ~ y
-      )) %>% 
+    data.frame(type = "bathymetry", 
+               lab = c("50 m", "100 m", "200 m"), 
+               x = c(-168.122, -172.736, -174.714527), 
+               y = c(58.527, 58.2857, 58.504532), 
+               SRVY = "BS") %>%
       sf::st_as_sf(coords = c("x", "y"), 
-                   crs = "EPSG:3338") %>% 
-      dplyr::mutate(SRVY = "BS"),
-    shp_ebs$place.labels %>%
+                   remove = FALSE,  
+                   crs = "+proj=longlat") %>%
+      sf::st_transform(crs = "EPSG:3338"), 
+    data.frame(type = "bathymetry", 
+               lab = c("50 m", "100 m", "200 m"), 
+               x = c(-168, -172.5, -174.714527), 
+               y = c(58.527, 58.2857, 58.504532), 
+               SRVY = "EBS") %>%
       sf::st_as_sf(coords = c("x", "y"), 
-                   crs = "EPSG:3338") %>% 
-      dplyr::mutate(SRVY = "EBS")#,
-    # shp_nbs$place.labels  %>%
-    #   sf::st_as_sf(coords = c("x", "y"), 
-    #                crs = "EPSG:3338") %>% 
-    #   dplyr::mutate(SRVY = "NBS")#,
-    # shp_ai$place.labels %>%
-    #   sf::st_as_sf(coords = c("x", "y"), 
-    #                crs = "EPSG:3338") %>% 
-    #   dplyr::mutate(SRVY = "AI", 
-    #                 station = ID),
-    # shp_goa$place.labels %>%
-    #   sf::st_as_sf(coords = c("x", "y"), 
-    #                crs = "EPSG:3338") %>% 
-    #   dplyr::mutate(SRVY = "GOA",
-    #                 station = ID),
-    # shp_bss$survey.grid %>%
-    # sf::st_as_sf(coords = c("x", "y"), 
-    #              crs = "EPSG:3338") %>% 
-    #   dplyr::mutate(SRVY = "BSS")
-  )) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(SRVY, survey, survey, survey_definition_id) %>% 
-                       dplyr::distinct())
-  )
+                   remove = FALSE,  
+                   crs = "+proj=longlat") %>%
+      sf::st_transform(crs = "EPSG:3338")
+  )) )
