@@ -39,6 +39,11 @@ dat_googledrive <- data.frame()
 if (length(a)>0) { # if there are enteries for this year in the spreadsheet
   for (i in a) {
     b <- readxl::read_xlsx(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"), sheet = i, skip = 1)
+    if (grepl(pattern = "AI", x = i) | grepl(pattern = "GOA", x = i)) {
+      b <- b %>% 
+        dplyr::filter(!is.na(gear_temperature_c))
+    }
+    
     dat_googledrive <- dplyr::bind_rows( 
       dat_googledrive, 
       b %>% 
@@ -173,11 +178,11 @@ dat_survey <- dat_survey %>%
       format(x = min(as.Date(date_start), na.rm = TRUE), "%b %d"),
       " - ", 
       format(x = max(as.Date(date_end), na.rm = TRUE), "%b %d"))) %>% 
-    dplyr::filter( # there shouldn't be bottom temps of 0 in the AI or GOA
-      ((survey_definition_id %in% c(52, 47) & surface_temperature_c != 0) | 
-         (survey_definition_id %in% c(78, 98, 143))) & 
-        ((survey_definition_id %in% c(52, 47) & gear_temperature_c != 0) | 
-           (survey_definition_id %in% c(78, 98, 143)))) %>% 
+    # dplyr::filter( # there shouldn't be bottom temps of 0 in the AI or GOA
+    #   ((survey_definition_id %in% c(52, 47) & surface_temperature_c != 0) | 
+    #      (survey_definition_id %in% c(78, 98, 143))) & 
+    #     ((survey_definition_id %in% c(52, 47) & gear_temperature_c != 0) | 
+    #        (survey_definition_id %in% c(78, 98, 143)))) %>% 
   dplyr::rename(st = surface_temperature_c, 
                 bt = gear_temperature_c) 
 # dplyr::select(year, SRVY, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey) %>% 

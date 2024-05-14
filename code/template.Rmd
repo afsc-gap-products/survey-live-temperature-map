@@ -296,7 +296,7 @@ readr::write_lines(x = fig_alt, file = paste0(dir_out, filename0, ".txt"))
 
 ```
 
-```{r, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5, dpi = 320}
+```{r plot-figure, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5, dpi = 320}
 gg
 ```
 

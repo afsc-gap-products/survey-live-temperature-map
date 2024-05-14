@@ -139,7 +139,7 @@ make_varplot_wrapper <- function(
   ## Wrangle observed (daily) data ---------------------------------------------
   
   dat <- dat_survey %>%
-    dplyr::filter(SRVY %in% SRVY & 
+    dplyr::filter(SRVY %in% SRVY1 & 
                     year == maxyr) %>% 
     dplyr::select(SRVY, stratum, station, date, year, 
                   vessel_shape, var = dplyr::all_of(var), 
