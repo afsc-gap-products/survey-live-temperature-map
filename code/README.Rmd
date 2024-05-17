@@ -47,11 +47,11 @@ return(str0)
 
 **Emily Markowitz** (Emily.Markowitz AT noaa.gov; [\@EmilyMarkowitz-NOAA](https://github.com/EmilyMarkowitz-NOAA))
 
-**Liz Dawson** (Liz.Dawson AT noaa.gov; [\@liz-dawson-NOAA](https://github.com/liz-dawson-NOAA))
-
 **Chris Anderson** (Christopher.Anderson AT noaa.gov; [\@ChrisAnderson-NOAA](https://github.com/ChrisAnderson-NOAA))
 
-And previously, **Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
+And previously: 
+**Caitlin Allen Akselrud** (caitlin.allen_akselrud AT noaa.gov; [\@CaitlinAkselrud-NOAA](https://github.com/CaitlinAkselrud-NOAA))
+**Liz Dawson** (Liz.Dawson AT noaa.gov; [\@liz-dawson-NOAA](https://github.com/liz-dawson-NOAA))
 
 Alaska Fisheries Science Center,
 

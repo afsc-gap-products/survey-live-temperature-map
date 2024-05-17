@@ -1,5 +1,5 @@
 #' ---------------------------
-#' title: Survey Daily and Anomally Temperature Plot
+#' title: Survey Daily and Anomaly Temperature Plot
 #' OG author: Jason Conner
 #' maintained: Emily Markowitz and Liz Dawson (May 2021)
 #' purpose: functions

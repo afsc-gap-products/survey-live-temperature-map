@@ -7,14 +7,14 @@
 
 # KNOWNS -----------------------------------------------------------------------
 
-maxyr <- 2023
+maxyr <- 2024
 data_source <- "gd" # google drive
-dates0 <- "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 var <- "bt"
 
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1V9GLy2DkOz8UbMTw6eC0GxjMfWa5FeHm"
-dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1OAZa4TDO3OOCKsKzMX-UzTwKGVVGFsOW"
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1PK2nnSprqOYV12Ae80YE_avp3Qj5IKEL"
+dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1OAZa4TDO3OOCKsKzMX-UzTwKGVVGFsOW"
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
@@ -27,7 +27,7 @@ googledrive::drive_auth()
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
 locations <- c(
-  "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
+  # "C:/Users/liz.dawson/Work/R/GAPSurveyTemperatureMap/",
   "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
   "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/",
   "Z:/Projects/survey-live-temperature-map/")
