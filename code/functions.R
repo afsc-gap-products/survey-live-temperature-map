@@ -878,12 +878,12 @@ make_figure <- function(
         # label regions
         gg <- gg           
         # full station grid
-        ggplot2::ggplot2::geom_sf(
+        ggplot2::geom_sf(
           data = shp$survey.grid,
           colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
           size = ifelse(file_end == "grid", .05, .02),
           show.legend = FALSE)  + +
-          ggplot2::geom_sf(data = shp$survey.area, 
+        ggplot2::geom_sf(data = shp$survey.area, 
                              colour = "grey50",
                            fill = "transparent",
                              show.legend = legend_title) +
@@ -935,7 +935,7 @@ make_figure <- function(
         
         gg <- gg +
           # full station grid
-          # ggplot2::ggplot2::geom_sf(
+          # ggplot2::geom_sf(
           #   data = shp$survey.grid,
           #   colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
           #   size = ifelse(file_end == "grid", .05, .02),
