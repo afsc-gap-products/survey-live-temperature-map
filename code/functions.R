@@ -145,51 +145,51 @@ make_varplot_wrapper <- function(
                   vessel_shape, var = dplyr::all_of(var), 
                   survey_dates, survey, vessel_name, data_type)
   
-  if (nrow(dat) == 0) {
-    
-    dat <- dplyr::left_join(
-      x = dat_anom,
-      y = dat_survey %>%
-        dplyr::select(SRVY, survey_dates, survey) %>%
-        dplyr::distinct(),
-      multiple = "all",
-      by = "SRVY") %>%
-      dplyr::mutate(var0 = 0,
-                    date = as.Date(paste0(maxyr, "-01-01")),
-                    vessel_id = "",
-                    vessel_shape = "",
-                    vessel_name = "")
-    # } else {
-    
-    # if (show_planned_stations) {
-    # temp <- data.frame(matrix(data = NA,
-    #                           ncol = ncol(dat0),
-    #                           nrow = nrow(dat_survey)))    
-    # names(temp) <- names(dat)
-    # temp <- temp %>% 
-    #   dplyr::mutate(
-    #     SRVY = dat_survey$SRVY,
-    #     stratum = 0,
-    #     station = "0",
-    #     var0 = NA,
-    #     survey = dat_survey$survey, 
-    #     survey_dates  = dat_survey$survey_dates, 
-    #     date = (min(as.Date(dat$date), na.rm = TRUE)-1),
-    #     vessel_name = dat_survey$vessel_name,
-    #     vessel_shape = dat_survey$vessel_shape)
-    # 
-    # dat0 <- dplyr::bind_rows(
-    # temp,
-    # dat0 %>%
-    #   dplyr::mutate(
-    #     SRVY = as.character(SRVY),
-    #     stratum = as.numeric(stratum),
-    #     station = as.character(station),
-    #     var0 = as.numeric(var0),
-    #     date = date,
-    #     vessel_name = as.character(vessel_name), 
-    #     vessel_shape = as.character(vessel_shape)) )
-  }
+  # if (nrow(dat) == 0) {
+  #   
+  #   dat <- dplyr::left_join(
+  #     x = dat_anom,
+  #     y = dat_survey %>%
+  #       dplyr::select(SRVY, survey_dates, survey) %>%
+  #       dplyr::distinct(),
+  #     multiple = "all",
+  #     by = "SRVY") %>%
+  #     dplyr::mutate(var0 = 0,
+  #                   date = as.Date(paste0(maxyr, "-01-01")),
+  #                   vessel_id = "",
+  #                   vessel_shape = "",
+  #                   vessel_name = "")
+  #   # } else {
+  #   
+  #   # if (show_planned_stations) {
+  #   # temp <- data.frame(matrix(data = NA,
+  #   #                           ncol = ncol(dat0),
+  #   #                           nrow = nrow(dat_survey)))    
+  #   # names(temp) <- names(dat)
+  #   # temp <- temp %>% 
+  #   #   dplyr::mutate(
+  #   #     SRVY = dat_survey$SRVY,
+  #   #     stratum = 0,
+  #   #     station = "0",
+  #   #     var0 = NA,
+  #   #     survey = dat_survey$survey, 
+  #   #     survey_dates  = dat_survey$survey_dates, 
+  #   #     date = (min(as.Date(dat$date), na.rm = TRUE)-1),
+  #   #     vessel_name = dat_survey$vessel_name,
+  #   #     vessel_shape = dat_survey$vessel_shape)
+  #   # 
+  #   # dat0 <- dplyr::bind_rows(
+  #   # temp,
+  #   # dat0 %>%
+  #   #   dplyr::mutate(
+  #   #     SRVY = as.character(SRVY),
+  #   #     stratum = as.numeric(stratum),
+  #   #     station = as.character(station),
+  #   #     var0 = as.numeric(var0),
+  #   #     date = date,
+  #   #     vessel_name = as.character(vessel_name), 
+  #   #     vessel_shape = as.character(vessel_shape)) )
+  # }
   
   dat <- dplyr::left_join(
     x = dat,
@@ -301,7 +301,7 @@ make_varplot_wrapper <- function(
           dplyr::mutate(var = mean, 
                         reg_lab = paste0(survey, "\n ")),
         var_breaks = var_breaks, 
-        plot_title = paste0("Timeseries Mean ", var00),
+        plot_title = paste0("Time series Mean ", var00),
         plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
                              x = paste0("NOAA Fisheries ", 
                                         text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
@@ -665,7 +665,8 @@ make_figure <- function(
       sf::st_transform(crs = "EPSG:3338")
     
     gg <- ggplot() +
-      ggplot2::geom_sf(data = world_coordinates, fill = "black") + #ifelse(SRVY %in% c("GOA", "AI"), "black", "white")) + 
+      ggplot2::geom_sf(data = world_coordinates, 
+                       fill = "black") + #ifelse(SRVY %in% c("GOA", "AI"), "black", "white")) + 
       # ggplot2::geom_sf(data = shp$graticule, 
       #                  color = "grey90", 
       #                  alpha = 0.5) +
@@ -836,6 +837,14 @@ make_figure <- function(
       
       ### grid map ---------------------------------------------------
       
+      gg <- gg +
+      # Survey area
+      ggplot2::geom_sf(data = shp$survey.area, 
+                       color = "grey50", 
+                       linewidth = .5, 
+                       fill = "NA",
+                       show.legend = TRUE) 
+      
       # Draw bounding boxes
       bb <- data.frame()
       for (iiii in 1:length(unique(grid_stations_plot$area_name))) {
@@ -867,7 +876,13 @@ make_figure <- function(
       
       if (file_end == 'grid') {
         # label regions
-        gg <- gg +
+        gg <- gg           
+        # full station grid
+        ggplot2::ggplot2::geom_sf(
+          data = shp$survey.grid,
+          colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
+          size = ifelse(file_end == "grid", .05, .02),
+          show.legend = FALSE)  + +
           ggplot2::geom_sf(data = shp$survey.area, 
                              colour = "grey50",
                            fill = "transparent",
@@ -919,19 +934,20 @@ make_figure <- function(
         }
         
         gg <- gg +
+          # full station grid
+          # ggplot2::ggplot2::geom_sf(
+          #   data = shp$survey.grid,
+          #   colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
+          #   size = ifelse(file_end == "grid", .05, .02),
+          #   show.legend = FALSE)  +
           # allocated station grid
           ggplot2::geom_sf(
-            data = shp$survey.grid,
-            colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
-            size = ifelse(file_end == "grid", .05, .02),
-            show.legend = FALSE)  +
-          ggplot2::geom_sf(
-            data = grid_stations_plot, 
+            data = grid_stations_plot %>% dplyr::filter(!is.na(year)), 
             colour = ifelse((as.character(dates0[1]) == "none"), "grey50", "grey70"),
             size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
             show.legend = FALSE) +
           # temperate points
-          geom_sf(
+          ggplot2::geom_sf(
             data = grid_stations_plot_visited,
             mapping = aes(geometry = geometry,
                           fill = var_bin,
@@ -985,10 +1001,10 @@ make_figure <- function(
         
         # if (file_end %in% c("daily", "anom")) {
         gg <- gg +
-          annotate("text", 
+          ggplot2::annotate("text", 
                    # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
-                   x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(SRVY == "AI", .15, .6)),  
-                   y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], .80), 
+                   x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(SRVY == "AI", .1, .15)),  # ifelse(SRVY == "AI", .60, .15)
+                   y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(SRVY == "AI", .2, .80)), 
                    label = ifelse(is.na(max_date), 
                                   "", 
                                   ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
@@ -1008,7 +1024,7 @@ make_figure <- function(
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                 x = .37, y = .38, # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
+                 x = .37, y = .32, # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  scale = .15 )
     
     filename0 <- paste0(

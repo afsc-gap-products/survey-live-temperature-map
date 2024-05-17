@@ -39,14 +39,15 @@ dat_googledrive <- data.frame()
 if (length(a)>0) { # if there are enteries for this year in the spreadsheet
   for (i in a) {
     b <- readxl::read_xlsx(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"), sheet = i, skip = 1)
-    if (grepl(pattern = "AI", x = i) | grepl(pattern = "GOA", x = i)) {
-      b <- b %>% 
-        dplyr::filter(!is.na(gear_temperature_c))
-    }
+    # if (grepl(pattern = "AI", x = i) | grepl(pattern = "GOA", x = i)) {
+    #   b <- b %>% 
+    #     dplyr::filter(!is.na(gear_temperature_c))
+    # }
     
     dat_googledrive <- dplyr::bind_rows( 
       dat_googledrive, 
       b %>% 
+        dplyr::filter(!is.na(station))%>%
         dplyr::mutate(
                       # data_type = i, 
                       station = as.character(station), 
@@ -112,9 +113,6 @@ FROM RACE_DATA.EDIT_HAULS;")),
       
       by = "HAUL_ID")  %>% 
       janitor::clean_names() %>% 
-      # dplyr::left_join(x = ., 
-      #                  y = dat_survey %>% 
-      #                    dplyr::filter(year == date_max)) %>% 
       dplyr::mutate(
         year = date_max,
         latitude_dd_start = latitude_dd_start/100, 
@@ -187,15 +185,6 @@ dat_survey <- dat_survey %>%
                 bt = gear_temperature_c) 
 # dplyr::select(year, SRVY, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey) %>% 
   # dplyr::distinct() 
-
-# haul data --------------------------------------------------------------------
-
-# haul <- dat_survey %>% 
-#   dplyr::select(
-#     SRVY, year, stratum, station, date, survey, survey_dates, 
-#     vessel_shape, vessel_name, vessel_ital, st, bt 
-#   ) %>% 
-#   dplyr::distinct()
 
 # Load shape files -------------------------------------------------------------
 
