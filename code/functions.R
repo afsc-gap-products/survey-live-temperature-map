@@ -260,7 +260,7 @@ make_varplot_wrapper <- function(
                                        paste0(survey, "\n"), 
                                        survey)),
       var_breaks = NA,
-      plot_title = ifelse(SRVY %in% c("GOA", "AI"), "Survey Region", "Survey Grid"),
+      plot_title = ifelse(SRVY %in% c("GOA", "AI"), "Survey Districts", "Survey Grid"),
       plot_subtitle = plot_subtitle,
       legend_title = "",
       dates0 = "none",

@@ -50,10 +50,10 @@ if (SRVY %in% c("AI", "GOA")) {
   
   goaai_regions0 <- paste0("This survey covers the ", 
                            text_list(goaai_regions$area_name), 
-                           " subregions. ")
+                           " districts ")
   goaai_regions <- paste0("This survey covers the ", 
                           text_list(goaai_regions$area_name), 
-                          " regions, which are sampled randomly each year. ")
+                          " districts, which are sampled randomly each year. ")
 } else {
   goaai_regions <- ""
 }
