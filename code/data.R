@@ -49,8 +49,7 @@ if (length(a)>0) { # if there are enteries for this year in the spreadsheet
       b %>% 
         dplyr::filter(!is.na(station))%>%
         dplyr::mutate(
-          bt = as.character(bt), 
-          st = as.character(st), 
+          gear_temperature_c = as.character(gear_temperature_c), 
           station = as.character(station), 
                       stratum = as.numeric(stratum)))
   }
