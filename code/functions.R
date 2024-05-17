@@ -876,7 +876,7 @@ make_figure <- function(
       
       if (file_end == 'grid') {
         # label regions
-        gg <- gg           
+        gg <- gg + 
         # full station grid
         ggplot2::geom_sf(
           data = shp$survey.grid,

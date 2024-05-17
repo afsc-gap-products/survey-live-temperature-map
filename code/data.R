@@ -49,8 +49,9 @@ if (length(a)>0) { # if there are enteries for this year in the spreadsheet
       b %>% 
         dplyr::filter(!is.na(station))%>%
         dplyr::mutate(
-                      # data_type = i, 
-                      station = as.character(station), 
+          bt = as.character(bt), 
+          st = as.character(st), 
+          station = as.character(station), 
                       stratum = as.numeric(stratum)))
   }
 dat_googledrive <- dat_googledrive %>% 
