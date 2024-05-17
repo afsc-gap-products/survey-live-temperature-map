@@ -143,14 +143,11 @@ dat_survey <-
       dplyr::distinct()) %>% 
   dplyr::mutate(data_type = "offical")
 
-if (data_source == "gd") {
+if (data_source == "gd" & 
+    max(dat_survey$year) < max(dat_googledrive$year, na.rm = TRUE)) {
 dat_survey <- dat_survey %>% 
-  dplyr::filter(year < maxyr)
-}
-
-if (max(dat_survey$year) < max(dat_googledrive$year, na.rm = TRUE)) {
-  dat_survey <- dat_survey %>% 
-    dplyr::bind_rows(dat_googledrive) # Combined previous and new haul data
+  dplyr::filter(year < maxyr) %>% 
+  dplyr::bind_rows(dat_googledrive) # Combined previous and new haul data
 }
 
 dat_survey <- dat_survey %>% 

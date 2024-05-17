@@ -882,7 +882,7 @@ make_figure <- function(
           data = shp$survey.grid,
           colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
           size = ifelse(file_end == "grid", .05, .02),
-          show.legend = FALSE)  + +
+          show.legend = FALSE)  + 
         ggplot2::geom_sf(data = shp$survey.area, 
                              colour = "grey50",
                            fill = "transparent",
