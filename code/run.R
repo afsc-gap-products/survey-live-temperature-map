@@ -8,6 +8,7 @@
 
 # AI/GOA station allocation docs can be found in (similar) G:\ALEUTIAN\AI 2024\Station Allocation
 
+istest <- TRUE
 maxyr <- 2024
 data_source <- "gd" # = google dirve, "oracle" 
 dates0 <-  "all" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
@@ -15,10 +16,13 @@ var <- "bt"
 survey_definition_id0 <- c(52, 98) # Survey ID. The survey definition ID key code uniquely identifies a survey/survey design. Integer code that uniquely identifies survey. Full list of survey definition IDs are in RACE_DATA.SURVEY_DEFINITIONS. IDs used in GAP_PRODUCTS are: 47 (Gulf of Alaska); 52 (Aleutian Islands); 78 (Bering Sea Slope); 98 (Eastern Bering Sea Shelf); 143 (Northern Bering Sea Shelf). The column "survey_definition_id" is associated with the "srvy" and "survey" columns. For a complete list of surveys, review the [code books](https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual).
 
 dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/19Cy0gSn4TWcGymKeSNB8XIpwyEIzzw0m" # TEST LINK
-# dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1sP34UMQiTQvci4U6PMOFcnlFI0vQ1BH9" # REAL LINK
-dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/16Za6GFBGGg1YdwByF4gUqz_XU42IM4rA" # TEST LINK
-# dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1PK2nnSprqOYV12Ae80YE_avp3Qj5IKEL" # REAL LINK 
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1sP34UMQiTQvci4U6PMOFcnlFI0vQ1BH9" # REAL LINK
+dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1PK2nnSprqOYV12Ae80YE_avp3Qj5IKEL" # REAL LINK
+
+if(istest) {
+  dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/16Za6GFBGGg1YdwByF4gUqz_XU42IM4rA" # TEST LINK
+  dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/19Cy0gSn4TWcGymKeSNB8XIpwyEIzzw0m" # TEST LINK
+}
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 

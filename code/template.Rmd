@@ -76,7 +76,7 @@ intro_vess <- paste0(
   goaai_regions)
 
 foss_not <- paste0("The final, validated haul and catch data will be publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}) after the survey is complete. ")
-foss_avail <- paste0("These data are publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}",ifelse(file_end %in% c("mean", "mean_cb"), "and the coldpool R package (\\textit{https://github.com/afsc-gap-products/coldpool}", ""),"). ")
+foss_avail <- paste0("These data are publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}",ifelse(file_end %in% c("mean", "mean_cb"), ") and the coldpool R package (\\textit{https://github.com/afsc-gap-products/coldpool}", ""),"). ")
 foss0 <- ifelse(data_source == "gd", foss_not, foss_avail)
 
 if (file_end %in% c("mean", "mean_cb")) {  
@@ -145,7 +145,8 @@ if (file_end %in% c("mean", "mean_cb")) {
 } else if (file_end == "grid") { # (as.character(dates0[1]) == "none") {
   
   if (SRVY %in% c("BS", "NBS", "EBS")) {
-    fig_cap <- paste0( "Map of the ", text_list(surveys)," ",maxyr," survey stations and the ", 
+    fig_cap <- paste0( "Map of the ", text_list(surveys)," ",maxyr,
+                       " survey station grid and the ", 
       text_list(x = paste0(unique(shp$bathymetry$meters), " m")),
       " bathymetry lines. ")
   } else if (SRVY %in% c("GOA", "AI")) {

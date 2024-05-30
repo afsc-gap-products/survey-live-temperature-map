@@ -301,7 +301,7 @@ make_varplot_wrapper <- function(
           dplyr::mutate(var = mean, 
                         reg_lab = paste0(survey, "\n ")),
         var_breaks = var_breaks, 
-        plot_title = paste0("Time series Mean ", var00),
+        plot_title = paste0("Time Series Mean ", var00),
         plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
                              x = paste0("NOAA Fisheries ", 
                                         text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
@@ -388,7 +388,7 @@ make_varplot_wrapper <- function(
                                         text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
                                         ifelse(nrow(anom_years)>1, "s", ""))),
         legend_title = paste0(var00, '\nAnomaly ', unit0),
-        dates0 = "latest", 
+        dates0 = dates0, 
         shp = shp,
         file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end),
         dir_wd = dir_wd,
@@ -1024,7 +1024,7 @@ make_figure <- function(
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                 x = .37, y = .32, # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
+                 x = .37, y = ifelse(SRVY %in% c("AI", "GOA") & file_end == "grid", .25, .32), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  scale = .15 )
     
     filename0 <- paste0(
