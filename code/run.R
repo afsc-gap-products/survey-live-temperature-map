@@ -4,6 +4,11 @@
 #' purpose: run script
 #' ---------------------------
 
+# LOG --------------------------------------------------------------------------
+if(!istest) {
+  sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
+}
+
 # KNOWNS -----------------------------------------------------------------------
 
 # AI/GOA station allocation docs can be found in (similar) G:\ALEUTIAN\AI 2024\Station Allocation
@@ -45,9 +50,6 @@ for (i in 1:length(locations)){
     dir_wd  <- locations[i]
   }
 }
-
-# LOG --------------------------------------------------------------------------
-# sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 source(file = paste0(dir_wd,"code/functions.R"))
@@ -105,7 +107,7 @@ if (52 %in% survey_definition_id0) {
 
 ## EBS Maps --------------------------------------------------------------------
 if (98 %in% survey_definition_id0) { 
-
+  
   SRVY <- "EBS"; print(paste0("------------", SRVY, " Plots ------------"))
   plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
@@ -182,5 +184,6 @@ if (98 %in% survey_definition_id0) {
 # }
 
 # Log --------------------------------------------------------------------------
-
-# sink() 
+if(!istest) {
+  sink()
+}
