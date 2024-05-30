@@ -81,7 +81,7 @@ if (ftp_dl) {
 ## AI --------------------------------------------------------------------------
 if (52 %in% survey_definition_id0) { 
   
-  SRVY <- "AI"
+  SRVY <- "AI"; print(paste0("------------", SRVY, " Plots ------------"))
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
   dir_googledrive_upload <- ifelse(exists(x = "dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_ai, NULL)
   plot_anom <- FALSE
@@ -106,7 +106,7 @@ if (52 %in% survey_definition_id0) {
 ## EBS Maps --------------------------------------------------------------------
 if (98 %in% survey_definition_id0) { 
 
-  SRVY <- "EBS"
+  SRVY <- "EBS"; print(paste0("------------", SRVY, " Plots ------------"))
   plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
   show_planned_stations <- TRUE

@@ -307,7 +307,7 @@ make_varplot_wrapper <- function(
                                         text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
                                         ifelse(nrow(anom_years)>1, "s", ""))),
         legend_title = paste0(var00, '\nMean ', unit0),
-        dates0 = "latest", 
+        dates0 = "none", 
         shp = shp,
         file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end),
         dir_wd = dir_wd,
@@ -1128,6 +1128,13 @@ make_figure <- function(
       message("Make current_* files")
       temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
       temp <- temp[!grepl(pattern = "current_", x = temp)]
+      if (grepl(pattern = "_cb", x = file_end)) {
+        # if there is _cb in the name, only pull _cb named things
+        temp <- temp[grepl(pattern = "_cb", x = temp)]
+      } else {
+        # if there is no _cb in the name, only pull non_cb named things
+        temp <- temp[!grepl(pattern = "_cb", x = temp)]
+      }
       for (iiii in 1:length(temp)) {
         if (file_end  %in% c("anom", "daily", "anom_cb", "daily_cb")) {
           filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
