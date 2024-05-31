@@ -2,18 +2,34 @@
 #' title: Survey Daily and Anomaly Temperature Plot
 #' maintained: Emily Markowitz
 #' purpose: run script
+#' # make sure the latest installation of pandoc is available: https://pandoc.org/installing.html
+#' # AI/GOA station allocation docs can be found in (similar) G:\ALEUTIAN\AI 2024\Station Allocation
 #' ---------------------------
 
-# LOG --------------------------------------------------------------------------
-if(!istest) {
-  sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
+
+# Set Working Directory --------------------------------------------------------
+## Actually we cant use the here package, here - it actually causes issues with 
+## the tasks scheduler, which has no concept of a project root folder. 
+locations <- c(
+  # "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
+  # "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/", 
+  # paste0(here::here(), "/"),
+  "Z:/Projects/survey-live-temperature-map/"
+)
+
+for (i in 1:length(locations)){
+  if (file.exists(locations[i])) {
+    dir_wd  <- locations[i]
+  }
 }
+print(dir_wd)
 
 # KNOWNS -----------------------------------------------------------------------
 
-# AI/GOA station allocation docs can be found in (similar) G:\ALEUTIAN\AI 2024\Station Allocation
-
 istest <- FALSE
+# if(!istest) {
+#   sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
+# }
 maxyr <- 2024
 data_source <- "gd" # = google dirve, "oracle" 
 dates0 <-  "latest" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
@@ -35,21 +51,6 @@ googledrive_dl <- TRUE
 googledrive::drive_deauth()
 googledrive::drive_auth()
 2
-
-# Set Working Directory --------------------------------------------------------
-## Actually we cant use the here package, here - it actually causes issues with 
-## the tasks scheduler, which has no concept of a project root folder. 
-locations <- c(
-  # "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-  # "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/",
-  "Z:/Projects/survey-live-temperature-map/", 
-  paste0(here::here(), "/"))
-
-for (i in 1:length(locations)){
-  if (file.exists(locations[i])) {
-    dir_wd  <- locations[i]
-  }
-}
 
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 source(file = paste0(dir_wd,"code/functions.R"))
@@ -100,7 +101,7 @@ if (52 %in% survey_definition_id0) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "grid"), 
+                       file_end0 = c("daily"), # , "grid"
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
@@ -126,7 +127,7 @@ if (98 %in% survey_definition_id0) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("grid", "daily", "mean", "anom"), 
+                       file_end0 = c("daily", "anom"), # , "grid", "mean" 
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
@@ -183,7 +184,7 @@ if (98 %in% survey_definition_id0) {
 #                        ftp = ftp)
 # }
 
-# Log --------------------------------------------------------------------------
-if(!istest) {
-  sink()
-}
+# LOG --------------------------------------------------------------------------
+# if(!istest) {
+#   sink()
+# }
