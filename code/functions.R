@@ -451,6 +451,16 @@ make_figure <- function(
   dir.create(path = dir_out, showWarnings = FALSE)
   
   # Set Base Layers ------------------------------------------------------------
+  if (show_planned_stations) {
+    dat <- dat %>% 
+      dplyr::bind_rows(dat %>%
+                         dplyr::filter(date == min(date, na.rm = TRUE)) %>% 
+                         dplyr::mutate(date = (date-1), 
+                                       stratum = 9999, 
+                                       station = "9999") %>% 
+                         head(1))
+  }
+  
   # shp <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
   survey_reg_col <- gray.colors(length(unique(dat$SRVY))+2) # region colors
   survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
@@ -795,7 +805,7 @@ make_figure <- function(
               breaks = sort(as.character(unique(dat_planned$vessel_shape))), 
               labels = sort(unique(dat_planned$lab))) +
             
-            guides(
+            ggplot2::guides(
               fill = guide_legend(ncol = 2, 
                                   override.aes = list(colour = c("white"),
                                                       size = 0),
@@ -820,18 +830,24 @@ make_figure <- function(
       }      
       
       if (file_end %in% c("daily", "daily_cb" , "anom", "anom_cb")) { 
+        
+        min_date <- min(as.Date(dat_plot$date), na.rm = TRUE)
+        # if (show_planned_stations) { min_date <- min_date-1 } 
+        
         gg <- gg +
           annotate("text", 
                    x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .12), 
                    y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], .15), 
                    label = ifelse(is.na(max_date), 
                                   "", 
-                                  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
-                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
-                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
+                                  ifelse(min_date == max_date, 
+                                         paste0(format(x = min_date, "%b %d, %Y")), 
+                                         paste0(format(x = min_date, "%b %d"), 
                                                 " \u2013\n", 
                                                 format(x = as.Date(max_date), format = "%b %d, %Y")))), 
-                   color = "black", size = 5, fontface=2) 
+                   color = "black", 
+                   size = 5, 
+                   fontface=2) 
       }
       
     } else if (SRVY %in% c("AI", "GOA")) {
@@ -1175,9 +1191,9 @@ make_figure <- function(
     if (!(is.null(dir_googledrive_upload))) {
       message("Uploading files to googledrive")
       filename1 <- unique(filename1)
-      for (iii in 1:length(filename1)) { 
+      for (iii in 1:length(filename1)) {
         drive_upload(
-          media = filename1[iii], 
+          media = filename1[iii],
           path = googledrive::as_id(dir_googledrive_upload),
           overwrite = TRUE)
       }
