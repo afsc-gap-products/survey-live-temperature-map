@@ -4,6 +4,20 @@
 #' purpose: run script
 #' ---------------------------
 
+
+# Set Working Directory --------------------------------------------------------
+## Actually we cant use the here package, here - it actually causes issues with 
+## the tasks scheduler, which has no concept of a project root folder. 
+locations <- c(
+  # "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
+  # "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/",
+  "Z:/Projects/survey-live-temperature-map/")
+
+for (i in 1:length(locations)){
+  if (file.exists(locations[i])) {
+    dir_wd  <- locations[i]
+  }
+}
 # KNOWNS -----------------------------------------------------------------------
 
 # AI/GOA station allocation docs can be found in (similar) G:\ALEUTIAN\AI 2024\Station Allocation
@@ -31,25 +45,11 @@ googledrive::drive_deauth()
 googledrive::drive_auth()
 2
 
-# Set Working Directory --------------------------------------------------------
-## Actually we cant use the here package, here - it actually causes issues with 
-## the tasks scheduler, which has no concept of a project root folder. 
-locations <- c(
-  # "C:/Users/christopher.anderson/Work/survey-live-temperature-map/",
-  # "C:/Users/emily.markowitz/Work/projects/survey-live-temperature-map/",
-  "Z:/Projects/survey-live-temperature-map/", 
-  paste0(here::here(), "/"))
-
-for (i in 1:length(locations)){
-  if (file.exists(locations[i])) {
-    dir_wd  <- locations[i]
-  }
-}
 
 # LOG --------------------------------------------------------------------------
-if(!istest) {
-  sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE)
-}
+# if(!istest) {
+#   sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE, )
+# }
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
@@ -125,7 +125,7 @@ if (98 %in% survey_definition_id0) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("grid", "daily"), # , "mean", "anom"
+                       file_end0 = c("daily", "anom"), # , "grid", "mean", "anom"
                        dir_wd = dir_wd, 
                        ftp = ftp)
 }
@@ -183,6 +183,6 @@ if (98 %in% survey_definition_id0) {
 # }
 
 # Log --------------------------------------------------------------------------
-if(!istest) {
-  sink()
-}
+# if(!istest) {
+#   sink()
+# }

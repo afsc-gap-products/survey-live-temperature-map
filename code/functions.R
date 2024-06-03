@@ -534,9 +534,10 @@ make_figure <- function(
         show_planned_stations & # if we plan to show planned stations
         sum(is.na(dat$var) &  # and if there are planned stations to show
             dat$station != 0 & # not including dummy stations
-            !is.na(dat$vessel_shape))>0) {
+            !is.na(dat$vessel_shape))>0 &
+        sum(is.na(dat$var)) != nrow(dat)) { # day before first day: if stations are planned, but have not been completed yet
       iterate <- iterate-1
-    }
+    } 
   } else { # if you want to run a specific date
     #   iterate <- which((date_entered) %in% (dates0))
     # } if else(!(dates0[1] %in% c("none", "all", "first", "last","latest"))) { # if there is a specific range of dates
