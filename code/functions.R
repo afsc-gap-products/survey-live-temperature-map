@@ -1254,11 +1254,15 @@ make_figure <- function(
     if (!(is.null(dir_googledrive_upload))) {
       message("Uploading files to googledrive")
       filename1 <- unique(filename1)
+      dir_googledrive_upload_archive <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload))
+      dir_googledrive_upload_archive <- dir_googledrive_upload_archive$id[grep(pattern = "archive", x = dir_googledrive_upload_archive$name)]
       for (iii in 1:length(filename1)) {
-        drive_upload(
-          media = filename1[iii],
-          path = googledrive::as_id(dir_googledrive_upload),
-          overwrite = TRUE)
+          drive_upload(
+            media = filename1[iii],
+            path = googledrive::as_id(ifelse(grep(pattern = "current", x = filename1[iii]), 
+                                             dir_googledrive_upload, # if a current file, put in the main folder
+                                             dir_googledrive_upload_archive)), # if the day-stamp file, put directly in the archive folder for safe keeping
+            overwrite = TRUE)          
       }
     }
     
