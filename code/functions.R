@@ -9,8 +9,9 @@
 # Install libraries ------------------------------------------------------------
 
 PKG <- c(
+  "devtools",
   # Mapping
-  "akgfmaps", # devtools::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = TRUE)
+  "akgfmaps", # devtools::install_github("safsc-gap-products/akgfmaps", build_vignettes = TRUE)
   "sf",
   "ggspatial", 
   
@@ -34,6 +35,8 @@ PKG <- c(
   "readxl",
   # "knitr", # A general-purpose tool for dynamic report generation in R
   # "officer"
+  "quarto",
+  "tinytex", # tinytex::install_tinytex(); https://yihui.org/tinytex/
   
   "RODBC", 
   "RCurl" # for ftp connection
@@ -41,7 +44,11 @@ PKG <- c(
 
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {  
-    install.packages(p, verbose = FALSE)
+    if (p %in% c("akgfmaps", "coldpool", "gapindex")) {
+      devtools::install_github("afsc-gap-products/akgfmaps")
+    } else {
+      install.packages(p, verbose = FALSE)
+    }
     require(p,character.only = TRUE)}
 }
 
@@ -64,6 +71,7 @@ for (p in PKG) {
 #' @param data_source String. Default = "gd". "gd" will pull data from the google drive file and "oracle" will use the haul data (noted above) that comes from oracle. 
 #' @param plot_anom Logical. Default = TRUE. TRUE will plot anomaly plots and FALSE will not. 
 #' @param dir_wd String. Default = "./", or the root directory. Necessary because the task scheduler does not understand the concept of the R Project root directory (therefore, beware of the {here} R package.. This string should be the path to the R Project root directory. 
+#' @param dir_out String. Default = "./", or the root directory. This is where files will be saved to. Necessary because the task scheduler does not understand the concept of the R Project root directory (therefore, beware of the {here} R package.. This string should be the path to the R Project root directory.  
 #'
 #' @return
 #' @export
@@ -82,12 +90,10 @@ make_varplot_wrapper <- function(
     data_source = "gd", 
     file_end0 = c("grid", "daily", "mean", "anom"), 
     dir_wd = "./", 
+    dir_out = "./", 
     ftp) {
   
   # Establish knowns and variables ---------------------------------------------
-  case <- paste0(maxyr, "_", SRVY)
-  dir_out <- paste0(dir_wd, "/output/", case, "/")
-  
   SRVY0 <- SRVY
   SRVY1 <- SRVY
   if (SRVY == "BS") {
@@ -253,26 +259,34 @@ make_varplot_wrapper <- function(
   if ("grid" %in% file_end0) {
     file_end <- "grid"; print(paste0("------------", file_end, "------------"))
     
+    dat00 = dat %>%
+      dplyr::filter(stratum != 0) %>% 
+      dplyr::mutate(reg_lab = ifelse(SRVY == "BS", 
+                                     paste0(survey, "\n"), 
+                                     survey))
+    var_breaks = NA
+    plot_title = ifelse(SRVY %in% c("GOA", "AI"), "Survey Districts", "Survey Grid")
+    legend_title = ""
+    dates0 = "none"
+    make_gifs = FALSE
+    show_planned_stations = FALSE
+    
     make_figure(
       SRVY = SRVY, 
-      dat = dat %>%
-        dplyr::filter(stratum != 0) %>% 
-        dplyr::mutate(reg_lab = ifelse(SRVY == "BS", 
-                                       paste0(survey, "\n"), 
-                                       survey)),
-      var_breaks = NA,
-      plot_title = ifelse(SRVY %in% c("GOA", "AI"), "Survey Districts", "Survey Grid"),
+      dat00 = dat00,
+      var_breaks = var_breaks,
+      plot_title = plot_title,
       plot_subtitle = plot_subtitle,
-      legend_title = "",
-      dates0 = "none",
+      legend_title = legend_title,
+      dates0 = dates0,
       shp = shp,
       file_end = file_end,
       dir_wd = dir_wd,
       dir_out = dir_out, 
       dir_googledrive_upload = dir_googledrive_upload, 
-      make_gifs = FALSE, 
+      make_gifs = make_gifs, 
       data_source = data_source,
-      show_planned_stations = FALSE, 
+      show_planned_stations = show_planned_stations, 
       height0 = height0)
   }
   
@@ -293,33 +307,42 @@ make_varplot_wrapper <- function(
       }
     }
     
-    for (i in c("H", # Rainbow color scheme
-                "B")){ # Inferno color scheme
+    for (virids_option in c("H", # Rainbow color scheme
+                            "B")){ # Inferno color scheme
+      
+      dat00 = dat %>% # Mean plot
+        dplyr::mutate(var = mean, 
+                      reg_lab = paste0(survey, "\n "))
+      plot_title = paste0("Time Series Mean ", var00)
+      plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
+                           x = paste0("NOAA Fisheries ", 
+                                      text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
+                                      ifelse(nrow(anom_years)>1, "s", "")))
+      legend_title = paste0(var00, '\nMean ', unit0)
+      dates0 = "none"
+      file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end)
+      make_gifs = FALSE
+      show_planned_stations = FALSE
       
       make_figure(
         SRVY = SRVY, 
-        dat = dat %>% # Mean plot
-          dplyr::mutate(var = mean, 
-                        reg_lab = paste0(survey, "\n ")),
+        dat00 = dat00,
         var_breaks = var_breaks, 
-        plot_title = paste0("Time Series Mean ", var00),
-        plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
-                             x = paste0("NOAA Fisheries ", 
-                                        text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
-                                        ifelse(nrow(anom_years)>1, "s", ""))),
-        legend_title = paste0(var00, '\nMean ', unit0),
-        dates0 = "none", 
+        plot_title = plot_title,
+        plot_subtitle = plot_subtitle,
+        legend_title = legend_title,
+        dates0 = dates0, 
         shp = shp,
-        file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end),
+        file_end = file_end,
         dir_wd = dir_wd,
         dir_out = dir_out, 
         dir_googledrive_upload = dir_googledrive_upload, 
-        make_gifs = FALSE, 
+        make_gifs = make_gifs, 
         data_source = data_source,
-        show_planned_stations = FALSE, 
+        show_planned_stations = show_planned_stations, 
         height0 = height0, 
         var00 = var00, 
-        virids_option = i)
+        virids_option = virids_option)
     }
   }
   
@@ -342,28 +365,34 @@ make_varplot_wrapper <- function(
       }
     }
     
-    for (i in c("H", # Rainbow color scheme
-                "B")){ # Inferno color scheme
+    for (virids_option in c("H", # Rainbow color scheme
+                            "B")){ # Inferno color scheme
+      
+      dat00 <- dat
+      plot_title = paste0(maxyr, " ", var00, " ", unit0)
+      legend_title = paste0(gsub(pattern = " ", replacement = "\n", x = var00), " ", unit0)
+      file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end) 
+      make_gifs = TRUE
       
       make_figure(
         SRVY = SRVY, 
-        dat = dat,
+        dat00 = dat00,
         var_breaks = var_breaks, 
-        plot_title = paste0(maxyr, " ", var00, " ", unit0),
+        plot_title = plot_title,
         plot_subtitle = plot_subtitle,
-        legend_title = paste0(gsub(pattern = " ", replacement = "\n", x = var00), " ", unit0),
+        legend_title = legend_title,
         dates0 = dates0, 
         shp = shp,
-        file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end),
+        file_end = file_end,
         dir_wd = dir_wd,
         dir_out = dir_out, 
         dir_googledrive_upload = dir_googledrive_upload, 
-        make_gifs = TRUE, 
+        make_gifs = make_gifs, 
         data_source = data_source,
         show_planned_stations = show_planned_stations, 
         height0 = height0, 
         var00 = var00, 
-        virids_option = i)
+        virids_option = virids_option)
     }
   }
   
@@ -372,35 +401,45 @@ make_varplot_wrapper <- function(
     file_end <- "anom"; print(paste0("------------", file_end, "------------"))
     
     
-    for (i in c("H", # Rainbow color scheme
-                "B")) { # Inferno color scheme
+    for (virids_option in c("H", # Rainbow color scheme
+                            "B")) { # Inferno color scheme
+      
+      dat00 = dat %>% # Anomaly plot
+        dplyr::filter(station != 0) %>% # because show_planned_stations = FALSE
+        dplyr::mutate(var = anom, 
+                      reg_lab = ifelse(SRVY == "BS", 
+                                       paste0(survey, "\n"), 
+                                       survey))
+      var_breaks = c(-10, seq(from = -2, to = 3, by = 1), 50)
+      plot_title = paste0(maxyr,  " ", var00, ' Anomaly' )
+      plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
+                           x = paste0("NOAA Fisheries ", 
+                                      text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
+                                      ifelse(nrow(anom_years)>1, "s", "")))
+      legend_title = paste0(var00, '\nAnomaly ', unit0)
+      file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end)
+      make_gifs = FALSE
+      show_planned_stations = FALSE
+      
       make_figure(
         SRVY = SRVY, 
-        dat = dat %>% # Anomaly plot
-          dplyr::filter(station != 0) %>% # because show_planned_stations = FALSE
-          dplyr::mutate(var = anom, 
-                        reg_lab = ifelse(SRVY == "BS", 
-                                         paste0(survey, "\n"), 
-                                         survey)),
-        var_breaks = c(-10, seq(from = -2, to = 3, by = 1), 50), 
-        plot_title = paste0(maxyr,  " ", var00, ' Anomaly' ),
-        plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
-                             x = paste0("NOAA Fisheries ", 
-                                        text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
-                                        ifelse(nrow(anom_years)>1, "s", ""))),
-        legend_title = paste0(var00, '\nAnomaly ', unit0),
+        dat00 = dat00,
+        var_breaks = var_breaks, 
+        plot_title = plot_title,
+        plot_subtitle = plot_subtitle,
+        legend_title = legend_title,
         dates0 = dates0, 
         shp = shp,
-        file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end),
+        file_end = file_end,
         dir_wd = dir_wd,
         dir_out = dir_out, 
         dir_googledrive_upload = dir_googledrive_upload, 
-        make_gifs = FALSE, 
+        make_gifs = make_gifs, 
         data_source = data_source,
-        show_planned_stations = FALSE, 
+        show_planned_stations = show_planned_stations, 
         height0 = height0, 
         var00 = var00, 
-        virids_option = i)
+        virids_option = virids_option)
     }
   }
   
@@ -428,7 +467,7 @@ make_varplot_wrapper <- function(
 #' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 make_figure <- function(
     SRVY, 
-    dat, 
+    dat00, 
     var_breaks, 
     plot_title = "",
     plot_subtitle = "",
@@ -451,6 +490,7 @@ make_figure <- function(
   dir.create(path = dir_out, showWarnings = FALSE)
   
   # Set Base Layers ------------------------------------------------------------
+  dat <- dat00
   if (show_planned_stations) {
     dat <- dat %>% 
       dplyr::bind_rows(dat %>%
@@ -856,12 +896,12 @@ make_figure <- function(
       ### grid map ---------------------------------------------------
       
       gg <- gg +
-      # Survey area
-      ggplot2::geom_sf(data = shp$survey.area, 
-                       color = "grey50", 
-                       linewidth = .5, 
-                       fill = "NA",
-                       show.legend = TRUE) 
+        # Survey area
+        ggplot2::geom_sf(data = shp$survey.area, 
+                         color = "grey50", 
+                         linewidth = .5, 
+                         fill = "NA",
+                         show.legend = TRUE) 
       
       # Draw bounding boxes
       bb <- data.frame()
@@ -895,32 +935,32 @@ make_figure <- function(
       if (file_end == 'grid') {
         # label regions
         gg <- gg + 
-        # full station grid
-        ggplot2::geom_sf(
-          data = shp$survey.grid,
-          colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
-          size = ifelse(file_end == "grid", .05, .02),
-          show.legend = FALSE)  + 
-        ggplot2::geom_sf(data = shp$survey.area, 
-                             colour = "grey50",
+          # full station grid
+          ggplot2::geom_sf(
+            data = shp$survey.grid,
+            colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
+            size = ifelse(file_end == "grid", .05, .02),
+            show.legend = FALSE)  + 
+          ggplot2::geom_sf(data = shp$survey.area, 
+                           colour = "grey50",
                            fill = "transparent",
-                             show.legend = legend_title) +
+                           show.legend = legend_title) +
           # fix extent
           ggspatial::coord_sf(
             xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
             ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], 
                      sf::st_bbox(grid_stations_plot)[c(4)]+50000)) + 
           ggplot2::geom_label(data = bb, 
-                     color = ifelse(SRVY == "AI", "black", "white"), 
-                     fill = ifelse(SRVY == "AI", NA, "black"),
-                     fontface = "bold",
-                     label.size = NA,
-                     label.r = unit(0, "pt"),
-                     mapping = 
-                       aes(x = x, 
-                           y = ifelse(lab %in% c("Western Aleutians"), (y-25000), (y+25000)), 
-                           label = lab), 
-                     size = 4)
+                              color = ifelse(SRVY == "AI", "black", "white"), 
+                              fill = ifelse(SRVY == "AI", NA, "black"),
+                              fontface = "bold",
+                              label.size = NA,
+                              label.r = unit(0, "pt"),
+                              mapping = 
+                                aes(x = x, 
+                                    y = ifelse(lab %in% c("Western Aleutians"), (y-25000), (y+25000)), 
+                                    label = lab), 
+                              size = 4)
       } 
       
       if (file_end != 'grid') {
@@ -1011,31 +1051,27 @@ make_figure <- function(
           #                height0 = 0.03,
           #                st.bottom = FALSE,
           #                st.size = 3, 
-        #                model = shp$crs) +
-        # fix extent
-        ggspatial::coord_sf(
-          xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-          ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
+          #                model = shp$crs) +
+          # fix extent
+          ggspatial::coord_sf(
+            xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
+            ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
         
         # if (file_end %in% c("daily", "anom")) {
         gg <- gg +
           ggplot2::annotate("text", 
-                   # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
-                   x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(SRVY == "AI", .1, .15)),  # ifelse(SRVY == "AI", .60, .15)
-                   y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(SRVY == "AI", .2, .80)), 
-                   label = ifelse(is.na(max_date), 
-                                  "", 
-                                  ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
-                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
-                                         paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
-                                                " \u2013\n", 
-                                                format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
-                   color = "black", size = 5, fontface=2) 
-        # }
-        
-        
+                            # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
+                            x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(SRVY == "AI", .1, .15)),  # ifelse(SRVY == "AI", .60, .15)
+                            y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(SRVY == "AI", .2, .80)), 
+                            label = ifelse(is.na(max_date), 
+                                           "", 
+                                           ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
+                                                  paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
+                                                  paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
+                                                         " \u2013\n", 
+                                                         format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
+                            color = "black", size = 5, fontface=2) 
       }
-      
     }
     
     ## Save files --------------------------------------------------------------
@@ -1084,11 +1120,38 @@ make_figure <- function(
     filename1 <- c(filename1, 
                    paste0(dir_out, filename0,'.pdf'), 
                    paste0(dir_out, filename0,'.txt'))
+    
+    # RMarkdown ---
     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(filename0, ".pdf"))
-    file.remove(list.files(path = paste0(dir_wd, "/code/"), 
+
+    file.remove(list.files(path = paste0(dir_wd, "/code/"),
                            pattern = ".log", full.names = TRUE))
+
+    # # Quarto ---
+    # quarto::quarto_render(  # render the quarto document
+    #   input = paste0(dir_wd, "/code/template.qmd"),
+    #   output_format = "pdf",
+    #   output_file = paste0(filename0, ".pdf"),
+    #   execute_params = list(
+    #     "dat_plot" = dat_plot,
+    #     "dat" = dat,
+    #     "shp" = shp,
+    #     "SRVY" = SRVY,
+    #     "data_source" = data_source,
+    #     "file_end" = file_end,
+    #     "var00" = var00,
+    #     "maxyr" = maxyr,
+    #     "max_date" = max_date,
+    #     "dir_out" = dir_out,
+    #     "filename0" = filename0,
+    #     "gg" = gg))
+    # 
+    # file.copy(from = here::here(paste0("report_",report_cruise, file_type)),
+    #           to = here::here("output", report_yr, paste0("report_",report_cruise, file_type)),
+    #           overwrite = TRUE)
+    # file.remove(from = here::here(paste0("report_",report_cruise, file_type)))
     
     ### Combined PDF -----------------------------------------------------------------
     

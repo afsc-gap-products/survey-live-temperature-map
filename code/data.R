@@ -214,12 +214,6 @@ dat_survey <- dat_survey %>%
 
 # Load shape files -------------------------------------------------------------
 
-library(ggplot2)
-library(viridis)
-# devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
-library(akgfmaps)
-library(sf)
-
 # crs.out <- shp_bs$survey_area$crs$input
 
 shp_bs <- akgfmaps::get_base_layers(select.region = "bs.all", set.crs = "auto")

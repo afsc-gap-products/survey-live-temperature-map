@@ -3,9 +3,13 @@
 
 # Connect to oracle ------------------------------------------------------------
 
-library(magrittr)
-library(readr)
-library(dplyr)
+PKG <- c("magrittr", "readr", "dplyr")
+
+for (p in PKG) {
+  if(!require(p,character.only = TRUE)) {  
+    install.packages(p, verbose = FALSE)
+    require(p,character.only = TRUE)}
+}
 
 if (file.exists("Z:/Projects/ConnectToOracle.R")) {
   source("Z:/Projects/ConnectToOracle.R")
