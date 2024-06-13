@@ -1259,7 +1259,7 @@ make_figure <- function(
       for (iii in 1:length(filename1)) {
           drive_upload(
             media = filename1[iii],
-            path = googledrive::as_id(ifelse(grep(pattern = "current", x = filename1[iii]), 
+            path = googledrive::as_id(ifelse(grepl(pattern = "current", x = filename1[iii]), 
                                              dir_googledrive_upload, # if a current file, put in the main folder
                                              dir_googledrive_upload_archive)), # if the day-stamp file, put directly in the archive folder for safe keeping
             overwrite = TRUE)          
