@@ -320,7 +320,7 @@ make_varplot_wrapper <- function(
                                       ifelse(nrow(anom_years)>1, "s", "")))
       legend_title = paste0(var00, '\nMean ', unit0)
       dates0 = "none"
-      file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end)
+      file_end = ifelse(virids_option == "B", paste0(file_end, "_cb"), file_end)
       make_gifs = FALSE
       show_planned_stations = FALSE
       
@@ -371,7 +371,7 @@ make_varplot_wrapper <- function(
       dat00 <- dat
       plot_title = paste0(maxyr, " ", var00, " ", unit0)
       legend_title = paste0(gsub(pattern = " ", replacement = "\n", x = var00), " ", unit0)
-      file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end) 
+      file_end = ifelse(virids_option == "B", paste0(file_end, "_cb"), file_end) 
       make_gifs = TRUE
       
       make_figure(
@@ -417,7 +417,7 @@ make_varplot_wrapper <- function(
                                       text_list(paste0(anom_years$survey, " Bottom Trawl Survey ", anom_years$range)), 
                                       ifelse(nrow(anom_years)>1, "s", "")))
       legend_title = paste0(var00, '\nAnomaly ', unit0)
-      file_end = ifelse(i == "B", paste0(file_end, "_cb"), file_end)
+      file_end = ifelse(virids_option == "B", paste0(file_end, "_cb"), file_end)
       make_gifs = FALSE
       show_planned_stations = FALSE
       
