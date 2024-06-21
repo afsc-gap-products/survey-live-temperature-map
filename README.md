@@ -176,7 +176,7 @@ Fisheries</figcaption>
 Szalay et al., 2023; Von Szalay and Raring, 2018)
 
 <div id="refs" class="references csl-bib-body hanging-indent"
-line-spacing="2">
+entry-spacing="0" line-spacing="2">
 
 <div id="ref-RN979" class="csl-entry">
 
@@ -240,16 +240,17 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
 
 ## R Version Metadata
 
-    FALSE R version 4.3.3 (2024-02-29 ucrt)
-    FALSE Platform: x86_64-w64-mingw32/x64 (64-bit)
+    FALSE R version 4.4.0 (2024-04-24 ucrt)
+    FALSE Platform: x86_64-w64-mingw32/x64
     FALSE Running under: Windows 10 x64 (build 19045)
     FALSE 
     FALSE Matrix products: default
     FALSE 
     FALSE 
     FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-    FALSE [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8   
+    FALSE [3] LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                          
+    FALSE [5] LC_TIME=English_United States.utf8    
     FALSE 
     FALSE time zone: America/Los_Angeles
     FALSE tzcode source: internal
@@ -258,24 +259,33 @@ repository](https://github.com/afsc-gap-products/survey-live-temperature-map/iss
     FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
     FALSE 
     FALSE other attached packages:
-    FALSE  [1] glue_1.7.0        RCurl_1.98-1.14   RODBC_1.3-23      readxl_1.4.3      stringr_1.5.1     magrittr_2.0.3    googledrive_2.1.1
-    FALSE  [8] tidyr_1.3.1       rmarkdown_2.26    readr_2.1.5       viridis_0.6.5     viridisLite_0.4.2 janitor_2.2.0     qpdf_1.3.3       
-    FALSE [15] magick_2.8.3      cowplot_1.1.3     ggspatial_1.1.9   akgfmaps_3.5.0    terra_1.7-71      stars_0.6-5       abind_1.4-5      
-    FALSE [22] sf_1.0-16         gstat_2.1-1       ggplot2_3.5.1     dplyr_1.1.4       classInt_0.4-10  
+    FALSE  [1] glue_1.7.0        RCurl_1.98-1.14   RODBC_1.3-23      tinytex_0.51      quarto_1.4       
+    FALSE  [6] readxl_1.4.3      here_1.0.1        stringr_1.5.1     magrittr_2.0.3    googledrive_2.1.1
+    FALSE [11] tidyr_1.3.1       rmarkdown_2.27    readr_2.1.5       viridis_0.6.5     viridisLite_0.4.2
+    FALSE [16] janitor_2.2.0     qpdf_1.3.3        magick_2.8.3      cowplot_1.1.3     ggspatial_1.1.9  
+    FALSE [21] akgfmaps_3.5.3    terra_1.7-78      stars_0.6-5       abind_1.4-5       sf_1.0-16        
+    FALSE [26] gstat_2.1-1       ggplot2_3.5.1     dplyr_1.1.4       classInt_0.4-10   devtools_2.4.5   
+    FALSE [31] usethis_2.2.3    
     FALSE 
     FALSE loaded via a namespace (and not attached):
-    FALSE  [1] tidyselect_1.2.1   bitops_1.0-7       fastmap_1.1.1      digest_0.6.35      timechange_0.3.0   lifecycle_1.0.4   
-    FALSE  [7] compiler_4.3.3     rlang_1.1.3        tools_4.3.3        utf8_1.2.4         yaml_2.3.8         data.table_1.15.4 
-    FALSE [13] knitr_1.46         FNN_1.1.4          askpass_1.2.0      bit_4.0.5          sp_2.1-4           curl_5.2.1        
-    FALSE [19] here_1.0.1         KernSmooth_2.23-22 withr_3.0.0        purrr_1.0.2        grid_4.3.3         fansi_1.0.6       
-    FALSE [25] xts_0.13.2         readtext_0.91      e1071_1.7-14       colorspace_2.1-0   scales_1.3.0       cli_3.6.2         
-    FALSE [31] crayon_1.5.2       intervals_0.15.4   generics_0.1.3     rstudioapi_0.16.0  httr_1.4.7         tzdb_0.4.0        
-    FALSE [37] DBI_1.2.2          proxy_0.4-27       parallel_4.3.3     cellranger_1.1.0   vctrs_0.6.5        jsonlite_1.8.8    
-    FALSE [43] hms_1.1.3          bit64_4.0.5        units_0.8-5        codetools_0.2-19   lubridate_1.9.3    stringi_1.8.4     
-    FALSE [49] gtable_0.3.5       munsell_0.5.1      tibble_3.2.1       pillar_1.9.0       rappdirs_0.3.3     htmltools_0.5.8.1 
-    FALSE [55] openssl_2.1.2      R6_2.5.1           rprojroot_2.0.4    vroom_1.6.5        evaluate_0.23      lattice_0.22-5    
-    FALSE [61] snakecase_0.11.1   gargle_1.5.2       class_7.3-22       Rcpp_1.0.12        gridExtra_2.3      spacetime_1.3-1   
-    FALSE [67] xfun_0.43          fs_1.6.4           zoo_1.8-12         pkgconfig_2.0.3
+    FALSE  [1] bitops_1.0-7       DBI_1.2.3          gridExtra_2.3      remotes_2.5.0      rlang_1.1.4       
+    FALSE  [6] snakecase_0.11.1   e1071_1.7-14       compiler_4.4.0     vctrs_0.6.5        profvis_0.3.8     
+    FALSE [11] crayon_1.5.2       pkgconfig_2.0.3    fastmap_1.2.0      ellipsis_0.3.2     utf8_1.2.4        
+    FALSE [16] promises_1.3.0     sessioninfo_1.2.2  tzdb_0.4.0         ps_1.7.6           bit_4.0.5         
+    FALSE [21] purrr_1.0.2        xfun_0.44          cachem_1.1.0       jsonlite_1.8.8     later_1.3.2       
+    FALSE [26] parallel_4.4.0     R6_2.5.1           stringi_1.8.4      pkgload_1.3.4      lubridate_1.9.3   
+    FALSE [31] cellranger_1.1.0   Rcpp_1.0.12        knitr_1.47         zoo_1.8-12         readtext_0.91     
+    FALSE [36] FNN_1.1.4          httpuv_1.6.15      timechange_0.3.0   tidyselect_1.2.1   yaml_2.3.8        
+    FALSE [41] rstudioapi_0.16.0  codetools_0.2-20   miniUI_0.1.1.1     curl_5.2.1         processx_3.8.4    
+    FALSE [46] pkgbuild_1.4.4     lattice_0.22-6     tibble_3.2.1       intervals_0.15.4   shiny_1.8.1.1     
+    FALSE [51] withr_3.0.0        askpass_1.2.0      evaluate_0.24.0    units_0.8-5        proxy_0.4-27      
+    FALSE [56] urlchecker_1.0.1   xts_0.14.0         pillar_1.9.0       KernSmooth_2.23-24 generics_0.1.3    
+    FALSE [61] vroom_1.6.5        rprojroot_2.0.4    sp_2.1-4           spacetime_1.3-1    hms_1.1.3         
+    FALSE [66] munsell_0.5.1      scales_1.3.0       xtable_1.8-4       class_7.3-22       tools_4.4.0       
+    FALSE [71] data.table_1.15.4  fs_1.6.4           grid_4.4.0         colorspace_2.1-0   cli_3.6.2         
+    FALSE [76] rappdirs_0.3.3     fansi_1.0.6        gargle_1.5.2       gtable_0.3.5       digest_0.6.35     
+    FALSE [81] htmlwidgets_1.6.4  memoise_2.0.1      htmltools_0.5.8.1  lifecycle_1.0.4    httr_1.4.7        
+    FALSE [86] mime_0.12          bit64_4.0.5        openssl_2.2.0
 
 ## NOAA README
 
