@@ -14,6 +14,7 @@ params:
   dir_out: ./
   filename0: dummy
   gg: !r ggplot2::ggplot()
+  virids_option: "H"
 ---
 
 ```{r setup}
@@ -141,7 +142,7 @@ if (SRVY %in% c("AI", "GOA")) {
 }
 
 intro0 <- paste0(
-  "NOAA Fisheries AFSC Groundfish Assessment Program conducted the ", 
+  "NOAA Fisheries AFSC Groundfish Assessment Program is conducting the ", 
   text_list(surveys),
   " bottom trawl survey",
   ifelse(length(surveys)>1, "s", ""), ". ")
@@ -340,7 +341,9 @@ if (file_end %in% c("mean", "mean_cb")) {
     stations1 <- paste0(stations1, "Stations yet to be sampled are shown as gray dots. ")
   }
   
-  
+  if (virids_option == "B") {
+    colorblind0 <- "This map is designed to be accessible for the colorblind. "
+  }
   
   temp00 <- paste0("The near real-time ocean bottom temperatures depicted were collected ", 
                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
@@ -359,7 +362,7 @@ if (file_end %in% c("mean", "mean_cb")) {
   fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
                     ifelse(firstplotofrun, temp01, temp00), 
                     stations_first_last, 
-                    stations1)
+                    stations1, colorblind0)
   
 }
 
