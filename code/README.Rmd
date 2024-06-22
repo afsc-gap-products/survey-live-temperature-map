@@ -14,24 +14,30 @@ library(magrittr)
 library(dplyr)
 library(glue)
 
-print_figs <- function(string_id, file_type = ".png") {
-temp <- list.files(path = here::here("examples"), pattern = string_id, full.names = TRUE)
-temp <- data.frame(
-  img = temp[grep(pattern = file_type, x = temp)], 
-  txt0 = temp[grep(pattern = ".txt", x = temp)], 
-  txt = NA) %>% 
-  dplyr::mutate(
-    srvy = sapply(X = strsplit(x = txt0, split = ".", fixed = TRUE), "[[", 2), 
-    srvy = gsub(pattern = paste0(here::here("examples"), "/", string_id), replacement = "", x = srvy),
-    order = dplyr::case_when(
-      srvy == "bs" ~ 1, 
-      srvy == "ai" ~ 2, 
-      srvy == "goa" ~ 3 )) %>% 
-  dplyr::arrange(order)
-for (i in 1:nrow(temp)) {
-  temp$txt[i] <- paste0(read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."), collapse = " ")
-}
-str0 <- glue::glue("![{temp$txt}]({temp$img})\n\n")
+print_figs <- function(string_id = "current_daily_", 
+                       file_type = ".png", 
+                       link_repo = "https://github.com/afsc-gap-products/survey-live-temperature-map") {
+  temp <- paste0(link_repo, 
+                 "/blob/main/examples/", 
+                 list.files(path = here::here("examples"), pattern = string_id, full.names = FALSE))
+  temp <- data.frame(
+    img = temp[grep(pattern = file_type, x = temp)], 
+    txt0 = temp[grep(pattern = ".txt", x = temp)], 
+    txt = NA) %>% 
+    dplyr::mutate(
+      srvy = sapply(X = strsplit(x = txt0, split = "_", fixed = TRUE), "[[", 3), 
+      srvy = sapply(X = strsplit(x = srvy, split = ".", fixed = TRUE), "[[", 1), 
+      # srvy = gsub(pattern = paste0(here::here("examples"), "/", string_id), replacement = "", x = srvy),
+      order = dplyr::case_when(
+        srvy == "bs" ~ 3, 
+        srvy == "bs" ~ 4, 
+        srvy == "ai" ~ 1, 
+        srvy == "goa" ~ 2 )) %>% 
+    dplyr::arrange(order)
+  for (i in 1:nrow(temp)) {
+    temp$txt[i] <- paste0(read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."), collapse = " ")
+  }
+  str0 <- glue::glue("![{temp$txt}]({temp$img})\n\n")
 return(str0)
 }
 ```
@@ -109,25 +115,25 @@ These scripts create daily survey station daily temperature and anomaly plots as
 Find more plot examples [here](`r paste0(link_repo, "/tree/main/test")`). 
 
 ## Final stacked gifs
-```{r}
+```{r current_daily_}
 a <- print_figs(string_id = "current_daily_", file_type = "gif")
 ```
 `r a`
 
 ## Blank, Grid-only Plot
-```{r}
+```{r current_grid_}
 a <- print_figs(string_id = "current_grid_")
 ```
 `r a`
 
 ## Mean Plot
-```{r}
+```{r current_mean_}
 a <- print_figs(string_id = "current_mean_")
 ```
 `r a`
 
 ## Anomaly Plot
-```{r}
+```{r current_anom_}
 a <- print_figs(string_id = "current_anom_")
 ```
 `r a`
@@ -151,7 +157,7 @@ If you see that the data, product, or metadata can be improved, you are invited 
 
 ## R Version Metadata
 
-```{r}
+```{r session-info}
 sessionInfo()
 ```
 

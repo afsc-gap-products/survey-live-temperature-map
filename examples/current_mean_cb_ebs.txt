@@ -1,0 +1,1 @@
+The time series mean bottom temperatures from the NOAA Fisheries eastern Bering Sea (1982-2023; 41 years) bottom trawl survey. These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss) and the coldpool R package (https://github.com/afsc-gap-products/coldpool). Credit: NOAA Fisheries
