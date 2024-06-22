@@ -98,6 +98,12 @@ Find more plot examples
 
 ## Final stacked gifs
 
+    FALSE Warning in read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."): incomplete final line found by readTableHeader on
+    FALSE 'Z:/Projects/survey-live-temperature-map/examples/current_daily_goa.txt'
+
+    FALSE Warning in read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."): incomplete final line found by readTableHeader on
+    FALSE 'Z:/Projects/survey-live-temperature-map/examples/current_daily_bs.txt'
+
 ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the
 Aleutian Islands bottom trawl survey. The near real-time ocean bottom
 temperatures depicted were collected June 7-June 21 On June 21, stations
@@ -106,21 +112,17 @@ temperatures depicted were collected June 7-June 21 On June 21, stations
 the F/V Ocean Explorer. No stations were surveyed by the F/V Alaska
 Provider. Credit: NOAA
 Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_ai.gif)
-, ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the Gulf
-of Alaska bottom trawl survey. The near real-time ocean bottom
-temperatures depicted were collected June 12-June 13 On June 13,
-stations 56-49 (54.33°N, -165.37°W; ≤3°C) and 25-18 (53.05°N, -167.95°W;
-≤3°C) were surveyed by the F/V Alaska Provider and stations 50-33
-(53.66°N, -165.88°W; \>3–4°C) and 52-40 (53.95°N, -165.71°W; \>4–5°C)
-were surveyed by the F/V Ocean Explorer. Credit: NOAA
-Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_goa.gif)
-, ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the
-eastern Bering Sea and northern Bering Sea bottom trawl surveys. The
-near real-time ocean bottom temperatures depicted were collected May
-29-August 20 This is the last day of the survey. On August 20, stations
-R-18 (60.67°N, -168.69°W; \>8°C), R-01 (60.67°N, -168.01°W; \>8°C), and
-R-02 (60.67°N, -167.32°W; \>8°C) were surveyed by the F/V Alaska Knight.
-No stations were surveyed by the F/V Vesteraalen. Credit: NOAA
+, ![NOAA Fisheries scientists are providing information on ocean
+temperatures observed during the Gulf of Alaska Bottom Trawl Survey in
+2023 Credit: NOAA
+Fisheries.](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_goa.gif)
+, ![Map of the ocean bottom temperatures from the 2023 eastern and
+northern Bering Sea bottom trawl surveys aboard the F/V Northwest
+Explorer and F/V Alaska Knight. Updated colors: This year in an effort
+to make the heatmaps more accessible to a broader audience a new color
+scheme was used for our heatmaps. However, given feedback we have
+received we are reverting back to the colors used in previous years.
+Credit: NOAA
 Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_bs.gif)
 , ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the
 eastern Bering Sea bottom trawl survey. The near real-time ocean bottom
@@ -135,58 +137,52 @@ Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob
 
 ## Blank, Grid-only Plot
 
+    FALSE Warning in read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."): incomplete final line found by readTableHeader on
+    FALSE 'Z:/Projects/survey-live-temperature-map/examples/current_grid_bs.txt'
+
 ![The Aleutian Islands bottom trawl survey. This survey covers the
 Central Aleutians, Eastern Aleutians, Southern Bering Sea, and Western
 Aleutians districts. Credit: NOAA
 Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_ai.png)
-, ![The Gulf of Alaska bottom trawl survey. This survey covers the
-Shumagin, Chirikof, Kodiak, Yakutat, and Southeastern regions. Credit:
-NOAA
-Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_goa.png)
-, ![The grid of designated stations in the eastern Bering Sea and
-northern Bering Sea bottom trawl survey areas as well as the 50m, 100m,
-and 200m bathymetric boundaries. Credit: NOAA
-Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_bs.png)
+, ![The Gulf of Alaska bottom trawl survey region. This survey covers
+the Shumagin, Chirikof, Kodiak, Yakutat, and Southeastern subregions.
+Credit: NOAA
+Fisheries.](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_goa.png)
+, ![Map of the eastern Bering Sea and northern Bering Sea 2023 survey
+stations with the 50m, 100m, and 200m bathymetry lines. Credit: NOAA
+Fisheries.](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_bs.png)
 , ![Map of the eastern Bering Sea 2024 survey station grid and the 50 m,
 100 m, and 200 m bathymetry lines. Credit: NOAA
 Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_ebs.png)
 
 ## Mean Plot
 
-![The timeseries mean bottom temperatures from the NOAA Fisheries
-eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea
-(2010-2021; 4 years) bottom trawl surveys. These data are publicly
-accessible on Fisheries One Stop Shop data platform
-(<https://www.fisheries.noaa.gov/foss>). Credit: NOAA
-Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_mean_bs.png)
-, ![The time series mean bottom temperatures from the NOAA Fisheries
-eastern Bering Sea (1982-2023; 41 years) bottom trawl survey. These data
-are publicly accessible on Fisheries One Stop Shop data platform
-(<https://www.fisheries.noaa.gov/foss>) and the coldpool R package
-(<https://github.com/afsc-gap-products/coldpool>). Credit: NOAA
-Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_mean_ebs.png)
-, ![The time series mean bottom temperatures from the NOAA Fisheries
-eastern Bering Sea (1982-2023; 41 years) bottom trawl survey. These data
-are publicly accessible on Fisheries One Stop Shop data platform
-(<https://www.fisheries.noaa.gov/foss>) and the coldpool R package
-(<https://github.com/afsc-gap-products/coldpool>). Credit: NOAA
-Fisheries](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_mean_cb_ebs.png)
+    FALSE Warning in read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."): incomplete final line found by readTableHeader on
+    FALSE 'Z:/Projects/survey-live-temperature-map/examples/current_mean_bs.txt'
+
+<figure>
+<img
+src="https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_mean_bs.png"
+alt="Mean bottom temperatures in the NOAA Fisheries eastern (1982-2022; 40 years) and northern Bering Sea (2010-2022; 5 years) Bottom Trawl Surveys. Credit: NOAA Fisheries." />
+<figcaption aria-hidden="true">Mean bottom temperatures in the NOAA
+Fisheries eastern (1982-2022; 40 years) and northern Bering Sea
+(2010-2022; 5 years) Bottom Trawl Surveys. Credit: NOAA
+Fisheries.</figcaption>
+</figure>
 
 ## Anomaly Plot
+
+    FALSE Warning in read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."): incomplete final line found by readTableHeader on
+    FALSE 'Z:/Projects/survey-live-temperature-map/examples/current_anom_bs.txt'
 
 <figure>
 <img
 src="https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_anom_bs.png"
-alt="The 2022 near real-time ocean bottom temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment Program’s eastern Bering Sea and northern Bering Sea bottom trawl surveys. The timeseries mean bottom temperatures from the eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years) bottom trawl surveys are compared to their respective 2022 surveys (May 30-August 20). These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss). Credit: NOAA Fisheries" />
-<figcaption aria-hidden="true">The 2022 near real-time ocean bottom
-temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment
-Program’s eastern Bering Sea and northern Bering Sea bottom trawl
-surveys. The timeseries mean bottom temperatures from the eastern Bering
-Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years)
-bottom trawl surveys are compared to their respective 2022 surveys (May
-30-August 20). These data are publicly accessible on Fisheries One Stop
-Shop data platform (<a href="https://www.fisheries.noaa.gov/foss"
-class="uri">https://www.fisheries.noaa.gov/foss</a>). Credit: NOAA
+alt="Ocean bottom temperature anomaly of the mean bottom temperatures from the eastern (1982-2022; 40 years) and northern Bering Sea (2010-2022; 5 years) bottom trawl surveys compared to their respective 2023 survey stations. Credit: NOAA Fisheries" />
+<figcaption aria-hidden="true">Ocean bottom temperature anomaly of the
+mean bottom temperatures from the eastern (1982-2022; 40 years) and
+northern Bering Sea (2010-2022; 5 years) bottom trawl surveys compared
+to their respective 2023 survey stations. Credit: NOAA
 Fisheries</figcaption>
 </figure>
 
