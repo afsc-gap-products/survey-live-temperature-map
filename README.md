@@ -98,84 +98,101 @@ Find more plot examples
 
 ## Final stacked gifs
 
-![NOAA Fisheries AFSC Groundfish Assessment Program conducted the
-Aleutian Islands bottom trawl survey. The near real-time ocean bottom
-temperatures depicted were collected June 10-August 13 On August 13,
-stations 162-16 (51.65°N, -177.89°W; \>5.5–6°C) and 184-16 (51.66°N,
--176.25°W; \>5–5.5°C) were surveyed by the F/V Alaska Provider. No
-stations were surveyed by the F/V Ocean Explorer. Allocated stations
-that have not yet been sampled are shown as gray dots. Credit: NOAA
-Fisheries](Z:/Projects/survey-live-temperature-map/examples/current_daily_ai.gif)
-, ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the
-eastern Bering Sea and northern Bering Sea bottom trawl surveys. The
-near real-time ocean bottom temperatures depicted were collected May
-29-August 20 This is the last day of the survey. On August 20, stations
-R-18 (60.67°N, -168.69°W; \>8°C), R-01 (60.67°N, -168.01°W; \>8°C), and
-R-02 (60.67°N, -167.32°W; \>8°C) were surveyed by the F/V Alaska Knight.
-No stations were surveyed by the F/V Vesteraalen. Credit: NOAA
-Fisheries](Z:/Projects/survey-live-temperature-map/examples/current_daily_bs.gif)
-, ![NOAA Fisheries AFSC Groundfish Assessment Program conducted the Gulf
-of Alaska bottom trawl survey. The near real-time ocean bottom
-temperatures depicted were collected May 23-August 14 On August 14, a
-station 447-60 (54.79°N, -133.07°W; \>6–7°C) was surveyed by the F/V
-Alaska Provider. No stations were surveyed by the F/V Ocean Explorer.
-Allocated stations that have not yet been sampled are shown as gray
-dots. Credit: NOAA
-Fisheries](Z:/Projects/survey-live-temperature-map/examples/current_daily_goa.gif)
+![*NOAA* *Fisheries* *AFSC* *Groundfish* *Assessment* *Program*
+*conducted* *the* *Aleutian* *Islands* *bottom* *trawl* *survey.* *The*
+*near* *real-time* *ocean* *bottom* *temperatures* *depicted* *were*
+*collected* *June* *7-June* *21* *On* *June* *21,* *stations* *237-36*
+*(52.52°N,* *-172.26°W;* *\>3.5–4°C),* *236-36* *(52.52°N,* *-172.34°W;*
+*\>4–4.5°C),* *and* *238-37* *(52.57°N,* *-172.18°W;* *\>3.5–4°C)*
+*were* *surveyed* *by* *the* *F/V* *Ocean* *Explorer.* *No* *stations*
+*were* *surveyed* *by* *the* *F/V* *Alaska* *Provider.* *Credit:* *NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_ai.gif)
+, ![*NOAA* *Fisheries* *scientists* *are* *providing* *information* *on*
+*ocean* *temperatures* *observed* *during* *the* *Gulf* *of* *Alaska*
+*Bottom* *Trawl* *Survey* *in* *2023* *Credit:* *NOAA*
+*Fisheries.*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_goa.gif)
+, ![*Map* *of* *the* *ocean* *bottom* *temperatures* *from* *the* *2023*
+*eastern* *and* *northern* *Bering* *Sea* *bottom* *trawl* *surveys*
+*aboard* *the* *F/V* *Northwest* *Explorer* *and* *F/V* *Alaska*
+*Knight.* *Updated* *colors:* *This* *year* *in* *an* *effort* *to*
+*make* *the* *heatmaps* *more* *accessible* *to* *a* *broader*
+*audience* *a* *new* *color* *scheme* *was* *used* *for* *our*
+*heatmaps.* *However,* *given* *feedback* *we* *have* *received* *we*
+*are* *reverting* *back* *to* *the* *colors* *used* *in* *previous*
+*years.* *Credit:* *NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_bs.gif)
+, ![*NOAA* *Fisheries* *AFSC* *Groundfish* *Assessment* *Program*
+*conducted* *the* *eastern* *Bering* *Sea* *bottom* *trawl* *survey.*
+*The* *near* *real-time* *ocean* *bottom* *temperatures* *depicted*
+*were* *collected* *June* *2-June* *21* *On* *June* *21,* *stations*
+*K-04* *(58.33°N,* *-165.88°W;* *\>2–3°C),* *L-04* *(58.67°N,*
+*-165.89°W;* *\>2–3°C),* *and* *M-04* *(59°N,* *-165.9°W;* *\>3–4°C)*
+*were* *surveyed* *by* *the* *F/V* *Alaska* *Knight* *and* *stations*
+*K-05* *(58.33°N,* *-165.24°W;* *\>2–3°C),* *K-06* *(58.33°N,*
+*-164.61°W;* *\>2–3°C),* *and* *L-05* *(58.67°N,* *-165.25°W;*
+*\>2–3°C)* *were* *surveyed* *by* *the* *F/V* *Northwest* *Explorer.*
+*There* *are* *8* *stations* *planned* *for* *June* *22* *Credit:*
+*NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_ebs.gif)
 
 ## Blank, Grid-only Plot
 
-![The Gulf of Alaska bottom trawl survey. This survey covers the Central
-Aleutians, Eastern Aleutians, Southern Bering Sea, and Western Aleutians
-regions. Credit: NOAA
-Fisheries](Z:/Projects/survey-live-temperature-map/examples/current_grid_ai.png)
-, ![The grid of designated stations in the eastern Bering Sea and
-northern Bering Sea bottom trawl survey areas as well as the 50m, 100m,
-and 200m bathymetric boundaries. Credit: NOAA
-Fisheries](Z:/Projects/survey-live-temperature-map/examples/current_grid_bs.png)
-, ![The Gulf of Alaska bottom trawl survey. This survey covers the
-Shumagin, Chirikof, Kodiak, Yakutat, and Southeastern regions. Credit:
-NOAA
-Fisheries](Z:/Projects/survey-live-temperature-map/examples/current_grid_goa.png)
+![*The* *Aleutian* *Islands* *bottom* *trawl* *survey.* *This* *survey*
+*covers* *the* *Central* *Aleutians,* *Eastern* *Aleutians,* *Southern*
+*Bering* *Sea,* *and* *Western* *Aleutians* *districts.* *Credit:*
+*NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_ai.png)
+, ![*The* *Gulf* *of* *Alaska* *bottom* *trawl* *survey* *region.*
+*This* *survey* *covers* *the* *Shumagin,* *Chirikof,* *Kodiak,*
+*Yakutat,* *and* *Southeastern* *subregions.* *Credit:* *NOAA*
+*Fisheries.*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_goa.png)
+, ![*Map* *of* *the* *eastern* *Bering* *Sea* *and* *northern* *Bering*
+*Sea* *2023* *survey* *stations* *with* *the* *50m,* *100m,* *and*
+*200m* *bathymetry* *lines.* *Credit:* *NOAA*
+*Fisheries.*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_bs.png)
+, ![*Map* *of* *the* *eastern* *Bering* *Sea* *2024* *survey* *station*
+*grid* *and* *the* *50* *m,* *100* *m,* *and* *200* *m* *bathymetry*
+*lines.* *Credit:* *NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_ebs.png)
 
 ## Mean Plot
 
 <figure>
 <img
-src="Z:/Projects/survey-live-temperature-map/examples/current_mean_bs.png"
-alt="The timeseries mean bottom temperatures from the NOAA Fisheries eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years) bottom trawl surveys. These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss). Credit: NOAA Fisheries" />
-<figcaption aria-hidden="true">The timeseries mean bottom temperatures
-from the NOAA Fisheries eastern Bering Sea (1982-2021; 39 years) and
-northern Bering Sea (2010-2021; 4 years) bottom trawl surveys. These
-data are publicly accessible on Fisheries One Stop Shop data platform
-(<a href="https://www.fisheries.noaa.gov/foss"
-class="uri">https://www.fisheries.noaa.gov/foss</a>). Credit: NOAA
-Fisheries</figcaption>
+src="https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_mean_bs.png"
+alt="Mean bottom temperatures in the NOAA Fisheries eastern (1982-2022; 40 years) and northern Bering Sea (2010-2022; 5 years) Bottom Trawl Surveys. Credit: NOAA Fisheries." />
+<figcaption aria-hidden="true"><em>Mean</em> <em>bottom</em>
+<em>temperatures</em> <em>in</em> <em>the</em> <em>NOAA</em>
+<em>Fisheries</em> <em>eastern</em> <em>(1982-2022;</em> <em>40</em>
+<em>years)</em> <em>and</em> <em>northern</em> <em>Bering</em>
+<em>Sea</em> <em>(2010-2022;</em> <em>5</em> <em>years)</em>
+<em>Bottom</em> <em>Trawl</em> <em>Surveys.</em> <em>Credit:</em>
+<em>NOAA</em> <em>Fisheries.</em></figcaption>
 </figure>
 
 ## Anomaly Plot
 
 <figure>
 <img
-src="Z:/Projects/survey-live-temperature-map/examples/current_anom_bs.png"
-alt="The 2022 near real-time ocean bottom temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment Program’s eastern Bering Sea and northern Bering Sea bottom trawl surveys. The timeseries mean bottom temperatures from the eastern Bering Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years) bottom trawl surveys are compared to their respective 2022 surveys (May 30-August 20). These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss). Credit: NOAA Fisheries" />
-<figcaption aria-hidden="true">The 2022 near real-time ocean bottom
-temperature anomaly in the NOAA Fisheries AFSC Groundfish Assessment
-Program’s eastern Bering Sea and northern Bering Sea bottom trawl
-surveys. The timeseries mean bottom temperatures from the eastern Bering
-Sea (1982-2021; 39 years) and northern Bering Sea (2010-2021; 4 years)
-bottom trawl surveys are compared to their respective 2022 surveys (May
-30-August 20). These data are publicly accessible on Fisheries One Stop
-Shop data platform (<a href="https://www.fisheries.noaa.gov/foss"
-class="uri">https://www.fisheries.noaa.gov/foss</a>). Credit: NOAA
-Fisheries</figcaption>
+src="https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_anom_bs.png"
+alt="Ocean bottom temperature anomaly of the mean bottom temperatures from the eastern (1982-2022; 40 years) and northern Bering Sea (2010-2022; 5 years) bottom trawl surveys compared to their respective 2023 survey stations. Credit: NOAA Fisheries" />
+<figcaption aria-hidden="true"><em>Ocean</em> <em>bottom</em>
+<em>temperature</em> <em>anomaly</em> <em>of</em> <em>the</em>
+<em>mean</em> <em>bottom</em> <em>temperatures</em> <em>from</em>
+<em>the</em> <em>eastern</em> <em>(1982-2022;</em> <em>40</em>
+<em>years)</em> <em>and</em> <em>northern</em> <em>Bering</em>
+<em>Sea</em> <em>(2010-2022;</em> <em>5</em> <em>years)</em>
+<em>bottom</em> <em>trawl</em> <em>surveys</em> <em>compared</em>
+<em>to</em> <em>their</em> <em>respective</em> <em>2023</em>
+<em>survey</em> <em>stations.</em> <em>Credit:</em> <em>NOAA</em>
+<em>Fisheries</em></figcaption>
 </figure>
 
 # Relevant publications
 
 **Learn more about these surveys and ocean temperatures around Alaska**
 (Hoff, 2016; Markowitz et al., 2023, 2023; Rohan et al., 2022; Von
-Szalay et al., 2023; Von Szalay and Raring, 2018)
+Szalay et al., 2023; Von Szalay and Raring, 2018).
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0" line-spacing="2">
@@ -241,44 +258,6 @@ or [submit an issue to the code’s
 repository](https://github.com/afsc-gap-products/survey-live-temperature-map/issues).
 
 ## R Version Metadata
-
-    FALSE R version 4.4.0 (2024-04-24 ucrt)
-    FALSE Platform: x86_64-w64-mingw32/x64
-    FALSE Running under: Windows 10 x64 (build 19045)
-    FALSE 
-    FALSE Matrix products: default
-    FALSE 
-    FALSE 
-    FALSE locale:
-    FALSE [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-    FALSE [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
-    FALSE 
-    FALSE time zone: America/Los_Angeles
-    FALSE tzcode source: internal
-    FALSE 
-    FALSE attached base packages:
-    FALSE [1] stats     graphics  grDevices utils     datasets  methods   base     
-    FALSE 
-    FALSE other attached packages:
-    FALSE  [1] RCurl_1.98-1.14   RODBC_1.3-23      tinytex_0.51      quarto_1.4        readxl_1.4.3      here_1.0.1        stringr_1.5.1     googledrive_2.1.1
-    FALSE  [9] tidyr_1.3.1       rmarkdown_2.27    readr_2.1.5       viridis_0.6.5     viridisLite_0.4.2 janitor_2.2.0     qpdf_1.3.3        magick_2.8.3     
-    FALSE [17] cowplot_1.1.3     ggspatial_1.1.9   akgfmaps_3.5.3    terra_1.7-78      stars_0.6-5       abind_1.4-5       sf_1.0-16         gstat_2.1-1      
-    FALSE [25] ggplot2_3.5.1     classInt_0.4-10   devtools_2.4.5    usethis_2.2.3     glue_1.7.0        dplyr_1.1.4       magrittr_2.0.3   
-    FALSE 
-    FALSE loaded via a namespace (and not attached):
-    FALSE  [1] DBI_1.2.3          bitops_1.0-7       gridExtra_2.3      remotes_2.5.0      rlang_1.1.4        snakecase_0.11.1   e1071_1.7-14      
-    FALSE  [8] compiler_4.4.0     vctrs_0.6.5        profvis_0.3.8      crayon_1.5.2       pkgconfig_2.0.3    fastmap_1.2.0      ellipsis_0.3.2    
-    FALSE [15] utf8_1.2.4         promises_1.3.0     sessioninfo_1.2.2  tzdb_0.4.0         ps_1.7.6           bit_4.0.5          purrr_1.0.2       
-    FALSE [22] xfun_0.44          cachem_1.1.0       jsonlite_1.8.8     later_1.3.2        parallel_4.4.0     R6_2.5.1           stringi_1.8.4     
-    FALSE [29] pkgload_1.3.4      cellranger_1.1.0   lubridate_1.9.3    Rcpp_1.0.12        knitr_1.47         zoo_1.8-12         readtext_0.91     
-    FALSE [36] FNN_1.1.4          timechange_0.3.0   httpuv_1.6.15      tidyselect_1.2.1   rstudioapi_0.16.0  yaml_2.3.8         codetools_0.2-20  
-    FALSE [43] miniUI_0.1.1.1     processx_3.8.4     curl_5.2.1         pkgbuild_1.4.4     lattice_0.22-6     tibble_3.2.1       intervals_0.15.4  
-    FALSE [50] shiny_1.8.1.1      withr_3.0.0        askpass_1.2.0      evaluate_0.24.0    units_0.8-5        proxy_0.4-27       urlchecker_1.0.1  
-    FALSE [57] xts_0.14.0         pillar_1.9.0       KernSmooth_2.23-22 generics_0.1.3     vroom_1.6.5        rprojroot_2.0.4    sp_2.1-4          
-    FALSE [64] spacetime_1.3-1    hms_1.1.3          munsell_0.5.1      scales_1.3.0       xtable_1.8-4       class_7.3-22       tools_4.4.0       
-    FALSE [71] data.table_1.15.4  fs_1.6.4           grid_4.4.0         colorspace_2.1-0   cli_3.6.2          rappdirs_0.3.3     fansi_1.0.6       
-    FALSE [78] gargle_1.5.2       gtable_0.3.5       digest_0.6.35      htmlwidgets_1.6.4  memoise_2.0.1      htmltools_0.5.8.1  lifecycle_1.0.4   
-    FALSE [85] httr_1.4.7         mime_0.12          bit64_4.0.5        openssl_2.2.0
 
 ## NOAA README
 
