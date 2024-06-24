@@ -527,8 +527,13 @@ make_figure <- function(
                                       var_breaks[i-1],"\u2013",var_breaks[i]) # ,"\u00B0C" "\u00B0"
                       ))
     }
-    var_color <- viridis::viridis_pal(begin = 0.2, end = 0.9, option = virids_option)(length(var_labels))
-    # var_color <- viridis::viridis_pal(begin = 0.2, end = 0.9, option = "B")(length(var_labels))
+    
+    if (virids_option == "H") {
+      var_color <- viridis::viridis_pal(option = virids_option)(length(var_labels))
+    } else {
+      var_color <- viridis::viridis_pal(begin = 0.2, end = 0.9, option = virids_option)(length(var_labels))
+      # var_color <- viridis::viridis_pal(begin = 0.2, end = 0.9, option = "B")(length(var_labels))
+    }
     # bin var
     dat <- dat %>%
       dplyr::mutate(var_bin = base::cut(x = as.numeric(dat$var),
