@@ -1,17 +1,107 @@
-#' ---------------------------
-#' title: Survey Daily and Anomally Temperature Plot
-#' OG author: Jason Conner
-#' maintained: Emily Markowitz and Liz Dawson (May 2021)
-#' purpose: functions
-#' ---------------------------
 
+# Load packages ----------------------------------------------------------------
 
-# Install libraries ------------------------------------------------------------
+# Here we list all the packages we will need for this whole process
+# We'll also use this in our works cited page!!!
 
 PKG <- c(
-  "devtools",
+  # For creating R Markdown Docs
+  "knitr", # A general-purpose tool for dynamic report generation in R
+  "rmarkdown", # R Markdown Document Conversion, #https://stackoverflow.com/questions/33499651/rmarkdown-in-shiny-application
+  
+  # File Management
+  "here", # For finding the root directory of your scripts and thus, find your files
+  # "officer",
+  "devtools", # Package development tools for R; used here for downloading packages from GitHub
+
+  
+  # Graphics
+  "ggplot2", # Create Elegant Data Visualisations Using the Grammar of Graphics
+  "nmfspalette",  # devtools::install_github("nmfs-general-modeling-tools/nmfspalette")
+  "cowplot",
+  "png",
+  "extrafont",
+  "akgfmaps", # devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
+  "coldpool", # devtools::install_github("afsc-gap-products/coldpool", build_vignettes = TRUE)
+  
+  # other tidyverse
+  "dplyr",
+  # "googledrive",
+  "magrittr",
+  "readr",
+  "magrittr", 
+  "stringr", 
+  "data.table",
+  #Piping/operators which promote semantics
+  "tidyr", 
+  # library(tidyverse)
+  "glue", 
+
+  # Text Management
+  "stringr",
+  "htmltools", 
+  "htmlwidgets",
+  
+  # Spatial
+  "sf",
+  "rlist", 
+  "jsonlite", 
+  "prettymapr",
+  "rosm", 
+  "shadowtext", 
+  "ggspatial", 
+  "digest", 
+  "ps", 
+  "backports", 
+  "callr", 
+  "labeling", 
+  "gstat", 
+  "raster", 
+  "reshape", 
+  "stars",
+  "mapview",
+  "viridis",
+
+  # For outputting JS files
+  "jsonlite", 
+  
+  # For editing XML files
+  "XML", 
+  
+  # Oracle
+  "RODBC", 
+  
+  #shiny
+  "shiny", # Need for running Shiny apps
+  "shinydashboard", 
+  "shinythemes", 
+  "shinyauthr", 
+  
+  # Use Java Script
+  "shinyjs", 
+  "shinyBS", 
+  "V8", 
+  
+  # For table formatting
+  "DT", 
+  "kableExtra", 
+  "formattable", 
+  
+  "rnaturalearth", 
+  "rnaturalearthdata", 
+  
+  # colors
+  # https://drive.google.com/file/d/1EwZOVAzzqwniXczu611yk6uXs4_TuRwH/view?usp=sharing
+  "nmfspalette", # oceans, waves, seagrass, urchin, crusteacean, coral
+  "viridis", 
+  
+  # leaflet
+  "leaflet", 
+  "leafem", 
+  "leafpop", 
+  "leaflet.extras", 
+  
   # Mapping
-  "akgfmaps", # devtools::install_github("safsc-gap-products/akgfmaps", build_vignettes = TRUE)
   "sf",
   "ggspatial", 
   
@@ -52,7 +142,90 @@ for (p in PKG) {
     require(p,character.only = TRUE)}
 }
 
+# Knowns -----------------------------------------------------------------------
+
+link_foss <- "https://www.fisheries.noaa.gov/foss"
+link_repo <- "https://github.com/afsc-gap-products/gap_products" # paste0(shell("git config --get remote.origin.url"))
+link_repo_web <- "https://afsc-gap-products.github.io/gap_products/"
+link_code_books <- "https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual"
+pretty_date <- format(Sys.Date(), "%B %d, %Y")
+licence0 <- "Software code created by U.S. Government employees is not subject to copyright in the United States (17 U.S.C. §105). The United States/Department of Commerce reserve all rights to seek and obtain copyright protection in countries other than the United States for Software authored in its entirety by the Department of Commerce. To this end, the Department of Commerce hereby grants to Recipient a royalty-free, nonexclusive license to use, copy, and create derivative works of the Software outside of the United States."
+NOAA.Fonts<-"Proxima Nova"
+
+# Color pallet -----------------------------------------------------------------
+
+NOAAFisheries.Colors<-list(
+  
+  Oceans = list(
+  "Process Blue" = "#0093D0", 
+  "Reflex Blue" = "#0055A4", #Nav Bar Hover
+  "PMS 541" = "#00467F", # Nav Bar
+  "White" = "#FFFFFF"
+  ), 
+  
+  Waves = list(
+  "PMS 319" = "#1ECAD3", 
+  "PMS 321" = "#008998", 
+  "PMS 322" = "#00708", 
+  "Gray 10%" = "#E8E8E8"
+  ),
+
+  Seagrass = list(
+  "PMS 375" = "#93D500", 
+  "PMS 362" = "#4C9C2E", 
+  "PMS 322" = "#007078", 
+  "Gray 20%" = "#D0D0D0"
+  ), 
+  
+  Urchin = list(
+  "Custom" = "#7F7FFF", 
+  "PMS 2725" = "#625BC4", 
+  "PMS 7670" = "#575195",
+  "Gray 40%" = "#9A9A9A"
+  ), 
+  
+  Crustacean = list(
+    "PMS 151" = "#FF8300", 
+    "PMS 717" = "#D65F00", 
+    "PMS 7670" = "#575195", 
+    "Gray 50%" = "#7B7B7B"
+  ), 
+  
+  Coral = list(
+    "Warm Red" = "#FF4438", 
+    "PMS 711" = "D02C2F", 
+    "PMS 1805" = "#B2292E", 
+    "Gray 70%" = "#646464"
+  ),
+  
+  "NOAA Colors" = list(
+  
+  #Primary Colors
+  "REFLEX BLUE" = "#0A4595", 
+  "PROCESS BLUE" = "#0099D8", 
+  "DARK SLATE GREY" = "#333333", 
+  "WHITE" = "#FFFFFF", 
+  
+  #Secondary Colors
+  "DARK GREY" = "#575757", 
+  "MEDIUM GREY" = "#666666",
+  "LIGHT GREY" = "#ACACAC",
+  "FADED BLUE" = "#6B84B4",
+  "RICH BLUE GREY" = "#28282A"
+  )
+
+)
+
 # Functions --------------------------------------------------------------------
+
+# https://stackoverflow.com/questions/37446283/creating-legend-with-circles-leaflet-r
+addLegendCustom <- function(map, position = "bottomright", title = "", colors, labels, sizes, opacity = 0.5){
+  colorAdditions <- paste0(colors, "; width:", sizes, "px; height:", sizes, "px")
+  labelAdditions <- paste0("<div style='display: inline-block;height: ", sizes, "px;margin-top: 4px;line-height: ", sizes, "px;'>", labels, "</div>")
+  
+  return(addLegend(map, position = position, title = title, colors = colorAdditions, labels = labelAdditions, opacity = opacity))
+}
+
 
 #' Wrapper function to produce daily or anomaly plots
 #' 
@@ -527,14 +700,8 @@ make_figure <- function(
                                       var_breaks[i-1],"\u2013",var_breaks[i]) # ,"\u00B0C" "\u00B0"
                       ))
     }
-    
-    if (virids_option == "H") {
-    var_color <- viridis::viridis_pal(option = virids_option)(length(var_labels))
-    } else {
     var_color <- viridis::viridis_pal(begin = 0.2, end = 0.9, option = virids_option)(length(var_labels))
     # var_color <- viridis::viridis_pal(begin = 0.2, end = 0.9, option = "B")(length(var_labels))
-    }
-    
     # bin var
     dat <- dat %>%
       dplyr::mutate(var_bin = base::cut(x = as.numeric(dat$var),
@@ -1131,10 +1298,10 @@ make_figure <- function(
     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
                       output_file = paste0(filename0, ".pdf"))
-
+    
     file.remove(list.files(path = paste0(dir_wd, "/code/"),
                            pattern = ".log", full.names = TRUE))
-
+    
     # # Quarto ---
     # quarto::quarto_render(  # render the quarto document
     #   input = paste0(dir_wd, "/code/template.qmd"),
@@ -1263,12 +1430,12 @@ make_figure <- function(
       dir_googledrive_upload_archive <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload))
       dir_googledrive_upload_archive <- dir_googledrive_upload_archive$id[grep(pattern = "archive", x = dir_googledrive_upload_archive$name)]
       for (iii in 1:length(filename1)) {
-          drive_upload(
-            media = filename1[iii],
-            path = googledrive::as_id(ifelse(grepl(pattern = "current", x = filename1[iii]), 
-                                             dir_googledrive_upload, # if a current file, put in the main folder
-                                             dir_googledrive_upload_archive)), # if the day-stamp file, put directly in the archive folder for safe keeping
-            overwrite = TRUE)          
+        drive_upload(
+          media = filename1[iii],
+          path = googledrive::as_id(ifelse(grepl(pattern = "current", x = filename1[iii]), 
+                                           dir_googledrive_upload, # if a current file, put in the main folder
+                                           dir_googledrive_upload_archive)), # if the day-stamp file, put directly in the archive folder for safe keeping
+          overwrite = TRUE)          
       }
     }
     
