@@ -354,7 +354,7 @@ make_varplot_wrapper <- function(
     if (!is.null(var)){
       if (var == "bt") {
         if (SRVY %in% c("BS", "EBS", "NBS")) {
-          var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
+          var_breaks <- c(-10, seq(from = -1, to = 8, by = 1), 50)
         } else if (SRVY %in% c("GOA")) {
           var_breaks <- c(-10, seq(from = 3, to = 10, by = 1), 50)
         } else if (SRVY %in% c("AI")) {
