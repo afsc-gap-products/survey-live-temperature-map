@@ -609,7 +609,7 @@ make_figure <- function(
     dat_plot <- dat    
     dat_planned <- NULL
     
-    if (as.character(dates0[1]) == "none") { # If you ARE NOT using any data from temp data
+    if (as.character(dates0[1]) == "none" & file_end == "grid") { # If you ARE NOT using any data from temp data
       
       max_date <- NA
       grid_stations_plot$var_bin <- NA  # only use dates including this date and before this date
@@ -624,16 +624,21 @@ make_figure <- function(
         next_date <- date_entered[i+1]
       }
       
+      if (file_end != "mean") {
       # only use dates including this date and before this date
-      dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
+        dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
+      }  
       grid_stations_plot <- grid_stations_plot %>% 
         dplyr::left_join(dat_plot)
-      grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
-      # only use dates including the next day before this date and before this date, so we can see the planned progression
-      dat_plot$vessel_shape[dat_plot$date>next_date]<-NA
-      dat_plot$date[dat_plot$date>next_date]<-NA
-      grid_stations_plot$vessel_shape[grid_stations_plot$date > next_date]<-NA
-      grid_stations_plot$date[grid_stations_plot$date > next_date]<-NA
+
+      if (file_end != "mean") {
+        grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
+        # only use dates including the next day before this date and before this date, so we can see the planned progression
+        dat_plot$vessel_shape[dat_plot$date>next_date]<-NA
+        dat_plot$date[dat_plot$date>next_date]<-NA
+        grid_stations_plot$vessel_shape[grid_stations_plot$date > next_date]<-NA
+        grid_stations_plot$date[grid_stations_plot$date > next_date]<-NA
+      }      
       
       # separate out the data for the temperature and planned stations if there are planned stations listed
       # if (show_planned_stations & 
@@ -827,6 +832,7 @@ make_figure <- function(
           ggplot2::geom_sf(data = grid_stations_plot, 
                            aes(fill = var_bin), 
                            colour = "grey50",
+                           # size = .5, 
                            show.legend = legend_title) +
           ggplot2::scale_fill_manual(
             name = legend_title,
