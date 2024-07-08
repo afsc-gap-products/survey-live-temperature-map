@@ -90,7 +90,7 @@ if (52 %in% survey_definition_id0) {
   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
   if(ftp_dl){ftp$dest <- dev_ai}
   
-  file_end0 = c("daily") # , "grid"
+  file_end0 = c("daily", "grid") # , "grid"
   
   make_varplot_wrapper(maxyr = maxyr, 
                        SRVY = SRVY,
@@ -119,7 +119,7 @@ if (98 %in% survey_definition_id0) {
   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
   if(ftp_dl){ftp$dest <- dev_bs}
   
-  file_end0 = c("daily", "anom") # , "grid", "mean", "anom"
+  file_end0 = c("daily", "anom", "grid", "mean") # , "grid", "mean", "anom"
   
   make_varplot_wrapper(maxyr = maxyr,
                        SRVY = SRVY,
