@@ -59,13 +59,13 @@ if (SRVY %in% c("AI", "GOA")) {
 }
 
 intro0 <- paste0(
-  "NOAA Fisheries AFSC Groundfish Assessment Program conducts the ", 
+  "NOAA Fisheries AFSC Groundfish Assessment Program is conducting the ", 
   text_list(surveys),
   " bottom trawl survey",
   ifelse(length(surveys)>1, "s", ""), ". ")
 
 intro_vess <- paste0(
-  "NOAA Fisheries AFSC Groundfish Assessment Program conducts the ", 
+  "NOAA Fisheries AFSC Groundfish Assessment Program is conducting the ", 
   text_list(surveys),
   " bottom trawl survey",
   ifelse(length(surveys)>1, "s", "")
