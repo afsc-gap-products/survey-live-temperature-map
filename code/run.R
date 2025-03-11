@@ -5,7 +5,7 @@
 #' 
 #' notes: 
 #' https://github.com/afsc-gap-products/survey-live-temperature-map
-#' AI/GOA station allocation docs can be found in (similar) G:\ALEUTIAN\AI 2024\Station Allocation
+#' AI/GOA station allocation docs can be found in (similar) G:/ALEUTIAN/AI 2024/Station Allocation
 #' ---------------------------
 
 # Set Working Directory --------------------------------------------------------
@@ -22,23 +22,29 @@ for (i in 1:length(locations)){
 # KNOWNS -----------------------------------------------------------------------
 
 istest <- FALSE
-maxyr <- 2024
-data_source <- "gd" # "gd" = google dirve, "oracle" 
+maxyr <- 2025
+data_source <- "oracle" # "gd" = google dirve, "oracle" 
 dates0 <-  "latest" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 if (format(Sys.Date(), format = "%A") %in% c("Sunday", "Thursday") & 
     format(Sys.time(), format = "%H") %in% 2) { # maintenance cycle - make another task scheduler for this 
   dates0 <- "all"
 }
 var <- "bt"
-survey_definition_id0 <- c(52, 98) # Survey ID. The survey definition ID key code uniquely identifies a survey/survey design. Integer code that uniquely identifies survey. Full list of survey definition IDs are in RACE_DATA.SURVEY_DEFINITIONS. IDs used in GAP_PRODUCTS are: 47 (Gulf of Alaska); 52 (Aleutian Islands); 78 (Bering Sea Slope); 98 (Eastern Bering Sea Shelf); 143 (Northern Bering Sea Shelf). The column "survey_definition_id" is associated with the "srvy" and "survey" columns. For a complete list of surveys, review the [code books](https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual).
 
-dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/16CJA6hKOcN1a3QNpSu3d2nTGmrmBeCdmmBCcQlLVqrE"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1sP34UMQiTQvci4U6PMOFcnlFI0vQ1BH9" # REAL LINK
-dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/1PK2nnSprqOYV12Ae80YE_avp3Qj5IKEL" # REAL LINK
+# Survey ID. The survey definition ID key code uniquely identifies a survey/survey design. 
+# Integer code that uniquely identifies survey. Full list of survey definition IDs are in RACE_DATA.SURVEY_DEFINITIONS. 
+# IDs used in GAP_PRODUCTS are: 47 (Gulf of Alaska); 52 (Aleutian Islands); 78 (Bering Sea Slope); 98 (Eastern Bering Sea Shelf); 143 (Northern Bering Sea Shelf). 
+# The column "survey_definition_id" is associated with the "srvy" and "survey" columns. 
+# For a complete list of surveys, review the [code books](https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual).
+survey_definition_id0 <- c(47, 98, 143) 
+
+dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/1-x7U1bCmYA-NghgRDpTdBbDNp5bBRHcn6f3Zs5HUzkk"
+dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1H4kfU4xd3_vWggxrLwnImE6ikg4ub0a7" # REAL LINK
+dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/10m709GkyPTofj37a3afQtZQGrzacXwb9" # REAL LINK
 
 if(istest) {
-  dir_googledrive_upload_ai = "https://drive.google.com/drive/folders/16Za6GFBGGg1YdwByF4gUqz_XU42IM4rA" # TEST LINK
-  dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/19Cy0gSn4TWcGymKeSNB8XIpwyEIzzw0m" # TEST LINK
+  dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1TjNRlpRUF-Nzx2LsZdWWFluMb8iUCRth" # TEST LINK
+  dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1WXmQXmUjNjzQm915GSyrKyrZVrRfsBfT" # TEST LINK
   dates0 <- "all"
 }
 print(dates0)
@@ -110,7 +116,7 @@ if (52 %in% survey_definition_id0) {
 
 ## EBS Maps --------------------------------------------------------------------
 if (98 %in% survey_definition_id0) { 
-
+  
   SRVY <- "EBS"; print(paste0("------------", SRVY, " Plots ------------"))
   plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
