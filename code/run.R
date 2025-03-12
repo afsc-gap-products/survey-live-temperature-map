@@ -11,7 +11,7 @@
 # Set Working Directory --------------------------------------------------------
 ## Actually we cant use the here package, here - it actually causes issues with 
 ## the tasks scheduler, which has no concept of a project root folder. 
-locations <- c("Z:/Projects/survey-live-temperature-map/")
+locations <- c("Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/")
 
 for (i in 1:length(locations)){
   if (file.exists(locations[i])) {
