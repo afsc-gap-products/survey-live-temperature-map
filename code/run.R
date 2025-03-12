@@ -85,48 +85,18 @@ if (ftp_dl) {
 
 # Map --------------------------------------------------------------------------
 
-## AI --------------------------------------------------------------------------
-if (52 %in% survey_definition_id0) { 
-  
-  SRVY <- "AI"; print(paste0("------------", SRVY, " Plots ------------"))
-  plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-  dir_googledrive_upload <- ifelse(exists(x = "dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_ai, NULL)
-  plot_anom <- FALSE
-  show_planned_stations <- FALSE
-  dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
-  if(ftp_dl){ftp$dest <- dev_ai}
-  
-  file_end0 = c("daily") # , "grid"
-  
-  make_varplot_wrapper(maxyr = maxyr, 
-                       SRVY = SRVY,
-                       dat_survey = dat_survey,
-                       var = var,
-                       dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = dates0,
-                       shp = shp,
-                       plot_subtitle = plot_subtitle,
-                       show_planned_stations = show_planned_stations,
-                       data_source = data_source,
-                       file_end0 = file_end0, 
-                       dir_wd = dir_wd, 
-                       dir_out = dir_out, 
-                       ftp = ftp)
-}
 
-## EBS Maps --------------------------------------------------------------------
-if (98 %in% survey_definition_id0) { 
-  
-  SRVY <- "EBS"; print(paste0("------------", SRVY, " Plots ------------"))
-  plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
-  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
-  show_planned_stations <- TRUE
-  plot_anom <- TRUE
-  dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
-  if(ftp_dl){ftp$dest <- dev_bs}
-  
-  file_end0 = c("daily", "anom") # , "grid", "mean", "anom"
-  
+## GOA --------------------------------------------------------------------------
+
+if ("GOA" %in% dat_survey$SRVY) {
+
+  SRVY <- "GOA"
+  plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
+  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_goa, NULL)
+  show_planned_stations <- FALSE
+  shp <- shp_goa
+  if(ftp_dl){ftp$dest <- dev_goa}
+
   make_varplot_wrapper(maxyr = maxyr,
                        SRVY = SRVY,
                        dat_survey = dat_survey,
@@ -137,22 +107,50 @@ if (98 %in% survey_definition_id0) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = file_end0, 
-                       dir_wd = dir_wd, 
-                       dir_out = dir_out, 
+                       file_end0 = c("daily"),
+                       dir_wd = dir_wd)
+}
+
+## NBS + EBS Maps --------------------------------------------------------------
+
+if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
+
+  SRVY <- "BS"
+  plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
+  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
+  show_planned_stations <- TRUE
+  plot_anom <- TRUE
+  shp <- shp_bs
+  if(ftp_dl){ftp$dest <- dev_bs}
+
+  make_varplot_wrapper(maxyr = maxyr,
+                       SRVY = SRVY,
+                       dat_survey = dat_survey,
+                       var = var,
+                       dir_googledrive_upload = dir_googledrive_upload,
+                       dates0 = dates0,
+                       shp = shp,
+                       plot_subtitle = plot_subtitle,
+                       show_planned_stations = show_planned_stations,
+                       data_source = data_source,
+                       file_end0 = c("daily", "anom"),
+                       dir_wd = dir_wd,
                        ftp = ftp)
 }
 
-### GOA --------------------------------------------------------------------------
-# 
-# if ("GOA" %in% dat_survey$SRVY) {
+
+## AI --------------------------------------------------------------------------
+# if (52 %in% survey_definition_id0) { 
 #   
-#   SRVY <- "GOA"
-#   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
-#   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_goa, NULL)
+#   SRVY <- "AI"; print(paste0("------------", SRVY, " Plots ------------"))
+#   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
+#   dir_googledrive_upload <- ifelse(exists(x = "dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_ai, NULL)
+#   plot_anom <- FALSE
 #   show_planned_stations <- FALSE
-#   shp <- shp_goa
-#   if(ftp_dl){ftp$dest <- dev_goa}
+#   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
+#   if(ftp_dl){ftp$dest <- dev_ai}
+#   
+#   file_end0 = c("daily") # , "grid"
 #   
 #   make_varplot_wrapper(maxyr = maxyr, 
 #                        SRVY = SRVY,
@@ -164,21 +162,24 @@ if (98 %in% survey_definition_id0) {
 #                        plot_subtitle = plot_subtitle,
 #                        show_planned_stations = show_planned_stations,
 #                        data_source = data_source,
-#                        file_end0 = c("daily"),
-#                        dir_wd = dir_wd)
+#                        file_end0 = file_end0, 
+#                        dir_wd = dir_wd, 
+#                        dir_out = dir_out, 
+#                        ftp = ftp)
 # }
-# 
-### NBS + EBS Maps --------------------------------------------------------------
-# 
-# if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
+
+# ## EBS Maps --------------------------------------------------------------------
+# if (98 %in% survey_definition_id0) { 
 #   
-#   SRVY <- "BS"
-#   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
+#   SRVY <- "EBS"; print(paste0("------------", SRVY, " Plots ------------"))
+#   plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
 #   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
 #   show_planned_stations <- TRUE
 #   plot_anom <- TRUE
-#   shp <- shp_bs
+#   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
 #   if(ftp_dl){ftp$dest <- dev_bs}
+#   
+#   file_end0 = c("daily", "anom") # , "grid", "mean", "anom"
 #   
 #   make_varplot_wrapper(maxyr = maxyr,
 #                        SRVY = SRVY,
@@ -190,10 +191,12 @@ if (98 %in% survey_definition_id0) {
 #                        plot_subtitle = plot_subtitle,
 #                        show_planned_stations = show_planned_stations,
 #                        data_source = data_source,
-#                        file_end0 = c("daily", "anom"), 
+#                        file_end0 = file_end0, 
 #                        dir_wd = dir_wd, 
+#                        dir_out = dir_out, 
 #                        ftp = ftp)
 # }
+
 
 # Log --------------------------------------------------------------------------
 # if(!istest) {

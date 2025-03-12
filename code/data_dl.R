@@ -1,7 +1,62 @@
 
-# Download oracle data ----------------------------------------------------------
 
-# Connect to oracle ------------------------------------------------------------
+# Dowload FOSS data ------------------------------------------------------------
+
+# adatapted from https://afsc-gap-products.github.io/gap_products/content/foss-api-r.html#haul-data
+# September 26, 2024 by Emily Markowitz
+
+library(httr)
+library(jsonlite)
+print("FOSS haul data")
+
+dat <- data.frame()
+for (i in seq(0, 500000, 10000)){
+  print(i)
+  ## query the API link
+  res <- httr::GET(url = paste0('https://apps-st.fisheries.noaa.gov/ods/foss/afsc_groundfish_survey_haul/',
+                                "?offset=",i,"&limit=10000"))
+  ## convert from JSON format
+  data <- jsonlite::fromJSON(base::rawToChar(res$content))
+  
+  ## if there are no data, stop the loop
+  if (is.null(nrow(data$items))) {
+    break
+  }
+  
+  ## bind sub-pull to dat data.frame
+  dat <- dplyr::bind_rows(dat,
+                          data$items %>%
+                            dplyr::select(-links)) # necessary for API accounting, but not part of the dataset)
+}
+foss_haul <- dat %>%
+  dplyr::mutate(date_time = as.POSIXct(date_time,
+                                       format = "%Y-%m-%dT%H:%M:%S",
+                                       tz = Sys.timezone()), 
+                data_type = "offical", 
+                date = format(x = min(date_time, na.rm = TRUE), format = "%Y-%m-%d"), 
+                vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
+                vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
+                vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))) %>% 
+  dplyr::select(year, SRVY = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin, 
+                # date_start, date_end, survey_dates, 
+                station, stratum, date_time_start = date_time, 
+                latitude_dd_start, longitude_dd_start,
+                st = surface_temperature_c, bt = bottom_temperature_c, 
+                vessel_id, vessel_name, 
+  data_type, vessel_shape, vessel_ital, date)
+
+foss_haul <- foss_haul %>% 
+  dplyr::left_join(
+    foss_haul %>% 
+      dplyr::group_by(survey_definition_id, year) %>% 
+      dplyr::summarise(date_start = format(x = min(date_time_start, na.rm = TRUE), format = "%B %d"), 
+                       date_end = format(x = max(date_time_start, na.rm = TRUE), format = "%B %d"), 
+                       survey_dates = paste0(date_start, " - ", date_end))    
+  )
+
+save(foss_haul, file = here::here("data", "foss_haul.rdata"))
+
+# Download oracle data ----------------------------------------------------------
 
 PKG <- c("magrittr", "readr", "dplyr")
 
@@ -11,6 +66,7 @@ for (p in PKG) {
     require(p,character.only = TRUE)}
 }
 
+### Connect to oracle
 if (file.exists("Z:/Projects/ConnectToOracle.R")) {
   source("Z:/Projects/ConnectToOracle.R")
   channel <- channel
@@ -31,27 +87,12 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
                          believeNRows = FALSE)
 }
 
-# locations <- c(
-#   "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL", 
-#   "RACE_DATA.V_CRUISES", 
-#   "GOA.GOA_STRATA"
-# )
-
 locations<-c(
-  "GAP_PRODUCTS.AKFIN_CRUISE",
-  "GAP_PRODUCTS.AKFIN_HAUL",
+  # "GAP_PRODUCTS.AKFIN_CRUISE",
+  # "GAP_PRODUCTS.AKFIN_HAUL",
   "GAP_PRODUCTS.AKFIN_AREA",
   "GAP_PRODUCTS.AKFIN_STRATUM_GROUPS", 
   "RACE_DATA.CRUISES" # needed for survey start and end dates
-  
-
-  # "AI.AIGRID_GIS",
-  # "GOA.GOA_STRATA",
-  # # "RACE_DATA.VESSELS", 
-  # "RACE_DATA.V_CRUISES",
-  # # "RACEBASE.HAUL", 
-  # # "RACE_DATA.V_CRUISES"
-  # "RACEBASE_FOSS.JOIN_FOSS_CPUE_HAUL"
 )
 
 error_loading <- c()
@@ -76,13 +117,19 @@ for (i in 1:length(locations)){
   if (is.null(nrow(a))) { # if (sum(grepl(pattern = "SQLExecDirect ", x = a))>1) {
     error_loading <- c(error_loading, locations[i])
   } else {
+    b <- paste0(tolower(gsub(pattern = '.', 
+                             replacement = "_", 
+                             x = locations[i], 
+                             fixed = TRUE)),
+                ".csv")
     write.csv(x = a, 
-              here::here("data",
-                         paste0(tolower(gsub(pattern = '.', 
-                                             replacement = "_", 
-                                             x = locations[i], 
-                                             fixed = TRUE)),
-                                ".csv")))
+              here::here("data", b))
+    
+    names(a) <- tolower(names(a))
+    assign(x = gsub(x = paste0(b, "0"),
+      pattern = ifelse(grepl(pattern = ".csv", x = b, fixed = TRUE), ".csv", ".xlsx"), 
+      replacement = ""), 
+      value = a)
   }
   remove(a)
 }
@@ -90,15 +137,11 @@ error_loading
 
 # Load shape files -------------------------------------------------------------
 
-# crs.out <- shp_bs$survey_area$crs$input
-
 shp_bs <- akgfmaps::get_base_layers(select.region = "bs.all", set.crs = "auto")
 shp_ebs <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = "auto")
 shp_nbs <- akgfmaps::get_base_layers(select.region = "bs.north", set.crs = "auto")
 shp_ai <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
-shp_ai$survey.strata$Stratum <- shp_ai$survey.strata$STRATUM
 shp_goa <- akgfmaps::get_base_layers(select.region = "goa", set.crs = "auto")
-shp_goa$survey.strata$Stratum <- shp_goa$survey.strata$STRATUM
 shp_bss <- akgfmaps::get_base_layers(select.region = "ebs.slope", set.crs = "auto")
 
 aa <- gap_products_akfin_area0 %>% 
@@ -110,19 +153,11 @@ areas <- gap_products_akfin_area0  %>%
   # find the most up to date design_year's
   dplyr::filter(eval(parse(text=paste0("(survey_definition_id == ", aa$survey_definition_id, 
                                        " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) %>%
-  # dplyr::filter((survey_definition_id %in% c(52, 47) & area_type %in% c("INPFC", "STRATUM")) | 
-  #                 (survey_definition_id %in% c(143, 98, 78) & area_type == "STRATUM")) %>% 
   dplyr::filter(area_type %in% c("STRATUM", "INPFC")) %>% 
-  dplyr::mutate(#area_name = stringr::str_to_title(inpfc_area),
+  dplyr::mutate(
     area_name = dplyr::case_when(
       area_name %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-      TRUE ~ area_name)#, 
-    # SRVY = dplyr::case_when(
-    #   survey_definition_id == 98 ~ "EBS", 
-    #   survey_definition_id == 143 ~ "NBS", 
-    #   survey_definition_id == 78 ~ "BSS",
-    #   survey_definition_id == 47 ~ "GOA", 
-    #   survey_definition_id == 52 ~ "AI")
+      TRUE ~ area_name)
   ) %>% 
   dplyr::select(survey_definition_id, area_id, area_type, area_name) 
 
@@ -157,6 +192,7 @@ shp_all <- shp <- list(
       SURVEY_DEFINITION_ID == 47 ~ "GOA" 
     )) %>% 
     janitor::clean_names() %>%
+    dplyr::mutate(area_id = stratum) %>% 
     dplyr::left_join(y = areas, relationship = "many-to-many"), 
   
   # Regions
@@ -184,14 +220,14 @@ shp_all <- shp <- list(
     shp_ai$survey.grid,
     shp_goa$survey.grid)
   ) %>%
-  janitor::clean_names()  %>%
-  dplyr::mutate(SRVY = dplyr::case_when(
-    survey_definition_id == 98 ~ "EBS", 
-    survey_definition_id == 143 ~ "NBS", 
-    survey_definition_id == 78 ~ "BSS", 
-    survey_definition_id == 52 ~ "AI", 
-    survey_definition_id == 47 ~ "GOA" 
-  )), 
+    janitor::clean_names()  %>%
+    dplyr::mutate(SRVY = dplyr::case_when(
+      survey_definition_id == 98 ~ "EBS", 
+      survey_definition_id == 143 ~ "NBS", 
+      survey_definition_id == 78 ~ "BSS", 
+      survey_definition_id == 52 ~ "AI", 
+      survey_definition_id == 47 ~ "GOA" 
+    )), 
   
   # lon.breaks
   lon.breaks = list(

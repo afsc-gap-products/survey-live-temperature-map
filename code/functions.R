@@ -152,57 +152,10 @@ make_varplot_wrapper <- function(
                   vessel_shape, var = dplyr::all_of(var), 
                   survey_dates, survey, vessel_name, data_type)
   
-  # if (nrow(dat) == 0) {
-  #   
-  #   dat <- dplyr::left_join(
-  #     x = dat_anom,
-  #     y = dat_survey %>%
-  #       dplyr::select(SRVY, survey_dates, survey) %>%
-  #       dplyr::distinct(),
-  #     multiple = "all",
-  #     by = "SRVY") %>%
-  #     dplyr::mutate(var0 = 0,
-  #                   date = as.Date(paste0(maxyr, "-01-01")),
-  #                   vessel_id = "",
-  #                   vessel_shape = "",
-  #                   vessel_name = "")
-  #   # } else {
-  #   
-  #   # if (show_planned_stations) {
-  #   # temp <- data.frame(matrix(data = NA,
-  #   #                           ncol = ncol(dat0),
-  #   #                           nrow = nrow(dat_survey)))    
-  #   # names(temp) <- names(dat)
-  #   # temp <- temp %>% 
-  #   #   dplyr::mutate(
-  #   #     SRVY = dat_survey$SRVY,
-  #   #     stratum = 0,
-  #   #     station = "0",
-  #   #     var0 = NA,
-  #   #     survey = dat_survey$survey, 
-  #   #     survey_dates  = dat_survey$survey_dates, 
-  #   #     date = (min(as.Date(dat$date), na.rm = TRUE)-1),
-  #   #     vessel_name = dat_survey$vessel_name,
-  #   #     vessel_shape = dat_survey$vessel_shape)
-  #   # 
-  #   # dat0 <- dplyr::bind_rows(
-  #   # temp,
-  #   # dat0 %>%
-  #   #   dplyr::mutate(
-  #   #     SRVY = as.character(SRVY),
-  #   #     stratum = as.numeric(stratum),
-  #   #     station = as.character(station),
-  #   #     var0 = as.numeric(var0),
-  #   #     date = date,
-  #   #     vessel_name = as.character(vessel_name), 
-  #   #     vessel_shape = as.character(vessel_shape)) )
-  # }
-  
   dat <- dplyr::left_join(
     x = dat,
     y = dat_anom,
     by = c("SRVY", "stratum", "station"))
-  # }
   
   dat <- dat %>%
     dplyr::mutate(reg_lab = paste0(survey, "\n(", survey_dates, ")"), 
