@@ -28,33 +28,35 @@ for (i in seq(0, 500000, 10000)){
                           data$items %>%
                             dplyr::select(-links)) # necessary for API accounting, but not part of the dataset)
 }
-foss_haul <- dat %>%
+dat_foss <- dat %>%
   dplyr::mutate(date_time = as.POSIXct(date_time,
                                        format = "%Y-%m-%dT%H:%M:%S",
                                        tz = Sys.timezone()), 
-                data_type = "offical", 
-                date = format(x = min(date_time, na.rm = TRUE), format = "%Y-%m-%d"), 
-                vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
-                vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
-                vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))) %>% 
-  dplyr::select(year, SRVY = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin, 
+                source = "offical", 
+                date = format(x = min(date_time, na.rm = TRUE), format = "%Y-%m-%d") # , 
+                # vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
+                # vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
+                # vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))
+                ) %>% 
+  dplyr::select(year, srvy = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin, 
                 # date_start, date_end, survey_dates, 
                 station, stratum, date_time_start = date_time, 
                 latitude_dd_start, longitude_dd_start,
                 st = surface_temperature_c, bt = bottom_temperature_c, 
-                vessel_id, vessel_name, 
-  data_type, vessel_shape, vessel_ital, date)
+                vessel_id, vessel_name, #vessel_shape, vessel_ital, 
+  source, date)
 
-foss_haul <- foss_haul %>% 
+dat_foss <- dat_foss %>% 
   dplyr::left_join(
-    foss_haul %>% 
+    dat_foss %>% 
       dplyr::group_by(survey_definition_id, year) %>% 
       dplyr::summarise(date_start = format(x = min(date_time_start, na.rm = TRUE), format = "%B %d"), 
                        date_end = format(x = max(date_time_start, na.rm = TRUE), format = "%B %d"), 
                        survey_dates = paste0(date_start, " - ", date_end))    
   )
 
-save(foss_haul, file = here::here("data", "foss_haul.rdata"))
+# save(dat_foss, file = here::here("data", "dat_foss.rdata"))
+write.csv(x = dat_foss, file = here::here("data", "dat_foss.csv"))
 
 # Download oracle data ----------------------------------------------------------
 
@@ -91,8 +93,8 @@ locations<-c(
   # "GAP_PRODUCTS.AKFIN_CRUISE",
   # "GAP_PRODUCTS.AKFIN_HAUL",
   "GAP_PRODUCTS.AKFIN_AREA",
-  "GAP_PRODUCTS.AKFIN_STRATUM_GROUPS", 
-  "RACE_DATA.CRUISES" # needed for survey start and end dates
+  "GAP_PRODUCTS.AKFIN_STRATUM_GROUPS"#, 
+  # "RACE_DATA.CRUISES" # needed for survey start and end dates
 )
 
 error_loading <- c()
@@ -134,6 +136,17 @@ for (i in 1:length(locations)){
   remove(a)
 }
 error_loading
+
+
+race_data_cruises0 <- 
+  RODBC::sqlQuery(channel, "SELECT * FROM RACE_DATA.CRUISES;")  %>% 
+  dplyr::left_join(
+    RODBC::sqlQuery(channel, "SELECT SURVEY_ID, SURVEY_DEFINITION_ID FROM RACE_DATA.SURVEYS;") )  %>% 
+  dplyr::left_join(
+    RODBC::sqlQuery(channel, "SELECT VESSEL_ID, NAME AS VESSEL_NAME FROM RACE_DATA.VESSELS;") )  %>% 
+      janitor::clean_names()
+
+write.csv(x = race_data_cruises0, file = here::here("data", "race_data_cruises_mod.csv"))
 
 # Load shape files -------------------------------------------------------------
 
@@ -178,13 +191,21 @@ areas <- dplyr::bind_rows(
 shp_all <- shp <- list(
   # Stratum
   survey.strata = dplyr::bind_rows(list(
-    shp_bs$survey.strata,
+    # shp_bs$survey.strata,
     shp_ebs$survey.strata,
     shp_nbs$survey.strata,
     shp_ai$survey.strata,
-    shp_goa$survey.strata,
+    shp_goa$survey.strata %>% 
+      dplyr::mutate(
+      area_name = dplyr::case_when( 
+        STRATUM %in% c(211, 15, 14, 113, 511) ~ "Shumagin",
+        STRATUM %in% c(123, 24, 521, 222, 23, 321) ~ "Chirikof",
+        STRATUM %in% c(36, 136, 105, 37, 38, 531, 135) ~ "Kodiak",
+        STRATUM %in% c(43, 541, 242, 42, 144, 145) ~ "Yakutat",
+        STRATUM %in% c(51, 551, 152, 352, 253, 252) ~ "Southeastern"
+      )),
     shp_bss$survey.strata)) %>%
-    dplyr::mutate(SRVY = dplyr::case_when(
+    dplyr::mutate(srvy = dplyr::case_when(
       SURVEY_DEFINITION_ID == 98 ~ "EBS", 
       SURVEY_DEFINITION_ID == 143 ~ "NBS", 
       SURVEY_DEFINITION_ID == 78 ~ "BSS", 
@@ -197,14 +218,14 @@ shp_all <- shp <- list(
   
   # Regions
   survey.area = dplyr::bind_rows(list(
-    shp_bs$survey.area,
+    # shp_bs$survey.area,
     shp_ebs$survey.area,
     shp_nbs$survey.area,
     shp_ai$survey.area,
     shp_goa$survey.area,
     shp_bss$survey.area)) %>%
     janitor::clean_names()  %>%
-    dplyr::mutate(SRVY = dplyr::case_when(
+    dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
       survey_definition_id == 78 ~ "BSS", 
@@ -214,14 +235,18 @@ shp_all <- shp <- list(
   
   # Stations
   survey.grid = dplyr::bind_rows(list(
-    shp_bs$survey.grid, 
-    shp_ebs$survey.grid,
-    shp_nbs$survey.grid,
-    shp_ai$survey.grid,
-    shp_goa$survey.grid)
-  ) %>%
+    # shp_bs$survey.grid, 
+    shp_ebs$survey.grid %>% 
+      dplyr::mutate(survey_definition_id = 98),
+    shp_nbs$survey.grid %>% 
+      dplyr::mutate(survey_definition_id = 143),
+    shp_ai$survey.grid %>% 
+      dplyr::mutate(survey_definition_id = 52),
+    shp_goa$survey.grid %>% 
+      dplyr::mutate(survey_definition_id = 47)
+  )) %>%
     janitor::clean_names()  %>%
-    dplyr::mutate(SRVY = dplyr::case_when(
+    dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
       survey_definition_id == 78 ~ "BSS", 
@@ -252,26 +277,26 @@ shp_all <- shp <- list(
   # bathymetry
   bathymetry = dplyr::bind_rows(list(
     shp_bs$bathymetry %>% 
-      dplyr::mutate(SRVY = "BS"),
+      dplyr::mutate(srvy = "BS"),
     shp_ebs$bathymetry %>% 
-      dplyr::mutate(SRVY = "EBS"),
+      dplyr::mutate(srvy = "EBS"),
     shp_nbs$bathymetry %>% 
-      dplyr::mutate(SRVY = "NBS"),
+      dplyr::mutate(srvy = "NBS"),
     shp_bss$bathymetry %>% 
-      dplyr::mutate(SRVY = "BSS"),
+      dplyr::mutate(srvy = "BSS"),
     shp_goa$bathymetry %>% 
-      dplyr::mutate(SRVY = "GOA"),
+      dplyr::mutate(srvy = "GOA"),
     shp_ai$bathymetry %>% 
-      dplyr::mutate(SRVY = "AI")
+      dplyr::mutate(srvy = "AI")
   ))  %>%
     janitor::clean_names() %>% 
-    dplyr::select(geometry, SRVY = srvy, meters) %>%
+    dplyr::select(geometry, srvy = srvy, meters) %>%
     dplyr::mutate(survey_definition_id = dplyr::case_when(
-      SRVY == "EBS" ~ 98, 
-      SRVY == "NBS" ~ 143, 
-      SRVY == "BSS" ~ 78, 
-      SRVY == "AI" ~ 52, 
-      SRVY == "GOA" ~ 47 
+      srvy == "EBS" ~ 98, 
+      srvy == "NBS" ~ 143, 
+      srvy == "BSS" ~ 78, 
+      srvy == "AI" ~ 52, 
+      srvy == "GOA" ~ 47 
     )),
   
   # place labels
@@ -280,7 +305,7 @@ shp_all <- shp <- list(
                lab = c("50 m", "100 m", "200 m"), 
                x = c(-168.122, -172.736, -174.714527), 
                y = c(58.527, 58.2857, 58.504532), 
-               SRVY = "BS") %>%
+               srvy = "BS") %>%
       sf::st_as_sf(coords = c("x", "y"), 
                    remove = FALSE,  
                    crs = "+proj=longlat") %>%
@@ -289,7 +314,7 @@ shp_all <- shp <- list(
                lab = c("50 m", "100 m", "200 m"), 
                x = c(-168, -172.5, -174.714527), 
                y = c(58.527, 58.2857, 58.504532), 
-               SRVY = "EBS") %>%
+               srvy = "EBS") %>%
       sf::st_as_sf(coords = c("x", "y"), 
                    remove = FALSE,  
                    crs = "+proj=longlat") %>%

@@ -58,7 +58,7 @@ for (i in 1:length(files)) {
 
 df.ls<-list()
 
-SRVY1 <- toupper(unique(sub("^([[:alpha:]]*).*", "\\1", files)))
+srvy1 <- toupper(unique(sub("^([[:alpha:]]*).*", "\\1", files)))
 a<-list.files(path = here::here("data", "publicdata"), 
               full.names = TRUE, 
               pattern = ".csv")

@@ -33,9 +33,9 @@ for (i in 1:length(a)){
 ## Cruise data -----------------------------------------------------------------
 
 dat_survey <- 
-  dplyr::right_join( # get SRVY
+  dplyr::right_join( # get srvy
     x = racebase_foss_join_foss_cpue_haul0 %>% 
-      dplyr::select(SRVY = srvy, survey_definition_id, year, vessel_id) %>% 
+      dplyr::select(srvy = srvy, survey_definition_id, year, vessel_id) %>% 
       dplyr::distinct(),
     y = race_data_v_cruises0 %>% 
       dplyr::select(year, cruise_id, cruise, vessel_id, start_date, end_date, survey_definition_id, vessel_name) %>% 
@@ -46,26 +46,26 @@ dat_survey <-
     vessel_shape = as.factor(substr(x = vessel_name, start = 1, stop = 1)), 
     vessel_ital = paste0("F/V *", stringr::str_to_title(vessel_name), "*"), 
     vessel_name = paste0("F/V ", stringr::str_to_title(vessel_name)),
-    SRVY = dplyr::case_when(
+    srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
       survey_definition_id == 47 ~ "GOA", 
       survey_definition_id == 52 ~ "AI"), 
     survey_long = dplyr::case_when(
-      SRVY == "EBS" ~ "Eastern Bering Sea", 
-      SRVY == "NBS" ~ "Northern Bering Sea", 
-      SRVY == "GOA" ~ "Gulf of Alaska", 
-      SRVY == "AI" ~ "Aleutian Islands"), 
+      srvy == "EBS" ~ "Eastern Bering Sea", 
+      srvy == "NBS" ~ "Northern Bering Sea", 
+      srvy == "GOA" ~ "Gulf of Alaska", 
+      srvy == "AI" ~ "Aleutian Islands"), 
     survey_dates = paste0(
       format(x = min(as.Date(start_date), na.rm = TRUE), "%b %d"),
       " - ", 
       format(x = max(as.Date(end_date), na.rm = TRUE), "%b %d"))) %>% 
-  dplyr::select(year, SRVY, cruise_id, cruise, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey_long) %>% 
+  dplyr::select(year, srvy, cruise_id, cruise, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey_long) %>% 
   dplyr::distinct()
 
 # > dat_survey
 # # A tibble: 742 × 9
-# year SRVY  cruise_id survey_dates       vessel_id vessel_shape vessel_name            vessel_ital              survey_long
+# year srvy  cruise_id survey_dates       vessel_id vessel_shape vessel_name            vessel_ital              survey_long
 # <dbl> <chr>     <dbl> <chr>               <dbl> <fct>        <chr>                  <chr>                    <chr>      
 #   1  2023 GOA         765 Mar 10 - Aug 24       148 O            F/V Ocean Explorer     F/V *Ocean Explorer*     Gulf of Al…
 # 2  2023 GOA         766 Mar 10 - Aug 24       176 A            F/V Alaska Provider    F/V *Alaska Provider*    Gulf of Al…
@@ -131,17 +131,17 @@ FROM RACE_DATA.EDIT_HAULS;")),
     janitor::clean_names() %>% 
     dplyr::left_join(
       y = dat_survey %>% 
-        dplyr::select(cruise_id, SRVY, vessel_id), 
+        dplyr::select(cruise_id, srvy, vessel_id), 
       by = "cruise_id")
   
   temp0 <- temperature_raw %>% 
-    dplyr::filter(SRVY %in% c("GOA")) %>% 
+    dplyr::filter(srvy %in% c("GOA")) %>% 
     unique()
   temp1 <- # add this year's allocated stations
     readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                       sheet = "2023_GOA", 
                       skip = 1) %>%
-    dplyr::select(SRVY, station, stratum) %>% 
+    dplyr::select(srvy, station, stratum) %>% 
     dplyr::filter(!(paste0(stratum, "-", station) %in% paste0(temp0$stratum, "-", temp0$station))) %>%
     unique() 
   
@@ -149,13 +149,13 @@ FROM RACE_DATA.EDIT_HAULS;")),
     readxl::read_xlsx(path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"), 
                       sheet = "2023_BS", 
                       skip = 1) %>%
-    dplyr::select(SRVY, station, stratum) %>%
+    dplyr::select(srvy, station, stratum) %>%
     unique()  %>% 
-    dplyr::filter(!(station %in% temperature_raw$station[temperature_raw$SRVY %in% c("NBS", "EBS")])) # %>% 
+    dplyr::filter(!(station %in% temperature_raw$station[temperature_raw$srvy %in% c("NBS", "EBS")])) # %>% 
     # dplyr::left_join(y = dat_survey %>% 
     #                    dplyr::filter(year == date_max &
-    #                                    SRVY %in% c("NBS", "EBS")) %>% 
-    #                    dplyr::select(SRVY))
+    #                                    srvy %in% c("NBS", "EBS")) %>% 
+    #                    dplyr::select(srvy))
   
   temperature_raw <- temperature_raw %>% 
     dplyr::bind_rows(temp1) %>% 
@@ -167,7 +167,7 @@ FROM RACE_DATA.EDIT_HAULS;")),
       year = date_max,
       latitude_dd_start = latitude_dd_start/100, 
                   longitude_dd_start = longitude_dd_start/100, 
-                  data_type = "raw") %>% 
+                  source = "raw") %>% 
     dplyr::select(-haul_id) 
 
 } else {
@@ -177,35 +177,35 @@ FROM RACE_DATA.EDIT_HAULS;")),
 ## Combined Previous and New haul data --------------------------------------------------------------------
 
 dat <- haul <- racebase_foss_join_foss_cpue_haul0 %>% 
-  dplyr::rename(SRVY = srvy, 
+  dplyr::rename(srvy = srvy, 
                 date = date_time) %>%
   dplyr::left_join(x = ., # get cruise_id
                    y = dat_survey %>%
-                     dplyr::select(SRVY, year, cruise, cruise_id, vessel_id)) %>%
+                     dplyr::select(srvy, year, cruise, cruise_id, vessel_id)) %>%
   dplyr::filter(
     !(is.na(station)) &
       !is.na(surface_temperature_c) &
       !is.na(bottom_temperature_c)) %>% 
-  dplyr::mutate(data_type = "offical") %>% 
+  dplyr::mutate(source = "offical") %>% 
   dplyr::filter( 
     # there shouldn't be bottom temps of 0 in the AI or GOA
-    ((SRVY %in% c("AI", "GOA") & surface_temperature_c != 0) | (SRVY %in% c("EBS", "NBS"))) & 
-      ((SRVY %in% c("AI", "GOA") & bottom_temperature_c != 0) | (SRVY %in% c("EBS", "NBS")))) %>% 
+    ((srvy %in% c("AI", "GOA") & surface_temperature_c != 0) | (srvy %in% c("EBS", "NBS"))) & 
+      ((srvy %in% c("AI", "GOA") & bottom_temperature_c != 0) | (srvy %in% c("EBS", "NBS")))) %>% 
   # dplyr::select(list(names(temperature_raw)))
   dplyr::bind_rows(temperature_raw) %>% # incorporate new data
 
   dplyr::mutate(date = as.Date(format(date, format = "%Y-%m-%d"))) %>%
   dplyr::select(
-    SRVY, year, stratum, station, date, data_type, cruise_id, 
+    srvy, year, stratum, station, date, source, cruise_id, 
     vessel_id, 
     st = surface_temperature_c,
     bt = bottom_temperature_c,
     latitude = latitude_dd_start,
     longitude = longitude_dd_start ) %>%
-  dplyr::left_join( # get SRVY info
+  dplyr::left_join( # get srvy info
     x = ., 
     y = dat_survey %>% 
-      dplyr::select(SRVY, survey_long, survey_dates) %>% 
+      dplyr::select(srvy, survey_long, survey_dates) %>% 
       unique()) %>%
   dplyr::left_join( # get vessel info
     x = ., 
@@ -218,7 +218,7 @@ dat <- haul <- racebase_foss_join_foss_cpue_haul0 %>%
 # load(file = here::here("data", "shp.rdata"))
 # shp_vess <- dplyr::left_join(
 #   dat %>% 
-#     dplyr::select(SRVY, year, date, station, stratum, vessel_id, vessel_shape, vessel_name, vessel_name), 
+#     dplyr::select(srvy, year, date, station, stratum, vessel_id, vessel_shape, vessel_name, vessel_name), 
 #   shp_stn)
 
 
@@ -238,19 +238,19 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 survey_area$survey.area <- survey_area$survey.area %>% 
-  dplyr::mutate(SRVY = ifelse(SURVEY == "EBS_SHELF", "EBS", "NBS"))
+  dplyr::mutate(srvy = ifelse(SURVEY == "EBS_SHELF", "EBS", "NBS"))
 shp_bs <- survey_area
 
 # ## EBS  ------------------------------------------------------------------------
 # survey_area <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = "auto")
 # survey_area$survey.area <- shp_bs$survey.area %>% 
-#   dplyr::filter(SRVY == "EBS")
+#   dplyr::filter(srvy == "EBS")
 # shp_ebs <- survey_area
 # 
 # ## NBS  ------------------------------------------------------------------------
 # survey_area <- akgfmaps::get_base_layers(select.region = "bs.north", set.crs = "auto")
 # survey_area$survey.area <- shp_bs$survey.area %>% 
-#   dplyr::filter(SRVY == "NBS")
+#   dplyr::filter(srvy == "NBS")
 # shp_nbs <- survey_area
 
 ## AI  ------------------------------------------------------------------------
@@ -262,19 +262,19 @@ survey_area$survey.grid <-
                     stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "AI") %>%
-      dplyr::mutate(SRVY = "AI",
+      dplyr::mutate(srvy = "AI",
                     region = stringr::str_to_title(inpfc_area),
                     region = dplyr::case_when(
                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
                       TRUE ~ region)) %>%
-      dplyr::select(SRVY, stratum, region) %>%
+      dplyr::select(srvy, stratum, region) %>%
       dplyr::distinct(),
     by = "stratum")  %>%
   dplyr::arrange(region) %>%
   dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>%
   dplyr::mutate(SURVEY = "AI",
-                SRVY = "AI")
+                srvy = "AI")
 shp_ai <- survey_area
 
 ## GOA  ------------------------------------------------------------------------
@@ -287,16 +287,16 @@ survey_area$survey.grid <-
                     stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "GOA") %>%
-      dplyr::mutate(SRVY = "GOA",
+      dplyr::mutate(srvy = "GOA",
                     region = stringr::str_to_title(inpfc_area) ) %>%
-      dplyr::select(SRVY, stratum, region) %>%
+      dplyr::select(srvy, stratum, region) %>%
       dplyr::distinct(),
     by = "stratum")  %>% 
   dplyr::arrange(region) %>% 
   dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>% 
   dplyr::mutate(SURVEY = "GOA", 
-                SRVY = "GOA")
+                srvy = "GOA")
 shp_goa <- survey_area
 
 
@@ -313,5 +313,5 @@ survey_area <- akgfmaps::get_base_layers(select.region = "ebs.slope", set.crs = 
 #                    by = "station") %>% 
 #   dplyr::mutate(region = "Bering Sea")
 survey_area$survey.area <- survey_area$survey.area %>% 
-  dplyr::mutate(SRVY = "BSS")
+  dplyr::mutate(srvy = "BSS")
 shp_bss <- survey_area

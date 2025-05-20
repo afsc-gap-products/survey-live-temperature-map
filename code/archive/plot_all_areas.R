@@ -14,19 +14,19 @@ survey_area$survey.grid <- survey_area$survey.grid %>%
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 survey_area$survey.area <- survey_area$survey.area %>% 
-  dplyr::mutate(SRVY = ifelse(SURVEY == "EBS_SHELF", "EBS", "NBS"))
+  dplyr::mutate(srvy = ifelse(SURVEY == "EBS_SHELF", "EBS", "NBS"))
 shp_bs <- survey_area
 
 # ## EBS  ------------------------------------------------------------------------
 survey_area <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = "auto")
 survey_area$survey.area <- shp_bs$survey.area %>%
-  dplyr::filter(SRVY == "EBS")
+  dplyr::filter(srvy == "EBS")
 shp_ebs <- survey_area
 
 ## NBS  ------------------------------------------------------------------------
 survey_area <- akgfmaps::get_base_layers(select.region = "bs.north", set.crs = "auto")
 survey_area$survey.area <- shp_bs$survey.area %>%
-  dplyr::filter(SRVY == "NBS")
+  dplyr::filter(srvy == "NBS")
 shp_nbs <- survey_area
 
 ## AI  ------------------------------------------------------------------------
@@ -39,19 +39,19 @@ survey_area$survey.grid <-
                     stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "AI") %>%
-      dplyr::mutate(SRVY = "AI",
+      dplyr::mutate(srvy = "AI",
                     region = stringr::str_to_title(inpfc_area),
                     region = dplyr::case_when(
                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
                       TRUE ~ region)) %>%
-      dplyr::select(SRVY, stratum, region) %>%
+      dplyr::select(srvy, stratum, region) %>%
       dplyr::distinct(),
     by = "stratum")  %>%
   dplyr::arrange(region) %>%
   dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>%
   dplyr::mutate(SURVEY = "AI",
-                SRVY = "AI")
+                srvy = "AI")
 shp_ai <- survey_area
 
 # J:\RACE_GF\GOA\GOA 2021\Files for boats\ArcGIS\GOAGRID_2021
@@ -72,19 +72,19 @@ shp_ai <- survey_area
 #     x = .,
 #     y = goa_goa_strata0 %>%
 #       dplyr::filter(survey == "AI") %>%
-#       dplyr::mutate(SRVY = "AI",
+#       dplyr::mutate(srvy = "AI",
 #                     region = stringr::str_to_title(inpfc_area),
 #                     region = dplyr::case_when(
 #                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
 #                       TRUE ~ region)) %>%
-#       dplyr::select(SRVY, stratum, region) %>%
+#       dplyr::select(srvy, stratum, region) %>%
 #       dplyr::distinct(),
 #     all.x = TRUE)  %>%
 #   dplyr::arrange(region) %>%
 #   dplyr::mutate(AIGRID_ID = as.double(AIGRID_ID))
 # survey_area$survey.area <- survey_area$survey.area %>%
 #   dplyr::mutate(SURVEY = "AI",
-#                 SRVY = "AI")
+#                 srvy = "AI")
 # shp_ai <- survey_area
 
 # 
@@ -144,16 +144,16 @@ survey_area$survey.grid <-
                     stratum = STRATUM),
     y = goa_goa_strata0 %>%
       dplyr::filter(survey == "GOA") %>%
-      dplyr::mutate(SRVY = "GOA",
+      dplyr::mutate(srvy = "GOA",
                     region = stringr::str_to_title(inpfc_area) ) %>%
-      dplyr::select(SRVY, stratum, region) %>%
+      dplyr::select(srvy, stratum, region) %>%
       dplyr::distinct(),
     by = "stratum")  %>% 
   dplyr::arrange(region) %>% 
   dplyr::filter(!is.na(region))
 survey_area$survey.area <- survey_area$survey.area %>% 
   dplyr::mutate(SURVEY = "GOA", 
-                SRVY = "GOA")
+                srvy = "GOA")
 shp_goa <- survey_area
 
 
@@ -170,7 +170,7 @@ survey_area <- akgfmaps::get_base_layers(select.region = "ebs.slope", set.crs = 
 #                    by = "station") %>% 
 #   dplyr::mutate(region = "Bering Sea")
 survey_area$survey.area <- survey_area$survey.area %>% 
-  dplyr::mutate(SRVY = "BSS")
+  dplyr::mutate(srvy = "BSS")
 shp_bss <- survey_area
 
 
@@ -182,7 +182,7 @@ shp_bss <- survey_area
 gg <- ggplot() +
   ggplot2::geom_sf(data = survey_area$akland, 
                    fill = "black", 
-                   color = "transparent") + #ifelse(SRVY %in% c("GOA", "AI"), "black", "white")) + 
+                   color = "transparent") + #ifelse(srvy %in% c("GOA", "AI"), "black", "white")) + 
   # ggplot2::geom_sf(data = survey_area$graticule, 
   #                  color = "grey90", 
   #                  alpha = 0.5) +

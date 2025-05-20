@@ -1,7 +1,6 @@
 #' ---------------------------
 #' title: Survey Daily and Anomaly Temperature Plot
 #' maintained: Emily Markowitz
-#' purpose: run script
 #' 
 #' notes: 
 #' https://github.com/afsc-gap-products/survey-live-temperature-map
@@ -9,45 +8,37 @@
 #' ---------------------------
 
 # Set Working Directory --------------------------------------------------------
-## Actually we cant use the here package, here - it actually causes issues with 
-## the tasks scheduler, which has no concept of a project root folder. 
-locations <- c("Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/")
+## Actually we cant directly use the here package, here - it actually causes 
+# issues with the tasks scheduler, which has no concept of a project root folder.
 
-for (i in 1:length(locations)){
-  if (file.exists(locations[i])) {
-    dir_wd  <- locations[i]
-  }
-}
+library(here)
+here::here("Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/") 
+dir_wd <- paste0(here::here(), "/")
 
 # KNOWNS -----------------------------------------------------------------------
 
-istest <- FALSE
+istest <- TRUE
 maxyr <- 2025
 data_source <- "oracle" # "gd" = google dirve, "oracle" 
-dates0 <-  "latest" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <-  "all" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 if (format(Sys.Date(), format = "%A") %in% c("Sunday", "Thursday") & 
     format(Sys.time(), format = "%H") %in% 2) { # maintenance cycle - make another task scheduler for this 
   dates0 <- "all"
 }
 var <- "bt"
 
-# Survey ID. The survey definition ID key code uniquely identifies a survey/survey design. 
-# Integer code that uniquely identifies survey. Full list of survey definition IDs are in RACE_DATA.SURVEY_DEFINITIONS. 
-# IDs used in GAP_PRODUCTS are: 47 (Gulf of Alaska); 52 (Aleutian Islands); 78 (Bering Sea Slope); 98 (Eastern Bering Sea Shelf); 143 (Northern Bering Sea Shelf). 
-# The column "survey_definition_id" is associated with the "srvy" and "survey" columns. 
-# For a complete list of surveys, review the [code books](https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual).
 survey_definition_id0 <- c(47, 98, 143) 
 
-dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/1-x7U1bCmYA-NghgRDpTdBbDNp5bBRHcn6f3Zs5HUzkk"
-dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1H4kfU4xd3_vWggxrLwnImE6ikg4ub0a7" # REAL LINK
-dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/10m709GkyPTofj37a3afQtZQGrzacXwb9" # REAL LINK
+dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/1ymH0K3d9SgfrhmP9PQI7y4PqInKFal2phKjot92xr1U"
+dir_googledrive_upload_bs = 
+  ifelse(istest, 
+         "https://drive.google.com/drive/folders/1TjNRlpRUF-Nzx2LsZdWWFluMb8iUCRth",
+         "https://drive.google.com/drive/folders/1H4kfU4xd3_vWggxrLwnImE6ikg4ub0a7")
+dir_googledrive_upload_goa = 
+  ifelse(istest, 
+         "https://drive.google.com/drive/folders/1WXmQXmUjNjzQm915GSyrKyrZVrRfsBfT", 
+         "https://drive.google.com/drive/folders/10m709GkyPTofj37a3afQtZQGrzacXwb9")
 
-if(istest) {
-  dir_googledrive_upload_bs = "https://drive.google.com/drive/folders/1TjNRlpRUF-Nzx2LsZdWWFluMb8iUCRth" # TEST LINK
-  dir_googledrive_upload_goa = "https://drive.google.com/drive/folders/1WXmQXmUjNjzQm915GSyrKyrZVrRfsBfT" # TEST LINK
-  dates0 <- "all"
-}
-print(dates0)
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
 googledrive_dl <- TRUE
@@ -55,27 +46,10 @@ googledrive::drive_deauth()
 googledrive::drive_auth()
 2
 
-# LOG --------------------------------------------------------------------------
-# if(!istest) {
-#   sink(file = paste0(dir_wd, "/output/", Sys.Date(), ".txt"), append=TRUE, )
-# }
-
 # SOURCE SUPPORT SCRIPTS -------------------------------------------------------
 source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
-
-# SIGN INTO FTP ----------------------------------------------------------------
-ftp_dl <- FALSE # test
-# ftp_dl <- (googledrive_dl & file.exists(paste0(dir_wd, "code/ftp.R")))
-ftp <- list(ftp_dl = ftp_dl)
-if (ftp_dl) {
-  source(file = paste0(dir_wd, "code/ftp.R")) # removed in gitignore - ask for permission
-  ftp <- list(
-    ftp_dl = ftp_dl,
-    user = user,
-    pass = pass)
-}
 
 # UPDATE README (sometimes) ----------------------------------------------------
 
@@ -85,20 +59,17 @@ if (ftp_dl) {
 
 # Map --------------------------------------------------------------------------
 
-
 ## GOA --------------------------------------------------------------------------
 
-if ("GOA" %in% dat_survey$SRVY) {
-
-  SRVY <- "GOA"
+if ("GOA" %in% dat_survey$srvy) {
+  
+  srvy <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
-  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_goa, NULL)
+  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_goa") & googledrive_dl, dir_googledrive_upload_goa, NULL)
   show_planned_stations <- FALSE
-  shp <- shp_goa
-  if(ftp_dl){ftp$dest <- dev_goa}
-
+  
   make_varplot_wrapper(maxyr = maxyr,
-                       SRVY = SRVY,
+                       srvy = srvy,
                        dat_survey = dat_survey,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
@@ -107,24 +78,22 @@ if ("GOA" %in% dat_survey$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"),
+                       file_end0 = c("grid", "mean", "daily", "anom"), # c("daily"),
                        dir_wd = dir_wd)
 }
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
-if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
-
-  SRVY <- "BS"
+if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
+  
+  srvy <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
   show_planned_stations <- TRUE
   plot_anom <- TRUE
-  shp <- shp_bs
-  if(ftp_dl){ftp$dest <- dev_bs}
-
+  
   make_varplot_wrapper(maxyr = maxyr,
-                       SRVY = SRVY,
+                       srvy = srvy,
                        dat_survey = dat_survey,
                        var = var,
                        dir_googledrive_upload = dir_googledrive_upload,
@@ -133,27 +102,27 @@ if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "anom"),
-                       dir_wd = dir_wd,
-                       ftp = ftp)
+                       file_end0 = c("grid", "mean", "daily", "anom"), # c("daily", "anom"),
+                       dir_wd = dir_wd
+  )
 }
 
 
 ## AI --------------------------------------------------------------------------
 # if (52 %in% survey_definition_id0) { 
 #   
-#   SRVY <- "AI"; print(paste0("------------", SRVY, " Plots ------------"))
+#   srvy <- "AI"; print(paste0("------------", srvy, " Plots ------------"))
 #   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 #   dir_googledrive_upload <- ifelse(exists(x = "dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_ai, NULL)
 #   plot_anom <- FALSE
 #   show_planned_stations <- FALSE
-#   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
+#   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", srvy, "/")  
 #   if(ftp_dl){ftp$dest <- dev_ai}
 #   
 #   file_end0 = c("daily") # , "grid"
 #   
 #   make_varplot_wrapper(maxyr = maxyr, 
-#                        SRVY = SRVY,
+#                        srvy = srvy,
 #                        dat_survey = dat_survey,
 #                        var = var,
 #                        dir_googledrive_upload = dir_googledrive_upload,
@@ -171,18 +140,18 @@ if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
 # ## EBS Maps --------------------------------------------------------------------
 # if (98 %in% survey_definition_id0) { 
 #   
-#   SRVY <- "EBS"; print(paste0("------------", SRVY, " Plots ------------"))
+#   srvy <- "EBS"; print(paste0("------------", srvy, " Plots ------------"))
 #   plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
 #   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
 #   show_planned_stations <- TRUE
 #   plot_anom <- TRUE
-#   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", SRVY, "/")  
+#   dir_out <- paste0(dir_wd, "/output/", ifelse(istest, "TEST", maxyr), "_", srvy, "/")  
 #   if(ftp_dl){ftp$dest <- dev_bs}
 #   
 #   file_end0 = c("daily", "anom") # , "grid", "mean", "anom"
 #   
 #   make_varplot_wrapper(maxyr = maxyr,
-#                        SRVY = SRVY,
+#                        srvy = srvy,
 #                        dat_survey = dat_survey,
 #                        var = var,
 #                        dir_googledrive_upload = dir_googledrive_upload,

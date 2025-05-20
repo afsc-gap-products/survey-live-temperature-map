@@ -39,7 +39,7 @@ plot_anom <- FALSE
 dates0 <- "all" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 
 ## NBS + EBS -------------------------------------------------------------------
-SRVY <- "BS"
+srvy <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 region_akgfmaps = "bs.all"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
@@ -58,14 +58,14 @@ survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
 dat_ebs <- data.frame(reg_shapefile = "EBS_SHELF", 
                           region_long = "Eastern Bering Sea", 
-                          SRVY = "EBS", 
+                          srvy = "EBS", 
                           region = "BS", 
                           vessel_id = c(94, 162), 
                           vessel_shape = c("V", "A"), 
                           reg_dates = "May 25 - Aug 03 2022") 
 dat_nbs <- data.frame(reg_shapefile = "NBS_SHELF", 
                                            region_long = "Northern Bering Sea", 
-                                           SRVY = "NBS", 
+                                           srvy = "NBS", 
                                            region = "BS", 
                                            vessel_id = c(94, 162), 
                                            vessel_shape = c("V", "A"), 
@@ -81,7 +81,7 @@ for (i in 1:length(yrs)){
   maxyr <- as.numeric(names(yrs)[i])
   dir_googledrive_upload <- googledrive::as_id(unlist(yrs[i]))
   make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-                    SRVY = SRVY,
+                    srvy = srvy,
                     haul = haul,
                     dat_survreg = dat_survreg,
                     dir_googledrive_upload = dir_googledrive_upload,
@@ -90,7 +90,7 @@ for (i in 1:length(yrs)){
                     plot_subtitle = plot_subtitle,
                     dir_wd = dir_wd)
   make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survreg = dat_survreg,
                        var = var,
@@ -103,7 +103,7 @@ for (i in 1:length(yrs)){
                        plot_anom = plot_anom,
                        dir_wd = dir_wd)
   make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survreg = dat_survreg,
                        var = var,
@@ -120,7 +120,7 @@ for (i in 1:length(yrs)){
 }
 
 ### EBS ------------------------------------------------------------------------
-SRVY <- "EBS"
+srvy <- "EBS"
 plot_subtitle <- "NOAA Fisheries eastern Bering Sea Bottom Trawl Survey"
 region_akgfmaps = "bs.south"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
@@ -144,7 +144,7 @@ for (i in 1:length(yrs)) {
   dir_googledrive_upload <- googledrive::as_id(unlist(yrs[i]))
   
   make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-                    SRVY = SRVY,
+                    srvy = srvy,
                     haul = haul,
                     dat_survreg = dat_survreg,
                     dir_googledrive_upload = dir_googledrive_upload,
@@ -153,7 +153,7 @@ for (i in 1:length(yrs)) {
                     plot_subtitle = plot_subtitle,
                     dir_wd = dir_wd)
   make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survreg = dat_survreg,
                        var = var,
@@ -166,7 +166,7 @@ for (i in 1:length(yrs)) {
                        plot_anom = plot_anom,
                        dir_wd = dir_wd)
   make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survreg = dat_survreg,
                        var = var,
@@ -183,7 +183,7 @@ for (i in 1:length(yrs)) {
 }
 
 ## AI --------------------------------------------------------------------------
-SRVY <- "AI"
+srvy <- "AI"
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 region_akgfmaps = "ai"
 show_planned_stations <- FALSE
@@ -202,12 +202,12 @@ survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),#
     x = .,
     y = goa_strata0 %>%
       dplyr::filter(survey == "AI") %>%
-      dplyr::mutate(SRVY = "AI",
+      dplyr::mutate(srvy = "AI",
                     region = stringr::str_to_title(inpfc_area),
                     region = dplyr::case_when(
                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
                       TRUE ~ region)) %>%
-      dplyr::select(SRVY, stratum, region) %>%
+      dplyr::select(srvy, stratum, region) %>%
       dplyr::distinct(),
     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
   dplyr::arrange(region)
@@ -216,7 +216,7 @@ survey_area$survey.grid1 <- survey_area$survey.grid
 dat_survreg <- dplyr::bind_rows(dat_survreg,
                                 data.frame(reg_shapefile = "AI",
                                            region_long = "Aleutian Islands",
-                                           SRVY = "AI",
+                                           srvy = "AI",
                                            region = "AI",
                                            vessel_id = c(148, 143), # CHANGE
                                            vessel_shape = c("OEX", "SS"), # CHANGE
@@ -230,7 +230,7 @@ for (i in 1:length(yrs)) {
   dir_googledrive_upload <- googledrive::as_id(unlist(yrs[i]))
   
   make_grid_wrapper(maxyr = maxyr,                               # Blank grid plot
-                    SRVY = SRVY,
+                    srvy = srvy,
                     haul = haul,
                     dat_survreg = dat_survreg,
                     dir_googledrive_upload = dir_googledrive_upload,
@@ -239,7 +239,7 @@ for (i in 1:length(yrs)) {
                     plot_subtitle = plot_subtitle,
                     dir_wd = dir_wd)
   make_varplot_wrapper(maxyr = maxyr,                                 # Daily plot
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survreg = dat_survreg,
                        var = var,
@@ -256,7 +256,7 @@ for (i in 1:length(yrs)) {
 # ## GOA --------------------------------------------------------------------------
 # maxyr <- 2023 #CHANGE
 # data_source <- "gd" # google drive
-# SRVY <- "GOA"
+# srvy <- "GOA"
 # plot_anom <- FALSE
 # plot_subtitle = "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
 # region_akgfmaps = "goa"
@@ -276,13 +276,13 @@ for (i in 1:length(yrs)) {
 #                 stratum = STRATUM) %>%
 #   dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
 #                   stratum != 0) %>% # land
-#       dplyr::select(SRVY, stratum, region) %>%
+#       dplyr::select(srvy, stratum, region) %>%
 #       dplyr::distinct(),
 #     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
 #   dplyr::arrange(region)
 # 
 # make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-#                   SRVY = SRVY,
+#                   srvy = srvy,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
 #                   dir_googledrive_upload = dir_googledrive_upload,
@@ -291,7 +291,7 @@ for (i in 1:length(yrs)) {
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
 # make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
-#                   SRVY = SRVY,
+#                   srvy = srvy,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
 #                   var = var,
@@ -312,7 +312,7 @@ for (i in 1:length(yrs)) {
 # dat_survreg <- dplyr::bind_rows(dat_survreg, 
 #                                data.frame(reg_shapefile = "GOA", 
 #                                           region_long = "Gulf of Alaska", 
-#                                           SRVY = "GOA", 
+#                                           srvy = "GOA", 
 #                                           region = "GOA", 
 #                                           vessel_id = c(148, 176), # CHANGE
 #                                           vessel_shape = c("OEX", "SS"), # CHANGE
@@ -321,7 +321,7 @@ for (i in 1:length(yrs)) {
 # maxyr <- 2021
 # dir_googledrive_upload <- googledrive::as_id("https://drive.google.com/drive/folders/1VANFDlNVQYi5GeYsIKn1ISBtXzEadCUx")
 # make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot
-#                   SRVY = SRVY,
+#                   srvy = srvy,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
 #                   dir_googledrive_upload = dir_googledrive_upload,
@@ -330,7 +330,7 @@ for (i in 1:length(yrs)) {
 #                   plot_subtitle = plot_subtitle,
 #                   dir_wd = dir_wd)
 # make_varplot_wrapper(maxyr = maxyr,                               # Daily plot
-#                   SRVY = SRVY,
+#                   srvy = srvy,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
 #                   var = var,
@@ -343,7 +343,7 @@ for (i in 1:length(yrs)) {
 #                   plot_anom = plot_anom,
 #                   dir_wd = dir_wd)
 # make_varplot_wrapper(maxyr = maxyr,                       # Anom and mean plot
-#                   SRVY = SRVY,
+#                   srvy = srvy,
 #                   haul = haul,
 #                   dat_survreg = dat_survreg,
 #                   var = var,

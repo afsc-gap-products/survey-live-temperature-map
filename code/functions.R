@@ -11,7 +11,7 @@
 PKG <- c(
   "devtools",
   # Mapping
-  "akgfmaps", # devtools::install_github("safsc-gap-products/akgfmaps", build_vignettes = TRUE)
+  "akgfmaps", # devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
   "sf",
   "ggspatial", 
   
@@ -45,7 +45,7 @@ PKG <- c(
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {  
     if (p %in% c("akgfmaps", "coldpool", "gapindex")) {
-      devtools::install_github("afsc-gap-products/akgfmaps")
+      devtools::install_github(paste0("afsc-gap-products/", p))
     } else {
       install.packages(p, verbose = FALSE)
     }
@@ -59,9 +59,9 @@ for (p in PKG) {
 #' This function prepares data to be used in the make_figures() function
 #'
 #' @param maxyr Numeric. The 4 digit year (YYYY) of the year that the data is from. 
-#' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
+#' @param srvy String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
 #' @param haul data.frame. Here, derived from the RACEBASE.HAUL and RACE_DATA.V_CRUISES oracle tables. See example in data.R script. 
-#' @param dat_survey data.frame. Must include reg_shapefile (the name of the shapefile polygon), survey (the formal name of the survey), SRVY ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), survey_dates (the planned dates of the survey).
+#' @param dat_survey data.frame. Must include reg_shapefile (the name of the shapefile polygon), survey (the formal name of the survey), srvy ("BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA"), region (to match the region of the survey in the haul data), vessel_id (from RACE_DATA.VESSELS), vessel_shape (as listed in the google spreadsheet/how you want the vessel to appear on the plot), survey_dates (the planned dates of the survey).
 #' @param var String. Default = "bt". "bt" will select the bottom temperature column and "st" will select the surface temperature column in haul data. 
 #' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 #' @param dates0 Default = "latest". A string of either the date to be plotted to ("YYYY-MM-DD"), a string of dates to be plotted (as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))), "all" which will plot all of the days where data was collected for in that year, "first" that uses the first date of the time series, or "latest" where only the most recent date's data will be plotted, or "none" where only the grid (no data) will be printed. 
@@ -79,7 +79,7 @@ for (p in PKG) {
 #' @examples
 make_varplot_wrapper <- function(
     maxyr, 
-    SRVY, 
+    srvy, 
     dat_survey, 
     var = "bt", 
     dir_googledrive_upload = NULL, 
@@ -89,18 +89,31 @@ make_varplot_wrapper <- function(
     show_planned_stations = TRUE, 
     data_source = "gd", 
     file_end0 = c("grid", "daily", "mean", "anom"), 
-    dir_wd = "./", 
-    dir_out = "./", 
-    ftp) {
+    dir_wd = "./"#, 
+    # dir_out = "./"#, 
+    # ftp
+    ) {
+  
+  # Establish output directory -------------------------------------------------
+  dir_out <- paste0(dir_wd, "output/", maxyr, "_", srvy, "/")
+  dir.create(path = dir_out, showWarnings = FALSE)
   
   # Establish knowns and variables ---------------------------------------------
-  SRVY0 <- SRVY
-  SRVY1 <- SRVY
-  if (SRVY == "BS") {
-    SRVY1 <- c("EBS", "NBS")
+  srvy0 <- srvy
+  srvy1 <- srvy
+  if (srvy == "BS") {
+    srvy1 <- c("EBS", "NBS")
   }
   
-  height0 <- ifelse(SRVY %in% c("AI", "GOA"), 6, 8)
+  shp$survey.strata <- shp$survey.strata[shp$survey.strata$srvy %in% srvy1,]
+  shp$survey.area <- shp$survey.area[shp$survey.area$srvy %in% srvy1,]
+  shp$survey.grid <- shp$survey.grid[shp$survey.grid$srvy %in% srvy1,]
+  shp$lon.breaks <- shp$lon.breaks[[srvy]]
+  shp$lat.breaks <- shp$lat.breaks[[srvy]]
+  shp$bathymetry <- shp$bathymetry[shp$bathymetry$srvy %in% srvy,]
+  shp$place.labels <- shp$place.labels[shp$place.labels$srvy %in% srvy,]
+
+  height0 <- ifelse(srvy %in% c("AI", "GOA"), 6, 8)
   
   # Define var
   if (!is.null(var)){
@@ -116,15 +129,15 @@ make_varplot_wrapper <- function(
   ## Wrangle Anomaly data -----------------------------------------------------
   anom_years <- dat_survey %>%
     dplyr::select(
-      SRVY, year, stratum, station, date, survey, survey, survey_dates,
+      srvy, year, stratum, station, date, survey, survey, survey_dates,
       vessel_shape, vessel_name, vessel_ital, st, bt) %>%
     dplyr::distinct() %>% 
     dplyr::filter(!(is.na(station)) &
                     year < maxyr &
-                    SRVY %in% SRVY1) %>%
-    dplyr::select(SRVY, survey, year) %>% 
+                    srvy %in% srvy1) %>%
+    dplyr::select(srvy, survey, year) %>% 
     dplyr::distinct() %>%
-    dplyr::group_by(SRVY, survey) %>% 
+    dplyr::group_by(srvy, survey) %>% 
     dplyr::summarize(min = min(year, na.rm = TRUE), 
                      max = max(year, na.rm = TRUE), 
                      nn = n()) %>% 
@@ -133,29 +146,29 @@ make_varplot_wrapper <- function(
   # Calculate var averages from previous data
   dat_anom <- dat_survey %>%
     dplyr::select(
-      SRVY, year, stratum, station, date, survey, survey, survey_dates,
+      srvy, year, stratum, station, date, survey, survey, survey_dates,
       vessel_shape, vessel_name, vessel_ital, st, bt) %>%
     dplyr::distinct() %>% 
     dplyr::filter(year < maxyr &
-                    SRVY %in% SRVY1) %>%
+                    srvy %in% srvy1) %>%
     dplyr::rename("var" = dplyr::all_of(var)) %>%
-    dplyr::group_by(SRVY, stratum, station) %>% 
+    dplyr::group_by(srvy, stratum, station) %>% 
     dplyr::summarise(mean = mean(var, na.rm = TRUE), 
                      sd = sd(var, na.rm = TRUE))
   
   ## Wrangle observed (daily) data ---------------------------------------------
   
   dat <- dat_survey %>%
-    dplyr::filter(SRVY %in% SRVY1 & 
+    dplyr::filter(srvy %in% srvy1 & 
                     year == maxyr) %>% 
-    dplyr::select(SRVY, stratum, station, date, year, 
+    dplyr::select(srvy, stratum, station, date, year, 
                   vessel_shape, var = dplyr::all_of(var), 
-                  survey_dates, survey, vessel_name, data_type)
+                  survey_dates, survey, vessel_name, source)
   
   dat <- dplyr::left_join(
     x = dat,
     y = dat_anom,
-    by = c("SRVY", "stratum", "station"))
+    by = c("srvy", "stratum", "station"))
   
   dat <- dat %>%
     dplyr::mutate(reg_lab = paste0(survey, "\n(", survey_dates, ")"), 
@@ -167,39 +180,39 @@ make_varplot_wrapper <- function(
   
   ## Wrangle shapefiles ---------------------------------------------
   
-  shp$lon.breaks <- shp$lon.breaks[SRVY0][[1]] 
-  shp$lat.breaks <- shp$lat.breaks[SRVY0][[1]] 
+  # shp$lon.breaks <- shp$lon.breaks[srvy0][[1]] 
+  # shp$lat.breaks <- shp$lat.breaks[srvy0][[1]] 
   # shp$plot.boundary <- shp$plot.boundary %>% 
-  #   dplyr::filter(SRVY %in% SRVY0)
+  #   dplyr::filter(srvy %in% srvy0)
   
   shp$survey.strata <- shp$survey.strata %>% 
-    dplyr::filter(SRVY %in% SRVY0) %>%
+    # dplyr::filter(srvy %in% srvy0) %>%
     dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(stratum, SRVY, survey, survey, survey_definition_id) %>%
+                       dplyr::select(stratum, srvy, survey, survey, survey_definition_id) %>%
                        dplyr::distinct())
   
   shp$survey.area <- shp$survey.area %>% 
-    dplyr::filter(SRVY %in% SRVY0) %>%
+    # dplyr::filter(srvy %in% srvy0) %>%
     dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(SRVY, survey, survey_definition_id) %>%
+                       dplyr::select(srvy, survey, survey_definition_id) %>%
                        dplyr::distinct())
   
   shp$place.labels <- shp$place.labels %>% 
-    dplyr::filter(SRVY %in% SRVY0) %>%
+    # dplyr::filter(srvy %in% srvy0) %>%
     dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(SRVY, survey, survey_definition_id) %>%
+                       dplyr::select(srvy, survey, survey_definition_id) %>%
                        dplyr::distinct())
   
   shp$survey.grid <- shp$survey.grid %>% 
-    dplyr::filter(SRVY %in% SRVY0) %>% 
+    # dplyr::filter(srvy %in% srvy0) %>% 
     dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(station, stratum, SRVY, survey, survey, survey_definition_id) %>%
+                       dplyr::select(station, stratum, srvy, survey, survey, survey_definition_id) %>%
                        dplyr::distinct())
   
   shp$bathymetry <- shp$bathymetry %>% 
-    dplyr::filter(SRVY %in% SRVY0) %>%
+    # dplyr::filter(srvy %in% srvy0) %>%
     dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(SRVY, survey, survey_definition_id) %>%
+                       dplyr::select(srvy, survey, survey_definition_id) %>%
                        dplyr::distinct())
   
   is_there_data_to_plot <- TRUE
@@ -214,18 +227,18 @@ make_varplot_wrapper <- function(
     
     dat00 = dat %>%
       dplyr::filter(stratum != 0) %>% 
-      dplyr::mutate(reg_lab = ifelse(SRVY == "BS", 
+      dplyr::mutate(reg_lab = ifelse(srvy == "BS", 
                                      paste0(survey, "\n"), 
                                      survey))
     var_breaks = NA
-    plot_title = ifelse(SRVY %in% c("GOA", "AI"), "Survey Districts", "Survey Grid")
+    plot_title = ifelse(srvy %in% c("GOA", "AI"), "Survey Districts", "Survey Grid")
     legend_title = ""
     dates0 = "none"
     make_gifs = FALSE
     show_planned_stations = FALSE
     
     make_figure(
-      SRVY = SRVY, 
+      srvy = srvy, 
       dat00 = dat00,
       var_breaks = var_breaks,
       plot_title = plot_title,
@@ -250,9 +263,9 @@ make_varplot_wrapper <- function(
     # Define temperature bins
     if (!is.null(var)){
       if (var == "bt") {
-        if (SRVY %in% c("BS", "EBS", "NBS")) {
+        if (srvy %in% c("BS", "EBS", "NBS")) {
           var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
-        } else if (SRVY %in% c("GOA", "AI")) {
+        } else if (srvy %in% c("GOA", "AI")) {
           var_breaks <- c(-10, seq(from = 2, to = 10, by = 1), 50)
         }
       } else if (var == "st") {
@@ -260,8 +273,9 @@ make_varplot_wrapper <- function(
       }
     }
     
-    for (virids_option in c("H", # Rainbow color scheme
-                            "B")){ # Inferno color scheme
+    for (virids_option in c("H"#, # Rainbow color scheme
+                            # "B"
+                            )){ # Inferno color scheme
       
       dat00 = dat %>% # Mean plot
         dplyr::mutate(var = mean, 
@@ -278,7 +292,7 @@ make_varplot_wrapper <- function(
       show_planned_stations = FALSE
       
       make_figure(
-        SRVY = SRVY, 
+        srvy = srvy, 
         dat00 = dat00,
         var_breaks = var_breaks, 
         plot_title = plot_title,
@@ -306,11 +320,11 @@ make_varplot_wrapper <- function(
     # Define temperature bins
     if (!is.null(var)){
       if (var == "bt") {
-        if (SRVY %in% c("BS", "EBS", "NBS")) {
+        if (srvy %in% c("BS", "EBS", "NBS")) {
           var_breaks <- c(-10, seq(from = -2, to = 8, by = 1), 50)
-        } else if (SRVY %in% c("GOA")) {
+        } else if (srvy %in% c("GOA")) {
           var_breaks <- c(-10, seq(from = 3, to = 10, by = 1), 50)
-        } else if (SRVY %in% c("AI")) {
+        } else if (srvy %in% c("AI")) {
           var_breaks <- c(-10, seq(from = 3, to = 6, by = 0.5), 50)
         }
       } else if (var == "st") {
@@ -328,7 +342,7 @@ make_varplot_wrapper <- function(
       make_gifs = TRUE
       
       make_figure(
-        SRVY = SRVY, 
+        srvy = srvy, 
         dat00 = dat00,
         var_breaks = var_breaks, 
         plot_title = plot_title,
@@ -354,13 +368,14 @@ make_varplot_wrapper <- function(
     file_end <- "anom"; print(paste0("------------", file_end, "------------"))
     
     
-    for (virids_option in c("H", # Rainbow color scheme
-                            "B")) { # Inferno color scheme
+    for (virids_option in c("H"#, # Rainbow color scheme
+                            # "B"
+                            )) { # Inferno color scheme
       
       dat00 = dat %>% # Anomaly plot
         dplyr::filter(station != 0) %>% # because show_planned_stations = FALSE
         dplyr::mutate(var = anom, 
-                      reg_lab = ifelse(SRVY == "BS", 
+                      reg_lab = ifelse(srvy == "BS", 
                                        paste0(survey, "\n"), 
                                        survey))
       var_breaks = c(-10, seq(from = -2, to = 3, by = 1), 50)
@@ -375,7 +390,7 @@ make_varplot_wrapper <- function(
       show_planned_stations = FALSE
       
       make_figure(
-        SRVY = SRVY, 
+        srvy = srvy, 
         dat00 = dat00,
         var_breaks = var_breaks, 
         plot_title = plot_title,
@@ -401,7 +416,7 @@ make_varplot_wrapper <- function(
 
 #' Create temperature and anomaly plots
 #'
-#' @param SRVY String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
+#' @param srvy String. Accepted values include "BS" (EBS and NBS combined), "EBS", "NBS", "AI". "GOA" will be added as an option in 2023. 
 #' @param dat The csv file from googledrive or oracle with data for the 'maxyr' being plotted or compared to in the anomally. 
 #' @param var_breaks String. Desired breaks for var to be binned into. 
 #' @param plot_title String. Default = "". The desired title for the figure. 
@@ -419,7 +434,7 @@ make_varplot_wrapper <- function(
 #' @param data_source String. Default = "gd". "gd" will pull data from the google drive file and "oracle" will use the haul data (noted above) that comes from oracle. 
 #' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 make_figure <- function(
-    SRVY, 
+    srvy, 
     dat00, 
     var_breaks, 
     plot_title = "",
@@ -439,9 +454,6 @@ make_figure <- function(
     var00 = "", 
     virids_option = "H") {
   
-  # Create Directories
-  dir.create(path = dir_out, showWarnings = FALSE)
-  
   # Set Base Layers ------------------------------------------------------------
   dat <- dat00
   if (show_planned_stations) {
@@ -455,16 +467,16 @@ make_figure <- function(
   }
   
   # shp <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-  survey_reg_col <- gray.colors(length(unique(dat$SRVY))+2) # region colors
+  survey_reg_col <- gray.colors(length(unique(dat$srvy))+2) # region colors
   survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
   shp$survey.area <- dplyr::left_join(
     x = shp$survey.area, 
     y = dat %>% 
-      dplyr::select(survey, reg_lab, SRVY) %>% 
+      dplyr::select(survey, reg_lab, srvy) %>% 
       dplyr::distinct() %>% 
       dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))), 
-    by = "SRVY") %>% 
-    dplyr::arrange(desc(SRVY))
+    by = "srvy") %>% 
+    dplyr::arrange(desc(srvy))
   
   # Colors and bins for var ----------------------------------------------
   if (file_end %in% c("anom", "anom_cb", "daily_cb", "daily", "mean_cb", "mean")) {
@@ -682,7 +694,7 @@ make_figure <- function(
     
     gg <- ggplot() +
       ggplot2::geom_sf(data = world_coordinates, 
-                       fill = "black") + #ifelse(SRVY %in% c("GOA", "AI"), "black", "white")) + 
+                       fill = "black") + #ifelse(srvy %in% c("GOA", "AI"), "black", "white")) + 
       # ggplot2::geom_sf(data = shp$graticule, 
       #                  color = "grey90", 
       #                  alpha = 0.5) +
@@ -721,7 +733,7 @@ make_figure <- function(
     #                   ylim = c(sf::st_bbox(shp$survey.grid)$ymin, 
     #                            sf::st_bbox(shp$survey.grid)$ymax)) # shp$plot.boundary$y)
     
-    if (SRVY %in% c("BS", "EBS", "NBS")) {
+    if (srvy %in% c("BS", "EBS", "NBS")) {
       ## Bering Sea -----------------------------------------------------------
       
       gg <- gg +
@@ -763,7 +775,7 @@ make_figure <- function(
         #                model = shp$crs)  +
         ggplot2::annotate("text", 
                           x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .9), 
-                          y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], .8), 
+                          y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(srvy == "BS", .68, .8)), 
                           label = "Alaska", 
                           color = "white", 
                           size = 10)  +
@@ -834,7 +846,7 @@ make_figure <- function(
         }
       }      
       
-      if (file_end %in% c("daily", "daily_cb" , "anom", "anom_cb")) { 
+      if (file_end %in% c("daily" , "anom", "daily_cb", "anom_cb")) { 
         
         min_date <- min(as.Date(dat_plot$date), na.rm = TRUE)
         # if (show_planned_stations) { min_date <- min_date-1 } 
@@ -855,7 +867,7 @@ make_figure <- function(
                    fontface=2) 
       }
       
-    } else if (SRVY %in% c("AI", "GOA")) {
+    } else if (srvy %in% c("AI", "GOA")) {
       ## Aleutian Islands and Gulf of Alaska ----------------------------------
       
       ### grid map ---------------------------------------------------
@@ -916,8 +928,8 @@ make_figure <- function(
             ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], 
                      sf::st_bbox(grid_stations_plot)[c(4)]+50000)) + 
           ggplot2::geom_label(data = bb, 
-                              color = ifelse(SRVY == "AI", "black", "white"), 
-                              fill = ifelse(SRVY == "AI", NA, "black"),
+                              color = ifelse(srvy == "AI", "black", "white"), 
+                              fill = ifelse(srvy == "AI", NA, "black"),
                               fontface = "bold",
                               label.size = NA,
                               label.r = unit(0, "pt"),
@@ -1026,8 +1038,8 @@ make_figure <- function(
         gg <- gg +
           ggplot2::annotate("text", 
                             # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
-                            x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(SRVY == "AI", .1, .15)),  # ifelse(SRVY == "AI", .60, .15)
-                            y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(SRVY == "AI", .2, .80)), 
+                            x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(srvy == "AI", .1, .15)),  # ifelse(srvy == "AI", .60, .15)
+                            y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(srvy == "AI", .2, .80)), 
                             label = ifelse(is.na(max_date), 
                                            "", 
                                            ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
@@ -1043,7 +1055,7 @@ make_figure <- function(
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                 x = .37, y = ifelse(SRVY %in% c("AI", "GOA") & file_end == "grid", .25, .32), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
+                 x = .37, y = ifelse(srvy %in% c("AI", "GOA") & file_end == "grid", .25, .32), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  scale = .15 )
     
     filename0 <- paste0(
@@ -1103,7 +1115,7 @@ make_figure <- function(
     #     "dat_plot" = dat_plot,
     #     "dat" = dat,
     #     "shp" = shp,
-    #     "SRVY" = SRVY,
+    #     "srvy" = srvy,
     #     "data_source" = data_source,
     #     "file_end" = file_end,
     #     "var00" = var00,
@@ -1185,14 +1197,14 @@ make_figure <- function(
         if (file_end  %in% c("anom", "daily", "anom_cb", "daily_cb")) {
           filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
           filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
-                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
+                             replacement = paste0("current_", file_end, "_",tolower(srvy),"."), 
                              x = filename00, fixed = TRUE)
           filename00 <- gsub(pattern = paste0("current_", file_end, "_bind."), 
-                             replacement = paste0("current_", file_end, "_bind_",tolower(SRVY),"."), 
+                             replacement = paste0("current_", file_end, "_bind_",tolower(srvy),"."), 
                              x = filename00, fixed = TRUE)
         } else if (file_end %in% c("grid", "mean", "mean_cb")) {
           filename00 <- gsub(pattern = paste0("_", file_end,"."), 
-                             replacement = paste0("current_", file_end, "_",tolower(SRVY),"."), 
+                             replacement = paste0("current_", file_end, "_",tolower(srvy),"."), 
                              x = temp[iiii], 
                              fixed = TRUE)
         }
@@ -1202,16 +1214,16 @@ make_figure <- function(
                   overwrite = TRUE)
       }
       
-      ### FTP -------------------------------------------
-      # only make current if it is the last plot of the run
-      if (ftp$ftp_dl){
-        message("Uploading files to FTP")
-        upload_ftp(
-          dir_in = filename1, # [grepl(pattern = "current_", x = filename1)],
-          dest = ftp$dest, 
-          user = ftp$user, 
-          pass = ftp$pass)
-      }
+      # ### FTP -------------------------------------------
+      # # only make current if it is the last plot of the run
+      # if (ftp$ftp_dl){
+      #   message("Uploading files to FTP")
+      #   upload_ftp(
+      #     dir_in = filename1, # [grepl(pattern = "current_", x = filename1)],
+      #     dest = ftp$dest, 
+      #     user = ftp$user, 
+      #     pass = ftp$pass)
+      # }
       
     }
     

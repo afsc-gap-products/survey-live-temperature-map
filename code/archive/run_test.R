@@ -88,11 +88,11 @@ dates0 <- "all"
 
 ## GOA --------------------------------------------------------------------------
 
-# if ("GOA" %in% dat_survey$SRVY) {
+# if ("GOA" %in% dat_survey$srvy) {
 
 maxyr <- 2023 # testing
 
-SRVY <- "GOA"
+srvy <- "GOA"
 plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
 if (googledrive_dl) {
   dir_googledrive_upload <- dir_googledrive_upload_goa
@@ -101,11 +101,11 @@ if (googledrive_dl) {
 }
 show_planned_stations <- FALSE
 survey_area <- shp_goa
-# survey_area <- shp_surv[shp_surv$SRVY == "GOA"]
+# survey_area <- shp_surv[shp_surv$srvy == "GOA"]
 if(ftp_dl){ftp$dest <- dev_goa}
 
 make_varplot_wrapper(maxyr = maxyr, 
-                     SRVY = SRVY,
+                     srvy = srvy,
                      haul = haul,
                      dat_survey = dat_survey,
                      var = var,
@@ -121,11 +121,11 @@ make_varplot_wrapper(maxyr = maxyr,
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
-# if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
+# if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
 
 maxyr <- 2022 # testing
 
-SRVY <- "BS"
+srvy <- "BS"
 plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 if (googledrive_dl) {
   dir_googledrive_upload <- dir_googledrive_upload_bs
@@ -135,12 +135,12 @@ if (googledrive_dl) {
 show_planned_stations <- TRUE
 plot_anom <- TRUE
 survey_area <- shp_bs
-# survey_area <- shp_surv[shp_surv$SRVY %in% "NEBS"]
+# survey_area <- shp_surv[shp_surv$srvy %in% "NEBS"]
 
 if(ftp_dl){ftp$dest <- dev_bs}
 
 make_varplot_wrapper(maxyr = maxyr,
-                     SRVY = SRVY,
+                     srvy = srvy,
                      haul = haul,
                      dat_survey = dat_survey,
                      var = var,
@@ -156,11 +156,11 @@ make_varplot_wrapper(maxyr = maxyr,
 # }
 
 ## AI --------------------------------------------------------------------------
-# if ("AI" %in% dat_survey$SRVY) {
+# if ("AI" %in% dat_survey$srvy) {
 
 maxyr <- 2022 # testing
 
-SRVY <- "AI"
+srvy <- "AI"
 plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
 if (googledrive_dl) {
   dir_googledrive_upload <- dir_googledrive_upload_ai
@@ -170,12 +170,12 @@ if (googledrive_dl) {
 plot_anom <- FALSE
 show_planned_stations <- FALSE
 survey_area <- shp_ai
-# survey_area <- shp_surv[shp_surv$SRVY == "AI"]
+# survey_area <- shp_surv[shp_surv$srvy == "AI"]
 
 if(ftp_dl){ftp$dest <- dev_ai}
 
 make_varplot_wrapper(maxyr = maxyr, 
-                     SRVY = SRVY,
+                     srvy = srvy,
                      haul = haul,
                      dat_survey = dat_survey,
                      var = var,

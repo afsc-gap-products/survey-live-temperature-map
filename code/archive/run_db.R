@@ -79,9 +79,9 @@ if (ftp_dl) {
 
 ## GOA --------------------------------------------------------------------------
 
-if ("GOA" %in% dat_survey$SRVY) {
+if ("GOA" %in% dat_survey$srvy) {
 
-  SRVY <- "GOA"
+  srvy <- "GOA"
   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
   if (googledrive_dl) {
     dir_googledrive_upload <- dir_googledrive_upload_goa
@@ -93,7 +93,7 @@ if ("GOA" %in% dat_survey$SRVY) {
   if(ftp_dl){ftp$dest <- dev_goa}
   
   make_varplot_wrapper(maxyr = maxyr, 
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survey = dat_survey,
                        var = var,
@@ -109,9 +109,9 @@ if ("GOA" %in% dat_survey$SRVY) {
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
-if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
+if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
 
-  SRVY <- "BS"
+  srvy <- "BS"
   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
   if (googledrive_dl) {
     dir_googledrive_upload <- dir_googledrive_upload_bs
@@ -123,7 +123,7 @@ if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
   if(ftp_dl){ftp$dest <- dev_bs}
   
   make_varplot_wrapper(maxyr = maxyr,
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survey = dat_survey,
                        var = var,
@@ -139,9 +139,9 @@ if ("NBS" %in% dat_survey$SRVY & "EBS" %in% dat_survey$SRVY) {
 }
 
 ## AI --------------------------------------------------------------------------
-if ("AI" %in% dat_survey$SRVY) { # won't run in 2023 because is not in dat_survey
+if ("AI" %in% dat_survey$srvy) { # won't run in 2023 because is not in dat_survey
   
-  SRVY <- "AI"
+  srvy <- "AI"
   plot_subtitle = "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
   if (googledrive_dl) {
     dir_googledrive_upload <- dir_googledrive_upload_ai
@@ -154,7 +154,7 @@ if ("AI" %in% dat_survey$SRVY) { # won't run in 2023 because is not in dat_surve
   if(ftp_dl){ftp$dest <- dev_ai}
   
   make_varplot_wrapper(maxyr = maxyr, 
-                       SRVY = SRVY,
+                       srvy = srvy,
                        haul = haul,
                        dat_survey = dat_survey,
                        var = var,
