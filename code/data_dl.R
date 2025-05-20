@@ -194,7 +194,16 @@ shp_all <- shp <- list(
     # shp_bs$survey.strata,
     shp_ebs$survey.strata,
     shp_nbs$survey.strata,
-    shp_ai$survey.strata,
+    # ggplot(data = aaa, mapping = aes(fill = area_name, label = STRATUM)) + geom_sf(color = "black") + geom_sf_label()
+    shp_ai$survey.strata %>% # require(sf); shape <- read_sf(dsn = here::here("data", "aigrid_trawable_thru2018_Emily.shp"))
+      dplyr::mutate(# 322
+        area_name = dplyr::case_when( 
+          STRATUM %in% c(212, 214, 211, 213, 223, 223, 224, 221, 222) ~ "Western Aleutians",
+          STRATUM %in% c(424, 422, 421, 414, 314, 313, 423, 324, 413, 312, 311, 323, 322, 321, 412, 411) ~ "Central Aleutians",
+          STRATUM %in% c(513, 614, 621, 511, 612, 611, 522, 
+                         624, 512, 622, 613, 521, 623, 523, 594) ~ "Eastern Aleutians",
+          STRATUM %in% c(712, 794, 721, 722, 793, 711) ~ "South Bering Sea"
+        )),
     shp_goa$survey.strata %>% 
       dplyr::mutate(
       area_name = dplyr::case_when( 
@@ -252,7 +261,8 @@ shp_all <- shp <- list(
       survey_definition_id == 78 ~ "BSS", 
       survey_definition_id == 52 ~ "AI", 
       survey_definition_id == 47 ~ "GOA" 
-    )), 
+    )) %>% 
+    dplyr::select(-survey_definition_id_2), 
   
   # lon.breaks
   lon.breaks = list(
@@ -321,6 +331,33 @@ shp_all <- shp <- list(
       sf::st_transform(crs = "EPSG:3338")
   )) )
 
+aaa <- dplyr::left_join(
+shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",], 
+sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",] %>% 
+              sf::st_centroid(), 
+            shp_all$survey.strata[shp_all$survey.strata$srvy == "GOA",] %>% 
+              dplyr::select(area_name, stratum)) %>% 
+  dplyr::select(area_name, stratum, grid_id, station) %>% 
+  sf::st_drop_geometry())
+shp_all$survey.grid <- shp_all$survey.grid[shp_all$survey.grid$srvy != "GOA",]
+shp_all$survey.grid <- dplyr::bind_rows(aaa, shp_all$survey.grid)
+
+aaa <- dplyr::left_join(
+  shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] %>% 
+    dplyr::select(-stratum, -area_name), 
+  sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] %>% 
+                sf::st_centroid() %>% 
+                dplyr::select(-stratum, -area_name), 
+              shp_all$survey.strata[shp_all$survey.strata$srvy == "AI",] %>% 
+                dplyr::select(area_name, stratum)) %>% 
+    dplyr::select(area_name, stratum, grid_id, station) %>% 
+    sf::st_drop_geometry())
+shp_all$survey.grid <- shp_all$survey.grid[shp_all$survey.grid$srvy != "AI",]
+shp_all$survey.grid <- dplyr::bind_rows(aaa, shp_all$survey.grid)
+
+# ggplot(data = aaa, # %>% dplyr::filter(is.na(area_name)),
+#        mapping = aes(fill = area_name, label = stratum)) +
+#   geom_sf(color = "black") #+ geom_sf_label()
 
 save(shp_all, file = here::here("data", "shp_all.rdata"))
 

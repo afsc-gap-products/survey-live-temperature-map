@@ -882,8 +882,10 @@ make_figure <- function(
       
       # Draw bounding boxes
       bb <- data.frame()
-      for (iiii in 1:length(unique(grid_stations_plot$area_name))) {
-        x <- unique(grid_stations_plot$area_name)[iiii]
+      grid_stations_plot0 <- grid_stations_plot %>% 
+        dplyr::filter(!is.na(area_name))
+      for (iiii in 1:length(unique(grid_stations_plot0$area_name))) {
+        x <- unique(grid_stations_plot0$area_name)[iiii]
         grid_stations_plot1 <- grid_stations_plot
         grid_stations_plot1$area_name <- factor(grid_stations_plot1$area_name)        
         grid_stations_plot1 <- grid_stations_plot1[grid_stations_plot1$area_name == x,]

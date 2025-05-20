@@ -204,135 +204,11 @@ dat_survey <-
   vessel_name = ifelse(is.na(vessel_name), NA, stringr::str_to_title(vessel_name)), 
   vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")),
   vessel_shape = ifelse(is.na(vessel_name), NA, substr(vessel_name, start = 1, stop = 1)),          
-  vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", vessel_name))) # %>% 
-  # dplyr::left_join(gap_products_akfin_area0 %>%
-  #                    # dplyr::filter(area_type == "STRATUM") %>%
-  #                    dplyr::left_join(gap_products_akfin_area0 %>%
-  #                                       # dplyr::filter(area_type == "STRATUM") %>%
-  #                                       dplyr::group_by(survey_definition_id) %>%
-  #                                       dplyr::summarise(design_year = max(design_year)) %>%
-  #                                       dplyr::ungroup() %>%
-  #                                       dplyr::mutate(design_year = ifelse(survey_definition_id == 47, 1984, design_year)) %>% # TOLEDO - 2025 edit
-  #                                       dplyr::mutate(include = TRUE) ) %>%
-  #                    dplyr::filter(include == TRUE) %>%
-  #                    dplyr::select(stratum = area_id, area_name, survey_definition_id, design_year) %>%
-  #                    # dplyr::distinct() %>%
-  #                    dplyr::mutate(area_name = dplyr::case_when(
-  #                      # area_id %in% C(211, 15, 14, 113, 511) ~ "Shumagin",
-  #                      # area_id %in% C(123, 24, 521, 222, 23) ~ "Chirikof",
-  #                      # area_id %in% C(36, 136, 105, 37, 38, 531) ~ "Kodiak",
-  #                      # area_id %in% C(43, 541, 242, 42) ~ "Yakutat",
-  #                      # area_id %in% C(51, 551, 152, 352, 253) ~ "Southeastern",
-  #                      grepl(pattern = "Prince of", x = area_name) ~ "Southeastern",
-  #                      # grepl(pattern = "Alaska Pen", x = area_name) ~ "Alaska Pen",
-  #                      grepl(pattern = "Barren Is", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Lower Cook", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Fairweather", x = area_name) ~ "Yakutat",
-  #                      grepl(pattern = "Fox Isl", x = area_name) ~ "Shumagin",
-  #                      grepl(pattern = "Middleton", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Kenai", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Albatross", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Yakutat", x = area_name) ~ "Yakutat",
-  #                      grepl(pattern = "Yakataga", x = area_name) ~ "Yakutat",
-  #                      grepl(pattern = "Kodiak", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Southeast", x = area_name) ~ "Southeastern",
-  #                      grepl(pattern = "Davidson Bank", x = area_name) ~ "Shumagin",
-  #                      grepl(pattern = "Upper Alaska", x = area_name) ~ "Chirikof",
-  #                      grepl(pattern = "Lower Alaska", x = area_name) ~ "Shumagin",
-  #                      grepl(pattern = "Portlock Flats", x = area_name) ~ "Kodiak",
-  #                      grepl(pattern = "Shumagin", x = area_name) ~ "Shumagin",
-  #                      grepl(pattern = "Sanak Gully", x = area_name) ~ "Shumagin",
-  #                      grepl(pattern = "Chichagof", x = area_name) ~ "Southeastern",
-  #                      grepl(pattern = "Semidi Bank", x = area_name) ~ "Chirikof",
-  #                      grepl(pattern = "Chirikof", x = area_name) ~ "Chirikof",
-  #                      grepl(pattern = "Shelikof", x = area_name) ~ "Chirikof",
-  #                      TRUE ~ area_name
-  #                    )) %>%
-  #                    dplyr::select(-design_year) )
-  
-# require(sf)
-# shape <- read_sf(dsn = here::here("data", "aigrid_trawable_thru2018_Emily.shp"), layer = "SHAPEFILE")
-
-# ggplot2::ggplot() + # %>%
-# #                   # dplyr::mutate(
-# #                   #   area_id = stratum, 
-# #                   #   area_name = dplyr::case_when(
-# #                   #   area_id %in% C(211, 15, 14, 113, 511) ~ "Shumagin",
-# #                   #   area_id %in% C(123, 24, 521, 222, 23) ~ "Chirikof",
-# #                   #   area_id %in% C(36, 136, 105, 37, 38, 531) ~ "Kodiak",
-# #                   #   area_id %in% C(43, 541, 242, 42) ~ "Yakutat",
-# #                   #   area_id %in% C(51, 551, 152, 352, 253) ~ "Southeastern"
-# #                   #   # TRUE ~ area_name
-# #                   # )), 
-# #                  
-# #                   dplyr::mutate(
-# #                     area_name = dplyr::case_when( 
-# #                       stratum %in% c(211, 15, 14, 113, 511) ~ "Shumagin",
-# #                       stratum %in% c(123, 24, 521, 222, 23, 321) ~ "Chirikof", 
-# #                       stratum %in% c(36, 136, 105, 37, 38, 531, 135) ~ "Kodiak", 
-# #                       stratum %in% c(43, 541, 242, 42, 144, 145) ~ "Yakutat", 
-# #                       stratum %in% c(51, 551, 152, 352, 253, 252) ~ "Southeastern"#, 
-# #                       # TRUE ~ stratum
-# #                     )) %>% 
-#                 # mapping = aes()  + 
-#   # geom_sf(data = shp$survey.strata[shp$survey.strata$srvy == "GOA",], 
-#   #         mapping = aes(geometry = geometry)) +
-#   geom_point(data = dat_survey %>%
-#                   dplyr::filter(year == 2025 &
-#                                   srvy == "GOA"),
-#              mapping = aes(color = area_name,
-#                            #fill = area_name,
-#                            x = longitude_dd_start,
-#                            y = latitude_dd_start)) #+
-#   # geom_sf_label(mapping = aes(label = stratum))
-
-
-# aaa <- shp$survey.strata %>% 
-#   dplyr::filter(srvy == "GOA") %>% 
-#   dplyr::select(stratum, geometry) %>% 
-#   dplyr::mutate(
-#     # area_id = stratum, 
-#     area_name = dplyr::case_when( # 
-#       stratum %in% c(211, 15, 14, 113, 511) ~ "Shumagin",
-#       stratum %in% c(123, 24, 521, 222, 23, 321) ~ "Chirikof", 
-#       stratum %in% c(36, 136, 105, 37, 38, 531, 135) ~ "Kodiak", 
-#       stratum %in% c(43, 541, 242, 42, 144, 145) ~ "Yakutat", 
-#       stratum %in% c(51, 551, 152, 352, 253, 252) ~ "Southeastern"#, 
-#       # TRUE ~ stratum
-#     ))
-# 
-# ggplot(data = aaa) + # %>% dplyr::filter(is.na(area_name))) + 
-#   geom_sf(mapping = aes(fill = area_name), color = "black") + 
-#   geom_sf_label(mapping = aes(label = stratum), position = position_jitter(height = 1000)) 
-
-# if (data_source == "gd") {
-#   if (max(dat_survey$year) < max(dat_googledrive$year, na.rm = TRUE)) {
-#     
-#     dat_survey <- dat_survey %>%
-#       dplyr::filter(year < maxyr) %>%
-#       dplyr::bind_rows(
-#         dat_googledrive %>% # Combined previous and new haul data
-#           dplyr::mutate(vessel_name1 = toupper(vessel_name)) %>%
-#           dplyr::left_join( # join to a distinct list of vessels
-#             dat_survey %>%
-#               dplyr::mutate(vessel_name1 = toupper(vessel_name)) %>%
-#               dplyr::select(vessel_name1, vessel_id) %>%
-#               dplyr::filter(!is.na(vessel_id)) %>%
-#               dplyr::distinct())) %>%
-#       dplyr::select(-vessel_name1)
-#     
-#     # dat_survey <- dat_survey %>%
-#     #   dplyr::filter(year < maxyr) %>%
-#     #   dplyr::bind_rows(dat_googledrive) # Combined previous and new haul data
-#   }
-# }
+  vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", vessel_name))) # 
 
 dat_survey <- race_data_cruises_mod0 %>% 
-  dplyr::select(#survey_id, 
-                cruise, vessel_id, survey_definition_id, 
+  dplyr::select(cruise, vessel_id, survey_definition_id, 
                 date_start = start_date, date_end = end_date) %>% 
-  # dplyr::left_join(dat_survey %>% 
-  #                    dplyr::select(cruise, vessel_id, survey_definition_id)) %>% 
   dplyr::filter(!is.na(survey_definition_id)) %>% 
   dplyr::filter(!is.na(date_start)) %>%
   dplyr::group_by(survey_definition_id, cruise) %>%
@@ -345,36 +221,6 @@ dat_survey <- race_data_cruises_mod0 %>%
     format(x = as.Date(date_end), "%b %d"))) %>% 
   dplyr::ungroup() %>%
   dplyr::right_join(dat_survey)
-
-# dat_survey <- dat_survey %>% 
-#   dplyr::arrange(-year) %>%
-#   dplyr::mutate(
-#     vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
-#     vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
-#     vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name))),
-#     srvy = dplyr::case_when(
-#       survey_definition_id == 98 ~ "EBS", 
-#       survey_definition_id == 143 ~ "NBS", 
-#       survey_definition_id == 78 ~ "BSS",
-#       survey_definition_id == 47 ~ "GOA", 
-#       survey_definition_id == 52 ~ "AI"), 
-#     survey = dplyr::case_when(
-#       srvy == "EBS" ~ "Eastern Bering Sea", 
-#       srvy == "NBS" ~ "Northern Bering Sea", 
-#       srvy == "BSS" ~ "Bering Sea Slope", 
-#       srvy == "GOA" ~ "Gulf of Alaska", 
-#       srvy == "AI" ~ "Aleutian Islands"), 
-#     date = as.Date(date_time_start))  %>%
-#   dplyr::filter(!is.na(srvy)) #%>% 
-# # dplyr::filter( # there shouldn't be bottom temps of 0 in the AI or GOA
-# #   ((survey_definition_id %in% c(52, 47) & surface_temperature_c != 0) | 
-# #      (survey_definition_id %in% c(78, 98, 143))) & 
-# #     ((survey_definition_id %in% c(52, 47) & gear_temperature_c != 0) | 
-# #        (survey_definition_id %in% c(78, 98, 143)))) %>% 
-# # dplyr::rename(st = surface_temperature_c, 
-# #               bt = gear_temperature_c) 
-# # dplyr::select(year, srvy, survey_dates, vessel_id, vessel_shape, vessel_name, vessel_ital, survey) %>% 
-# # dplyr::distinct() 
 
 # Load shapefiles --------------------------------------------------------------
 
