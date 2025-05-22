@@ -38,14 +38,14 @@ srvys <- unique(dat_plot$srvy)
 
 # find regions in west to east
 if (srvy %in% c("AI", "GOA")) {
-  goaai_regions <- shp$survey.grid %>% 
-    st_centroid() %>% 
-    st_transform(crs = "+proj=longlat +datum=WGS84") %>%
-    st_coordinates() %>% 
-    data.frame() %>%
-    dplyr::mutate(area_name = unlist(shp$survey.grid$area_name)) %>% 
-    dplyr::group_by(area_name) %>% 
-    dplyr::summarise(minlon = min(X, na.rm = TRUE)) %>% 
+  goaai_regions <- shp$survey.grid |> 
+    st_centroid() |> 
+    st_transform(crs = "+proj=longlat +datum=WGS84") |>
+    st_coordinates() |> 
+    data.frame() |>
+    dplyr::mutate(area_name = unlist(shp$survey.grid$area_name)) |> 
+    dplyr::group_by(area_name) |> 
+    dplyr::summarise(minlon = min(X, na.rm = TRUE)) |> 
     dplyr::arrange(minlon)
   
   goaai_regions0 <- paste0("This survey covers the ", 
@@ -158,7 +158,7 @@ if (file_end %in% c("mean", "mean_cb")) {
 } else if (file_end %in% c("daily", "daily_cb")) {
   
   # Find what stations were sampled on this day
-  loc <- dat_plot %>% 
+  loc <- dat_plot |> 
     dplyr::filter(!is.na(var) & 
                     date == max_date) 
   
@@ -175,26 +175,26 @@ if (file_end %in% c("mean", "mean_cb")) {
     stations1 <- paste0("No stations were sampled on ", format_date_txt(x = as.Date(max_date)),". ")
   } else {
     
-    dat_max_date <- grid_stations_plot %>% 
-      sf::st_cast("MULTIPOLYGON") %>% 
-      sf::st_centroid()  %>% 
-      sf::st_transform(x = ., crs = "+proj=longlat +datum=WGS84")%>%
-      sf::st_coordinates() %>%
-      data.frame() %>% 
+    dat_max_date <- grid_stations_plot |> 
+      sf::st_cast("MULTIPOLYGON") |> 
+      sf::st_centroid()  |> 
+      sf::st_transform(x = ., crs = "+proj=longlat +datum=WGS84")|>
+      sf::st_coordinates() |>
+      data.frame() |> 
       dplyr::rename(lon = X, 
-                    lat = Y) %>% 
+                    lat = Y) |> 
       dplyr::mutate(
         station = grid_stations_plot$station, 
         stratum = grid_stations_plot$stratum, 
-        stratum = as.character(stratum)) %>%
+        stratum = as.character(stratum)) |>
       dplyr::left_join(y = ., 
-                       x = loc %>% 
-                         dplyr::mutate(stratum = as.character(stratum)) %>% 
+                       x = loc |> 
+                         dplyr::mutate(stratum = as.character(stratum)) |> 
                          dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
-                       by = c("stratum", "station"))  %>%
-      dplyr::arrange(vessel_shape) %>% 
+                       by = c("stratum", "station"))  |>
+      dplyr::arrange(vessel_shape) |> 
       dplyr::mutate(lon = round(x = lon, digits = 2), 
-                    lat = round(x = lat, digits = 2)) %>% 
+                    lat = round(x = lat, digits = 2)) |> 
       dplyr::filter(!is.na(lon))
     
     temp <- c()

@@ -81,25 +81,25 @@ for (i in 1:length(a)){
 
 dat_cpue0<-SameColNames(df.ls)
 
-dat_cpue <- dat_cpue0 %>%
+dat_cpue <- dat_cpue0 |>
   dplyr::mutate(survey_long = dplyr::case_when(survey == "AI" ~ "Aleutian Islands", 
                                                survey == "ESSLOPE" ~ "Bering Sea Slope", 
                                                survey == "EBS" ~ "Eastern Bering Sea Shelf",  
                                                survey == "GOA" ~ "Gulf of Alaska",  
-                                               survey == "NBS" ~ "Northern Bering Sea Shelf")) %>%
+                                               survey == "NBS" ~ "Northern Bering Sea Shelf")) |>
   dplyr::mutate(map_area = dplyr::case_when(survey == "AI" ~ "ai", 
                                                survey == "ESSLOPE" ~ "bs.slope", 
                                                survey == "EBS" ~ "bs.south",  
                                                survey == "GOA" ~ "goa",  
-                                               survey == "NBS" ~ "bs.north")) %>%
+                                               survey == "NBS" ~ "bs.north")) |>
   dplyr::mutate(stratum_shp = dplyr::case_when(survey == "AI" ~ "shp_ai", 
                                             survey == "ESSLOPE" ~ "shp_bsslope", 
                                             survey == "EBS" ~ "shp_ebs",  
                                             survey == "GOA" ~ "shp_goa",  
-                                            survey == "NBS" ~ "shp_nbs")) %>%
-  dplyr::mutate(common0 = common) %>%
-  dplyr::mutate(common = str_to_sentence(common)) %>%
-  dplyr::mutate(survey_num = as.numeric(factor(survey))) %>% 
+                                            survey == "NBS" ~ "shp_nbs")) |>
+  dplyr::mutate(common0 = common) |>
+  dplyr::mutate(common = str_to_sentence(common)) |>
+  dplyr::mutate(survey_num = as.numeric(factor(survey))) |> 
   data.frame()
 
 dat_cpue$common <- gsub(pattern = "unid.", replacement = "(unidentified)", x = dat_cpue$common, ignore.case = TRUE)
@@ -126,7 +126,7 @@ dat_cpue$common[is.na(dat_cpue$common)] <- NULL #any rows with remaining NA's in
 # Set breaks for all years for each species
 for (i in 1:length(unique(dat_cpue$common))) {
   
-  df <- dat_cpue %>%
+  df <- dat_cpue |>
     filter(common == unique(dat_cpue$common)[i])
   
   n.breaks <- 5

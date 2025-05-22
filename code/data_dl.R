@@ -25,10 +25,10 @@ for (i in seq(0, 500000, 10000)){
   
   ## bind sub-pull to dat data.frame
   dat <- dplyr::bind_rows(dat,
-                          data$items %>%
+                          data$items |>
                             dplyr::select(-links)) # necessary for API accounting, but not part of the dataset)
 }
-dat_foss <- dat %>%
+dat_foss <- dat |>
   dplyr::mutate(date_time = as.POSIXct(date_time,
                                        format = "%Y-%m-%dT%H:%M:%S",
                                        tz = Sys.timezone()), 
@@ -37,7 +37,7 @@ dat_foss <- dat %>%
                 # vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
                 # vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
                 # vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))
-                ) %>% 
+                ) |> 
   dplyr::select(year, srvy = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin, 
                 # date_start, date_end, survey_dates, 
                 station, stratum, date_time_start = date_time, 
@@ -46,10 +46,10 @@ dat_foss <- dat %>%
                 vessel_id, vessel_name, #vessel_shape, vessel_ital, 
   source, date)
 
-dat_foss <- dat_foss %>% 
+dat_foss <- dat_foss |> 
   dplyr::left_join(
-    dat_foss %>% 
-      dplyr::group_by(survey_definition_id, year) %>% 
+    dat_foss |> 
+      dplyr::group_by(survey_definition_id, year) |> 
       dplyr::summarise(date_start = format(x = min(date_time_start, na.rm = TRUE), format = "%B %d"), 
                        date_end = format(x = max(date_time_start, na.rm = TRUE), format = "%B %d"), 
                        survey_dates = paste0(date_start, " - ", date_end))    
@@ -139,11 +139,11 @@ error_loading
 
 
 race_data_cruises0 <- 
-  RODBC::sqlQuery(channel, "SELECT * FROM RACE_DATA.CRUISES;")  %>% 
+  RODBC::sqlQuery(channel, "SELECT * FROM RACE_DATA.CRUISES;")  |> 
   dplyr::left_join(
-    RODBC::sqlQuery(channel, "SELECT SURVEY_ID, SURVEY_DEFINITION_ID FROM RACE_DATA.SURVEYS;") )  %>% 
+    RODBC::sqlQuery(channel, "SELECT SURVEY_ID, SURVEY_DEFINITION_ID FROM RACE_DATA.SURVEYS;") )  |> 
   dplyr::left_join(
-    RODBC::sqlQuery(channel, "SELECT VESSEL_ID, NAME AS VESSEL_NAME FROM RACE_DATA.VESSELS;") )  %>% 
+    RODBC::sqlQuery(channel, "SELECT VESSEL_ID, NAME AS VESSEL_NAME FROM RACE_DATA.VESSELS;") )  |> 
       janitor::clean_names()
 
 write.csv(x = race_data_cruises0, file = here::here("data", "race_data_cruises_mod.csv"))
@@ -157,35 +157,35 @@ shp_ai <- akgfmaps::get_base_layers(select.region = "ai", set.crs = "auto")
 shp_goa <- akgfmaps::get_base_layers(select.region = "goa", set.crs = "auto")
 shp_bss <- akgfmaps::get_base_layers(select.region = "ebs.slope", set.crs = "auto")
 
-aa <- gap_products_akfin_area0 %>% 
-  dplyr::filter(design_year <= maxyr) %>% 
-  dplyr::group_by(survey_definition_id) %>% 
+aa <- gap_products_akfin_area0 |> 
+  dplyr::filter(design_year <= maxyr) |> 
+  dplyr::group_by(survey_definition_id) |> 
   dplyr::summarise(design_year = max(design_year, na.rm = TRUE)) 
 
-areas <- gap_products_akfin_area0  %>% 
+areas <- gap_products_akfin_area0  |> 
   # find the most up to date design_year's
   dplyr::filter(eval(parse(text=paste0("(survey_definition_id == ", aa$survey_definition_id, 
-                                       " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) %>%
-  dplyr::filter(area_type %in% c("STRATUM", "INPFC")) %>% 
+                                       " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) |>
+  dplyr::filter(area_type %in% c("STRATUM", "INPFC")) |> 
   dplyr::mutate(
     area_name = dplyr::case_when(
       area_name %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
       TRUE ~ area_name)
-  ) %>% 
+  ) |> 
   dplyr::select(survey_definition_id, area_id, area_type, area_name) 
 
 areas <- dplyr::bind_rows(
-  areas %>% 
-    dplyr::mutate(stratum = area_id) %>%
+  areas |> 
+    dplyr::mutate(stratum = area_id) |>
     dplyr::filter(!(survey_definition_id %in% c(47, 52)) & 
                     area_type == "STRATUM"), 
-  gap_products_akfin_stratum_groups0 %>% 
+  gap_products_akfin_stratum_groups0 |> 
     dplyr::filter(eval(parse(text=paste0("(survey_definition_id == ", aa$survey_definition_id, 
-                                         " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) %>%
-    dplyr::filter(survey_definition_id %in% c(52, 47)) %>% 
-    dplyr::filter(area_id %in% unique(areas$area_id[areas$area_type == "INPFC"])) %>%
-    dplyr::select(-design_year) %>% 
-    dplyr::left_join(areas %>% 
+                                         " & ", "design_year == ", aa$design_year, ") ", collapse = " | ")))) |>
+    dplyr::filter(survey_definition_id %in% c(52, 47)) |> 
+    dplyr::filter(area_id %in% unique(areas$area_id[areas$area_type == "INPFC"])) |>
+    dplyr::select(-design_year) |> 
+    dplyr::left_join(areas |> 
                        dplyr::filter(area_type == "INPFC") ))  
 
 shp_all <- shp <- list(
@@ -195,7 +195,7 @@ shp_all <- shp <- list(
     shp_ebs$survey.strata,
     shp_nbs$survey.strata,
     # ggplot(data = aaa, mapping = aes(fill = area_name, label = STRATUM)) + geom_sf(color = "black") + geom_sf_label()
-    shp_ai$survey.strata %>% # require(sf); shape <- read_sf(dsn = here::here("data", "aigrid_trawable_thru2018_Emily.shp"))
+    shp_ai$survey.strata |> # require(sf); shape <- read_sf(dsn = here::here("data", "aigrid_trawable_thru2018_Emily.shp"))
       dplyr::mutate(# 322
         area_name = dplyr::case_when( 
           STRATUM %in% c(212, 214, 211, 213, 223, 223, 224, 221, 222) ~ "Western Aleutians",
@@ -204,7 +204,7 @@ shp_all <- shp <- list(
                          624, 512, 622, 613, 521, 623, 523, 594) ~ "Eastern Aleutians",
           STRATUM %in% c(712, 794, 721, 722, 793, 711) ~ "South Bering Sea"
         )),
-    shp_goa$survey.strata %>% 
+    shp_goa$survey.strata |> 
       dplyr::mutate(
       area_name = dplyr::case_when( 
         STRATUM %in% c(211, 15, 14, 113, 511) ~ "Shumagin",
@@ -213,16 +213,16 @@ shp_all <- shp <- list(
         STRATUM %in% c(43, 541, 242, 42, 144, 145) ~ "Yakutat",
         STRATUM %in% c(51, 551, 152, 352, 253, 252) ~ "Southeastern"
       )),
-    shp_bss$survey.strata)) %>%
+    shp_bss$survey.strata)) |>
     dplyr::mutate(srvy = dplyr::case_when(
       SURVEY_DEFINITION_ID == 98 ~ "EBS", 
       SURVEY_DEFINITION_ID == 143 ~ "NBS", 
       SURVEY_DEFINITION_ID == 78 ~ "BSS", 
       SURVEY_DEFINITION_ID == 52 ~ "AI", 
       SURVEY_DEFINITION_ID == 47 ~ "GOA" 
-    )) %>% 
-    janitor::clean_names() %>%
-    dplyr::mutate(area_id = stratum) %>% 
+    )) |> 
+    janitor::clean_names() |>
+    dplyr::mutate(area_id = stratum) |> 
     dplyr::left_join(y = areas, relationship = "many-to-many"), 
   
   # Regions
@@ -232,8 +232,8 @@ shp_all <- shp <- list(
     shp_nbs$survey.area,
     shp_ai$survey.area,
     shp_goa$survey.area,
-    shp_bss$survey.area)) %>%
-    janitor::clean_names()  %>%
+    shp_bss$survey.area)) |>
+    janitor::clean_names()  |>
     dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
@@ -245,23 +245,23 @@ shp_all <- shp <- list(
   # Stations
   survey.grid = dplyr::bind_rows(list(
     # shp_bs$survey.grid, 
-    shp_ebs$survey.grid %>% 
+    shp_ebs$survey.grid |> 
       dplyr::mutate(survey_definition_id = 98),
-    shp_nbs$survey.grid %>% 
+    shp_nbs$survey.grid |> 
       dplyr::mutate(survey_definition_id = 143),
-    shp_ai$survey.grid %>% 
+    shp_ai$survey.grid |> 
       dplyr::mutate(survey_definition_id = 52),
-    shp_goa$survey.grid %>% 
+    shp_goa$survey.grid |> 
       dplyr::mutate(survey_definition_id = 47)
-  )) %>%
-    janitor::clean_names()  %>%
+  )) |>
+    janitor::clean_names()  |>
     dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
       survey_definition_id == 78 ~ "BSS", 
       survey_definition_id == 52 ~ "AI", 
       survey_definition_id == 47 ~ "GOA" 
-    )) %>% 
+    )) |> 
     dplyr::select(-survey_definition_id_2), 
   
   # lon.breaks
@@ -286,21 +286,21 @@ shp_all <- shp <- list(
   
   # bathymetry
   bathymetry = dplyr::bind_rows(list(
-    shp_bs$bathymetry %>% 
+    shp_bs$bathymetry |> 
       dplyr::mutate(srvy = "BS"),
-    shp_ebs$bathymetry %>% 
+    shp_ebs$bathymetry |> 
       dplyr::mutate(srvy = "EBS"),
-    shp_nbs$bathymetry %>% 
+    shp_nbs$bathymetry |> 
       dplyr::mutate(srvy = "NBS"),
-    shp_bss$bathymetry %>% 
+    shp_bss$bathymetry |> 
       dplyr::mutate(srvy = "BSS"),
-    shp_goa$bathymetry %>% 
+    shp_goa$bathymetry |> 
       dplyr::mutate(srvy = "GOA"),
-    shp_ai$bathymetry %>% 
+    shp_ai$bathymetry |> 
       dplyr::mutate(srvy = "AI")
-  ))  %>%
-    janitor::clean_names() %>% 
-    dplyr::select(geometry, srvy = srvy, meters) %>%
+  ))  |>
+    janitor::clean_names() |> 
+    dplyr::select(geometry, srvy = srvy, meters) |>
     dplyr::mutate(survey_definition_id = dplyr::case_when(
       srvy == "EBS" ~ 98, 
       srvy == "NBS" ~ 143, 
@@ -315,47 +315,47 @@ shp_all <- shp <- list(
                lab = c("50 m", "100 m", "200 m"), 
                x = c(-168.122, -172.736, -174.714527), 
                y = c(58.527, 58.2857, 58.504532), 
-               srvy = "BS") %>%
+               srvy = "BS") |>
       sf::st_as_sf(coords = c("x", "y"), 
                    remove = FALSE,  
-                   crs = "+proj=longlat") %>%
+                   crs = "+proj=longlat") |>
       sf::st_transform(crs = "EPSG:3338"), 
     data.frame(type = "bathymetry", 
                lab = c("50 m", "100 m", "200 m"), 
                x = c(-168, -172.5, -174.714527), 
                y = c(58.527, 58.2857, 58.504532), 
-               srvy = "EBS") %>%
+               srvy = "EBS") |>
       sf::st_as_sf(coords = c("x", "y"), 
                    remove = FALSE,  
-                   crs = "+proj=longlat") %>%
+                   crs = "+proj=longlat") |>
       sf::st_transform(crs = "EPSG:3338")
   )) )
 
 aaa <- dplyr::left_join(
 shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",], 
-sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",] %>% 
+sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",] |> 
               sf::st_centroid(), 
-            shp_all$survey.strata[shp_all$survey.strata$srvy == "GOA",] %>% 
-              dplyr::select(area_name, stratum)) %>% 
-  dplyr::select(area_name, stratum, grid_id, station) %>% 
+            shp_all$survey.strata[shp_all$survey.strata$srvy == "GOA",] |> 
+              dplyr::select(area_name, stratum)) |> 
+  dplyr::select(area_name, stratum, grid_id, station) |> 
   sf::st_drop_geometry())
 shp_all$survey.grid <- shp_all$survey.grid[shp_all$survey.grid$srvy != "GOA",]
 shp_all$survey.grid <- dplyr::bind_rows(aaa, shp_all$survey.grid)
 
 aaa <- dplyr::left_join(
-  shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] %>% 
+  shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] |> 
     dplyr::select(-stratum, -area_name), 
-  sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] %>% 
-                sf::st_centroid() %>% 
+  sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] |> 
+                sf::st_centroid() |> 
                 dplyr::select(-stratum, -area_name), 
-              shp_all$survey.strata[shp_all$survey.strata$srvy == "AI",] %>% 
-                dplyr::select(area_name, stratum)) %>% 
-    dplyr::select(area_name, stratum, grid_id, station) %>% 
+              shp_all$survey.strata[shp_all$survey.strata$srvy == "AI",] |> 
+                dplyr::select(area_name, stratum)) |> 
+    dplyr::select(area_name, stratum, grid_id, station) |> 
     sf::st_drop_geometry())
 shp_all$survey.grid <- shp_all$survey.grid[shp_all$survey.grid$srvy != "AI",]
 shp_all$survey.grid <- dplyr::bind_rows(aaa, shp_all$survey.grid)
 
-# ggplot(data = aaa, # %>% dplyr::filter(is.na(area_name)),
+# ggplot(data = aaa, # |> dplyr::filter(is.na(area_name)),
 #        mapping = aes(fill = area_name, label = stratum)) +
 #   geom_sf(color = "black") #+ geom_sf_label()
 

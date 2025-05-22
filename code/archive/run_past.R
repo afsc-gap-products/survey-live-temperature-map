@@ -44,15 +44,15 @@ plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
 region_akgfmaps = "bs.all"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
 show_planned_stations <- TRUE
-survey_area$survey.grid <- survey_area$survey.grid %>% 
-  sf::st_transform(x = ., survey_area$crs$input) %>%
-  dplyr::rename(station = STATIONID) %>%
+survey_area$survey.grid <- survey_area$survey.grid |> 
+  sf::st_transform(x = ., survey_area$crs$input) |>
+  dplyr::rename(station = STATIONID) |>
   sp::merge(x = ., 
-            y = haul %>%
-              dplyr::rename(station = stationid) %>% 
-              dplyr::select(station, stratum) %>% 
+            y = haul |>
+              dplyr::rename(station = stationid) |> 
+              dplyr::select(station, stratum) |> 
               dplyr::distinct(), 
-            all.x = TRUE) %>% 
+            all.x = TRUE) |> 
   dplyr::mutate(region = "Bering Sea")
 survey_area$place.labels$y[survey_area$place.labels$lab == "200 m"] <- -60032.7
 
@@ -124,16 +124,16 @@ srvy <- "EBS"
 plot_subtitle <- "NOAA Fisheries eastern Bering Sea Bottom Trawl Survey"
 region_akgfmaps = "bs.south"
 survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.crs = "auto")
-survey_area$survey.grid <- survey_area$survey.grid %>%
-  sf::st_transform(x = ., survey_area$crs$input) %>%
-  dplyr::rename(station = STATIONID) %>%
+survey_area$survey.grid <- survey_area$survey.grid |>
+  sf::st_transform(x = ., survey_area$crs$input) |>
+  dplyr::rename(station = STATIONID) |>
   sp::merge(x = .,
-            y = haul %>%
-              dplyr::rename(station = stationid) %>%
-              dplyr::select(station, stratum) %>%
+            y = haul |>
+              dplyr::rename(station = stationid) |>
+              dplyr::select(station, stratum) |>
               dplyr::distinct(),
-            all.x = TRUE) %>%
-  dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  %>%
+            all.x = TRUE) |>
+  dplyr::filter(station %in% akgfmaps::get_survey_stations(select.region = region_akgfmaps))  |>
   dplyr::mutate(region = "Bering Sea")
 
 yrs <- list("2018" = "https://drive.google.com/drive/folders/1jaJrvKE729I15YnC6LhRDVI5Xxg4xEPo")
@@ -191,25 +191,25 @@ survey_area <- akgfmaps::get_base_layers(select.region = region_akgfmaps, set.cr
 
 survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
                                           layer = "aigrid_trawable_thru2018_Emily",
-                                          verbose=F) %>%
-  sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-  st_as_sf(x = .) %>%
+                                          verbose=F) |>
+  sp::spTransform(x = ., CRS(survey_area$crs$input)) |>
+  st_as_sf(x = .) |>
   dplyr::rename(station = ID,
-                stratum = STRATUM) %>%
+                stratum = STRATUM) |>
   dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
-                  stratum != 0) %>% # land
+                  stratum != 0) |> # land
   sp::merge(
     x = .,
-    y = goa_strata0 %>%
-      dplyr::filter(survey == "AI") %>%
+    y = goa_strata0 |>
+      dplyr::filter(survey == "AI") |>
       dplyr::mutate(srvy = "AI",
                     region = stringr::str_to_title(inpfc_area),
                     region = dplyr::case_when(
                       region %in% c("Western Aleutians", "Chirikof") ~ "Western Aleutians",
-                      TRUE ~ region)) %>%
-      dplyr::select(srvy, stratum, region) %>%
+                      TRUE ~ region)) |>
+      dplyr::select(srvy, stratum, region) |>
       dplyr::distinct(),
-    all.x = TRUE)  %>% # , duplicateGeoms = TRUE
+    all.x = TRUE)  |> # , duplicateGeoms = TRUE
   dplyr::arrange(region)
 survey_area$survey.grid1 <- survey_area$survey.grid
 
@@ -269,16 +269,16 @@ for (i in 1:length(yrs)) {
 # 
 # survey_area$survey.grid <- rgdal::readOGR(dsn = paste0(dir_wd, '/shapefiles/'),# Prepare map objects
 #                                 layer = "aigrid_trawable_thru2018_Emily",
-#                                 verbose=F) %>%
-#   sp::spTransform(x = ., CRS(survey_area$crs$input)) %>%
-#   st_as_sf(x = .) %>%
+#                                 verbose=F) |>
+#   sp::spTransform(x = ., CRS(survey_area$crs$input)) |>
+#   st_as_sf(x = .) |>
 #   dplyr::rename(station = ID,
-#                 stratum = STRATUM) %>%
+#                 stratum = STRATUM) |>
 #   dplyr::filter(stratum %in% unique(goa_strata0$stratum) &
-#                   stratum != 0) %>% # land
-#       dplyr::select(srvy, stratum, region) %>%
+#                   stratum != 0) |> # land
+#       dplyr::select(srvy, stratum, region) |>
 #       dplyr::distinct(),
-#     all.x = TRUE)  %>% # , duplicateGeoms = TRUE
+#     all.x = TRUE)  |> # , duplicateGeoms = TRUE
 #   dplyr::arrange(region)
 # 
 # make_grid_wrapper(maxyr = maxyr,                             # Blank grid plot

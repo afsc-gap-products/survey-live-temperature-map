@@ -30,7 +30,7 @@ print_figs <- function(string_id = "current_daily_",
   temp <- data.frame(
     img = img0[grep(pattern = file_type, x = img0)], 
     txt0 = txt00[grep(pattern = ".txt", x = txt00)], 
-    txt = NA) %>% 
+    txt = NA) |> 
     dplyr::mutate(
       srvy = sapply(X = strsplit(x = txt0, split = "_", fixed = TRUE), "[[", 3), 
       srvy = sapply(X = strsplit(x = srvy, split = ".", fixed = TRUE), "[[", 1), 
@@ -39,7 +39,7 @@ print_figs <- function(string_id = "current_daily_",
         srvy == "bs" ~ 3, 
         srvy == "ebs" ~ 4, 
         srvy == "ai" ~ 1, 
-        srvy == "goa" ~ 2 )) %>% 
+        srvy == "goa" ~ 2 )) |> 
     dplyr::arrange(order)
   for (i in 1:nrow(temp)) {
     temp$txt[i] <- paste0("*", read.table(file = temp$txt0[i], header = FALSE, sep = "", dec = "."), "*", collapse = " ")

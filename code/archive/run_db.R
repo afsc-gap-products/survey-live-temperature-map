@@ -54,7 +54,7 @@ source(file = here::here("code","functions.R"))
 source(file = here::here("code", "data_db.R"))
 
 # What surveys should be run for this year and obtain necessary metadata
-dat_survey <- dat_survey %>%
+dat_survey <- dat_survey |>
   dplyr::filter(year == maxyr)
 
 # SIGN INTO FTP ----------------------------------------------------------------

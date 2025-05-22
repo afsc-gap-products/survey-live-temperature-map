@@ -29,7 +29,7 @@ PKG <- c(
   "tidyr", 
   "dplyr",
   "googledrive",
-  "magrittr",
+  # "magrittr",
   "stringr", 
   "here",
   "readxl",
@@ -127,40 +127,40 @@ make_varplot_wrapper <- function(
   }
   
   ## Wrangle Anomaly data -----------------------------------------------------
-  anom_years <- dat_survey %>%
+  anom_years <- dat_survey |>
     dplyr::select(
       srvy, year, stratum, station, date, survey, survey, survey_dates,
-      vessel_shape, vessel_name, vessel_ital, st, bt) %>%
-    dplyr::distinct() %>% 
+      vessel_shape, vessel_name, vessel_ital, st, bt) |>
+    dplyr::distinct() |> 
     dplyr::filter(!(is.na(station)) &
                     year < maxyr &
-                    srvy %in% srvy1) %>%
-    dplyr::select(srvy, survey, year) %>% 
-    dplyr::distinct() %>%
-    dplyr::group_by(srvy, survey) %>% 
+                    srvy %in% srvy1) |>
+    dplyr::select(srvy, survey, year) |> 
+    dplyr::distinct() |>
+    dplyr::group_by(srvy, survey) |> 
     dplyr::summarize(min = min(year, na.rm = TRUE), 
                      max = max(year, na.rm = TRUE), 
-                     nn = n()) %>% 
+                     nn = n()) |> 
     dplyr::mutate(range = paste0(min, "-", max, " (", nn, " years)")) 
   
   # Calculate var averages from previous data
-  dat_anom <- dat_survey %>%
+  dat_anom <- dat_survey |>
     dplyr::select(
       srvy, year, stratum, station, date, survey, survey, survey_dates,
-      vessel_shape, vessel_name, vessel_ital, st, bt) %>%
-    dplyr::distinct() %>% 
+      vessel_shape, vessel_name, vessel_ital, st, bt) |>
+    dplyr::distinct() |> 
     dplyr::filter(year < maxyr &
-                    srvy %in% srvy1) %>%
-    dplyr::rename("var" = dplyr::all_of(var)) %>%
-    dplyr::group_by(srvy, stratum, station) %>% 
+                    srvy %in% srvy1) |>
+    dplyr::rename("var" = dplyr::all_of(var)) |>
+    dplyr::group_by(srvy, stratum, station) |> 
     dplyr::summarise(mean = mean(var, na.rm = TRUE), 
                      sd = sd(var, na.rm = TRUE))
   
   ## Wrangle observed (daily) data ---------------------------------------------
   
-  dat <- dat_survey %>%
+  dat <- dat_survey |>
     dplyr::filter(srvy %in% srvy1 & 
-                    year == maxyr) %>% 
+                    year == maxyr) |> 
     dplyr::select(srvy, stratum, station, date, year, 
                   vessel_shape, var = dplyr::all_of(var), 
                   survey_dates, survey, vessel_name, source)
@@ -170,49 +170,49 @@ make_varplot_wrapper <- function(
     y = dat_anom,
     by = c("srvy", "stratum", "station"))
   
-  dat <- dat %>%
+  dat <- dat |>
     dplyr::mutate(reg_lab = paste0(survey, "\n(", survey_dates, ")"), 
                   var = as.numeric(var), 
-                  anom = var-mean) %>%
-    # anom = as.numeric(ifelse(sum(var0 == 0) == nrow(.), var0-mean, NA))) %>%
-    dplyr::arrange(date) %>% 
+                  anom = var-mean) |>
+    # anom = as.numeric(ifelse(sum(var0 == 0) == nrow(.), var0-mean, NA))) |>
+    dplyr::arrange(date) |> 
     dplyr::ungroup()
   
   ## Wrangle shapefiles ---------------------------------------------
   
   # shp$lon.breaks <- shp$lon.breaks[srvy0][[1]] 
   # shp$lat.breaks <- shp$lat.breaks[srvy0][[1]] 
-  # shp$plot.boundary <- shp$plot.boundary %>% 
+  # shp$plot.boundary <- shp$plot.boundary |> 
   #   dplyr::filter(srvy %in% srvy0)
   
-  shp$survey.strata <- shp$survey.strata %>% 
-    # dplyr::filter(srvy %in% srvy0) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(stratum, srvy, survey, survey, survey_definition_id) %>%
+  shp$survey.strata <- shp$survey.strata |> 
+    # dplyr::filter(srvy %in% srvy0) |>
+    dplyr::left_join(y = dat_survey |>
+                       dplyr::select(stratum, srvy, survey, survey, survey_definition_id) |>
                        dplyr::distinct())
   
-  shp$survey.area <- shp$survey.area %>% 
-    # dplyr::filter(srvy %in% srvy0) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(srvy, survey, survey_definition_id) %>%
+  shp$survey.area <- shp$survey.area |> 
+    # dplyr::filter(srvy %in% srvy0) |>
+    dplyr::left_join(y = dat_survey |>
+                       dplyr::select(srvy, survey, survey_definition_id) |>
                        dplyr::distinct())
   
-  shp$place.labels <- shp$place.labels %>% 
-    # dplyr::filter(srvy %in% srvy0) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(srvy, survey, survey_definition_id) %>%
+  shp$place.labels <- shp$place.labels |> 
+    # dplyr::filter(srvy %in% srvy0) |>
+    dplyr::left_join(y = dat_survey |>
+                       dplyr::select(srvy, survey, survey_definition_id) |>
                        dplyr::distinct())
   
-  shp$survey.grid <- shp$survey.grid %>% 
-    # dplyr::filter(srvy %in% srvy0) %>% 
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(station, stratum, srvy, survey, survey, survey_definition_id) %>%
+  shp$survey.grid <- shp$survey.grid |> 
+    # dplyr::filter(srvy %in% srvy0) |> 
+    dplyr::left_join(y = dat_survey |>
+                       dplyr::select(station, stratum, srvy, survey, survey, survey_definition_id) |>
                        dplyr::distinct())
   
-  shp$bathymetry <- shp$bathymetry %>% 
-    # dplyr::filter(srvy %in% srvy0) %>%
-    dplyr::left_join(y = dat_survey %>%
-                       dplyr::select(srvy, survey, survey_definition_id) %>%
+  shp$bathymetry <- shp$bathymetry |> 
+    # dplyr::filter(srvy %in% srvy0) |>
+    dplyr::left_join(y = dat_survey |>
+                       dplyr::select(srvy, survey, survey_definition_id) |>
                        dplyr::distinct())
   
   is_there_data_to_plot <- TRUE
@@ -225,8 +225,8 @@ make_varplot_wrapper <- function(
   if ("grid" %in% file_end0) {
     file_end <- "grid"; print(paste0("------------", file_end, "------------"))
     
-    dat00 = dat %>%
-      dplyr::filter(stratum != 0) %>% 
+    dat00 = dat |>
+      dplyr::filter(stratum != 0) |> 
       dplyr::mutate(reg_lab = ifelse(srvy == "BS", 
                                      paste0(survey, "\n"), 
                                      survey))
@@ -277,7 +277,7 @@ make_varplot_wrapper <- function(
                             # "B"
                             )){ # Inferno color scheme
       
-      dat00 = dat %>% # Mean plot
+      dat00 = dat |> # Mean plot
         dplyr::mutate(var = mean, 
                       reg_lab = paste0(survey, "\n "))
       plot_title = paste0("Time Series Mean ", var00)
@@ -332,8 +332,9 @@ make_varplot_wrapper <- function(
       }
     }
     
-    for (virids_option in c("H", # Rainbow color scheme
-                            "B")){ # Inferno color scheme
+    for (virids_option in c("H" # , # Rainbow color scheme
+                            # "B"
+                            )){ # Inferno color scheme
       
       dat00 <- dat
       plot_title = paste0(maxyr, " ", var00, " ", unit0)
@@ -372,8 +373,8 @@ make_varplot_wrapper <- function(
                             # "B"
                             )) { # Inferno color scheme
       
-      dat00 = dat %>% # Anomaly plot
-        dplyr::filter(station != 0) %>% # because show_planned_stations = FALSE
+      dat00 = dat |> # Anomaly plot
+        dplyr::filter(station != 0) |> # because show_planned_stations = FALSE
         dplyr::mutate(var = anom, 
                       reg_lab = ifelse(srvy == "BS", 
                                        paste0(survey, "\n"), 
@@ -457,12 +458,12 @@ make_figure <- function(
   # Set Base Layers ------------------------------------------------------------
   dat <- dat00
   if (show_planned_stations) {
-    dat <- dat %>% 
-      dplyr::bind_rows(dat %>%
-                         dplyr::filter(date == min(date, na.rm = TRUE)) %>% 
+    dat <- dat |> 
+      dplyr::bind_rows(dat |>
+                         dplyr::filter(date == min(date, na.rm = TRUE)) |> 
                          dplyr::mutate(date = (date-1), 
                                        stratum = 9999, 
-                                       station = "9999") %>% 
+                                       station = "9999") |> 
                          head(1))
   }
   
@@ -471,11 +472,11 @@ make_figure <- function(
   survey_reg_col <- survey_reg_col[-((length(survey_reg_col)-1):length(survey_reg_col))]
   shp$survey.area <- dplyr::left_join(
     x = shp$survey.area, 
-    y = dat %>% 
-      dplyr::select(survey, reg_lab, srvy) %>% 
-      dplyr::distinct() %>% 
+    y = dat |> 
+      dplyr::select(survey, reg_lab, srvy) |> 
+      dplyr::distinct() |> 
       dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))), 
-    by = "srvy") %>% 
+    by = "srvy") |> 
     dplyr::arrange(desc(srvy))
   
   # Colors and bins for var ----------------------------------------------
@@ -501,12 +502,12 @@ make_figure <- function(
     }
     
     # bin var
-    dat <- dat %>%
+    dat <- dat |>
       dplyr::mutate(var_bin = base::cut(x = as.numeric(dat$var),
                                         breaks = var_breaks,
                                         labels = FALSE, 
                                         include.lowest = TRUE,
-                                        right = FALSE) ) %>%
+                                        right = FALSE) ) |>
       dplyr::mutate(var_bin = base::factor(x = var_labels[var_bin], 
                                            levels = var_labels, 
                                            labels = var_labels) ) 
@@ -516,13 +517,13 @@ make_figure <- function(
     date_entered <- date_entered[!is.na(date_entered)]
     date_entered <- c(#min(date_entered),#-1, 
       date_entered)
-    if (show_planned_stations & 
-        (data_source == "oracle" | 
+    if (show_planned_stations & # TOLEDO
+        (data_source %in% c("oracle", "race_data") | 
          sum(is.na(dat$var)) == 0)) { #survey is finished
       date_entered <- c(date_entered, max(date_entered)+1)
-    } 
+    }
   } else {
-    dat <- dat %>%
+    dat <- dat |>
       dplyr::mutate(var_bin = NA)
   }
   
@@ -530,9 +531,9 @@ make_figure <- function(
   # shp$survey.grid <- 
   #   dplyr::left_join(
   #     x = shp$survey.grid, 
-  #     y = dat %>%
+  #     y = dat |>
   #       dplyr::select(station, stratum, var_bin, # reg_shapefile, 
-  #                     survey, survey_dates, reg_lab, vessel_shape, date) %>% 
+  #                     survey, survey_dates, reg_lab, vessel_shape, date) |> 
   #       dplyr::distinct(), 
   #     by = c("stratum", "station")) 
   
@@ -593,7 +594,7 @@ make_figure <- function(
       # only use dates including this date and before this date
         dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
       }  
-      grid_stations_plot <- grid_stations_plot %>% 
+      grid_stations_plot <- grid_stations_plot |> 
         dplyr::left_join(dat_plot)
 
       if (file_end != "mean") {
@@ -613,29 +614,29 @@ make_figure <- function(
         sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) { # and if there are any planned stations to show
         
         # planned stations
-        loc <- dat_plot %>% 
+        loc <- dat_plot |> 
           dplyr::filter(
             is.na(var) &
               !is.na(vessel_shape) & 
-              date == next_date) %>% 
+              date == next_date) |> 
           dplyr::mutate(planned = "Y")
         
-        dat_planned <- grid_stations_plot %>% 
-          st_simplify(TRUE, dTolerance = 5000) %>% 
-          st_cast("MULTIPOLYGON") %>% 
-          st_centroid() %>%
-          st_coordinates() %>%
-          data.frame() %>% 
+        dat_planned <- grid_stations_plot |> 
+          st_simplify(TRUE, dTolerance = 5000) |> 
+          st_cast("MULTIPOLYGON") |> 
+          st_centroid() |>
+          st_coordinates() |>
+          data.frame() |> 
           dplyr::rename(lon = X, 
-                        lat = Y) %>% 
+                        lat = Y) |> 
           dplyr::mutate(
             station = grid_stations_plot$station, 
-            stratum = grid_stations_plot$stratum) %>%
+            stratum = grid_stations_plot$stratum) |>
           dplyr::left_join(x = ., 
-                           y = loc %>% 
+                           y = loc |> 
                              dplyr::select(stratum, station, planned, vessel_shape, vessel_name, date), 
-                           by = c("stratum", "station")) %>%
-          dplyr::filter(!is.na(planned)) %>% 
+                           by = c("stratum", "station")) |>
+          dplyr::filter(!is.na(planned)) |> 
           dplyr::mutate(lab = "")
         
         all_vess <- unique(dat_plot$vessel_shape)
@@ -646,9 +647,9 @@ make_figure <- function(
             temp1 <- rep_len(x = NA, length.out = ncol(dat_planned))
             names(temp1) <- names(dat_planned)
             dat_planned <- dplyr::bind_rows(dat_planned, 
-                                            temp1 %>% 
-                                              t() %>%
-                                              data.frame() %>%
+                                            temp1 |> 
+                                              t() |>
+                                              data.frame() |>
                                               dplyr::mutate(vessel_shape = vess, 
                                                             vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]), 
                                                             lon = 5000000, 
@@ -682,14 +683,14 @@ make_figure <- function(
       }
     }
     
-    # world_coordinates <- maps::map("world", plot = FALSE, fill = TRUE) %>% 
-    #   sf::st_as_sf() %>%
-    #   # sf::st_union() %>% 
-    #   sf::st_transform(crs = "EPSG:3338") %>% 
-    #   dplyr::filter(ID %in% c("USA", "Russia", "Canada")) %>% 
+    # world_coordinates <- maps::map("world", plot = FALSE, fill = TRUE) |> 
+    #   sf::st_as_sf() |>
+    #   # sf::st_union() |> 
+    #   sf::st_transform(crs = "EPSG:3338") |> 
+    #   dplyr::filter(ID %in% c("USA", "Russia", "Canada")) |> 
     #   dplyr::mutate(ID = ifelse(ID == "USA", "Alaska", ID))
     
-    world_coordinates <- akgfmaps::get_base_layers(select.region = "bs.all")$akland %>%
+    world_coordinates <- akgfmaps::get_base_layers(select.region = "bs.all")$akland |>
       sf::st_transform(crs = "EPSG:3338")
     
     gg <- ggplot() +
@@ -882,7 +883,7 @@ make_figure <- function(
       
       # Draw bounding boxes
       bb <- data.frame()
-      grid_stations_plot0 <- grid_stations_plot %>% 
+      grid_stations_plot0 <- grid_stations_plot |> 
         dplyr::filter(!is.na(area_name))
       for (iiii in 1:length(unique(grid_stations_plot0$area_name))) {
         x <- unique(grid_stations_plot0$area_name)[iiii]
@@ -901,10 +902,10 @@ make_figure <- function(
         
         poly <- data.frame(a[c(2,4)], a[c(1,3)])
         names(poly) <- c("lat", "lon") 
-        poly <- poly %>%
+        poly <- poly |>
           st_as_sf(coords = c("lon", "lat"), 
-                   crs = "EPSG:3338") %>% 
-          sf::st_bbox() %>% 
+                   crs = "EPSG:3338") |> 
+          sf::st_bbox() |> 
           sf::st_as_sfc()
         
         gg <- gg + 
@@ -944,23 +945,23 @@ make_figure <- function(
       
       if (file_end != 'grid') {
         ### Create temperature plots ---------------------------------------------------------
-        grid_stations_plot_visited <- grid_stations_plot %>% 
-          dplyr::filter(!is.na(var_bin)) %>% 
-          sf::st_centroid() %>% 
-          st_geometry() %>% 
-          data.frame() %>%
+        grid_stations_plot_visited <- grid_stations_plot |> 
+          dplyr::filter(!is.na(var_bin)) |> 
+          sf::st_centroid() |> 
+          st_geometry() |> 
+          data.frame() |>
           dplyr::mutate(
             var_bin = grid_stations_plot$var_bin[!is.na(grid_stations_plot$var_bin)])
         
         if (nrow(grid_stations_plot_visited)==0) {
           
           # still need the temperature legend, so adding in fake data off the map
-          grid_stations_plot_visited <- grid_stations_plot %>% 
-            sf::st_centroid() %>% 
-            st_geometry() %>% 
-            data.frame()  %>%
-            dplyr::mutate(var_bin = 1:nrow(.)) %>% 
-            dplyr::filter(var_bin == 1) %>%
+          grid_stations_plot_visited <- grid_stations_plot |> 
+            sf::st_centroid() |> 
+            st_geometry() |> 
+            data.frame()  |>
+            dplyr::mutate(var_bin = 1:nrow(.)) |> 
+            dplyr::filter(var_bin == 1) |>
             dplyr::mutate(
               var_bin = factor(levels(grid_stations_plot$var_bin)[1], 
                                levels = levels(grid_stations_plot$var_bin), 
@@ -979,7 +980,7 @@ make_figure <- function(
           #   show.legend = FALSE)  +
           # allocated station grid
           ggplot2::geom_sf(
-            data = grid_stations_plot %>% dplyr::filter(!is.na(year)), 
+            data = grid_stations_plot |> dplyr::filter(!is.na(year)), 
             colour = ifelse((as.character(dates0[1]) == "none"), "grey50", "grey70"),
             size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
             show.legend = FALSE) +
