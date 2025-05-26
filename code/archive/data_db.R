@@ -22,8 +22,8 @@ if (googledrive_dl) {
 
 a <- list.files(path = here::here("data"))
 for (i in 1:length(a)){
-  b <- read_csv(file = here::here("data", a[i]))
-  b <- janitor::clean_names(b)
+  b <- read_csv(file = here::here("data", a[i])) |> 
+    rename_all(tolower)
   if (names(b)[1] %in% "x1"){
     b$x1<-NULL
   }
@@ -127,8 +127,8 @@ EDIT_SURFACE_TEMPERATURE AS surface_temperature_c,
 EDIT_GEAR_TEMPERATURE AS bottom_temperature_c
 FROM RACE_DATA.EDIT_HAULS;")), 
     
-    by = "HAUL_ID")  |> 
-    janitor::clean_names() |> 
+    by = "HAUL_ID") |> 
+    rename_all(tolower) |> 
     dplyr::left_join(
       y = dat_survey |> 
         dplyr::select(cruise_id, srvy, vessel_id), 

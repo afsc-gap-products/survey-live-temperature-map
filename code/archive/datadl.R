@@ -64,8 +64,8 @@ a<-list.files(path = here::here("data", "publicdata"),
               pattern = ".csv")
 
 for (i in 1:length(a)){
-  b <- read_csv(file = a[i])
-  b <- janitor::clean_names(b)
+  b <- read_csv(file = a[i]) |> 
+    rename_all(tolower)
   if (names(b)[1] %in% "x1"){
     b$x1<-NULL
   }

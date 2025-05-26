@@ -18,7 +18,8 @@ for (i in 1:length(a)){
   if (grepl(pattern = ".csv", x = a[i], fixed = TRUE)) {
     b <- readr::read_csv(file = paste0(dir_wd, "data/", a[i]))
   }
-  b <- janitor::clean_names(b)
+  b <- b |> 
+    rename_all(tolower)
   if (names(b)[1] %in% "x1"){
     b$x1<-NULL
   }
@@ -77,8 +78,8 @@ EDIT_GEAR_TEMPERATURE AS bt -- bottom_temperature_c
 FROM RACE_DATA.EDIT_HAULS
 WHERE ABUNDANCE_HAUL = 'Y';")), 
   
-  by = "HAUL_ID") |> 
-  janitor::clean_names() |> 
+  by = "HAUL_ID")  |> 
+  rename_all(tolower) |> 
   dplyr::filter(!is.na(cruise_id))  |> 
   dplyr::filter(format(as.Date(date), "%Y") == date_max0) |>
   dplyr::mutate(

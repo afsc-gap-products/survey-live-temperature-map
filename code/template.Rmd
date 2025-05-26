@@ -178,7 +178,7 @@ if (file_end %in% c("mean", "mean_cb")) {
     dat_max_date <- grid_stations_plot |> 
       sf::st_cast("MULTIPOLYGON") |> 
       sf::st_centroid()  |> 
-      sf::st_transform(x = ., crs = "+proj=longlat +datum=WGS84")|>
+      sf::st_transform(crs = "+proj=longlat +datum=WGS84")|>
       sf::st_coordinates() |>
       data.frame() |> 
       dplyr::rename(lon = X, 
@@ -187,8 +187,7 @@ if (file_end %in% c("mean", "mean_cb")) {
         station = grid_stations_plot$station, 
         stratum = grid_stations_plot$stratum, 
         stratum = as.character(stratum)) |>
-      dplyr::left_join(y = ., 
-                       x = loc |> 
+      dplyr::right_join(y = loc |> 
                          dplyr::mutate(stratum = as.character(stratum)) |> 
                          dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
                        by = c("stratum", "station"))  |>

@@ -19,7 +19,6 @@ PKG <- c(
   "cowplot",
   "magick", 
   "qpdf",
-  "janitor",
   "ggplot2", # Create Elegant Data Visualizations Using the Grammar of Graphics
   "viridis", 
   
@@ -109,7 +108,7 @@ make_varplot_wrapper <- function(
   
   shp$lon.breaks <- shp$lon.breaks[[srvy]]
   shp$lat.breaks <- shp$lat.breaks[[srvy]]
-
+  
   shp$survey.strata <- shp$survey.strata |> 
     dplyr::filter(srvy %in% srvy1) |>
     dplyr::left_join(y = dat_survey |>
@@ -270,9 +269,9 @@ make_varplot_wrapper <- function(
       plot_title = paste0("Time Series Mean ", var00)
       plot_subtitle = gsub(pattern = "and ", replacement = "and\n", 
                            x = #paste0(
-                                      text_list(paste0("NOAA Fisheries ", anom_years$survey, " Bottom Trawl Survey ", anom_years$range))#, 
-                                      # ifelse(nrow(anom_years)>1, "s", "")
-                                      )#)
+                             text_list(paste0("NOAA Fisheries ", anom_years$survey, " Bottom Trawl Survey ", anom_years$range))#, 
+                           # ifelse(nrow(anom_years)>1, "s", "")
+      )#)
       legend_title = paste0(var00, '\nMean ', unit0)
       dates0 = "none"
       file_end = ifelse(virids_option == "B", paste0(file_end, "_cb"), file_end)
@@ -463,7 +462,7 @@ make_figure <- function(
     y = dat |> 
       dplyr::select(survey, reg_lab, srvy) |> 
       dplyr::distinct()) |> 
-      dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))) |> 
+    dplyr::mutate(survey_reg_col = c(alpha(survey_reg_col, 0.7))) |> 
     dplyr::arrange(desc(srvy))
   
   # Colors and bins for var ----------------------------------------------
@@ -584,7 +583,7 @@ make_figure <- function(
         dat_plot$var[as.Date(dat_plot$date)>as.Date(max_date)]<-NA 
       }  
       grid_stations_plot <- grid_stations_plot |> 
-        dplyr::left_join(dat_plot %>% 
+        dplyr::left_join(dat_plot |> 
                            dplyr::select(-survey)) 
       
       if (file_end != "mean") {
@@ -604,47 +603,52 @@ make_figure <- function(
         sum(is.na(dat_plot$var) & !is.na(dat_plot$vessel_shape))>0) { # and if there are any planned stations to show
         
         # planned stations
-        loc <- dat_plot |> 
+        loc <- dat_plot |>
           dplyr::filter(
             is.na(var) &
-              !is.na(vessel_shape) & 
-              date == next_date) |> 
+              !is.na(vessel_shape) &
+              date == next_date) |>
           dplyr::mutate(planned = "Y")
         
         dat_planned <- grid_stations_plot |> 
-          st_simplify(TRUE, dTolerance = 5000) |> 
-          st_cast("MULTIPOLYGON") |> 
-          st_centroid() |>
-          st_coordinates() |>
+          sf::st_simplify(TRUE, dTolerance = 5000) |> 
+          sf::st_cast("MULTIPOLYGON") |> 
+          sf::st_centroid() |>
+          sf::st_coordinates() |>
           data.frame() |> 
           dplyr::rename(lon = X, 
                         lat = Y) |> 
-          dplyr::mutate(
-            station = grid_stations_plot$station, 
-            stratum = grid_stations_plot$stratum) |>
-          dplyr::left_join(x = ., 
-                           y = loc |> 
+          dplyr::bind_cols(
+            grid_stations_plot |> 
+              dplyr::select(station, stratum) ) |>
+          dplyr::left_join(y = loc |> 
                              dplyr::select(stratum, station, planned, vessel_shape, vessel_name, date), 
                            by = c("stratum", "station")) |>
           dplyr::filter(!is.na(planned)) |> 
-          dplyr::mutate(lab = "")
+          dplyr::mutate(lab = "")|> 
+          sf::st_as_sf()
         
         all_vess <- unique(dat_plot$vessel_shape)
         all_vess <- all_vess[!is.na(all_vess)]
         for (ii in 1:length(all_vess)) {
           vess <- all_vess[ii]
           if (sum(unique(dat_planned$vessel_shape) %in% vess)==0) {
-            temp1 <- rep_len(x = NA, length.out = ncol(dat_planned))
-            names(temp1) <- names(dat_planned)
-            dat_planned <- dplyr::bind_rows(dat_planned, 
-                                            temp1 |> 
-                                              t() |>
-                                              data.frame() |>
-                                              dplyr::mutate(vessel_shape = vess, 
-                                                            vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]), 
-                                                            lon = 5000000, 
-                                                            lat = 5000000,
-                                                            planned = "N")) 
+            temp1 <- dat_planned |>
+              head(1) |>
+              dplyr::mutate(vessel_shape = vess,
+                            vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]),
+                            station = NA, 
+                            stratum = NA, 
+                            lab = paste0(vessel_name, "\n"), 
+                            lon = 5000000,
+                            lat = 5000000,
+                            planned = "N")  |> 
+              sf::st_drop_geometry() |>
+              sf::st_as_sf(coords = c("lon", "lat"), remove = FALSE) 
+            
+            sf::st_crs(temp1) <- sf::st_crs(dat_planned)
+          
+            dat_planned <- dplyr::bind_rows(dat_planned, temp1)
             vess_date <- paste0("\n ")
           } else {
             vess_date <- as.Date(range(as.Date(dat_planned$date[dat_planned$vessel_shape %in% vess])))
@@ -772,7 +776,6 @@ make_figure <- function(
                            breaks = shp$survey.area$reg_lab, 
                            labels = shp$survey.area$reg_lab) 
       
-      
       # Add temperature squares
       if (file_end != "grid") { # If you are using any data from temp data
         
@@ -871,10 +874,10 @@ make_figure <- function(
         # Survey area
         ggplot2::geom_sf(
           data = shp$survey.area, 
-                         color = "grey50", 
-                         linewidth = .5, 
-                         fill = "NA",
-                         show.legend = TRUE)
+          color = "grey50", 
+          linewidth = .5, 
+          fill = "NA",
+          show.legend = TRUE)
       
       # Draw bounding boxes
       bb <- data.frame()
@@ -892,7 +895,7 @@ make_figure <- function(
         b$lab <- x
         
         b$x <- mean(a[c(1,3)])
-        b$y <- a[2] - 25000
+        b$y <- a[2] # - 25000
         bb <- rbind.data.frame(bb, b)
         
         poly <- data.frame(a[c(2,4)], a[c(1,3)])
@@ -920,14 +923,14 @@ make_figure <- function(
           ggplot2::guides(color = "none") +
           # label regions
           ggplot2::geom_label(data = bb, 
-                              color = ifelse(srvy == "AI", "grey20", "white"), 
-                              fill = ifelse(srvy == "AI", NA, "grey20"),
+                              color = "white", #ifelse(srvy == "AI", "grey20", "white"), 
+                              fill = "grey20", # ifelse(srvy == "AI", NA, "grey20"),
                               fontface = "bold",
                               label.size = NA,
                               label.r = unit(0, "pt"),
                               mapping = 
                                 aes(x = x, 
-                                    y = ifelse(lab %in% c("Western Aleutians"), (y-25000), (y+25000)), 
+                                    y = y, #ifelse(lab %in% c("Western Aleutians"), (y-25000), (y+25000)), 
                                     label = lab), 
                               size = 4)
       } 
@@ -1180,38 +1183,38 @@ make_figure <- function(
     
     ### CURRENT plots for easy finding -------------------------------------------
     if (file_end == "daily") {
-    if (lastplotofrun) {
-      message("Make current_* files")
-      temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
-      temp <- temp[!grepl(pattern = "current_", x = temp)]
-      if (grepl(pattern = "_cb", x = file_end)) {
-        # if there is _cb in the name, only pull _cb named things
-        temp <- temp[grepl(pattern = "_cb", x = temp)]
-      } else {
-        # if there is no _cb in the name, only pull non_cb named things
-        temp <- temp[!grepl(pattern = "_cb", x = temp)]
-      }
-      for (iiii in 1:length(temp)) {
-        if (file_end  %in% c("anom", "daily", "anom_cb", "daily_cb")) {
-          filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
-          filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
-                             replacement = paste0("current_", file_end, "_",tolower(srvy),"."), 
-                             x = filename00, fixed = TRUE)
-          filename00 <- gsub(pattern = paste0("current_", file_end, "_bind."), 
-                             replacement = paste0("current_", file_end, "_bind_",tolower(srvy),"."), 
-                             x = filename00, fixed = TRUE)
-        } else if (file_end %in% c("grid", "mean", "mean_cb")) {
-          filename00 <- gsub(pattern = paste0("_", file_end,"."), 
-                             replacement = paste0("current_", file_end, "_",tolower(srvy),"."), 
-                             x = temp[iiii], 
-                             fixed = TRUE)
+      if (lastplotofrun) {
+        message("Make current_* files")
+        temp <- list.files(path = dir_out, pattern = filename0, full.names = TRUE)
+        temp <- temp[!grepl(pattern = "current_", x = temp)]
+        if (grepl(pattern = "_cb", x = file_end)) {
+          # if there is _cb in the name, only pull _cb named things
+          temp <- temp[grepl(pattern = "_cb", x = temp)]
+        } else {
+          # if there is no _cb in the name, only pull non_cb named things
+          temp <- temp[!grepl(pattern = "_cb", x = temp)]
         }
-        filename1 <- c(filename1, filename00) # add current files to list of files to upload
-        file.copy(from = temp[iiii], 
-                  to = filename00, 
-                  overwrite = TRUE)
+        for (iiii in 1:length(temp)) {
+          if (file_end  %in% c("anom", "daily", "anom_cb", "daily_cb")) {
+            filename00 <- gsub(pattern = max_date, replacement = "current", x = temp[iiii])
+            filename00 <- gsub(pattern = paste0("current_", file_end, "."), 
+                               replacement = paste0("current_", file_end, "_",tolower(srvy),"."), 
+                               x = filename00, fixed = TRUE)
+            filename00 <- gsub(pattern = paste0("current_", file_end, "_bind."), 
+                               replacement = paste0("current_", file_end, "_bind_",tolower(srvy),"."), 
+                               x = filename00, fixed = TRUE)
+          } else if (file_end %in% c("grid", "mean", "mean_cb")) {
+            filename00 <- gsub(pattern = paste0("_", file_end,"."), 
+                               replacement = paste0("current_", file_end, "_",tolower(srvy),"."), 
+                               x = temp[iiii], 
+                               fixed = TRUE)
+          }
+          filename1 <- c(filename1, filename00) # add current files to list of files to upload
+          file.copy(from = temp[iiii], 
+                    to = filename00, 
+                    overwrite = TRUE)
+        }
       }
-    }
       
       # ### FTP -------------------------------------------
       # # only make current if it is the last plot of the run

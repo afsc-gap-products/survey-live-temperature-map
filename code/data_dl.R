@@ -144,7 +144,7 @@ race_data_cruises0 <-
     RODBC::sqlQuery(channel, "SELECT SURVEY_ID, SURVEY_DEFINITION_ID FROM RACE_DATA.SURVEYS;") )  |> 
   dplyr::left_join(
     RODBC::sqlQuery(channel, "SELECT VESSEL_ID, NAME AS VESSEL_NAME FROM RACE_DATA.VESSELS;") )  |> 
-  janitor::clean_names()
+  rename_all(tolower)
 
 write.csv(x = race_data_cruises0, file = here::here("data", "race_data_cruises_mod.csv"))
 
@@ -226,7 +226,7 @@ shp_all <- shp <- list(
                          dplyr::mutate(stratum = area_id) |>
                          dplyr::filter(survey_definition_id == 78 & area_type == "STRATUM") |> 
                          dplyr::rename_all(toupper)) )) |>
-    janitor::clean_names() |>
+    rename_all(tolower) |>
     # dplyr::left_join(areas) |> 
     dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
@@ -246,7 +246,7 @@ shp_all <- shp <- list(
     shp_ai$survey.area,
     shp_goa$survey.area,
     shp_bss$survey.area)) |>
-    janitor::clean_names()  |>
+    rename_all(tolower)  |>
     dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
@@ -259,15 +259,19 @@ shp_all <- shp <- list(
   survey.grid = dplyr::bind_rows(list(
     # shp_bs$survey.grid, 
     shp_ebs$survey.grid |> 
+      dplyr::filter(grepl(pattern = "-", x = station)) |> 
       dplyr::mutate(survey_definition_id = 98),
     shp_nbs$survey.grid |> 
       dplyr::mutate(survey_definition_id = 143),
     shp_ai$survey.grid |> 
       dplyr::mutate(survey_definition_id = 52),
     shp_goa$survey.grid |> 
+      tidyr::separate(station, into = c("a", "b", "stratum"), sep = "-", remove = FALSE, convert = FALSE) |> 
+      dplyr::mutate(station0 = STATION, 
+                    station = paste0(a, "-", b)) |>
       dplyr::mutate(survey_definition_id = 47)
   )) |>
-    janitor::clean_names()  |>
+    rename_all(tolower)  |>
     dplyr::mutate(srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS", 
       survey_definition_id == 143 ~ "NBS", 
@@ -312,7 +316,7 @@ shp_all <- shp <- list(
     shp_ai$bathymetry |> 
       dplyr::mutate(srvy = "AI")
   ))  |>
-    janitor::clean_names() |> 
+    rename_all(tolower) |> 
     dplyr::select(geometry, srvy = srvy, meters) |>
     dplyr::mutate(survey_definition_id = dplyr::case_when(
       srvy == "EBS" ~ 98, 
