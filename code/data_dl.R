@@ -257,19 +257,23 @@ shp_all <- shp <- list(
   
   # Stations
   survey.grid = dplyr::bind_rows(list(
-    # shp_bs$survey.grid, 
-    shp_ebs$survey.grid |> 
-      dplyr::filter(grepl(pattern = "-", x = station)) |> 
-      dplyr::mutate(survey_definition_id = 98),
-    shp_nbs$survey.grid |> 
-      dplyr::mutate(survey_definition_id = 143),
-    shp_ai$survey.grid |> 
-      dplyr::mutate(survey_definition_id = 52),
+    # shp_bs$survey.grid,
+    shp_ebs$survey.grid |>
+      # dplyr::mutate(survey_definition_id = 98) |>
+      dplyr::filter(grepl(pattern = "-", x = STATION)) |>
+      dplyr::mutate(GRID_ID = as.character(GRID_ID)),
+    shp_nbs$survey.grid |>
+      # dplyr::mutate(survey_definition_id = 143) |>
+      dplyr::mutate(GRID_ID = as.character(GRID_ID)),
+    shp_ai$survey.grid |>
+      # dplyr::mutate(SURVEY_DEFINITION_ID = 52) |>
+      dplyr::mutate(GRID_ID = as.character(GRID_ID)),
     shp_goa$survey.grid |> 
-      tidyr::separate(station, into = c("a", "b", "stratum"), sep = "-", remove = FALSE, convert = FALSE) |> 
-      dplyr::mutate(station0 = STATION, 
-                    station = paste0(a, "-", b)) |>
-      dplyr::mutate(survey_definition_id = 47)
+      tidyr::separate("STATION", into = c("a", "b", "STRATUM"), sep = "-", remove = FALSE, convert = FALSE) |>
+      dplyr::mutate(GRID_ID = as.character(STATION), 
+                    # SURVEY_DEFINITION_ID = 47, 
+                    STATION = paste0(a, "-", b)) |> 
+      dplyr::select(-a, -b) 
   )) |>
     rename_all(tolower)  |>
     dplyr::mutate(srvy = dplyr::case_when(
@@ -278,8 +282,7 @@ shp_all <- shp <- list(
       survey_definition_id == 78 ~ "BSS", 
       survey_definition_id == 52 ~ "AI", 
       survey_definition_id == 47 ~ "GOA" 
-    )) |> 
-    dplyr::select(-survey_definition_id_2), 
+    )), 
   
   # lon.breaks
   lon.breaks = list(
@@ -354,7 +357,7 @@ aaa <- dplyr::left_join(
   sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",] |> 
                 sf::st_centroid(), 
               shp_all$survey.strata[shp_all$survey.strata$srvy == "GOA",] |> 
-                dplyr::select(area_name, stratum)) |> 
+                dplyr::select(area_name)) |> 
     dplyr::select(area_name, stratum, grid_id, station) |> 
     sf::st_drop_geometry())
 shp_all$survey.grid <- shp_all$survey.grid[shp_all$survey.grid$srvy != "GOA",]
@@ -368,7 +371,7 @@ aaa <- dplyr::left_join(
                 sf::st_centroid() |> 
                 dplyr::select(-stratum, -area_name), 
               shp_all$survey.strata[shp_all$survey.strata$srvy == "AI",] |> 
-                dplyr::select(area_name, stratum)) |> 
+                dplyr::select(area_name)) |> 
     dplyr::select(area_name, stratum, grid_id, station) |> 
     sf::st_drop_geometry())
 shp_all$survey.grid <- shp_all$survey.grid[shp_all$survey.grid$srvy != "AI",]
