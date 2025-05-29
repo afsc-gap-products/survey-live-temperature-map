@@ -272,6 +272,7 @@ shp_all <- shp <- list(
       tidyr::separate("STATION", into = c("a", "b", "STRATUM"), sep = "-", remove = FALSE, convert = FALSE) |>
       dplyr::mutate(GRID_ID = as.character(STATION), 
                     # SURVEY_DEFINITION_ID = 47, 
+                    STRATUM = as.numeric(STRATUM),
                     STATION = paste0(a, "-", b)) |> 
       dplyr::select(-a, -b) 
   )) |>
@@ -351,6 +352,8 @@ shp_all <- shp <- list(
       sf::st_transform(crs = "EPSG:3338")
   )) )
 
+# add area_name to stations
+
 # GOA
 aaa <- dplyr::left_join(
   shp_all$survey.grid[shp_all$survey.grid$srvy == "GOA",], 
@@ -366,10 +369,10 @@ shp_all$survey.grid <- dplyr::bind_rows(aaa, shp_all$survey.grid)
 # AI
 aaa <- dplyr::left_join(
   shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] |> 
-    dplyr::select(-stratum, -area_name), 
+    dplyr::select(-area_name), 
   sf::st_join(shp_all$survey.grid[shp_all$survey.grid$srvy == "AI",] |> 
                 sf::st_centroid() |> 
-                dplyr::select(-stratum, -area_name), 
+                dplyr::select(-area_name), 
               shp_all$survey.strata[shp_all$survey.strata$srvy == "AI",] |> 
                 dplyr::select(area_name)) |> 
     dplyr::select(area_name, stratum, grid_id, station) |> 
