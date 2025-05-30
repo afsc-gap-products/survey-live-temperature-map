@@ -75,8 +75,7 @@ STATION,
 STRATUM, 
 EDIT_SURFACE_TEMPERATURE AS st, -- surface_temperature_c, 
 EDIT_GEAR_TEMPERATURE AS bt -- bottom_temperature_c
-FROM RACE_DATA.EDIT_HAULS
-WHERE ABUNDANCE_HAUL = 'Y';")), 
+FROM RACE_DATA.EDIT_HAULS;")), # WHERE ABUNDANCE_HAUL = 'Y'
   
   by = "HAUL_ID")  |> 
   rename_all(tolower) |> 
@@ -172,7 +171,7 @@ dat_googledrive <- dplyr::bind_rows(
   dat_googledrive  |> # remove data with no vessel for the EBS/NBS
     dplyr::filter(srvy %in% c("EBS", "NBS")) |> 
     dplyr::filter(!is.na(vessel_name)) ) |> 
-  dplyr::filter(date > max(dat_race_data$date) )
+  dplyr::filter(date > ifelse(length(dat_race_data) == 0, as.Date(paste0(maxyr, "-12-31")), max(dat_race_data$date)) )
 
 # Combine all data sources -----------------------------------------------------
 
@@ -181,6 +180,7 @@ dat_survey <-
   dplyr::bind_rows(
     dat_race_data, 
     dat_googledrive ) |> # prioritize data already in RACE_DATA
+  dplyr::select(-srvy) |>
   # bind foss data
   dplyr::bind_rows(
     dat_foss0 |> 
@@ -197,6 +197,7 @@ dat_survey <-
       survey_definition_id == 143 ~ "NBS",
       survey_definition_id == 78 ~ "BSS",
       survey_definition_id == 47 ~ "GOA",
+      survey_definition_id == 39 ~ "GOA",
       survey_definition_id == 52 ~ "AI"),
     survey = dplyr::case_when(
       srvy == "EBS" ~ "Eastern Bering Sea",

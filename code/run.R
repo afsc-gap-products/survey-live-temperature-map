@@ -78,7 +78,7 @@ if ("GOA" %in% dat_survey$srvy) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"), # "daily, "grid"
+                       file_end0 = c("daily", "grid"), # "daily, "grid"
                        dir_wd = dir_wd)
 }
 
@@ -102,32 +102,31 @@ if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily"), # c("daily", "anom"),, "anom"
-                       dir_wd = dir_wd
-  )
+                       file_end0 = c("daily", "grid", "mean"), # c("daily", "anom"),, "anom"
+                       dir_wd = dir_wd)
 }
 
 
 # ## AI --------------------------------------------------------------------------
 # if (52 %in% survey_definition_id0) {
 # 
-#   srvy <- "AI"
-#   plot_subtitle <- "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-#   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_ai, NULL)
-#   show_planned_stations <- FALSE
-# 
-#   make_varplot_wrapper(maxyr = maxyr,
-#                        srvy = srvy,
-#                        dat_survey = dat_survey,
-#                        var = var,
-#                        dir_googledrive_upload = dir_googledrive_upload,
-#                        dates0 = dates0,
-#                        shp = shp,
-#                        plot_subtitle = plot_subtitle,
-#                        show_planned_stations = show_planned_stations,
-#                        data_source = data_source,
-#                        file_end0 = c("grid"), # "daily, "grid"
-#                        dir_wd = dir_wd)
+srvy <- "AI"
+plot_subtitle <- "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
+dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_ai") & googledrive_dl, dir_googledrive_upload_ai, NULL)
+show_planned_stations <- FALSE
+
+make_varplot_wrapper(maxyr = maxyr,
+                     srvy = srvy,
+                     dat_survey = dat_survey,
+                     var = var,
+                     dir_googledrive_upload = dir_googledrive_upload,
+                     dates0 = dates0,
+                     shp = shp,
+                     plot_subtitle = plot_subtitle,
+                     show_planned_stations = show_planned_stations,
+                     data_source = data_source,
+                     file_end0 = c("grid"), # "daily, "grid"
+                     dir_wd = dir_wd)
 # }
 
 # ## EBS Maps --------------------------------------------------------------------
