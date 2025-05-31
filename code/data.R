@@ -54,8 +54,6 @@ date_max <- max(date_max[date_max<=format(Sys.Date(), format = "%Y")]) # sometim
 # if this year's data hasn't been entered into the production data
 # if (format(max(dat_foss0$date_time_start), format = "%Y") < date_max | istest) { 
 
-date_max0 <- ifelse(istest, 2023, date_max) # 2025 testing specific
-
 dat_race_data <- dplyr::left_join(
   
   x = RODBC::sqlQuery(channel, paste0( 
@@ -70,17 +68,20 @@ WHERE EVENT_TYPE_ID = 3;")) |>  # 3	On bottom time
   y = RODBC::sqlQuery(channel, paste0( #  EDIT_GEAR_TEMPERATURE_UNITS, EDIT_SURFACE_TEMPERATURE_UNITS, ABUNDANCE_HAUL, CREATE_DATE, 
     "SELECT HAUL_ID, 
 CRUISE_ID, 
+-- PERFORMANCE, 
 HAUL, 
 STATION, 
-STRATUM, 
+--- STRATUM, 
 EDIT_SURFACE_TEMPERATURE AS st, -- surface_temperature_c, 
 EDIT_GEAR_TEMPERATURE AS bt -- bottom_temperature_c
-FROM RACE_DATA.EDIT_HAULS;")), # WHERE ABUNDANCE_HAUL = 'Y'
+FROM RACE_DATA.EDIT_HAULS
+WHERE PERFORMANCE >= 0
+AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EBS)
   
   by = "HAUL_ID")  |> 
   rename_all(tolower) |> 
   dplyr::filter(!is.na(cruise_id))  |> 
-  dplyr::filter(format(as.Date(date), "%Y") == date_max0) |>
+  dplyr::filter(format(as.Date(date), "%Y") == date_max) |>
   dplyr::mutate(
     year = date_max,
     date = format(as.Date(date), "%Y-%m-%d"), 
@@ -90,7 +91,7 @@ FROM RACE_DATA.EDIT_HAULS;")), # WHERE ABUNDANCE_HAUL = 'Y'
   dplyr::left_join(race_data_cruises_mod0 |>
                      dplyr::select(cruise, cruise_id, vessel_id, vessel_name, survey_definition_id) |> 
                      dplyr::distinct())  |>     
-  dplyr::select(-cruise_id, -haul, -haul_id) |> 
+  dplyr::select(-cruise_id, -haul) |> # , -haul_id 
   dplyr::mutate(cruise = as.numeric(cruise), 
                 date = as.Date(date, "%Y-%m-%d", tz = '') ) |> 
   dplyr::select(-vessel_id, -st, -latitude_dd_start, -longitude_dd_start)
@@ -125,7 +126,7 @@ dat_googledrive <- data.frame()
 if (length(a)>0) { # if there are enteries for this year in the spreadsheet
   for (i in a) {
     b <- readxl::read_xlsx(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"), sheet = i, skip = 1)
-
+    
     if (grepl(pattern = "_BS", x = i)) {
       b <- b |> 
         dplyr::left_join(
@@ -139,7 +140,7 @@ if (length(a)>0) { # if there are enteries for this year in the spreadsheet
     dat_googledrive <- dplyr::bind_rows( 
       dat_googledrive, 
       b |> 
-        dplyr::filter(!is.na(station))|>
+        dplyr::filter(!is.na(date))|>
         dplyr::mutate(
           bt = as.numeric(bt), 
           station = as.character(station)))
@@ -147,8 +148,7 @@ if (length(a)>0) { # if there are enteries for this year in the spreadsheet
 }
 
 dat_googledrive <- dat_googledrive  |> 
-  dplyr::filter(!is.na(srvy))  |> 
-  dplyr::filter(!is.na(bt) ) |> 
+  dplyr::filter(!is.na(srvy))  |>
   dplyr::mutate(
     source = "googledrive", 
     cruise = as.numeric(paste0(maxyr, ifelse(srvy == "NBS", "02", "01"))), 
@@ -157,7 +157,7 @@ dat_googledrive <- dat_googledrive  |>
   ) |> 
   dplyr::select(srvy, year, stratum, station, cruise, date, bt,  
                 vessel_name, source)    |> 
-  dplyr::mutate(date = as.Date(date, "%Y-%m-%d", tz = ''), 
+  dplyr::mutate(date = as.Date(date, "%Y-%m-%d", tz = 'America/Anchorage')+1, 
                 survey_definition_id = dplyr::case_when(
                   srvy == "EBS" ~ 98,
                   srvy == "NBS" ~ 143,
@@ -167,11 +167,11 @@ dat_googledrive <- dat_googledrive  |>
 
 dat_googledrive <- dplyr::bind_rows(
   dat_googledrive |> 
-    dplyr::filter(srvy %in% c("GOA", "AI")), 
+    dplyr::filter(srvy %in% c("GOA", "AI")) |> 
+    dplyr::filter(!is.na(bt) ), 
   dat_googledrive  |> # remove data with no vessel for the EBS/NBS
     dplyr::filter(srvy %in% c("EBS", "NBS")) |> 
-    dplyr::filter(!is.na(vessel_name)) ) |> 
-  dplyr::filter(date > ifelse(length(dat_race_data) == 0, as.Date(paste0(maxyr, "-12-31")), max(dat_race_data$date)) )
+    dplyr::filter(!is.na(vessel_name)) )
 
 # Combine all data sources -----------------------------------------------------
 
@@ -179,8 +179,9 @@ dat_survey <-
   # bind race_data and google drive data
   dplyr::bind_rows(
     dat_race_data, 
-    dat_googledrive ) |> # prioritize data already in RACE_DATA
-  dplyr::select(-srvy) |>
+    dat_googledrive |> 
+      dplyr::filter(date > if_else(nrow(dat_race_data) == 0, as.Date(paste0(maxyr, "-12-31")), max(dat_race_data$date)) ) ) |> # prioritize data already in RACE_DATA
+  dplyr::select(-srvy, -stratum) |>
   # bind foss data
   dplyr::bind_rows(
     dat_foss0 |> 
@@ -226,6 +227,7 @@ dat_survey <- race_data_cruises_mod0 |>
     " - ", 
     format(x = as.Date(date_end), "%b %d"))) |> 
   dplyr::ungroup() |>
-  dplyr::right_join(dat_survey)
+  dplyr::right_join(dat_survey) %>% 
+  dplyr::select(-stratum)
 
 

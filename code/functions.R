@@ -86,7 +86,6 @@ make_varplot_wrapper <- function(
     shp, 
     plot_subtitle = "", 
     show_planned_stations = TRUE, 
-    data_source = "gd", 
     file_end0 = c("grid", "daily", "mean", "anom"), 
     dir_wd = "./"#, 
     # dir_out = "./"#, 
@@ -112,7 +111,7 @@ make_varplot_wrapper <- function(
   shp$survey.strata <- shp$survey.strata |> 
     dplyr::filter(srvy %in% srvy1) |>
     dplyr::left_join(y = dat_survey |>
-                       dplyr::select(srvy, survey, survey_definition_id, stratum) |>
+                       dplyr::select(srvy, survey, survey_definition_id) |> # stratum
                        dplyr::distinct())
   
   shp$survey.area <- shp$survey.area |> 
@@ -130,7 +129,7 @@ make_varplot_wrapper <- function(
   shp$survey.grid <- shp$survey.grid |> 
     dplyr::filter(srvy %in% srvy1) |>
     dplyr::left_join(y = dat_survey |>
-                       dplyr::select(srvy, survey, survey_definition_id, station, stratum) |>
+                       dplyr::select(srvy, survey, survey_definition_id, station) |> # , stratum
                        dplyr::distinct())
   
   shp$bathymetry <- shp$bathymetry[shp$bathymetry$srvy == srvy,] |> 
@@ -155,7 +154,7 @@ make_varplot_wrapper <- function(
   ## Wrangle Anomaly data -----------------------------------------------------
   anom_years <- dat_survey |>
     dplyr::select(
-      srvy, year, stratum, station, date, survey, survey, survey_dates,
+      srvy, year, station, date, survey, survey, survey_dates, # stratum, 
       vessel_shape, vessel_name, vessel_ital, st, bt) |>
     dplyr::distinct() |> 
     dplyr::filter(!(is.na(station)) &
@@ -171,29 +170,35 @@ make_varplot_wrapper <- function(
   
   # Calculate var averages from previous data
   dat_anom <- dat_survey |>
-    dplyr::select(
-      srvy, year, stratum, station, date, survey, survey_dates,
-      vessel_shape, vessel_name, vessel_ital, st, bt) |>
-    dplyr::distinct() |> 
     dplyr::filter(year < maxyr &
                     srvy %in% srvy1) |>
     dplyr::rename("var" = dplyr::all_of(var)) |>
-    dplyr::group_by(srvy, stratum, station) |> 
+    dplyr::group_by(srvy, station) |> # stratum, 
     dplyr::summarise(mean = mean(var, na.rm = TRUE), 
-                     sd = sd(var, na.rm = TRUE))
+                     sd = sd(var, na.rm = TRUE)) # |> 
+    # dplyr::full_join(
+    #     dat_survey |> 
+    #       dplyr::filter(srvy %in% srvy1) |>
+    #       dplyr::select(srvy, station, survey) |>
+    #     dplyr::distinct() 
+    # )
   
   ## Wrangle observed (daily) data ---------------------------------------------
   
   dat <- dat_survey |>
     dplyr::filter(srvy %in% srvy1 & 
                     year == maxyr) |> 
-    dplyr::select(srvy, stratum, station, date, year, 
+    dplyr::select(srvy, station, date, year, 
                   vessel_shape, var = dplyr::all_of(var), 
                   survey_dates, survey, vessel_name, source)
   
   dat <- dplyr::full_join(
-    x = dat,
-    y = dat_anom) |>
+    x = dat |> 
+      dplyr::select(srvy, survey, survey_dates) |> 
+      dplyr::distinct(),
+    y = dat_anom) |> 
+    dplyr::full_join(
+      y = dat) |>
     dplyr::mutate(reg_lab = paste0(survey, "\n(", survey_dates, ")"), 
                   var = as.numeric(var), 
                   anom = var-mean) |>
@@ -211,8 +216,8 @@ make_varplot_wrapper <- function(
   if ("grid" %in% file_end0) {
     file_end <- "grid"; print(paste0("------------", file_end, "------------"))
     
-    dat00 = dat |>
-      dplyr::filter(stratum != 0) |> 
+    dat00 <- dat |>
+      # dplyr::filter(stratum != 0) |> 
       dplyr::mutate(reg_lab = ifelse(srvy == "BS", 
                                      paste0(survey, "\n"), 
                                      survey))
@@ -449,7 +454,7 @@ make_figure <- function(
       dplyr::bind_rows(dat |>
                          dplyr::filter(date == min(date, na.rm = TRUE)) |> 
                          dplyr::mutate(date = (date-1), 
-                                       stratum = 9999, 
+                                       # stratum = 9999, 
                                        station = "9999") |> 
                          head(1))
   }
@@ -584,7 +589,7 @@ make_figure <- function(
       }  
       grid_stations_plot <- grid_stations_plot |> 
         dplyr::left_join(dat_plot |> 
-                           dplyr::select(-survey)) 
+                           dplyr::select(-survey)) # , -stratum
       
       if (file_end != "mean") {
         grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
@@ -620,10 +625,10 @@ make_figure <- function(
                         lat = Y) |> 
           dplyr::bind_cols(
             grid_stations_plot |> 
-              dplyr::select(station, stratum) ) |>
+              dplyr::select(station) ) |> # , stratum
           dplyr::left_join(y = loc |> 
-                             dplyr::select(stratum, station, planned, vessel_shape, vessel_name, date), 
-                           by = c("stratum", "station")) |>
+                             dplyr::select(station, planned, vessel_shape, vessel_name, date), # stratum, 
+                           by = c("station")) |> # "stratum", 
           dplyr::filter(!is.na(planned)) |> 
           dplyr::mutate(lab = "")|> 
           sf::st_as_sf()
@@ -637,8 +642,8 @@ make_figure <- function(
               head(1) |>
               dplyr::mutate(vessel_shape = vess,
                             vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]),
-                            station = NA, 
-                            stratum = NA, 
+                            station = as.character(NA), 
+                            # stratum = NA, 
                             lab = paste0(vessel_name, "\n"), 
                             lon = 5000000,
                             lat = 5000000,
@@ -666,7 +671,7 @@ make_figure <- function(
       } else if (show_planned_stations) { # if we are sharing planned stations but there aren't any to share
         dat_planned <- data.frame(
           station = NA, 
-          stratum = NA, 
+          # stratum = NA, 
           lon = 5000000, 
           lat = 5000000, 
           planned = "N", 
@@ -799,10 +804,10 @@ make_figure <- function(
         if (show_planned_stations) {
           
           gg <- gg +
-            geom_point(data = dat_planned, 
+            ggplot2::geom_point(data = dat_planned, 
                        mapping = aes(x = lon, y = lat, shape = factor(vessel_shape)), 
                        size = 4, na.rm = TRUE) +
-            scale_shape_manual(
+            ggplot2::scale_shape_manual(
               name = "Planned Stations",
               values = sort(as.character(unique(dat_planned$vessel_shape))),
               breaks = sort(as.character(unique(dat_planned$vessel_shape))), 
