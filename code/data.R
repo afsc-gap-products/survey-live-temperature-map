@@ -181,7 +181,24 @@ dat_survey <-
     dat_race_data, 
     dat_googledrive |> 
       dplyr::filter(date > if_else(nrow(dat_race_data) == 0, as.Date(paste0(maxyr, "-12-31")), max(dat_race_data$date)) ) ) |> # prioritize data already in RACE_DATA
-  dplyr::select(-srvy, -stratum) |>
+  dplyr::select(-srvy, -stratum) 
+
+diff <- setdiff((unique(race_data_cruises_mod0$survey_definition_id[substr(race_data_cruises_mod0$cruise, 1, 4) == maxyr])), 
+                unique(dat_survey$survey_definition_id) )
+
+if (length(diff) > 0) {
+  dat_survey <- dat_survey |> 
+    dplyr::bind_rows(dat_survey |> 
+                       head(length(diff)) |> 
+                       dplyr::mutate(haul_id = NA, 
+                                     station = NA, 
+                                     source = "fake", 
+                                     vessel_name = NA, 
+                                     survey_definition_id = diff))
+}
+
+
+dat_survey <- dat_survey |>
   # bind foss data
   dplyr::bind_rows(
     dat_foss0 |> 
@@ -228,6 +245,6 @@ dat_survey <- race_data_cruises_mod0 |>
     format(x = as.Date(date_end), "%b %d"))) |> 
   dplyr::ungroup() |>
   dplyr::right_join(dat_survey) %>% 
-  dplyr::select(-stratum)
+  dplyr::select(-stratum, -vessel_id) 
 
 
