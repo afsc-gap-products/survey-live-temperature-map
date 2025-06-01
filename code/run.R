@@ -59,7 +59,7 @@ source(file = paste0(dir_wd, "code/data.R"))
 
 # Map --------------------------------------------------------------------------
 
-## GOA --------------------------------------------------------------------------
+## GOA -------------------------------------------------------------------------
 
 if ("GOA" %in% dat_survey$srvy) {
   
@@ -77,7 +77,7 @@ if ("GOA" %in% dat_survey$srvy) {
                        shp = shp,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
-                       file_end0 = c("daily"), # "daily, "grid", "grid"
+                       file_end0 = c("grid", "daily"), # "daily, "grid"
                        dir_wd = dir_wd)
 }
 
@@ -100,7 +100,7 @@ if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
                        shp = shp,
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
-                       file_end0 = c("daily"), # c("daily", "anom"),, "anom", "grid", "mean"
+                       file_end0 = c("grid", "mean", "daily"), # c("daily", "anom"),, "anom", "grid", "mean"
                        dir_wd = dir_wd)
 }
 

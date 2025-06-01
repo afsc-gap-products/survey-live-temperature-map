@@ -23,6 +23,8 @@ knitr::opts_chunk$set(echo = FALSE, comment = FALSE, message = FALSE, warning = 
 
 ```{r write_caption}
 
+# NOAA Fisheries Alaska Fisheries Science Center Groundfish Assessment Program is conducting the eastern Bering Sea bottom trawl survey. So far, we collected near real-time ocean bottom temperatures from May 29 to June 17, 2025, which are depicted here. As of June 17, the F/V Alaska Knight surveyed X stations and the F/V Northwest Explorer surveyed Y stations. We plan to sample 7 stations on June 18. Credit: NOAA Fisheries
+
 vess <- text_list(x = paste0("F/V \\textit{",
                              unique(gsub(pattern = "F/V ", replacement = "", fixed = TRUE, 
                                          x = dat$vessel_name[!is.na(dat$vessel_name)])),"}"))
@@ -77,7 +79,7 @@ intro_vess <- paste0(
 
 foss_not <- paste0("The final, validated haul and catch data will be publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}) after the survey is complete. ")
 foss_avail <- paste0("These data are publicly accessible on Fisheries One Stop Shop data platform (\\textit{https://www.fisheries.noaa.gov/foss}",ifelse(file_end %in% c("mean", "mean_cb"), ") and the coldpool R package (\\textit{https://github.com/afsc-gap-products/coldpool}", ""),"). ")
-foss0 <- ifelse(data_source == "gd", foss_not, foss_avail)
+foss0 <- foss_not
 
 if (file_end %in% c("mean", "mean_cb")) {  
   temp <- gsub(pattern = "[a-zA-Z]+", replacement = "", x = plot_subtitle)
@@ -184,13 +186,15 @@ if (file_end %in% c("mean", "mean_cb")) {
       dplyr::rename(lon = X, 
                     lat = Y) |> 
       dplyr::mutate(
-        station = grid_stations_plot$station, 
-        stratum = grid_stations_plot$stratum, 
-        stratum = as.character(stratum)) |>
+        # stratum = grid_stations_plot$stratum, 
+        # stratum = as.character(stratum),
+        station = grid_stations_plot$station
+        ) |>
       dplyr::right_join(y = loc |> 
-                         dplyr::mutate(stratum = as.character(stratum)) |> 
-                         dplyr::select(stratum, station, vessel_shape, vessel_name, date, var_bin), 
-                       by = c("stratum", "station"))  |>
+                         # dplyr::mutate(stratum = as.character(stratum)) |> 
+                         dplyr::select(station, vessel_shape, vessel_name, date, var_bin), # stratum, 
+                       by = c(#"stratum", 
+                              "station"))  |>
       dplyr::arrange(vessel_shape) |> 
       dplyr::mutate(lon = round(x = lon, digits = 2), 
                     lat = round(x = lat, digits = 2)) |> 
@@ -199,21 +203,30 @@ if (file_end %in% c("mean", "mean_cb")) {
     temp <- c()
     for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
       surveys <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
+      numstationsbyvessel <- surveys |> 
+        dplyr::group_by(vessel_name) |>
+        dplyr::summarise(
+          n = n()
+        )
+        
       temp <- c(temp, 
                 paste0(
-                  ifelse(nrow(surveys)>1, "", "a "), "station", 
-                  ifelse(nrow(surveys)>1, "s", ""), " ", 
-                  text_list(x = 
-                              paste0(surveys$station,
-                                     " (",surveys$lat,"°N, ",surveys$lon,"°W; ",
-                                     gsub(pattern = " ", 
-                                          replacement = "", 
-                                          x = surveys$var_bin, fixed = TRUE),"°C)")), 
-                  " ", ifelse(nrow(surveys)>1, "were", "was"), " surveyed by the F/V \\textit{",
+                  numbers2words(numstationsbyvessel$n), 
+                  # ifelse(nrow(surveys)>1, "", "a "), 
+                  " station", ifelse(nrow(surveys)>1, "s", ""), " ", 
+                  # text_list(x =
+                  #             paste0(surveys$station,
+                  #                    " (",surveys$lat,"°N, ",surveys$lon,"°W; ",
+                  #                    gsub(pattern = " ",
+                  #                         replacement = "",
+                  #                         x = surveys$var_bin, fixed = TRUE),"°C)")),
+                  # " ", 
+                  ifelse(nrow(surveys)>1, "were", "was"), " surveyed by the F/V \\textit{",
                   gsub(pattern = "F/V ", 
                        replacement = "", 
                        fixed = TRUE,
-                       x = unique(surveys$vessel_name[!is.na(surveys$vessel_name)])),"}") )
+                       x = unique(numstationsbyvessel$vessel_name)),"}") )
+                       # x = unique(surveys$vessel_name[!is.na(surveys$vessel_name)])),"}") )
     }
     
     temp1 <- ""
