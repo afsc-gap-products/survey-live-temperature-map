@@ -11,9 +11,10 @@
 ## Actually we cant directly use the here package, here - it actually causes 
 # issues with the tasks scheduler, which has no concept of a project root folder.
 
-library(here)
-here::here("Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/") 
-dir_wd <- paste0(here::here(), "/")
+dir_wd <- "Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/"
+# library(here)
+# here::here("Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/") 
+# dir_wd <- paste0(here::here(), "/")
 
 # KNOWNS -----------------------------------------------------------------------
 

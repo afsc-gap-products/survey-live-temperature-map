@@ -56,7 +56,7 @@ dat_foss <- dat_foss |>
   )
 
 # save(dat_foss, file = here::here("data", "dat_foss.rdata"))
-write.csv(x = dat_foss, file = here::here("data", "dat_foss.csv"))
+write.csv(x = dat_foss, file = paste0(dir_wd, "data/dat_foss.csv"))
 
 # Download oracle data ----------------------------------------------------------
 
@@ -125,7 +125,7 @@ for (i in 1:length(locations)){
                              fixed = TRUE)),
                 ".csv")
     write.csv(x = a, 
-              here::here("data", b))
+              paste0(dir_wd, "data", b))
     
     names(a) <- tolower(names(a))
     assign(x = gsub(x = paste0(b, "0"),
@@ -147,7 +147,7 @@ race_data_cruises0 <-
   rename_all(tolower) %>% 
   dplyr::mutate(survey_definition_id = ifelse(survey_definition_id == 39 & cruise == 202501, 47, survey_definition_id)) # TOLEDO
 
-write.csv(x = race_data_cruises0, file = here::here("data", "race_data_cruises_mod.csv"))
+write.csv(x = race_data_cruises0, file = paste0(dir_wd, "data/race_data_cruises_mod.csv"))
 
 # Load shape files -------------------------------------------------------------
 
@@ -394,5 +394,5 @@ shp_all$survey.grid <- dplyr::bind_rows(aaa, shp_all$survey.grid)
 #        mapping = aes(fill = area_name, label = stratum)) +
 #   geom_sf(color = "black") #+ geom_sf_label()
 
-save(shp_all, file = here::here("data", "shp_all.rdata"))
+save(shp_all, file = paste0(dir_wd, "data/shp_all.rdata"))
 

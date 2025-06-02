@@ -7,7 +7,7 @@
 
 # Load shapefiles --------------------------------------------------------------
 
-load(file = here::here("data", "shp_all.rdata"), verbose = TRUE)
+load(file = paste0(dir_wd, "data/shp_all.rdata"), verbose = TRUE)
 shp <- shp_all
 
 # Load files --------------------------------------------------------------
