@@ -230,6 +230,7 @@ make_varplot_wrapper <- function(
     
     make_figure(
       srvy = srvy, 
+      srvy1 = srvy1, 
       dat00 = dat00,
       var_breaks = var_breaks,
       plot_title = plot_title,
@@ -285,6 +286,7 @@ make_varplot_wrapper <- function(
       
       make_figure(
         srvy = srvy, 
+        srvy1 = srvy1, 
         dat00 = dat00,
         var_breaks = var_breaks, 
         plot_title = plot_title,
@@ -325,8 +327,8 @@ make_varplot_wrapper <- function(
     }
     
     for (virids_option in c("H" # , # Rainbow color scheme
-                            # "B"
-    )){ # Inferno color scheme
+                            # "B" # Inferno color scheme
+    )){ 
       
       dat00 <- dat
       plot_title = paste0(maxyr, " ", var00, " ", unit0)
@@ -336,6 +338,7 @@ make_varplot_wrapper <- function(
       
       make_figure(
         srvy = srvy, 
+        srvy1 = srvy1, 
         dat00 = dat00,
         var_breaks = var_breaks, 
         plot_title = plot_title,
@@ -384,6 +387,7 @@ make_varplot_wrapper <- function(
       
       make_figure(
         srvy = srvy, 
+        srvy1 = srvy1, 
         dat00 = dat00,
         var_breaks = var_breaks, 
         plot_title = plot_title,
@@ -428,6 +432,7 @@ make_varplot_wrapper <- function(
 #' @param dir_googledrive_upload googledrive::as_id("..."). Default = NULL. The location where outputs will be saved to in google drive. If NULL outputs will NOT be saved to googledrive. 
 make_figure <- function(
     srvy, 
+    srvy1, 
     dat00, 
     var_breaks, 
     plot_title = "",
@@ -471,7 +476,7 @@ make_figure <- function(
     dplyr::arrange(desc(srvy))
   
   # Colors and bins for var ----------------------------------------------
-  if (file_end %in% c("anom", "anom_cb", "daily_cb", "daily", "mean_cb", "mean")) {
+  if (file_end %in% c("anom", "anom_cb", "daily", "daily_cb", "mean_cb", "mean")) {
     
     var_labels <- c()
     for(i in 2:c(length(var_breaks))) {
@@ -537,7 +542,7 @@ make_figure <- function(
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
     if (sum(is.na(dat$var))!=0 & # if the survey is not yet complete
-        show_planned_stations & # if we plan to show planned stations
+        show_planned_stations & # if we are showing planned stations
         sum(is.na(dat$var) & !is.na(dat$vessel_shape))>0) { # and if there are planned stations to show
       iterate <- iterate[-length(iterate)]
     }
@@ -633,15 +638,15 @@ make_figure <- function(
           dplyr::mutate(lab = "")|> 
           sf::st_as_sf()
         
-        all_vess <- unique(dat_plot$vessel_shape)
+        all_vess <- unique(dat$vessel_shape)
         all_vess <- all_vess[!is.na(all_vess)]
         for (ii in 1:length(all_vess)) {
           vess <- all_vess[ii]
-          if (sum(unique(dat_planned$vessel_shape) %in% vess)==0) {
+          if (!(vess %in% unique(dat_planned$vessel_shape))) { #sum(unique(dat_planned$vessel_shape) %in% vess)==0) {
             temp1 <- dat_planned |>
               head(1) |>
               dplyr::mutate(vessel_shape = vess,
-                            vessel_name = unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]),
+                            vessel_name = unique(dat$vessel_name[dat$vessel_shape %in% vess]),
                             station = as.character(NA), 
                             # stratum = NA, 
                             lab = paste0(vessel_name, "\n"), 
@@ -663,10 +668,10 @@ make_figure <- function(
                                 paste(format(vess_date,
                                              "%b %d"), collapse = "-"))
             vess_date <- paste0("\n(", vess_date, ")")
+            dat_planned$lab[dat_planned$vessel_shape %in% vess] <-
+              paste0(unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]), vess_date)
           }
           
-          dat_planned$lab[dat_planned$vessel_shape %in% vess] <-
-            paste0(unique(dat_plot$vessel_name[dat_plot$vessel_shape %in% vess]), vess_date)
         }
       } else if (show_planned_stations) { # if we are sharing planned stations but there aren't any to share
         dat_planned <- data.frame(
@@ -802,6 +807,18 @@ make_figure <- function(
         
         # if we are showing planned stations
         if (show_planned_stations) {
+          
+          #   valbreak <- sort(as.character(unique(dat_planned$vessel_shape)))
+          #   labs <- sort(unique(dat_planned$lab))
+          #   vess <- unique(dat_plot$vessel_name); vess <- vess[!is.na(vess)]
+          # if (length(vess) == length(labs)) {
+          #   missing <- dat_plot %>% 
+          #     dplyr::filter(!is.na(station)) |>
+          #     dplyr::filter(!(vessel_shape %in% valbreak)) |>
+          #     head(1)
+          #   valbreak <- sort(c(valbreak, missing$vessel_shape))
+          #   labs <- sort(c(labs, paste0(missing$vessel_name, "\n")))
+          # }
           
           gg <- gg +
             ggplot2::geom_point(data = dat_planned, 
@@ -1055,13 +1072,13 @@ make_figure <- function(
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                 x = ifelse(srvy %in% c("BS") , .32, .37), # & file_end == "grid"
+                 x = ifelse(srvy %in% c("BS") , .31, .37), # & file_end == "grid"
                  # y = ifelse(srvy %in% c("AI", "GOA") & file_end == "grid", .25, .32), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  y = dplyr::case_when(
                    srvy %in% "AI"  ~ .35, 
                    srvy %in% "GOA" & file_end == "grid" ~ .33, 
                    srvy %in% "GOA" ~ .40, 
-                   srvy %in% c("BS") ~ .32, 
+                   srvy %in% c("BS") ~ .35, 
                    TRUE ~ .37), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  scale = .15 )
     
@@ -1069,7 +1086,7 @@ make_figure <- function(
       ifelse((file_end %in% c("grid", "mean", "mean_cb")), "", as.character(max_date)), 
       "_", file_end)
     
-    filename1 <- c()
+    filename1 <- c() # to track all of the files that need to be added to google drive
     
     # only make current if it is the last plot of the run
     if (file_end %in% c("grid", "mean", "mean_cb")) {

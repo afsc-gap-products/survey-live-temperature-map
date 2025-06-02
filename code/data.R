@@ -192,6 +192,7 @@ if (length(diff) > 0) {
                        head(length(diff)) |> 
                        dplyr::mutate(haul_id = NA, 
                                      station = NA, 
+                                     cruise = as.numeric(paste0(year, "02")), 
                                      source = "fake", 
                                      vessel_name = NA, 
                                      survey_definition_id = diff))
@@ -246,5 +247,4 @@ dat_survey <- race_data_cruises_mod0 |>
   dplyr::ungroup() |>
   dplyr::right_join(dat_survey) %>% 
   dplyr::select(-stratum, -vessel_id) 
-
 

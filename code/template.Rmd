@@ -186,21 +186,17 @@ if (file_end %in% c("mean", "mean_cb")) {
       dplyr::rename(lon = X, 
                     lat = Y) |> 
       dplyr::mutate(
-        # stratum = grid_stations_plot$stratum, 
-        # stratum = as.character(stratum),
-        station = grid_stations_plot$station
-        ) |>
+        station = grid_stations_plot$station ) |>
       dplyr::right_join(y = loc |> 
-                         # dplyr::mutate(stratum = as.character(stratum)) |> 
                          dplyr::select(station, vessel_shape, vessel_name, date, var_bin), # stratum, 
-                       by = c(#"stratum", 
-                              "station"))  |>
+                       by = c("station"))  |>
       dplyr::arrange(vessel_shape) |> 
       dplyr::mutate(lon = round(x = lon, digits = 2), 
                     lat = round(x = lat, digits = 2)) |> 
       dplyr::filter(!is.na(lon))
     
     temp <- c()
+    if (nrow(dat_max_date) != 0 ) {
     for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
       surveys <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
       numstationsbyvessel <- surveys |> 
@@ -228,26 +224,35 @@ if (file_end %in% c("mean", "mean_cb")) {
                        x = unique(numstationsbyvessel$vessel_name)),"}") )
                        # x = unique(surveys$vessel_name[!is.na(surveys$vessel_name)])),"}") )
     }
+    }
     
     temp1 <- ""
-    temp11 <- as.character(unique(dat_survey$vessel_shape)); temp11 <- temp11[!is.na(temp11)] # vessels in data
-    temp12 <- as.character(unique(dat_max_date$vessel_shape)) # vessels from maxdate
+    # temp11 <- as.character(unique(dat_survey$vessel_shape[dat_survey$year == maxyr & dat_survey$srvy %in% srvy1])); temp11 <- temp11[!is.na(temp11)] # vessels in data
+        temp11 <- dat_survey |> 
+          dplyr::filter(year == maxyr) |> 
+          dplyr::filter(srvy %in% srvy1) |> 
+          dplyr::filter(!is.na(vessel_shape)) |> 
+          dplyr::select(vessel_shape) |> 
+          dplyr::distinct() |>
+          unlist() # vessels in data
+    temp12 <- unique(dat_max_date$vessel_shape) # vessels from maxdate
     temp13 <- setdiff(temp11, temp12); temp13 <- temp13[!is.na(temp13)]
     if (length(temp13)>0) {
-      temp1 <- paste0("No stations were surveyed by the F/V \\textit{", 
-                      gsub(pattern = "F/V ", 
-                           replacement = "", 
+      temp1 <- paste0("No stations were surveyed by the F/V ", 
+                      paste0(gsub(pattern = "F/V ", 
+                           replacement = "\\textit{", 
                            fixed = TRUE,
                            x = setdiff(unique(dat_plot$vessel_name[!is.na(dat_plot$vessel_name)]), 
                                        unique(dat_max_date$vessel_name))), 
-                      "}. ")
+                      "}", collapse = " or "), ". ")
       temp1 <- ifelse(grepl(pattern = "No stations were surveyed by the F/V \\textit{}. ", 
                             x = temp1, fixed = TRUE), 
                       "", 
                       temp1)
     }
-    stations1 <- paste0("On ", format_date_txt(as.Date(max_date)), ", ",
-                        text_list(temp), ". ", temp1)
+    stations1 <- paste0(ifelse(is.null(temp), "", paste0("On ", format_date_txt(as.Date(max_date)), ", ",
+                        text_list(temp), ". ")), 
+                        temp1, collapse = "")
   }
   
   # Are stations planned for the next day?
@@ -270,9 +275,16 @@ if (file_end %in% c("mean", "mean_cb")) {
     stations1 <- paste0(stations1, "Stations yet to be sampled are shown as gray dots. ")
   }
   
-  
-  
-  temp00 <- paste0("The near real-time ocean bottom temperatures depicted were collected ", 
+    firstdayoftemps <- min(dat$date, na.rm = TRUE)+ifelse(show_planned_stations, 1, 0)
+  if (firstdayoftemps == date_entered[i]) {
+    temps_collected_when <- paste0("The near real-time ocean bottom temperatures depicted were collected on ",
+                     format_date_txt(x = min(as.Date(dat$date)+ifelse(show_planned_stations, 1, 0), 
+                                             na.rm = TRUE), "%B %d, %Y"),
+                     ". ")
+  } else if (firstplotofrun & show_planned_stations) {
+    temps_collected_when <- ""
+  } else {
+    temps_collected_when <- paste0("The near real-time ocean bottom temperatures depicted were collected ", 
                     ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date, 
                            paste0("on ", format_date_txt(x = min(as.Date(dat$date)+
                                                                    ifelse(show_planned_stations, 1, 0), 
@@ -281,13 +293,11 @@ if (file_end %in% c("mean", "mean_cb")) {
                                                           na.rm = TRUE), "%B %d"), 
                                   "-", 
                                   format_date_txt(x = as.Date(max_date), "%B %d"))), ". ")
-    temp01 <- paste0("The near real-time ocean bottom temperatures depicted were collected on ",
-                     format_date_txt(x = min(as.Date(dat$date)+ifelse(show_planned_stations, 1, 0), 
-                                             na.rm = TRUE), "%B %d, %Y"),
-                     ". ")
-  
+  }
+    
+    
   fig_cap <- paste0(ifelse(grepl(pattern = "F/V", x = stations1), intro0, intro_vess), 
-                    ifelse(firstplotofrun, temp01, temp00), 
+                    temps_collected_when, 
                     stations_first_last, 
                     stations1)
   

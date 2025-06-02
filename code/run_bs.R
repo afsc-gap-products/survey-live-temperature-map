@@ -79,7 +79,7 @@ if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
                        plot_subtitle = plot_subtitle,
                        show_planned_stations = show_planned_stations,
                        data_source = data_source,
-                       file_end0 = c("daily", "grid", "mean"), # c("daily", "anom"),, "anom"
+                       file_end0 = c("daily"), # c("daily", "anom"),, "anom"
                        dir_wd = dir_wd
   )
 }
