@@ -93,6 +93,7 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
                      dplyr::distinct())  |>     
   dplyr::select(-cruise_id, -haul) |> # , -haul_id 
   dplyr::mutate(cruise = as.numeric(cruise), 
+                vessel_name = stringr::str_to_title(vessel_name), 
                 date = as.Date(date, "%Y-%m-%d", tz = '') ) |> 
   dplyr::select(-vessel_id, -st, -latitude_dd_start, -longitude_dd_start)
 
@@ -175,12 +176,25 @@ dat_googledrive <- dplyr::bind_rows(
 
 # Combine all data sources -----------------------------------------------------
 
+# prioritize data already in RACE_DATA
+if (nrow(dat_race_data) == 0) {
+  dat_googledrive <- dat_googledrive |> 
+    dplyr::filter(date > as.Date(paste0(maxyr, "-12-31")) )
+} else {
+  dat_googledrive <- dplyr::left_join(dat_googledrive, 
+                 dat_race_data |> 
+  dplyr::group_by(vessel_name, survey_definition_id) |> 
+  dplyr::summarise(max_racedata_date = max(date, na.rm = TRUE)) |> 
+  dplyr::ungroup()) |> 
+  dplyr::filter(date > max_racedata_date) |> 
+  dplyr::select(-max_racedata_date)
+}
+
 dat_survey <- 
   # bind race_data and google drive data
   dplyr::bind_rows(
     dat_race_data, 
-    dat_googledrive |> 
-      dplyr::filter(date > if_else(nrow(dat_race_data) == 0, as.Date(paste0(maxyr, "-12-31")), max(dat_race_data$date)) ) ) |> # prioritize data already in RACE_DATA
+    dat_googledrive) |> 
   dplyr::select(-srvy, -stratum) 
 
 diff <- setdiff((unique(race_data_cruises_mod0$survey_definition_id[substr(race_data_cruises_mod0$cruise, 1, 4) == maxyr])), 
