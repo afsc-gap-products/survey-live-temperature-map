@@ -270,9 +270,9 @@ if (file_end %in% c("mean", "mean_cb")) {
                " stations planned for ", 
                format_date_txt(x = (as.Date(max_date)+1)), ". ")
     }
-  } else if (srvy %in% c("GOA", "AI") &
-             !(date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0)) { # not the last day of the survey
-    stations1 <- paste0(stations1, "Stations yet to be sampled are shown as gray dots. ")
+  # } else if (srvy %in% c("GOA", "AI") &
+  #            !(date_entered[length(date_entered)] == max_date & sum(is.na(dat_plot$var))>0)) { # not the last day of the survey
+  #    stations1 <- paste0(stations1, "Stations yet to be sampled are shown as gray dots. ")
   }
   
     firstdayoftemps <- min(dat$date, na.rm = TRUE)+ifelse(show_planned_stations, 1, 0)
