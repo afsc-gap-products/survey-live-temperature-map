@@ -1329,6 +1329,12 @@ make_figure_gif<-function(file_end,
     image = img_animated, 
     path = paste0(dir_out, filename0, ".gif") )
   
+  # if (FALSE) {
+  # magick::image_write_video(
+  #   image = img_animated,
+  #   path = paste0(dir_out, filename0, ".mp4")
+  # )
+  # }
 }
 
 upload_ftp <- function(dir_in, 
