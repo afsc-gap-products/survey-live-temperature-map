@@ -176,12 +176,12 @@ make_varplot_wrapper <- function(
     dplyr::group_by(srvy, station) |> # stratum, 
     dplyr::summarise(mean = mean(var, na.rm = TRUE), 
                      sd = sd(var, na.rm = TRUE)) # |> 
-    # dplyr::full_join(
-    #     dat_survey |> 
-    #       dplyr::filter(srvy %in% srvy1) |>
-    #       dplyr::select(srvy, station, survey) |>
-    #     dplyr::distinct() 
-    # )
+  # dplyr::full_join(
+  #     dat_survey |> 
+  #       dplyr::filter(srvy %in% srvy1) |>
+  #       dplyr::select(srvy, station, survey) |>
+  #     dplyr::distinct() 
+  # )
   
   ## Wrangle observed (daily) data ---------------------------------------------
   
@@ -594,7 +594,8 @@ make_figure <- function(
       }  
       grid_stations_plot <- grid_stations_plot |> 
         dplyr::left_join(dat_plot |> 
-                           dplyr::select(-survey)) # , -stratum
+                           dplyr::select(-survey)) |> 
+        dplyr::arrange(date)
       
       if (file_end != "mean") {
         grid_stations_plot$var_bin[as.Date(grid_stations_plot$date)>as.Date(max_date)]<-NA 
@@ -657,7 +658,7 @@ make_figure <- function(
               sf::st_as_sf(coords = c("lon", "lat"), remove = FALSE) 
             
             sf::st_crs(temp1) <- sf::st_crs(dat_planned)
-          
+            
             dat_planned <- dplyr::bind_rows(dat_planned, temp1)
             vess_date <- paste0("\n ")
           } else {
@@ -822,8 +823,8 @@ make_figure <- function(
           
           gg <- gg +
             ggplot2::geom_point(data = dat_planned, 
-                       mapping = aes(x = lon, y = lat, shape = factor(vessel_shape)), 
-                       size = 4, na.rm = TRUE) +
+                                mapping = aes(x = lon, y = lat, shape = factor(vessel_shape)), 
+                                size = 4, na.rm = TRUE) +
             ggplot2::scale_shape_manual(
               name = "Planned Stations",
               values = sort(as.character(unique(dat_planned$vessel_shape))),
@@ -959,13 +960,24 @@ make_figure <- function(
       
       if (file_end != 'grid') {
         ### Create temperature plots ---------------------------------------------------------
-        grid_stations_plot_visited <- grid_stations_plot |> 
-          dplyr::filter(!is.na(var_bin)) |> 
+        grid_stations_plot_visited <- grid_stations_plot |>
+          dplyr::filter(date <= date_entered[i]) |>
           sf::st_centroid() |> 
-          st_geometry() |> 
+          sf::st_geometry() |> 
           data.frame() |>
-          dplyr::mutate(
-            var_bin = grid_stations_plot$var_bin[!is.na(grid_stations_plot$var_bin)])
+          dplyr::bind_cols(
+            grid_stations_plot |>
+              dplyr::filter(date <= date_entered[i]) |> 
+              sf::st_drop_geometry() |>
+              dplyr::select(var_bin)) 
+        
+        # grid_stations_plot_visited <- grid_stations_plot |> 
+        #   # dplyr::filter(!is.na(var_bin)) |>
+        #   sf::st_centroid() |> 
+        #   st_geometry() |> 
+        #   data.frame() |>
+        #   dplyr::mutate(
+        #     var_bin = grid_stations_plot$var_bin)#[!is.na(grid_stations_plot$var_bin)])
         
         if (nrow(grid_stations_plot_visited)==0) {
           
@@ -981,20 +993,15 @@ make_figure <- function(
                                levels = levels(grid_stations_plot$var_bin), 
                                labels = levels(grid_stations_plot$var_bin)))
           
-          grid_stations_plot_visited$geometry[[1]][1] <- 1e12 # somewhere off the map
-          grid_stations_plot_visited$geometry[[1]][2] <- 1e12 # somewhere off the map
+          grid_stations_plot_visited$geometry[[1]][1] <- 
+            grid_stations_plot_visited$geometry[[1]][2] <- 1e12 # somewhere off the map
         }
         
         gg <- gg +
-          # full station grid
-          # ggplot2::geom_sf(
-          #   data = shp$survey.grid,
-          #   colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
-          #   size = ifelse(file_end == "grid", .05, .02),
-          #   show.legend = FALSE)  +
           # allocated station grid
           ggplot2::geom_sf(
-            data = grid_stations_plot |> dplyr::filter(!is.na(year)), 
+            data = grid_stations_plot |>
+              dplyr::filter(!is.na(year)),
             colour = ifelse((as.character(dates0[1]) == "none"), "grey50", "grey70"),
             size = ifelse((as.character(dates0[1]) == "none"), .05, .02),
             show.legend = FALSE) +
@@ -1010,7 +1017,8 @@ make_figure <- function(
             name = gsub(pattern = "\n", replacement = " ", x = legend_title),
             values = var_color,
             labels = var_labels,
-            drop = FALSE,
+            drop = FALSE, 
+            na.value = "grey70",
             na.translate = FALSE,
             guide = guide_legend(
               # direction = "horizontal",
@@ -1026,13 +1034,15 @@ make_figure <- function(
             legend.box = "horizontal", 
             legend.position = "bottom", 
             legend.spacing.x = unit(.5, 'cm')) +
-          # legend managment
+          # legend management
           ggplot2::scale_color_manual(
             name = "",
             values = var_color,
             labels = var_labels,
-            drop = FALSE,
-            na.translate = FALSE) +
+            na.value = "grey70",
+            drop = FALSE#,
+            # na.translate = FALSE
+            ) +
           ggplot2::guides(color = "none") +
           # scale bar
           # ggsn::scalebar(data = grid_stations_plot,

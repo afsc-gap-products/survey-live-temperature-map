@@ -95,7 +95,7 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
   dplyr::mutate(cruise = as.numeric(cruise), 
                 vessel_name = stringr::str_to_title(vessel_name), 
                 date = as.Date(date, "%Y-%m-%d", tz = '') ) |> 
-  dplyr::select(-vessel_id, -st, -latitude_dd_start, -longitude_dd_start)
+  dplyr::select(-vessel_id, -latitude_dd_start, -longitude_dd_start)
 
 if (istest) {
   dat_race_data <- dat_race_data |> 
@@ -141,7 +141,7 @@ if (length(a)>0) { # if there are enteries for this year in the spreadsheet
     dat_googledrive <- dplyr::bind_rows( 
       dat_googledrive, 
       b |> 
-        dplyr::filter(!is.na(date))|>
+        # dplyr::filter(!is.na(date))|>
         dplyr::mutate(
           bt = as.numeric(bt), 
           station = as.character(station)))
@@ -154,25 +154,25 @@ dat_googledrive <- dat_googledrive  |>
     source = "googledrive", 
     cruise = as.numeric(paste0(maxyr, ifelse(srvy == "NBS", "02", "01"))), 
     stratum = as.numeric(stratum),
-    year = maxyr # as.numeric(format(x = date, "%Y")), 
+    year = maxyr, # as.numeric(format(x = date, "%Y")), 
+    date = as.Date(date, "%Y-%m-%d", tz = 'America/Anchorage')+1, 
+    survey_definition_id = dplyr::case_when(
+      srvy == "EBS" ~ 98,
+      srvy == "NBS" ~ 143,
+      srvy == "BSS" ~ 78,
+      srvy == "GOA" ~ 47,
+      srvy == "AI" ~ 52)
   ) |> 
-  dplyr::select(srvy, year, stratum, station, cruise, date, bt,  
-                vessel_name, source)    |> 
-  dplyr::mutate(date = as.Date(date, "%Y-%m-%d", tz = 'America/Anchorage')+1, 
-                survey_definition_id = dplyr::case_when(
-                  srvy == "EBS" ~ 98,
-                  srvy == "NBS" ~ 143,
-                  srvy == "BSS" ~ 78,
-                  srvy == "GOA" ~ 47,
-                  srvy == "AI" ~ 52)) 
+  dplyr::select(srvy, survey_definition_id, year, stratum, station, cruise, date, bt,  
+                vessel_name, source)
 
-dat_googledrive <- dplyr::bind_rows(
-  dat_googledrive |> 
-    dplyr::filter(srvy %in% c("GOA", "AI")) |> 
-    dplyr::filter(!is.na(bt) ), 
-  dat_googledrive  |> # remove data with no vessel for the EBS/NBS
-    dplyr::filter(srvy %in% c("EBS", "NBS")) |> 
-    dplyr::filter(!is.na(vessel_name)) )
+# dat_googledrive <- dplyr::bind_rows(
+#   dat_googledrive |> 
+#     dplyr::filter(srvy %in% c("GOA", "AI")) |> 
+#     dplyr::filter(!is.na(bt) ), 
+#   dat_googledrive  |> # remove data with no vessel for the EBS/NBS
+#     dplyr::filter(srvy %in% c("EBS", "NBS")) |> 
+#     dplyr::filter(!is.na(vessel_name)) )
 
 # Combine all data sources -----------------------------------------------------
 
@@ -187,7 +187,10 @@ if (nrow(dat_race_data) == 0) {
   dplyr::summarise(max_racedata_date = max(date, na.rm = TRUE)) |> 
   dplyr::ungroup()) |> 
   dplyr::filter(date > max_racedata_date) |> 
-  dplyr::select(-max_racedata_date)
+  dplyr::select(-max_racedata_date) |> 
+    dplyr::bind_rows(dat_googledrive |> 
+                       dplyr::filter(!is.na(station)) |> 
+                       dplyr::filter(is.na(vessel_name)))
 }
 
 dat_survey <- 
