@@ -18,6 +18,8 @@ PKG <- c(
   #images
   "cowplot",
   "magick", 
+  "av", 
+  "gifski", 
   "qpdf",
   "ggplot2", # Create Elegant Data Visualizations Using the Grammar of Graphics
   "viridis", 
@@ -1208,7 +1210,8 @@ make_figure <- function(
     if (make_gifs) {
       message("Make GIF")
       filename1 <- c(filename1, 
-                     paste0(dir_out, filename0,'.gif'))
+                     paste0(dir_out, filename0,'.gif'), 
+                     paste0(dir_out, filename0,'.mp4') )
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
@@ -1309,15 +1312,21 @@ make_figure_gif<-function(file_end,
   temp <- temp[!grepl(pattern = "current", x = temp)]
   
   if (length(temp) != 0) {
-    temp <- as.Date(sort(sapply(temp,"[[",1)))
-    temp <- max(temp[as.Date(temp) < as.Date(max_date)])
-    imgs <- c(list.files(path = dir_out, 
-                         pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
-                         full.names = TRUE), 
-              imgs)
+    temp_all <- as.Date(sort(sapply(temp,"[[",1)))
+    if (max_date != min(temp_all)) {
+      temp <- max(temp_all[as.Date(temp_all) < as.Date(max_date)])
+      imgs_gifs <- c(list.files(path = dir_out, 
+                                pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
+                                full.names = TRUE), 
+                     imgs)
+    } else {
+      imgs_gifs <- c(imgs)
+    }
+    img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
   }
   
-  img_list <- lapply(imgs, 
+  # gifs
+  img_list <- lapply(imgs_gifs, 
                      image_read)
   
   img_list <- lapply(img_list, 
@@ -1339,12 +1348,10 @@ make_figure_gif<-function(file_end,
     image = img_animated, 
     path = paste0(dir_out, filename0, ".gif") )
   
-  # if (FALSE) {
-  # magick::image_write_video(
-  #   image = img_animated,
-  #   path = paste0(dir_out, filename0, ".mp4")
-  # )
-  # }
+  # movie file
+  av::av_encode_video(input = img_video, 
+                      framerate = 2,
+                      output = paste0(dir_out, filename0, ".mp4") )
 }
 
 upload_ftp <- function(dir_in, 
