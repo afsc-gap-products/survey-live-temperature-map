@@ -8,6 +8,8 @@
 
 # Install libraries ------------------------------------------------------------
 
+# install.packages("av")
+
 PKG <- c(
   "devtools",
   # Mapping
@@ -18,8 +20,6 @@ PKG <- c(
   #images
   "cowplot",
   "magick", 
-  "av", 
-  "gifski", 
   "qpdf",
   "ggplot2", # Create Elegant Data Visualizations Using the Grammar of Graphics
   "viridis", 
@@ -1215,7 +1215,7 @@ make_figure <- function(
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
-                      filename0 = paste0(filename0))
+                      filename0 = filename0)
     }
     
     ### CURRENT plots for easy finding -------------------------------------------
@@ -1322,7 +1322,7 @@ make_figure_gif<-function(file_end,
     } else {
       imgs_gifs <- c(imgs)
     }
-    img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
+    # img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
   }
   
   # gifs
@@ -1342,16 +1342,16 @@ make_figure_gif<-function(file_end,
   
   ## view animated image
   # img_animated
-  
+
+  ## save to disk
+  magick::image_write(
+    image = img_animated, 
+    path = paste0(dir_out, filename0, ".mp4") )
+    
   ## save to disk
   magick::image_write(
     image = img_animated, 
     path = paste0(dir_out, filename0, ".gif") )
-  
-  # movie file
-  av::av_encode_video(input = img_video, 
-                      framerate = 2,
-                      output = paste0(dir_out, filename0, ".mp4") )
 }
 
 upload_ftp <- function(dir_in, 
