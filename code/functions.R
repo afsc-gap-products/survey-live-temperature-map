@@ -8,8 +8,6 @@
 
 # Install libraries ------------------------------------------------------------
 
-# install.packages("av")
-
 PKG <- c(
   "devtools",
   # Mapping
@@ -20,6 +18,8 @@ PKG <- c(
   #images
   "cowplot",
   "magick", 
+  # "av",
+  # "gifski",
   "qpdf",
   "ggplot2", # Create Elegant Data Visualizations Using the Grammar of Graphics
   "viridis", 
@@ -140,7 +140,7 @@ make_varplot_wrapper <- function(
                        dplyr::select(srvy, survey, survey_definition_id) |>
                        dplyr::distinct())
   
-  height0 <- ifelse(srvy %in% c("AI", "GOA"), 6, 8)
+  height0 <- ifelse(srvy %in% c("AI", "GOA"), 5.99, 8.01)
   
   # Define var
   if (!is.null(var)){
@@ -442,7 +442,7 @@ make_figure <- function(
     legend_title = "",
     dates0 = "latest",
     shp, 
-    height0 = 8, 
+    height0 = 8.01, 
     width0 = 10.5,
     file_end = "",
     make_gifs = TRUE,
@@ -1044,7 +1044,7 @@ make_figure <- function(
             na.value = "grey70",
             drop = FALSE#,
             # na.translate = FALSE
-            ) +
+          ) +
           ggplot2::guides(color = "none") +
           # scale bar
           # ggsn::scalebar(data = grid_stations_plot,
@@ -1123,7 +1123,7 @@ make_figure <- function(
            height = height0, 
            width = width0,
            plot = gg, 
-           dpi = 320,
+           dpi = 300,
            bg = "white", 
            device = "png") 
     
@@ -1215,7 +1215,7 @@ make_figure <- function(
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
-                      filename0 = filename0)
+                      filename0 = paste0(filename0))
     }
     
     ### CURRENT plots for easy finding -------------------------------------------
@@ -1275,10 +1275,10 @@ make_figure <- function(
       for (iii in 1:length(filename1)) {
         drive_upload(
           media = filename1[iii],
-          path = googledrive::as_id(ifelse(grepl(pattern = "current", x = filename1[iii]), 
+          path = googledrive::as_id(ifelse(grepl(pattern = "current", x = filename1[iii]),
                                            dir_googledrive_upload, # if a current file, put in the main folder
                                            dir_googledrive_upload_archive)), # if the day-stamp file, put directly in the archive folder for safe keeping
-          overwrite = TRUE)          
+          overwrite = TRUE)
       }
     }
     
@@ -1315,18 +1315,19 @@ make_figure_gif<-function(file_end,
     temp_all <- as.Date(sort(sapply(temp,"[[",1)))
     if (max_date != min(temp_all)) {
       temp <- max(temp_all[as.Date(temp_all) < as.Date(max_date)])
-      imgs_gifs <- c(list.files(path = dir_out, 
-                                pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
-                                full.names = TRUE), 
-                     imgs)
+      img_gif <- c(list.files(path = dir_out, 
+                               pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
+                               full.names = TRUE), 
+                    imgs)
     } else {
-      imgs_gifs <- c(imgs)
+      img_gif <- c(imgs)
     }
-    # img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
+    img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
   }
   
-  # gifs
-  img_list <- lapply(imgs_gifs, 
+  # prepare animation ----------------------------------------------------------
+  
+  img_list <- lapply(img_gif, 
                      image_read)
   
   img_list <- lapply(img_list, 
@@ -1342,16 +1343,30 @@ make_figure_gif<-function(file_end,
   
   ## view animated image
   # img_animated
-
-  ## save to disk
-  magick::image_write(
-    image = img_animated, 
-    path = paste0(dir_out, filename0, ".mp4") )
-    
+  
+  # gifs -----------------------------------------------------------------------
+  
   ## save to disk
   magick::image_write(
     image = img_animated, 
     path = paste0(dir_out, filename0, ".gif") )
+  
+  # mp4 -----------------------------------------------------------------------
+  # !!! must install https://www.ffmpeg.org/download.html#build-windows
+
+  # ## save to disk
+  magick::image_write(
+    image = img_animated,
+    path = paste0(dir_out, filename0, ".mp4"), 
+    format = "mp4")
+  
+  # if (FALSE) { # backup
+  # library("av")
+  # library("gifski")
+  #   av::av_encode_video(input = img_video, 
+  #                       framerate = 2,
+  #                       output = paste0(dir_out, filename0, ".mp4") )
+  # }
 }
 
 upload_ftp <- function(dir_in, 
@@ -1486,5 +1501,4 @@ numbers2words <- function(x){
   }
   return(out)
 }
-
 
