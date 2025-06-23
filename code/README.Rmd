@@ -113,8 +113,7 @@ These scripts create daily survey station daily temperature and anomaly plots as
 
 # Notes
 
-You will need to install https://www.ffmpeg.org/download.html#build-windows so video files can compile using the `magick` package, which works well with Task Scheduler.
-
+ - You will need to install [`ffmpeg`](https://www.ffmpeg.org/download.html#build-windows) so video files can compile using the [`magick`](https://cran.r-project.org/web/packages/magick/vignettes/intro.html) package, which works well with Task Scheduler. The `av` R package does not seem to work with task scheduler. 
  - [How to set up the task scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
  - Files are saved to our internal dev FTP server and google drive. 
  - Troubleshooting: if the task scheduler fails to run the code, but you can run the script in R or Rstudio, you may need to update Pandoc. If you are on a NOAA machine, ask IT to install the .msi file for you. Close and reopen everything and try again. 

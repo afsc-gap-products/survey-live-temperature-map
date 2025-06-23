@@ -140,7 +140,8 @@ make_varplot_wrapper <- function(
                        dplyr::select(srvy, survey, survey_definition_id) |>
                        dplyr::distinct())
   
-  height0 <- ifelse(srvy %in% c("AI", "GOA"), 5.99, 8.01)
+  # funny height numbers because creating the mp4 through the magic package and ffmpeg needs the height to have an even pixel height (weird, but here we are)
+  height0 <- ifelse(srvy %in% c("AI", "GOA"), 5.99, 8.01) 
   
   # Define var
   if (!is.null(var)){

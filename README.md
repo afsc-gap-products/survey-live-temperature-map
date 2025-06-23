@@ -83,11 +83,12 @@ communications team. These plots are displayed on the AFSC website
 
 # Notes
 
-You will need to install
-<https://www.ffmpeg.org/download.html#build-windows> so video files can
-compile using the `magick` package, which works well with Task
-Scheduler.
-
+- You will need to install
+  [`ffmpeg`](https://www.ffmpeg.org/download.html#build-windows) so
+  video files can compile using the
+  [`magick`](https://cran.r-project.org/web/packages/magick/vignettes/intro.html)
+  package, which works well with Task Scheduler. The `av` R package does
+  not seem to work with task scheduler.
 - [How to set up the task
   scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
 - Files are saved to our internal dev FTP server and google drive.
