@@ -1322,7 +1322,7 @@ make_figure_gif<-function(file_end,
     } else {
       img_gif <- c(imgs)
     }
-    img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
+    # img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
   }
   
   # prepare animation ----------------------------------------------------------
@@ -1361,8 +1361,8 @@ make_figure_gif<-function(file_end,
     format = "mp4")
   
   # if (FALSE) { # backup
-  # library("av")
-  # library("gifski")
+  # library("av") # doesn't work with task scheduler for some reason
+  # library("gifski") # doesn't work with task scheduler for some reason
   #   av::av_encode_video(input = img_video, 
   #                       framerate = 2,
   #                       output = paste0(dir_out, filename0, ".mp4") )

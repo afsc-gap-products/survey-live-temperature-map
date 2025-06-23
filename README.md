@@ -83,6 +83,11 @@ communications team. These plots are displayed on the AFSC website
 
 # Notes
 
+You will need to install
+<https://www.ffmpeg.org/download.html#build-windows> so video files can
+compile using the `magick` package, which works well with Task
+Scheduler.
+
 - [How to set up the task
   scheduler](https://docs.google.com/document/d/1pwBmR6AqgnvUx_AiWYQxtYxIRjWMfdd5EPWwFvpI3Ug/edit)
 - Files are saved to our internal dev FTP server and google drive.
@@ -107,19 +112,15 @@ Find more plot examples
 *were* *surveyed* *by* *the* *F/V* *Ocean* *Explorer.* *No* *stations*
 *were* *surveyed* *by* *the* *F/V* *Alaska* *Provider.* *Credit:* *NOAA*
 *Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_ai.gif)
-, ![*NOAA* *Fisheries* *scientists* *are* *providing* *information* *on*
-*ocean* *temperatures* *observed* *during* *the* *Gulf* *of* *Alaska*
-*Bottom* *Trawl* *Survey* *in* *2023* *Credit:* *NOAA*
-*Fisheries.*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_goa.gif)
-, ![*Map* *of* *the* *ocean* *bottom* *temperatures* *from* *the* *2023*
-*eastern* *and* *northern* *Bering* *Sea* *bottom* *trawl* *surveys*
-*aboard* *the* *F/V* *Northwest* *Explorer* *and* *F/V* *Alaska*
-*Knight.* *Updated* *colors:* *This* *year* *in* *an* *effort* *to*
-*make* *the* *heatmaps* *more* *accessible* *to* *a* *broader*
-*audience* *a* *new* *color* *scheme* *was* *used* *for* *our*
-*heatmaps.* *However,* *given* *feedback* *we* *have* *received* *we*
-*are* *reverting* *back* *to* *the* *colors* *used* *in* *previous*
-*years.* *Credit:* *NOAA*
+, ![*NOAA* *Fisheries* *Alaska* *Fisheries* *Science* *Center*
+*Groundfish* *Assessment* *Program* *is* *conducting* *the* *eastern*
+*Bering* *Sea* *and* *northern* *Bering* *Sea* *bottom* *trawl*
+*surveys.* *The* *near* *real-time* *ocean* *bottom* *temperatures*
+*depicted* *were* *collected* *May* *31-June* *22* *On* *June* *22,*
+*three* *stations* *were* *surveyed* *by* *the* *F/V* *Northwest*
+*Explorer.* *No* *stations* *were* *surveyed* *by* *the* *F/V* *Alaska*
+*Knight.* *There* *are* *8* *stations* *planned* *for* *June* *23*
+*Credit:* *NOAA*
 *Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_bs.gif)
 , ![*NOAA* *Fisheries* *AFSC* *Groundfish* *Assessment* *Program*
 *conducted* *the* *eastern* *Bering* *Sea* *bottom* *trawl* *survey.*
@@ -134,40 +135,57 @@ Find more plot examples
 *There* *are* *8* *stations* *planned* *for* *June* *22* *Credit:*
 *NOAA*
 *Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_ebs.gif)
+, ![*NOAA* *Fisheries* *Alaska* *Fisheries* *Science* *Center*
+*Groundfish* *Assessment* *Program* *is* *conducting* *the* *Gulf* *of*
+*Alaska* *bottom* *trawl* *survey.* *The* *near* *real-time* *ocean*
+*bottom* *temperatures* *depicted* *were* *collected* *May* *27-June*
+*22* *On* *June* *22,* *eight* *stations* *were* *surveyed* *by* *the*
+*F/V* *Alaska* *Provider* *and* *six* *stations* *were* *surveyed* *by*
+*the* *F/V* *Ocean* *Explorer.* *Stations* *yet* *to* *be* *sampled*
+*are* *shown* *as* *gray* *dots.* *Credit:* *NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_daily_goa.gif)
 
 ## Blank, Grid-only Plot
 
-![*The* *Aleutian* *Islands* *bottom* *trawl* *survey.* *This* *survey*
-*covers* *the* *Central* *Aleutians,* *Eastern* *Aleutians,* *Southern*
-*Bering* *Sea,* *and* *Western* *Aleutians* *districts.* *Credit:*
-*NOAA*
+![*The* *NA* *bottom* *trawl* *survey.* *This* *survey* *covers* *the*
+*Central* *Aleutians,* *Eastern* *Aleutians,* *South* *Bering* *Sea,*
+*and* *Western* *Aleutians* *districts.* *Credit:* *NOAA*
 *Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_ai.png)
-, ![*The* *Gulf* *of* *Alaska* *bottom* *trawl* *survey* *region.*
-*This* *survey* *covers* *the* *Shumagin,* *Chirikof,* *Kodiak,*
-*Yakutat,* *and* *Southeastern* *subregions.* *Credit:* *NOAA*
-*Fisheries.*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_goa.png)
 , ![*Map* *of* *the* *eastern* *Bering* *Sea* *and* *northern* *Bering*
 *Sea* *2023* *survey* *stations* *with* *the* *50m,* *100m,* *and*
 *200m* *bathymetry* *lines.* *Credit:* *NOAA*
 *Fisheries.*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_bs.png)
-, ![*Map* *of* *the* *eastern* *Bering* *Sea* *2024* *survey* *station*
-*grid* *and* *the* *50* *m,* *100* *m,* *and* *200* *m* *bathymetry*
-*lines.* *Credit:* *NOAA*
+, ![*Map* *of* *the* *eastern* *Bering* *Sea* *and* *northern* *Bering*
+*Sea* *2025* *survey* *station* *grid* *and* *the* *50* *m,* *100* *m,*
+*and* *200* *m* *bathymetry* *lines.* *Credit:* *NOAA*
 *Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_ebs.png)
+, ![*The* *Gulf* *of* *Alaska* *bottom* *trawl* *survey.* *This*
+*survey* *covers* *the* *Shumagin,* *Chirikof,* *Kodiak,* *Yakutat,*
+*and* *Southeastern* *districts.* *Credit:* *NOAA*
+*Fisheries*](https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_grid_goa.png)
 
 ## Mean Plot
 
 <figure>
 <img
 src="https://github.com/afsc-gap-products/survey-live-temperature-map/blob/main/examples/current_mean_bs.png"
-alt="Mean bottom temperatures in the NOAA Fisheries eastern (1982-2022; 40 years) and northern Bering Sea (2010-2022; 5 years) Bottom Trawl Surveys. Credit: NOAA Fisheries." />
-<figcaption aria-hidden="true"><em>Mean</em> <em>bottom</em>
-<em>temperatures</em> <em>in</em> <em>the</em> <em>NOAA</em>
-<em>Fisheries</em> <em>eastern</em> <em>(1982-2022;</em> <em>40</em>
-<em>years)</em> <em>and</em> <em>northern</em> <em>Bering</em>
-<em>Sea</em> <em>(2010-2022;</em> <em>5</em> <em>years)</em>
-<em>Bottom</em> <em>Trawl</em> <em>Surveys.</em> <em>Credit:</em>
-<em>NOAA</em> <em>Fisheries.</em></figcaption>
+alt="The time series mean bottom temperatures from the NOAA Fisheries eastern Bering Sea (1982-2024; 42 years) and northern Bering Sea (2010-2023; 6 years) bottom trawl surveys. These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss) and the coldpool R package (https://github.com/afsc-gap-products/coldpool). Credit: NOAA Fisheries" />
+<figcaption aria-hidden="true"><em>The</em> <em>time</em>
+<em>series</em> <em>mean</em> <em>bottom</em> <em>temperatures</em>
+<em>from</em> <em>the</em> <em>NOAA</em> <em>Fisheries</em>
+<em>eastern</em> <em>Bering</em> <em>Sea</em> <em>(1982-2024;</em>
+<em>42</em> <em>years)</em> <em>and</em> <em>northern</em>
+<em>Bering</em> <em>Sea</em> <em>(2010-2023;</em> <em>6</em>
+<em>years)</em> <em>bottom</em> <em>trawl</em> <em>surveys.</em>
+<em>These</em> <em>data</em> <em>are</em> <em>publicly</em>
+<em>accessible</em> <em>on</em> <em>Fisheries</em> <em>One</em>
+<em>Stop</em> <em>Shop</em> <em>data</em> <em>platform</em> <em>(<a
+href="https://www.fisheries.noaa.gov/foss"
+class="uri">https://www.fisheries.noaa.gov/foss</a>)</em> <em>and</em>
+<em>the</em> <em>coldpool</em> <em>R</em> <em>package</em> <em>(<a
+href="https://github.com/afsc-gap-products/coldpool"
+class="uri">https://github.com/afsc-gap-products/coldpool</a>).</em>
+<em>Credit:</em> <em>NOAA</em> <em>Fisheries</em></figcaption>
 </figure>
 
 ## Anomaly Plot
@@ -191,8 +209,8 @@ alt="Ocean bottom temperature anomaly of the mean bottom temperatures from the e
 # Relevant publications
 
 **Learn more about these surveys and ocean temperatures around Alaska**
-(Hoff, 2016; Markowitz et al., 2023, 2023; Rohan et al., 2022; Von
-Szalay et al., 2023; Von Szalay and Raring, 2018).
+(Hoff, 2016; Markowitz et al., 2024, 2024; Rohan et al., 2022; Siple et
+al., 2024; Von Szalay et al., 2023; Zacher et al., 2024).
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0" line-spacing="2">
@@ -206,14 +224,14 @@ continental slope survey of groundfishes and invertebrate resources*
 
 </div>
 
-<div id="ref-2022NEBS2023" class="csl-entry">
+<div id="ref-2023NEBS" class="csl-entry">
 
-Markowitz, E. H., Dawson, E. J., Anderson, A. B., Rohan, S. K.,
-Charriere, N. E., Prohaska, B. K., and Stevenson, D. E. (2023). *Results
-of the 2022 eastern and northern Bering Sea continental shelf bottom
-trawl survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
-NMFS-AFSC-469; p. 213). U.S. Dep. Commer.
-<https://doi.org/10.25923/rt50-th19>
+Markowitz, E. H., Dawson, E. J., Wassermann, S., Anderson, C. B., Rohan,
+S. K., Charriere, B. K., and Stevenson, D. E. (2024). *Results of the
+2023 eastern and northern Bering Sea continental shelf bottom trawl
+survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
+NMFS-AFSC-487; p. 242). U.S. Dep. Commer.
+<https://doi.org/10.25923/2mry-yx09>
 
 </div>
 
@@ -227,12 +245,12 @@ NMFS-AFSC-456; p. 42). U.S. Dep. Commer.
 
 </div>
 
-<div id="ref-GOA2018" class="csl-entry">
+<div id="ref-GOA2023" class="csl-entry">
 
-Von Szalay, P. G., and Raring, N. W. (2018). *Data report: 2017
-<span class="nocase">Gulf of Alaska</span> bottom trawl survey* (NOAA
-Tech. Memo. NMFS-AFSC-374). U.S. Dep. Commer.
-<https://doi.org/10.7289/V5/TM-AFSC-374>
+Siple, M. C., Szalay, P. G. von, Raring, N. W., Dowlin, A. N., and
+Riggle, B. C. (2024). *Data report: 2023 gulf of alaska bottom trawl
+survey* (NOAA Tech. Memo. AFSC processed report; 2024-09). U.S. Dep.
+Commer. <https://doi.org/10.25923/gbb1-x748>
 
 </div>
 
@@ -242,6 +260,15 @@ Von Szalay, P. G., Raring, N. W., Siple, M. C., Dowlin, A. N., Riggle,
 B. C., and Laman, E. A. and. (2023). *Data report: 2022 Aleutian Islands
 bottom trawl survey* (AFSC Processed Rep. 2023-07; p. 230). U.S. Dep.
 Commer. <https://doi.org/10.25923/85cy-g225>
+
+</div>
+
+<div id="ref-SAPcrab2024" class="csl-entry">
+
+Zacher, L. S., Richar, J. I., Fedewa, E. J., Ryznar, E. R., and Litzow,
+M. A. (2024). *The 2024 eastern Bering Sea continental shelf trawl
+survey: Results for commercial crab species DRAFT* \[NOAA Tech. Memo.\].
+<https://www.fisheries.noaa.gov/resource/document/draft-2024-eastern-bering-sea-crab-technical-memorandum>
 
 </div>
 

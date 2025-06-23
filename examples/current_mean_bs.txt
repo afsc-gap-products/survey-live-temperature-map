@@ -1,1 +1,1 @@
-Mean bottom temperatures in the NOAA Fisheries eastern (1982-2022; 40 years) and northern Bering Sea (2010-2022; 5 years) Bottom Trawl Surveys. Credit: NOAA Fisheries.
+The time series mean bottom temperatures from the NOAA Fisheries eastern Bering Sea (1982-2024; 42 years) and northern Bering Sea (2010-2023; 6 years) bottom trawl surveys. These data are publicly accessible on Fisheries One Stop Shop data platform (https://www.fisheries.noaa.gov/foss) and the coldpool R package (https://github.com/afsc-gap-products/coldpool). Credit: NOAA Fisheries
