@@ -57,6 +57,10 @@ communications team. These plots are displayed on the AFSC website
 
 - [**Progress and temperature maps landing
   page**](https://www.fisheries.noaa.gov/alaska/science-data/bottom-trawl-survey-temperature-and-progress-maps)
+- [2025 Eastern Bering Sea Bottom Trawl
+  Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-2025-bering-sea-bottom-trawl-survey)
+- [2025 Gulf of Alaska Bottom Trawl
+  Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-2025-gulf-alaska-bottom-trawl-survey)
 - [2024 Eastern Bering Sea Bottom Trawl
   Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-eastern-bering-sea-bottom-trawl-survey-2024)
 - [2024 Aleutian Islands Bottom Trawl

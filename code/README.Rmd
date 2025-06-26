@@ -99,6 +99,8 @@ toc <- paste0(toc_list, "*](#", toc_link, ")", collapse = "\n")
 These scripts create daily survey station daily temperature and anomaly plots as the ships work their way through the Bering Sea. These ships are conducting NOAA Fisheries' Alaska Fisheries Science Center's fisheries independent surveys in the Eastern Bering Sea. Scripts pull temperatures from google drive, entered by FPCs at sea, create daily maps and composite gifs, and then push the maps to google drive for the communications team. These plots are displayed on the AFSC website
 
  - [**Progress and temperature maps landing page**](https://www.fisheries.noaa.gov/alaska/science-data/bottom-trawl-survey-temperature-and-progress-maps)
+ - [2025 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-2025-bering-sea-bottom-trawl-survey)
+ - [2025 Gulf of Alaska Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-2025-gulf-alaska-bottom-trawl-survey) 
  - [2024 Eastern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-eastern-bering-sea-bottom-trawl-survey-2024)
  - [2024 Aleutian Islands Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/climate/near-real-time-temperatures-aleutian-islands-bottom-trawl-survey-2024)
  - [2023 Eastern and Northern Bering Sea Bottom Trawl Survey](https://www.fisheries.noaa.gov/alaska/science-data/near-real-time-temperatures-bering-sea-bottom-trawl-survey-2023)
