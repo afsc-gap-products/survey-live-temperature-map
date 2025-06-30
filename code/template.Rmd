@@ -319,7 +319,12 @@ readr::write_lines(x = fig_alt, file = paste0(dir_out, filename0, ".txt"))
 
 ```
 
-```{r plot-figure, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5, dpi = 320}
+```{r plot-figure, fig.cap = fig_cap, fig.align = 'center', fig.width = 10.5, fig.height = 6.5, dpi = 320, eval = TRUE}
 gg
+```
+
+```{r plot-figure-png, fig.align = 'center', out.width="99%", dip = 72, eval = FALSE}
+# gg
+knitr::include_graphics(paste0(dir_out, filename0, ".png"))
 ```
 

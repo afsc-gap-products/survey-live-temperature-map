@@ -1138,10 +1138,14 @@ make_figure <- function(
     # RMarkdown ---
     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
-                      output_file = paste0(filename0, ".pdf"))
+                      output_file = paste0(filename0, "b.pdf"))
     
-    file.remove(list.files(path = paste0(dir_wd, "/code/"),
-                           pattern = ".log", full.names = TRUE))
+    # tools::compactPDF(paths = paste0(dir_out, filename0, "b.pdf"),
+    #                   verbose = TRUE,
+    #                   gs_quality='screen')
+
+    # file.remove(list.files(path = paste0(dir_wd, "/code/"),
+    #                        pattern = ".log", full.names = TRUE))
     
     # # Quarto ---
     # quarto::quarto_render(  # render the quarto document
@@ -1203,6 +1207,12 @@ make_figure <- function(
         qpdf::pdf_combine(input = c(paste0(dir_out, filename0, ".pdf"),
                                     paste0(dir_out, as.character(temp),"_", file_end, "_bind.pdf")),
                           output = c(paste0(dir_out, filename0, "_bind.pdf")))
+        
+        # tools::compactPDF(paths = paste0(dir_out, filename0, "_bind.pdf"), 
+        #                   verbose = TRUE,
+        #                   gs_quality='screen')
+
+        
         
       }
     }
