@@ -1138,7 +1138,7 @@ make_figure <- function(
     # RMarkdown ---
     rmarkdown::render(paste0(dir_wd, "/code/template.Rmd"),
                       output_dir = dir_out,
-                      output_file = paste0(filename0, "b.pdf"))
+                      output_file = paste0(filename0, ".pdf"))
     
     # tools::compactPDF(paths = paste0(dir_out, filename0, "b.pdf"),
     #                   verbose = TRUE,
