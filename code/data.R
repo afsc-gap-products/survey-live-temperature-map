@@ -84,6 +84,7 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
   dplyr::filter(format(as.Date(date), "%Y") == date_max) |>
   dplyr::mutate(
     year = date_max,
+    date = unlist(lapply(strsplit(x = as.character(date), split = " ", fixed = TRUE), '[[', 1)), 
     date = format(as.Date(date), "%Y-%m-%d"), 
     latitude_dd_start = latitude_dd_start/100, 
     longitude_dd_start = longitude_dd_start/100, 
@@ -182,12 +183,12 @@ if (nrow(dat_race_data) == 0) {
     dplyr::filter(date > as.Date(paste0(maxyr, "-12-31")) )
 } else {
   dat_googledrive <- dplyr::left_join(dat_googledrive, 
-                 dat_race_data |> 
-  dplyr::group_by(vessel_name, survey_definition_id) |> 
-  dplyr::summarise(max_racedata_date = max(date, na.rm = TRUE)) |> 
-  dplyr::ungroup()) |> 
-  dplyr::filter(date > max_racedata_date) |> 
-  dplyr::select(-max_racedata_date) |> 
+                                      dat_race_data |> 
+                                        dplyr::group_by(vessel_name, survey_definition_id) |> 
+                                        dplyr::summarise(max_racedata_date = max(date, na.rm = TRUE)) |> 
+                                        dplyr::ungroup()) |> 
+    dplyr::filter(date > max_racedata_date) |> 
+    dplyr::select(-max_racedata_date) |> 
     dplyr::bind_rows(dat_googledrive |> 
                        dplyr::filter(!is.na(station)) |> 
                        dplyr::filter(is.na(vessel_name)))

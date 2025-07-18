@@ -197,33 +197,33 @@ if (file_end %in% c("mean", "mean_cb")) {
     
     temp <- c()
     if (nrow(dat_max_date) != 0 ) {
-    for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
-      surveys <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
-      numstationsbyvessel <- surveys |> 
+      
+      numstationsbyvessel <- dat_max_date |>
         dplyr::group_by(vessel_name) |>
         dplyr::summarise(
           n = n()
-        )
+        ) 
+      numstationsbyvessel$num <- unlist(lapply(X = numstationsbyvessel$n, numbers2words))
+      
+      
+    # for (iii in 1:length(unique(dat_max_date$vessel_shape))) {
+    #   surveys <- dat_max_date[which(dat_max_date$vessel_shape == unique(dat_max_date$vessel_shape)[iii]),]
+    #   numstationsbyvessel <- surveys |> 
+    #     dplyr::group_by(vessel_name) |>
+    #     dplyr::summarise(
+    #       n = n()
+    #     )
         
       temp <- c(temp, 
                 paste0(
-                  numbers2words(numstationsbyvessel$n), 
-                  # ifelse(nrow(surveys)>1, "", "a "), 
-                  " station", ifelse(nrow(surveys)>1, "s", ""), " ", 
-                  # text_list(x =
-                  #             paste0(surveys$station,
-                  #                    " (",surveys$lat,"°N, ",surveys$lon,"°W; ",
-                  #                    gsub(pattern = " ",
-                  #                         replacement = "",
-                  #                         x = surveys$var_bin, fixed = TRUE),"°C)")),
-                  # " ", 
-                  ifelse(nrow(surveys)>1, "were", "was"), " surveyed by the F/V \\textit{",
+                  numstationsbyvessel$n, 
+                  " station", ifelse(numstationsbyvessel$n > 1, "s", ""), " ", 
+                  ifelse(numstationsbyvessel$n>1, "were", "was"), " surveyed by the F/V \\textit{",
                   gsub(pattern = "F/V ", 
                        replacement = "", 
                        fixed = TRUE,
-                       x = unique(numstationsbyvessel$vessel_name)),"}") )
-                       # x = unique(surveys$vessel_name[!is.na(surveys$vessel_name)])),"}") )
-    }
+                       x = numstationsbyvessel$vessel_name),"}", collapse = " and ") )
+    # }
     }
     
     temp1 <- ""
