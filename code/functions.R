@@ -1264,7 +1264,7 @@ make_figure <- function(
         }
       }
       
-      # ### FTP -------------------------------------------
+      ### FTP -------------------------------------------
       # # only make current if it is the last plot of the run
       # if (ftp$ftp_dl){
       #   message("Uploading files to FTP")
@@ -1293,6 +1293,12 @@ make_figure <- function(
       }
     }
     
+    ### remove objects to make sure there is no funny buisness -----------------
+    
+    remove("dat_planned", "dat_plot", "grid_stations_plot")
+    
+    
+    ### Done! ------------------------------------------------------------------
     end_time <- Sys.time()
     print((end_time - start_time))
   }

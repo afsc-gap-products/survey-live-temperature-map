@@ -85,7 +85,8 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
   dplyr::mutate(
     year = date_max,
     date = unlist(lapply(strsplit(x = as.character(date), split = " ", fixed = TRUE), '[[', 1)), 
-    date = format(as.Date(date), "%Y-%m-%d"), 
+    date = format(as.Date(date), "%Y-%m-%d", tz = ''), 
+    date = as.Date(date), 
     latitude_dd_start = latitude_dd_start/100, 
     longitude_dd_start = longitude_dd_start/100, 
     source = "race_data") |> 
@@ -94,8 +95,9 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
                      dplyr::distinct())  |>     
   dplyr::select(-cruise_id, -haul) |> # , -haul_id 
   dplyr::mutate(cruise = as.numeric(cruise), 
-                vessel_name = stringr::str_to_title(vessel_name), 
-                date = as.Date(date, "%Y-%m-%d", tz = '') ) |> 
+                vessel_name = stringr::str_to_title(vessel_name)#, 
+                # date = as.Date(date, "%Y-%m-%d", tz = '') 
+                ) |> 
   dplyr::select(-vessel_id, -latitude_dd_start, -longitude_dd_start)
 
 if (istest) {

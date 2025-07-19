@@ -216,7 +216,7 @@ if (file_end %in% c("mean", "mean_cb")) {
         
       temp <- c(temp, 
                 paste0(
-                  numstationsbyvessel$n, 
+                  numstationsbyvessel$num, 
                   " station", ifelse(numstationsbyvessel$n > 1, "s", ""), " ", 
                   ifelse(numstationsbyvessel$n>1, "were", "was"), " surveyed by the F/V \\textit{",
                   gsub(pattern = "F/V ", 
@@ -266,7 +266,7 @@ if (file_end %in% c("mean", "mean_cb")) {
       temp <- nrow(dat_planned[dat_planned$planned == "Y",])
       stations1 <- 
         paste0(stations1, "There are ",
-               ifelse(temp == 0, "no", temp),
+               ifelse(temp == 0, "no", numbers2words(temp)),
                " stations planned for ", 
                format_date_txt(x = (as.Date(max_date)+1)), ". ")
     }
