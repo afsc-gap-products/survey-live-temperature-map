@@ -516,6 +516,7 @@ make_figure <- function(
     # Create new temperature maps
     date_entered <- sort(unique(dat$date))
     date_entered <- date_entered[!is.na(date_entered)]
+    date_entered <- date_entered[which(date_entered <= max(dat$date[!is.na(dat$var)])+1)] # remove any date 2 days after the last temperature, such that only the next planned date shows. 
     date_entered <- c(#min(date_entered),#-1, 
       date_entered)
     if (show_planned_stations & # TOLEDO

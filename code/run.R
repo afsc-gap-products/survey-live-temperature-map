@@ -62,25 +62,25 @@ source(file = paste0(dir_wd, "code/data.R"))
 
 ## GOA -------------------------------------------------------------------------
 
-if ("GOA" %in% dat_survey$srvy) {
-  
-  srvy <- "GOA"
-  plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
-  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_goa") & googledrive_dl, dir_googledrive_upload_goa, NULL)
-  show_planned_stations <- FALSE
-  
-  make_varplot_wrapper(maxyr = maxyr,
-                       srvy = srvy,
-                       dat_survey = dat_survey,
-                       var = var,
-                       dir_googledrive_upload = dir_googledrive_upload,
-                       dates0 = dates0,
-                       shp = shp,
-                       plot_subtitle = plot_subtitle,
-                       show_planned_stations = show_planned_stations,
-                       file_end0 = c("daily"), # "daily, "grid"
-                       dir_wd = dir_wd)
-}
+# if ("GOA" %in% dat_survey$srvy) {
+#   
+#   srvy <- "GOA"
+#   plot_subtitle <- "NOAA Fisheries Gulf of Alaska Bottom Trawl Survey"
+#   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_goa") & googledrive_dl, dir_googledrive_upload_goa, NULL)
+#   show_planned_stations <- FALSE
+#   
+#   make_varplot_wrapper(maxyr = maxyr,
+#                        srvy = srvy,
+#                        dat_survey = dat_survey,
+#                        var = var,
+#                        dir_googledrive_upload = dir_googledrive_upload,
+#                        dates0 = dates0,
+#                        shp = shp,
+#                        plot_subtitle = plot_subtitle,
+#                        show_planned_stations = show_planned_stations,
+#                        file_end0 = c("daily"), # "daily, "grid"
+#                        dir_wd = dir_wd)
+# }
 
 ## NBS + EBS Maps --------------------------------------------------------------
 
