@@ -516,9 +516,8 @@ make_figure <- function(
     # Create new temperature maps
     date_entered <- sort(unique(dat$date))
     date_entered <- date_entered[!is.na(date_entered)]
-    date_entered <- date_entered[which(date_entered <= max(dat$date[!is.na(dat$var)])+1)] # remove any date 2 days after the last temperature, such that only the next planned date shows. 
-    date_entered <- c(#min(date_entered),#-1, 
-      date_entered)
+    date_entered <- date_entered[which(date_entered <= max(dat$date[!is.na(dat$var)]))+1] # remove any date 2 days after the last temperature, such that only the next planned date shows. 
+    # date_entered <- c(min(date_entered),#-1, date_entered)
     if (show_planned_stations & # TOLEDO
         (#data_source %in% c("oracle", "race_data") | 
           sum(is.na(dat$var)) == 0)) { #survey is finished for daily
@@ -561,7 +560,7 @@ make_figure <- function(
             !is.na(dat$vessel_shape))>0 &
         sum(is.na(dat$var)) != nrow(dat)) { # day before first day: if stations are planned, but have not been completed yet
       iterate <- iterate-1
-    } 
+    }
   } else { # if you want to run a specific date
     #   iterate <- which((date_entered) %in% (dates0))
     # } if else(!(dates0[1] %in% c("none", "all", "first", "last","latest"))) { # if there is a specific range of dates
@@ -1294,7 +1293,7 @@ make_figure <- function(
       }
     }
     
-    ### remove objects to make sure there is no funny buisness -----------------
+    ### remove objects to make sure there is no funny business -----------------
     
     remove("dat_planned", "dat_plot", "grid_stations_plot")
     
