@@ -196,11 +196,42 @@ if (nrow(dat_race_data) == 0) {
                        dplyr::filter(is.na(vessel_name)))
 }
 
+# historical data
+dat_oracle <- read.csv(file = paste0(dir_wd, "/data/racebase_haul.csv")) |> 
+  dplyr::select(-X, -AUDITJOIN) |> 
+  dplyr::filter(HAUL_TYPE == 3) |> 
+  dplyr::left_join(read.csv(file = paste0(dir_wd, "/data/racebase_cruise.csv"))) |> 
+  dplyr::select(haul_id = HAULJOIN, 
+                date = START_TIME, 
+                station = STATIONID, 
+                st = SURFACE_TEMPERATURE, 
+                bt = GEAR_TEMPERATURE, 
+                # survey_definition_id = SURVEY_DEFINITION_ID,
+                cruise = CRUISE, 
+                REGION, 
+                vessel_id = VESSEL) |> 
+  dplyr::mutate(
+    source = "oracle", 
+    date = as.Date(date, "%m/%d/%Y", tz = 'America/Anchorage')+1, 
+    year = as.numeric(format(date, format = "%Y")), 
+    survey_definition_id = dplyr::case_when(
+      REGION == "BS" & substr(x = as.character(cruise), start = 5, stop = 6) == "01" ~ 98, 
+      REGION == "BS" & substr(x = as.character(cruise), start = 5, stop = 6) == "02" ~ 143, 
+      REGION == "GOA" ~ 47, 
+      REGION == "AI" ~ 52
+    )
+  ) |> 
+  dplyr::select(-REGION) |> 
+  dplyr::left_join(gap_products_akfin_cruise0 |> 
+                     dplyr::select(vessel_id, vessel_name)  |> 
+                     dplyr::distinct())
+
 dat_survey <- 
   # bind race_data and google drive data
   dplyr::bind_rows(
     dat_race_data, 
     dat_googledrive) |> 
+  dplyr::bind_rows(dat_oracle) |> 
   dplyr::select(-srvy, -stratum) 
 
 diff <- setdiff((unique(race_data_cruises_mod0$survey_definition_id[substr(race_data_cruises_mod0$cruise, 1, 4) == maxyr])), 
@@ -222,14 +253,14 @@ if (length(diff) > 0) {
 dat_survey <- dat_survey |>
   # bind foss data
   dplyr::bind_rows(
-    dat_foss0 |> 
+    dat_foss0 |>
       dplyr::filter(
         !(is.na(station)) &
           !is.na(st) &
-          !is.na(bt)) |> 
-      dplyr::select(survey_definition_id, year, station, stratum, date, 
-                    vessel_name, vessel_id, 
-                    latitude_dd_start, longitude_dd_start, st, bt) ) |> 
+          !is.na(bt)) |>
+      dplyr::select(survey_definition_id, year, station, stratum, date,
+                    vessel_name, vessel_id,
+                    latitude_dd_start, longitude_dd_start, st, bt) ) |>
   dplyr::mutate(
     srvy = dplyr::case_when(
       survey_definition_id == 98 ~ "EBS",

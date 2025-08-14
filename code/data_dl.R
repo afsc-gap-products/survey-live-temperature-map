@@ -90,8 +90,9 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
 }
 
 locations<-c(
-  # "GAP_PRODUCTS.AKFIN_CRUISE",
-  # "GAP_PRODUCTS.AKFIN_HAUL",
+  "GAP_PRODUCTS.AKFIN_CRUISE",
+  "RACEBASE.HAUL",
+  "RACEBASE.CRUISE",
   "GAP_PRODUCTS.AKFIN_AREA",
   "GAP_PRODUCTS.AKFIN_STRATUM_GROUPS"#, 
   # "RACE_DATA.CRUISES" # needed for survey start and end dates
@@ -125,7 +126,7 @@ for (i in 1:length(locations)){
                              fixed = TRUE)),
                 ".csv")
     write.csv(x = a, 
-              paste0(dir_wd, "data", b))
+              paste0(dir_wd, "data/", b))
     
     names(a) <- tolower(names(a))
     assign(x = gsub(x = paste0(b, "0"),
