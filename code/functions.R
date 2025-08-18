@@ -540,6 +540,7 @@ make_figure <- function(
   
   ## Date range of figures to create ------------------------------------
   
+  date_entered <- date_entered[!is.na(date_entered)]
   if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
   } else if (dates0 == "all") {

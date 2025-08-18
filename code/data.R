@@ -80,6 +80,7 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
   
   by = "HAUL_ID")  |> 
   rename_all(tolower) |> 
+  dplyr::filter(!is.na(bt))  |> 
   dplyr::filter(!is.na(cruise_id))  |> 
   dplyr::filter(format(as.Date(date), "%Y") == date_max) |>
   dplyr::mutate(
@@ -198,6 +199,7 @@ if (nrow(dat_race_data) == 0) {
 
 # historical data
 dat_oracle <- read.csv(file = paste0(dir_wd, "/data/racebase_haul.csv")) |> 
+  dplyr::filter(ABUNDANCE_HAUL == 'Y') |> 
   dplyr::select(-X, -AUDITJOIN) |> 
   dplyr::filter(HAUL_TYPE == 3) |> 
   dplyr::left_join(read.csv(file = paste0(dir_wd, "/data/racebase_cruise.csv"))) |> 
