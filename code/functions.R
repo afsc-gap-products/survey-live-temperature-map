@@ -1144,7 +1144,7 @@ make_figure <- function(
     # tools::compactPDF(paths = paste0(dir_out, filename0, "b.pdf"),
     #                   verbose = TRUE,
     #                   gs_quality='screen')
-
+    
     # file.remove(list.files(path = paste0(dir_wd, "/code/"),
     #                        pattern = ".log", full.names = TRUE))
     
@@ -1212,7 +1212,7 @@ make_figure <- function(
         # tools::compactPDF(paths = paste0(dir_out, filename0, "_bind.pdf"), 
         #                   verbose = TRUE,
         #                   gs_quality='screen')
-
+        
         
         
       }
@@ -1329,19 +1329,19 @@ make_figure_gif<-function(file_end,
   temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
   temp <- temp[!grepl(pattern = "current", x = temp)]
   
-  if (length(temp) != 0) {
     temp_all <- as.Date(sort(sapply(temp,"[[",1)))
-    if (max_date != min(temp_all)) {
+  if (length(temp) != 0 & max_date != min(temp_all)) {
       temp <- max(temp_all[as.Date(temp_all) < as.Date(max_date)])
       img_gif <- c(list.files(path = dir_out, 
-                               pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
-                               full.names = TRUE), 
-                    imgs)
-    } else {
-      img_gif <- c(imgs)
-    }
-    # img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
+                              pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
+                              full.names = TRUE), 
+                   imgs)
+    # }
+  } else {
+    img_gif <- c(imgs)
   }
+  # img_video <- paste0(dir_out, as.character(temp_all[as.Date(temp_all) <= as.Date(max_date)]), "_", file_end, ".png")
+  # }
   
   # prepare animation ----------------------------------------------------------
   
@@ -1371,7 +1371,7 @@ make_figure_gif<-function(file_end,
   
   # mp4 -----------------------------------------------------------------------
   # !!! must install https://www.ffmpeg.org/download.html#build-windows
-
+  
   # ## save to disk
   magick::image_write(
     image = img_animated,

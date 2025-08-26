@@ -317,7 +317,7 @@ shp_all <- shp <- list(
       dplyr::mutate(srvy = "AI")
   ))  |>
     rename_all(tolower) |> 
-    dplyr::select(geometry, srvy = srvy, meters) |>
+    dplyr::select(geometry, srvy = srvy, depth_m) |>
     dplyr::mutate(survey_definition_id = dplyr::case_when(
       srvy == "EBS" ~ 98, 
       srvy == "NBS" ~ 143, 

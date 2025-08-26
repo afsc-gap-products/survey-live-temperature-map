@@ -223,6 +223,7 @@ dat_oracle <- read.csv(file = paste0(dir_wd, "/data/racebase_haul.csv")) |>
       REGION == "AI" ~ 52
     )
   ) |> 
+  dplyr::filter(year == date_max) |> 
   dplyr::select(-REGION) |> 
   dplyr::left_join(gap_products_akfin_cruise0 |> 
                      dplyr::select(vessel_id, vessel_name)  |> 
@@ -232,10 +233,20 @@ dat_survey <-
   # bind race_data and google drive data
   dplyr::bind_rows(
     dat_race_data, 
-    dat_googledrive) |> 
+    dat_googledrive)
+
+if (nrow(dat_oracle)>0) {
+  dat_survey <- dat_survey |> 
+    dplyr::filter(!(cruise %in% unique(dat_oracle$cruise)) & 
+                    !(survey_definition_id %in% unique(dat_oracle$survey_definition_id)))
+}
+
+dat_survey <- dat_survey |> 
   dplyr::bind_rows(dat_oracle) |> 
   dplyr::select(-srvy, -stratum) 
 
+
+# make dummy stations
 diff <- setdiff((unique(race_data_cruises_mod0$survey_definition_id[substr(race_data_cruises_mod0$cruise, 1, 4) == maxyr])), 
                 unique(dat_survey$survey_definition_id) )
 
