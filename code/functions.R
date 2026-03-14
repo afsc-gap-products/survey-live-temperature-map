@@ -1284,7 +1284,7 @@ make_figure <- function(
       message("Uploading files to googledrive")
       filename1 <- unique(filename1)
       dir_googledrive_upload_archive <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload))
-      dir_googledrive_upload_archive <- dir_googledrive_upload_archive$id[grep(pattern = "archive", x = dir_googledrive_upload_archive$name)]
+      dir_googledrive_upload_archive <- dir_googledrive_upload_archive$id[grep(pattern = "Archive", x = dir_googledrive_upload_archive$name)]
       for (iii in 1:length(filename1)) {
         drive_upload(
           media = filename1[iii],
