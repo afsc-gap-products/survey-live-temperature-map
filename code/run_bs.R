@@ -11,34 +11,36 @@
 ## Actually we cant directly use the here package, here - it actually causes 
 # issues with the tasks scheduler, which has no concept of a project root folder.
 
-# library(here)
 dir_wd <- "Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/"
+# library(here)
 # here::here("Z:/Projects/survey-live-temperature-map_general/survey-live-temperature-map/") 
 # dir_wd <- paste0(here::here(), "/")
 
 # KNOWNS -----------------------------------------------------------------------
 
 istest <- FALSE
-maxyr <- 2025
+maxyr <- 2026
 data_source <- c("gd", "race_data") # "gd" = google dirve, "oracle" 
-dates0 <-  "latest" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <-  "all" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+
+# Full rerun schedule:
 if (format(Sys.Date(), format = "%A") %in% c("Sunday", "Tuesday", "Thursday") & 
     format(Sys.time(), format = "%H") %in% 2) { # maintenance cycle - make another task scheduler for this 
   dates0 <- "all"
 }
 var <- "bt"
 
-survey_definition_id0 <- c(47, 98, 143) 
+survey_definition_id0 <- c(52, 98, 143) 
 
-dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/1ymH0K3d9SgfrhmP9PQI7y4PqInKFal2phKjot92xr1U"
+dir_googledrive_log <- "https://docs.google.com/spreadsheets/d/1M9bwA0ePSaDORRVI4EixGmgFNd5w6GcXCw4pWSn0dFU"
 dir_googledrive_upload_bs = 
   ifelse(istest, 
-         "https://drive.google.com/drive/folders/1TjNRlpRUF-Nzx2LsZdWWFluMb8iUCRth",
-         "https://drive.google.com/drive/folders/1H4kfU4xd3_vWggxrLwnImE6ikg4ub0a7")
-dir_googledrive_upload_goa = 
+         "https://drive.google.com/drive/folders/1iRGCznVxp-svhduUzXiNVMTUoMI6x45N",
+         "https://drive.google.com/drive/folders/1xfrr8hTgk97KZUBlMOGjrMiCQuHu-m0y")
+dir_googledrive_upload_ai = 
   ifelse(istest, 
-         "https://drive.google.com/drive/folders/1WXmQXmUjNjzQm915GSyrKyrZVrRfsBfT", 
-         "https://drive.google.com/drive/folders/10m709GkyPTofj37a3afQtZQGrzacXwb9")
+         "https://drive.google.com/drive/folders/1UmS2wGJvL02cmcWSb4YXO4qM3YHvC3FB", 
+         "https://drive.google.com/drive/folders/11f61U0oAkGUAxb8f9DaNItHUkLYUsqo8")
 
 # SIGN INTO GOOGLE DRIVE--------------------------------------------------------
 
@@ -52,6 +54,7 @@ source(file = paste0(dir_wd,"code/functions.R"))
 # source(file = paste0(dir_wd, "code/data_dl.R")) # you don't unnecessarily run this each time
 source(file = paste0(dir_wd, "code/data.R"))
 
+
 # UPDATE README (sometimes) ----------------------------------------------------
 
 # rmarkdown::render(here::here("code/README.Rmd"),
@@ -60,13 +63,13 @@ source(file = paste0(dir_wd, "code/data.R"))
 
 # Map --------------------------------------------------------------------------
 
-## NBS + EBS Maps --------------------------------------------------------------
+## EBS Maps --------------------------------------------------------------
 
-if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
+if (!("NBS" %in% dat_survey$srvy) & "EBS" %in% dat_survey$srvy) {
   
-  srvy <- "BS"
-  plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
-  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, dir_googledrive_upload_bs, NULL)
+  srvy <- "EBS"
+  plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
+  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, googledrive::as_id(dir_googledrive_upload_bs), NULL)
   show_planned_stations <- TRUE
   plot_anom <- TRUE
   
@@ -83,3 +86,27 @@ if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
                        dir_wd = dir_wd
   )
 }
+
+## NBS + EBS Maps --------------------------------------------------------------
+# 
+# if ("NBS" %in% dat_survey$srvy & "EBS" %in% dat_survey$srvy) {
+#   
+#   srvy <- "BS"
+#   plot_subtitle <- "NOAA Fisheries Bering Sea Bottom Trawl Survey"
+#   dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_bs") & googledrive_dl, googledrive::as_id(dir_googledrive_upload_bs), NULL)
+#   show_planned_stations <- TRUE
+#   plot_anom <- TRUE
+#   
+#   make_varplot_wrapper(maxyr = maxyr,
+#                        srvy = srvy,
+#                        dat_survey = dat_survey,
+#                        var = var,
+#                        dir_googledrive_upload = dir_googledrive_upload,
+#                        dates0 = dates0,
+#                        shp = shp,
+#                        plot_subtitle = plot_subtitle,
+#                        show_planned_stations = show_planned_stations,
+#                        file_end0 = c("daily"), # c("daily", "anom"),, "anom"
+#                        dir_wd = dir_wd
+#   )
+# }

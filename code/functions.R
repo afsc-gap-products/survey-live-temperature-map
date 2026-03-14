@@ -518,6 +518,8 @@ make_figure <- function(
     date_entered <- date_entered[!is.na(date_entered)]
     date_entered <- date_entered[which(date_entered <= max(dat$date[!is.na(dat$var)]))+1] # remove any date 2 days after the last temperature, such that only the next planned date shows. 
     # date_entered <- c(min(date_entered),#-1, date_entered)
+    date_entered <- date_entered[!is.na(date_entered)]
+  
     if (show_planned_stations & # TOLEDO
         (#data_source %in% c("oracle", "race_data") | 
           sum(is.na(dat$var)) == 0)) { #survey is finished for daily
@@ -540,7 +542,6 @@ make_figure <- function(
   
   ## Date range of figures to create ------------------------------------
   
-  date_entered <- date_entered[!is.na(date_entered)]
   if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
   } else if (dates0 == "all") {
@@ -953,7 +954,7 @@ make_figure <- function(
                               color = "white", #ifelse(srvy == "AI", "grey20", "white"), 
                               fill = "grey20", # ifelse(srvy == "AI", NA, "grey20"),
                               fontface = "bold",
-                              label.size = NA,
+                              linewidth = NA,
                               label.r = unit(0, "pt"),
                               mapping = 
                                 aes(x = x, 

@@ -1,62 +1,62 @@
 
 
-# Dowload FOSS data ------------------------------------------------------------
-
-# adatapted from https://afsc-gap-products.github.io/gap_products/content/foss-api-r.html#haul-data
-# September 26, 2024 by Emily Markowitz
-
-library(httr)
-library(jsonlite)
-print("FOSS haul data")
-
-dat <- data.frame()
-for (i in seq(0, 500000, 10000)){
-  print(i)
-  ## query the API link
-  res <- httr::GET(url = paste0('https://apps-st.fisheries.noaa.gov/ods/foss/afsc_groundfish_survey_haul/',
-                                "?offset=",i,"&limit=10000"))
-  ## convert from JSON format
-  data <- jsonlite::fromJSON(base::rawToChar(res$content))
-  
-  ## if there are no data, stop the loop
-  if (is.null(nrow(data$items))) {
-    break
-  }
-  
-  ## bind sub-pull to dat data.frame
-  dat <- dplyr::bind_rows(dat,
-                          data$items |>
-                            dplyr::select(-links)) # necessary for API accounting, but not part of the dataset)
-}
-dat_foss <- dat |>
-  dplyr::mutate(date_time = as.POSIXct(date_time,
-                                       format = "%Y-%m-%dT%H:%M:%S",
-                                       tz = Sys.timezone()), 
-                source = "offical", 
-                date = format(x = min(date_time, na.rm = TRUE), format = "%Y-%m-%d") # , 
-                # vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
-                # vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
-                # vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))
-  ) |> 
-  dplyr::select(year, srvy = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin, 
-                # date_start, date_end, survey_dates, 
-                station, stratum, date_time_start = date_time, 
-                latitude_dd_start, longitude_dd_start,
-                st = surface_temperature_c, bt = bottom_temperature_c, 
-                vessel_id, vessel_name, #vessel_shape, vessel_ital, 
-                source, date)
-
-dat_foss <- dat_foss |> 
-  dplyr::left_join(
-    dat_foss |> 
-      dplyr::group_by(survey_definition_id, year) |> 
-      dplyr::summarise(date_start = format(x = min(date_time_start, na.rm = TRUE), format = "%B %d"), 
-                       date_end = format(x = max(date_time_start, na.rm = TRUE), format = "%B %d"), 
-                       survey_dates = paste0(date_start, " - ", date_end))    
-  )
-
-# save(dat_foss, file = here::here("data", "dat_foss.rdata"))
-write.csv(x = dat_foss, file = paste0(dir_wd, "data/dat_foss.csv"))
+# # Dowload FOSS data ------------------------------------------------------------
+# 
+# # adatapted from https://afsc-gap-products.github.io/gap_products/content/foss-api-r.html#haul-data
+# # September 26, 2024 by Emily Markowitz
+# 
+# library(httr)
+# library(jsonlite)
+# print("FOSS haul data")
+# 
+# dat <- data.frame()
+# for (i in seq(0, 500000, 10000)){
+#   print(i)
+#   ## query the API link
+#   res <- httr::GET(url = paste0('https://apps-st.fisheries.noaa.gov/ods/foss/afsc_groundfish_survey_haul/',
+#                                 "?offset=",i,"&limit=10000"))
+#   ## convert from JSON format
+#   data <- jsonlite::fromJSON(base::rawToChar(res$content))
+#   
+#   ## if there are no data, stop the loop
+#   if (is.null(nrow(data$items))) {
+#     break
+#   }
+#   
+#   ## bind sub-pull to dat data.frame
+#   dat <- dplyr::bind_rows(dat,
+#                           data$items |>
+#                             dplyr::select(-links)) # necessary for API accounting, but not part of the dataset)
+# }
+# dat_foss <- dat |>
+#   dplyr::mutate(date_time = as.POSIXct(date_time,
+#                                        format = "%Y-%m-%dT%H:%M:%S",
+#                                        tz = Sys.timezone()), 
+#                 source = "offical", 
+#                 date = format(x = min(date_time, na.rm = TRUE), format = "%Y-%m-%d") # , 
+#                 # vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))), 
+#                 # vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")), 
+#                 # vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))
+#   ) |> 
+#   dplyr::select(year, srvy = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin, 
+#                 # date_start, date_end, survey_dates, 
+#                 station, stratum, date_time_start = date_time, 
+#                 latitude_dd_start, longitude_dd_start,
+#                 st = surface_temperature_c, bt = bottom_temperature_c, 
+#                 vessel_id, vessel_name, #vessel_shape, vessel_ital, 
+#                 source, date)
+# 
+# dat_foss <- dat_foss |> 
+#   dplyr::left_join(
+#     dat_foss |> 
+#       dplyr::group_by(survey_definition_id, year) |> 
+#       dplyr::summarise(date_start = format(x = min(date_time_start, na.rm = TRUE), format = "%B %d"), 
+#                        date_end = format(x = max(date_time_start, na.rm = TRUE), format = "%B %d"), 
+#                        survey_dates = paste0(date_start, " - ", date_end))    
+#   )
+# 
+# # save(dat_foss, file = here::here("data", "dat_foss.rdata"))
+# write.csv(x = dat_foss, file = paste0(dir_wd, "data/dat_foss.csv"))
 
 # Download oracle data ----------------------------------------------------------
 
@@ -90,9 +90,11 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
 }
 
 locations<-c(
-  "GAP_PRODUCTS.AKFIN_CRUISE",
   "RACEBASE.HAUL",
   "RACEBASE.CRUISE",
+  # "GAP_PRODUCTS.AKFIN_CATCH",
+  "GAP_PRODUCTS.AKFIN_CRUISE",
+  "GAP_PRODUCTS.AKFIN_HAUL",
   "GAP_PRODUCTS.AKFIN_AREA",
   "GAP_PRODUCTS.AKFIN_STRATUM_GROUPS"#, 
   # "RACE_DATA.CRUISES" # needed for survey start and end dates
@@ -138,7 +140,6 @@ for (i in 1:length(locations)){
 }
 error_loading
 
-
 race_data_cruises0 <- 
   RODBC::sqlQuery(channel, "SELECT * FROM RACE_DATA.CRUISES;")  |> 
   dplyr::left_join(
@@ -149,6 +150,38 @@ race_data_cruises0 <-
   dplyr::mutate(survey_definition_id = ifelse(survey_definition_id == 39 & cruise == 202501, 47, survey_definition_id)) # TOLEDO
 
 write.csv(x = race_data_cruises0, file = paste0(dir_wd, "data/race_data_cruises_mod.csv"))
+
+
+dat_foss <- gap_products_akfin_haul0 |>
+  dplyr::mutate(date_time = as.POSIXct(date_time_start,
+                                       format = "%Y-%m-%dT%H:%M:%S",
+                                       tz = Sys.timezone()),
+                source = "offical",
+                date = format(x = min(date_time, na.rm = TRUE), format = "%Y-%m-%d") # ,
+                # vessel_shape = ifelse(is.na(vessel_name), NA, as.character(substr(x = vessel_name, start = 1, stop = 1))),
+                # vessel_ital = ifelse(is.na(vessel_name), NA, paste0("F/V *", stringr::str_to_title(vessel_name), "*")),
+                # vessel_name = ifelse(is.na(vessel_name), NA, paste0("F/V ", stringr::str_to_title(vessel_name)))
+  ) |>
+  dplyr::left_join(gap_products_akfin_cruise0) |> 
+  dplyr::left_join(data.frame(srvy = c("EBS", "NBS", "AI", "GOA"), 
+                              survey = c("eastern Bering Sea", "northern Bering Sea", "Aleutian Islands", "Gulf of Alaska"), 
+                              survey_definition_id = c(98, 143, 52, 47))) |> 
+  dplyr::select(year, srvy = srvy, survey, survey_definition_id, cruise, cruisejoin, hauljoin,
+                # date_start, date_end, survey_dates,
+                station, stratum, date_time_start = date_time,
+                latitude_dd_start, longitude_dd_start,
+                st = surface_temperature_c, bt = gear_temperature_c,
+                vessel_id, vessel_name, #vessel_shape, vessel_ital,
+                source, date)
+
+dat_foss <- dat_foss |>
+  dplyr::left_join(
+    dat_foss |>
+      dplyr::group_by(survey_definition_id, year) |>
+      dplyr::summarise(date_start = format(x = min(date_time_start, na.rm = TRUE), format = "%B %d"),
+                       date_end = format(x = max(date_time_start, na.rm = TRUE), format = "%B %d"),
+                       survey_dates = paste0(date_start, " - ", date_end))
+  )
 
 # Load shape files -------------------------------------------------------------
 
