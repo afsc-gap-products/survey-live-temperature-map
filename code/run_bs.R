@@ -65,7 +65,7 @@ source(file = paste0(dir_wd, "code/data.R"))
 
 ## EBS Maps --------------------------------------------------------------
 
-if (!("NBS" %in% dat_survey$srvy) & "EBS" %in% dat_survey$srvy) {
+# if (!("NBS" %in% dat_survey$srvy) & "EBS" %in% dat_survey$srvy) {
   
   srvy <- "EBS"
   plot_subtitle <- "NOAA Fisheries Eastern Bering Sea Bottom Trawl Survey"
@@ -85,7 +85,7 @@ if (!("NBS" %in% dat_survey$srvy) & "EBS" %in% dat_survey$srvy) {
                        file_end0 = c("daily"), # c("daily", "anom"),, "anom"
                        dir_wd = dir_wd
   )
-}
+# }
 
 ## NBS + EBS Maps --------------------------------------------------------------
 # 

@@ -34,7 +34,7 @@ for (i in 1:length(a)){
 
 if (file.exists("Z:/Projects/ConnectToOracle.R")) {
   source("Z:/Projects/ConnectToOracle.R")
-  if (istest == TRUE) { channel <- channel_test }
+  # if (istest == TRUE) { channel <- channel_test }
 } else {
   library(rstudioapi)
   library(RODBC)
@@ -47,9 +47,10 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
 
 lastdl <- Sys.Date()
 
-date_max <- RODBC::sqlQuery(channel, paste0("SELECT CREATE_DATE FROM RACE_DATA.EDIT_HAULS;"))
+date_max <- date_max0 <- RODBC::sqlQuery(channel, paste0("SELECT CREATE_DATE FROM RACE_DATA.EDIT_HAULS;"))
 date_max <- sort(as.numeric(unique(unlist(format(date_max, format = "%Y")))))
 date_max <- max(date_max[date_max<=format(Sys.Date(), format = "%Y")]) # sometimes there are dates that haven't happened yet b/c testing
+date_max <- ifelse(date_max < maxyr, maxyr, date_max)
 
 # if this year's data hasn't been entered into the production data
 # if (format(max(dat_foss0$date_time_start), format = "%Y") < date_max | istest) { 
@@ -82,7 +83,6 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
   rename_all(tolower) |> 
   dplyr::filter(!is.na(bt))  |> 
   dplyr::filter(!is.na(cruise_id))  |> 
-  dplyr::filter(format(as.Date(date), "%Y") == date_max) |>
   dplyr::mutate(
     year = date_max,
     date = unlist(lapply(strsplit(x = as.character(date), split = " ", fixed = TRUE), '[[', 1)), 
@@ -91,6 +91,7 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
     latitude_dd_start = latitude_dd_start/100, 
     longitude_dd_start = longitude_dd_start/100, 
     source = "race_data") |> 
+  dplyr::filter(format(as.Date(date), "%Y") == date_max) |>
   dplyr::left_join(race_data_cruises_mod0 |>
                      dplyr::select(cruise, cruise_id, vessel_id, vessel_name, survey_definition_id) |> 
                      dplyr::distinct())  |>     
@@ -98,19 +99,8 @@ AND HAUL_TYPE  = 3;")), # WHERE ABUNDANCE_HAUL = 'Y'. Test tows are (7 GOA, 0 EB
   dplyr::mutate(cruise = as.numeric(cruise), 
                 vessel_name = stringr::str_to_title(vessel_name)#, 
                 # date = as.Date(date, "%Y-%m-%d", tz = '') 
-                ) |> 
-  dplyr::select(-vessel_id, -latitude_dd_start, -longitude_dd_start)
-
-if (istest) {
-  dat_race_data <- dat_race_data |> 
-    dplyr::mutate(
-      cruise = as.numeric(paste0(maxyr, substr(start = 5, stop = 6, cruise))), 
-      date = as.Date(paste0(maxyr, "-", format(as.Date(date), format = "%m-%d"))) ) |> 
-    dplyr::filter(as.Date(date) < as.Date("2025-07-01"))
-  # TOLEDO
-  dat_race_data <- dat_race_data |> 
-    dplyr::filter(date < "2025-07-01")
-}
+  ) |> 
+  dplyr::select(-vessel_id, -latitude_dd_start, -longitude_dd_start)  
 
 # Load new data from Google Sheet -------------------------------------------------
 # if (data_source == "gd") {
@@ -126,10 +116,10 @@ googledrive::drive_download(file = googledrive::as_id(dir_googledrive_log),  #"g
                             path = paste0(dir_wd, "/data/gap_survey_progression.xlsx"))
 
 a <- readxl::excel_sheets(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"))
-a <- a[grepl(pattern = ifelse(istest, "TEST", maxyr), x = a)]
+# a <- a[grepl(pattern = ifelse(istest, "TEST", maxyr), x = a)]
 dat_googledrive <- data.frame()
 if (length(a)>0) { # if there are enteries for this year in the spreadsheet
-  for (i in a) {
+  for (i in a[-1]) {
     b <- readxl::read_xlsx(path = paste0(dir_wd, "data/gap_survey_progression.xlsx"), sheet = i, skip = 1)
     
     if (grepl(pattern = "_BS", x = i)) {
@@ -147,7 +137,7 @@ if (length(a)>0) { # if there are enteries for this year in the spreadsheet
       b |> 
         # dplyr::filter(!is.na(date))|>
         dplyr::mutate(
-          bt = as.numeric(bt), 
+          bt = as.numeric(bt),
           station = as.character(station)))
   }
 }
@@ -167,7 +157,8 @@ dat_googledrive <- dat_googledrive  |>
       srvy == "GOA" ~ 47,
       srvy == "AI" ~ 52)
   ) |> 
-  dplyr::select(srvy, survey_definition_id, year, stratum, station, cruise, date, bt,  
+  dplyr::select(srvy, survey_definition_id, year, stratum, station, cruise, 
+                date, bt,  
                 vessel_name, source)
 
 # dat_googledrive <- dplyr::bind_rows(
@@ -183,13 +174,16 @@ dat_googledrive <- dat_googledrive  |>
 # prioritize data already in RACE_DATA
 if (nrow(dat_race_data) == 0) {
   dat_googledrive <- dat_googledrive |> 
-    dplyr::filter(date > as.Date(paste0(maxyr, "-12-31")) )
+    dplyr::filter(date > as.Date(paste0(maxyr, "-12-31"))) |> 
+    dplyr::mutate(vessel_name = as.character(vessel_name))
 } else {
-  dat_googledrive <- dplyr::left_join(dat_googledrive, 
-                                      dat_race_data |> 
-                                        dplyr::group_by(vessel_name, survey_definition_id) |> 
-                                        dplyr::summarise(max_racedata_date = max(date, na.rm = TRUE)) |> 
-                                        dplyr::ungroup()) |> 
+  dat_googledrive <- 
+    dplyr::left_join(
+      dat_googledrive, 
+      dat_race_data |> 
+        dplyr::group_by(vessel_name, survey_definition_id) |> 
+        dplyr::summarise(max_racedata_date = max(date, na.rm = TRUE)) |> 
+        dplyr::ungroup()) |> 
     dplyr::filter(date > max_racedata_date) |> 
     dplyr::select(-max_racedata_date) |> 
     dplyr::bind_rows(dat_googledrive |> 
@@ -223,8 +217,18 @@ dat_oracle <- read.csv(file = paste0(dir_wd, "/data/racebase_haul.csv")) |>
       REGION == "AI" ~ 52
     )
   ) |> 
+  dplyr::select(-REGION) 
+
+if (istest & nrow(dat_race_data) == 0 & nrow(dat_googledrive) == 0){
+  dat_oracle <- dat_oracle |> 
+    dplyr::filter(year == maxyr-2) |> # typically true
+    dplyr::mutate(year = maxyr, 
+      cruise = as.numeric(paste0(maxyr, substr(start = 5, stop = 6, cruise))), 
+      date = as.Date(paste0(maxyr, "-", format(as.Date(date), format = "%m-%d"))) ) 
+}
+
+dat_oracle <- dat_oracle |> 
   dplyr::filter(year == date_max) |> 
-  dplyr::select(-REGION) |> 
   dplyr::left_join(gap_products_akfin_cruise0 |> 
                      dplyr::select(vessel_id, vessel_name)  |> 
                      dplyr::distinct())

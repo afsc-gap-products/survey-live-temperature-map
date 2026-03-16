@@ -64,7 +64,7 @@ source(file = paste0(dir_wd, "code/data.R"))
 
 ## AI --------------------------------------------------------------------------
 
-if ("AI" %in% dat_survey$srvy) {
+# if ("AI" %in% dat_survey$srvy) {
   
   srvy <- "AI"
   plot_subtitle <- "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
@@ -82,7 +82,7 @@ if ("AI" %in% dat_survey$srvy) {
                        show_planned_stations = show_planned_stations,
                        file_end0 = c("daily"), # "daily, "grid"
                        dir_wd = dir_wd)
-}
+# }
 
 ## GOA --------------------------------------------------------------------------
 

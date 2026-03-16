@@ -13,8 +13,7 @@ PKG <- c(
   # Mapping
   "akgfmaps", # devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
   "sf",
-  "ggspatial", 
-  
+
   #images
   "cowplot",
   "magick", 
@@ -736,13 +735,7 @@ make_figure <- function(
         legend.box.background = element_blank(),
         legend.key = element_blank(), 
         legend.key.size=(unit(.3,"cm")), 
-        axis.title=element_text(size=14) ) # +
-    # ggplot2::coord_sf(xlim = shp$plot.boundary$x, 
-    #                   ylim = shp$plot.boundary$y)  +
-    # ggplot2::coord_sf(xlim = c(sf::st_bbox(shp$survey.grid)$xmin, 
-    #                            sf::st_bbox(shp$survey.grid)$xmax), # shp$plot.boundary$x,
-    #                   ylim = c(sf::st_bbox(shp$survey.grid)$ymin, 
-    #                            sf::st_bbox(shp$survey.grid)$ymax)) # shp$plot.boundary$y)
+        axis.title=element_text(size=14) ) 
     
     if (srvy %in% c("BS", "EBS", "NBS")) {
       ## Bering Sea -----------------------------------------------------------
@@ -756,8 +749,8 @@ make_figure <- function(
       if (file_end == "grid") {
         temp <- shp$place.labels[shp$place.labels$type == "bathymetry",]
         gg <- gg +
-          geom_sf(data = shp$bathymetry) +
-          guides(colour = 
+          ggplot2::geom_sf(data = shp$bathymetry) +
+          ggplot2::guides(colour = 
                    guide_legend(override.aes = 
                                   list(fill = shp$survey.area$survey_reg_col)))  # survey regions
         
@@ -782,12 +775,12 @@ make_figure <- function(
                           label = "Alaska", 
                           color = "white", 
                           size = 10)  +
-        geom_sf(data = shp$survey.area, 
-                aes(color = reg_lab), 
-                linewidth = 1.5, 
-                fill = "NA",
-                show.legend = TRUE) +
-        scale_color_manual(name = "Survey Region", 
+        # ggplot2::geom_sf(data = shp$survey.area, 
+        #         aes(color = reg_lab), 
+        #         linewidth = 1.5, 
+        #         fill = "NA",
+        #         show.legend = TRUE) +
+        ggplot2::scale_color_manual(name = "Survey Region", 
                            values = shp$survey.area$survey_reg_col,  
                            breaks = shp$survey.area$reg_lab, 
                            labels = shp$survey.area$reg_lab) 
@@ -798,18 +791,20 @@ make_figure <- function(
         gg <- gg +
           ggplot2::geom_sf(data = grid_stations_plot, 
                            aes(fill = var_bin), 
-                           colour = "grey50",
+                           colour = "grey50"#,
                            # size = .5, 
-                           show.legend = legend_title) +
+                           # show.legend = legend_title
+                           ) +
           ggplot2::scale_fill_manual(
             name = legend_title,
             values = var_color, 
             labels = var_labels, 
             drop = FALSE,
             na.translate = FALSE) +
-          ggspatial::coord_sf(
-            xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-            ylim = c(sf::st_bbox(grid_stations_plot)[c(2,4)])) 
+          ggplot2::coord_sf(
+            # xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
+            # ylim = c(sf::st_bbox(grid_stations_plot)[c(2,4)])
+            ) 
         
         # if we are showing planned stations
         if (show_planned_stations) {
@@ -887,18 +882,20 @@ make_figure <- function(
       ### grid map ---------------------------------------------------
       
       gg <- gg  + 
-        # # full station grid
-        # ggplot2::geom_sf(
-        #   data = shp$survey.grid,
-        #   alpha = .25,
-        #   colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
-        #   size = ifelse(file_end == "grid", .05, .02),
-        #   show.legend = FALSE)  +
+        # full station grid
+        ggplot2::geom_sf(
+          data = shp$survey.grid,
+          alpha = .25,
+          colour = "grey95", #ifelse((as.character(dates0[1]) == "none"), "grey50", "grey95"),
+          size = ifelse(file_end == "grid", .05, .02),
+          show.legend = FALSE)  +
         # fix extent
-        ggspatial::coord_sf(
-          xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-          ylim = c(sf::st_bbox(grid_stations_plot)[c(2)]+50000,
-                   sf::st_bbox(grid_stations_plot)[c(4)])) +
+        ggplot2::coord_sf(
+          # expand = TRUE,
+          # xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
+          # ylim = c(sf::st_bbox(grid_stations_plot)$ymin-100000, # +ifelse(srvy == "AI", -100000, +50000),
+          #          sf::st_bbox(grid_stations_plot)$ymax)
+          ) +
         # Survey area
         ggplot2::geom_sf(
           data = shp$survey.area, 
@@ -939,16 +936,25 @@ make_figure <- function(
       }
       
       if (file_end == 'grid') {
+        if (srvy %in% "AI") {
+          bb$y <- bb$y-20000
+          bb$y[bb$lab=="Eastern Aleutians"] <- bb$ymax[bb$lab=="Eastern Aleutians"]+17500
+        }
+        
         gg <- gg  +
           # district-colored station grids 
-          ggplot2::geom_sf(
-            data = shp$survey.grid  |>
-              dplyr::filter(!is.na(area_name)),
-            mapping = aes(color = area_name, geometry = geometry),
-            alpha = .95,
-            show.legend = FALSE)  +
-          ggplot2::scale_color_grey(start = .4) +
-          ggplot2::guides(color = "none") +
+          # ggplot2::geom_sf(
+          #   data = shp$survey.grid  |>
+          #     dplyr::filter(!is.na(area_name)),
+          #   mapping = aes(color = area_name, geometry = geometry),
+          #   alpha = .95,
+          #   show.legend = FALSE)  +
+          # ggplot2::scale_color_grey(start = .4) +
+          # ggplot2::guides(color = "none")   + 
+          ggplot2::coord_sf(
+            xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
+            ylim = c(sf::st_bbox(grid_stations_plot)$ymin-10000, # +ifelse(srvy == "AI", -100000, +50000),
+                     sf::st_bbox(grid_stations_plot)$ymax) ) +
           # label regions
           ggplot2::geom_label(data = bb, 
                               color = "white", #ifelse(srvy == "AI", "grey20", "white"), 
@@ -958,9 +964,10 @@ make_figure <- function(
                               label.r = unit(0, "pt"),
                               mapping = 
                                 aes(x = x, 
-                                    y = y, #ifelse(lab %in% c("Western Aleutians"), (y-25000), (y+25000)), 
+                                    y = y, # ifelse(srvy %in% "AI", (y-25000), y), 
                                     label = lab), 
                               size = 4)
+          
       } 
       
       if (file_end != 'grid') {
@@ -1015,60 +1022,38 @@ make_figure <- function(
             data = grid_stations_plot_visited,
             mapping = aes(geometry = geometry,
                           fill = var_bin,
-                          color = var_bin), na.rm = TRUE, 
-            size = 3, 
-            show.legend = legend_title)  + 
+                          color = var_bin), #na.rm = TRUE, 
+            # show.legend = legend_title, 
+            size = 3)  + 
+          ggplot2::scale_color_manual(
+            name = gsub(pattern = "\n", replacement = " ", x = legend_title), # "",
+            values = var_color,
+            labels = var_labels,
+            na.value = "grey70",
+            drop = FALSE
+          ) +
           ggplot2::scale_fill_manual(
             name = gsub(pattern = "\n", replacement = " ", x = legend_title),
             values = var_color,
             labels = var_labels,
             drop = FALSE, 
-            na.value = "grey70",
-            na.translate = FALSE,
-            guide = guide_legend(
-              # direction = "horizontal",
-              label.position = "bottom",
-              legend.justification = "center",
-              nrow = 1,
-              # label.theme = element_text(angle = 90)
-              label.hjust = 0.5,
-              label.vjust = 0.5,
-            ) ) +
+            na.value = "grey70" ) + #,
+          ggplot2::guides(colour = guide_legend(nrow = 1), 
+                          fill = guide_legend(nrow = 1)) +
+          # legend management
           ggplot2::theme(
             legend.direction = "horizontal", 
             legend.box = "horizontal", 
             legend.position = "bottom", 
+            legend.text.position = "bottom", 
             legend.spacing.x = unit(.5, 'cm')) +
-          # legend management
-          ggplot2::scale_color_manual(
-            name = "",
-            values = var_color,
-            labels = var_labels,
-            na.value = "grey70",
-            drop = FALSE#,
-            # na.translate = FALSE
-          ) +
-          ggplot2::guides(color = "none") +
-          # scale bar
-          # ggsn::scalebar(data = grid_stations_plot,
-          #                location = "bottomright",
-          #                dist = 100,
-          #                dist_unit = "nm",
-          #                transform = FALSE,
-          #                st.dist = 0.06,
-          #                border.size = .25,
-          #                height0 = 0.03,
-          #                st.bottom = FALSE,
-          #                st.size = 3, 
-          #                model = shp$crs) +
           # fix extent
-          ggspatial::coord_sf(
-            xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
-            ylim = c(sf::st_bbox(grid_stations_plot)[c(2)], sf::st_bbox(grid_stations_plot)[c(4)]+40000)) 
+          ggplot2::coord_sf() 
         
         # if (file_end %in% c("daily", "anom")) {
         gg <- gg +
-          ggplot2::annotate("text", 
+          ggplot2::annotate(
+            geom = "text", 
                             # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
                             x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(srvy == "AI", .1, .15)),  # ifelse(srvy == "AI", .60, .15)
                             y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(srvy == "AI", .2, .80)), 
@@ -1284,7 +1269,7 @@ make_figure <- function(
       message("Uploading files to googledrive")
       filename1 <- unique(filename1)
       dir_googledrive_upload_archive <- googledrive::drive_ls(path = googledrive::as_id(dir_googledrive_upload))
-      dir_googledrive_upload_archive <- dir_googledrive_upload_archive$id[grep(pattern = "Archive", x = dir_googledrive_upload_archive$name)]
+      dir_googledrive_upload_archive <- dir_googledrive_upload_archive$id[grep(pattern = "archive", x = dir_googledrive_upload_archive$name)]
       for (iii in 1:length(filename1)) {
         drive_upload(
           media = filename1[iii],
