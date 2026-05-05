@@ -175,8 +175,9 @@ make_varplot_wrapper <- function(
     dplyr::filter(year < maxyr &
                     srvy %in% srvy1) |>
     dplyr::rename("var" = dplyr::all_of(var)) |>
+    dplyr::rename("mean" = dplyr::all_of(paste0("mean_", var))) |>
     dplyr::group_by(srvy, station) |> # stratum, 
-    dplyr::summarise(#mean = mean(var, na.rm = TRUE), 
+    dplyr::summarise(mean = mean(var, na.rm = TRUE), 
       sd = sd(var, na.rm = TRUE)) # |> 
   # dplyr::full_join(
   #     dat_survey |> 
