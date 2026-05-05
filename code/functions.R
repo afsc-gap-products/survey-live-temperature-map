@@ -11,9 +11,9 @@
 PKG <- c(
   "devtools",
   # Mapping
-  "akgfmaps", # devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
+  "akgfmaps", # pak::pak("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
   "sf",
-
+  
   #images
   "cowplot",
   "magick", 
@@ -45,7 +45,7 @@ PKG <- c(
 for (p in PKG) {
   if(!require(p,character.only = TRUE)) {  
     if (p %in% c("akgfmaps", "coldpool", "gapindex")) {
-      devtools::install_github(paste0("afsc-gap-products/", p))
+      pak::pak(paste0("afsc-gap-products/", p))
     } else {
       install.packages(p, verbose = FALSE)
     }
@@ -194,13 +194,11 @@ make_varplot_wrapper <- function(
                   vessel_shape, var = dplyr::all_of(var), 
                   survey_dates, survey, vessel_name, source)
   
-  dat <- dplyr::full_join(
-    x = dat |> 
-      dplyr::select(srvy, survey, survey_dates) |> 
-      dplyr::distinct(),
-    y = dat_anom) |> 
-    dplyr::full_join(
-      y = dat) |>
+  dat <- dplyr::full_join(dat |> 
+                            dplyr::select(srvy, survey, survey_dates) |> 
+                            dplyr::distinct(),
+                          dat_anom) |> 
+    dplyr::full_join(dat) |>
     dplyr::mutate(reg_lab = paste0(survey, "\n(", survey_dates, ")"), 
                   var = as.numeric(var), 
                   anom = var-mean) |>
@@ -518,7 +516,7 @@ make_figure <- function(
     date_entered <- date_entered[which(date_entered <= max(dat$date[!is.na(dat$var)]))+1] # remove any date 2 days after the last temperature, such that only the next planned date shows. 
     # date_entered <- c(min(date_entered),#-1, date_entered)
     date_entered <- date_entered[!is.na(date_entered)]
-  
+    
     if (show_planned_stations & # TOLEDO
         (#data_source %in% c("oracle", "race_data") | 
           sum(is.na(dat$var)) == 0)) { #survey is finished for daily
@@ -543,6 +541,7 @@ make_figure <- function(
   
   if (dates0 == "none") { # If you are not using any data from temp data
     iterate <- 1 
+    date_entered <- max(dat$date, na.rm = TRUE) # needed for mean plots
   } else if (dates0 == "all") {
     iterate <- 1:length(date_entered)# if you want to run all of plots for each date_entered: 
     if (sum(is.na(dat$var))!=0 & # if the survey is not yet complete
@@ -743,7 +742,7 @@ make_figure <- function(
       gg <- gg +
         ggplot2::geom_sf(data = shp$survey.grid, 
                          colour = "grey50",
-                         show.legend = legend_title)
+                         show.legend = FALSE)
       
       ### grid map ---------------------------------------------------
       if (file_end == "grid") {
@@ -751,8 +750,8 @@ make_figure <- function(
         gg <- gg +
           ggplot2::geom_sf(data = shp$bathymetry) +
           ggplot2::guides(colour = 
-                   guide_legend(override.aes = 
-                                  list(fill = shp$survey.area$survey_reg_col)))  # survey regions
+                            guide_legend(override.aes = 
+                                           list(fill = shp$survey.area$survey_reg_col)))  # survey regions
         
         if (nrow(temp)>0) {
           
@@ -781,20 +780,20 @@ make_figure <- function(
         #         fill = "NA",
         #         show.legend = TRUE) +
         ggplot2::scale_color_manual(name = "Survey Region", 
-                           values = shp$survey.area$survey_reg_col,  
-                           breaks = shp$survey.area$reg_lab, 
-                           labels = shp$survey.area$reg_lab) 
+                                    values = shp$survey.area$survey_reg_col,  
+                                    breaks = shp$survey.area$reg_lab, 
+                                    labels = shp$survey.area$reg_lab) 
       
       # Add temperature squares
       if (file_end != "grid") { # If you are using any data from temp data
         
         gg <- gg +
           ggplot2::geom_sf(data = grid_stations_plot, 
-                           aes(fill = var_bin), 
-                           colour = "grey50"#,
+                           mapping = aes(fill = var_bin), 
+                           colour = "grey50",
                            # size = .5, 
-                           # show.legend = legend_title
-                           ) +
+                           show.legend = TRUE
+          ) +
           ggplot2::scale_fill_manual(
             name = legend_title,
             values = var_color, 
@@ -804,7 +803,7 @@ make_figure <- function(
           ggplot2::coord_sf(
             # xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
             # ylim = c(sf::st_bbox(grid_stations_plot)[c(2,4)])
-            ) 
+          ) 
         
         # if we are showing planned stations
         if (show_planned_stations) {
@@ -845,12 +844,14 @@ make_figure <- function(
         } else { # we are not showing planned stations
           gg <- gg +
             ggplot2::guides(
-              fill = guide_legend(ncol=2,  # tempartures # in case you want to have 2+ columns for the legend! 
+              fill = guide_legend(ncol = ifelse(file_end == "mean", 1, 2),  # tempartures # in case you want to have 2+ columns for the legend! 
+                                  title = ifelse(file_end == "mean", "Bottom\nTemperature\nMean", "Bottom Temperature\nMean"), 
                                   override.aes = list(colour = c("white"),
                                                       size = 0),
                                   order = 1),
               colour = guide_legend( # survey regions
                 order = 2, 
+                title = ifelse(file_end == "mean", "Bottom\nTemperature\nMean", "Bottom Temperature\nMean"), 
                 override.aes = list(fill = shp$survey.area$survey_reg_col))) 
         }
       }      
@@ -895,7 +896,7 @@ make_figure <- function(
           # xlim = c(sf::st_bbox(grid_stations_plot)[c(1,3)]),
           # ylim = c(sf::st_bbox(grid_stations_plot)$ymin-100000, # +ifelse(srvy == "AI", -100000, +50000),
           #          sf::st_bbox(grid_stations_plot)$ymax)
-          ) +
+        ) +
         # Survey area
         ggplot2::geom_sf(
           data = shp$survey.area, 
@@ -967,7 +968,7 @@ make_figure <- function(
                                     y = y, # ifelse(srvy %in% "AI", (y-25000), y), 
                                     label = lab), 
                               size = 4)
-          
+        
       } 
       
       if (file_end != 'grid') {
@@ -1054,17 +1055,17 @@ make_figure <- function(
         gg <- gg +
           ggplot2::annotate(
             geom = "text", 
-                            # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
-                            x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(srvy == "AI", .1, .15)),  # ifelse(srvy == "AI", .60, .15)
-                            y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(srvy == "AI", .2, .80)), 
-                            label = ifelse(is.na(max_date), 
-                                           "", 
-                                           ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
-                                                  paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
-                                                  paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
-                                                         " \u2013\n", 
-                                                         format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
-                            color = "black", size = 5, fontface=2) 
+            # x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], .15), 
+            x = quantile(sf::st_bbox(shp$survey.grid)[1]:sf::st_bbox(shp$survey.grid)[3], ifelse(srvy == "AI", .1, .15)),  # ifelse(srvy == "AI", .60, .15)
+            y = quantile(sf::st_bbox(shp$survey.grid)[2]:sf::st_bbox(shp$survey.grid)[4], ifelse(srvy == "AI", .2, .80)), 
+            label = ifelse(is.na(max_date), 
+                           "", 
+                           ifelse(min(as.Date(dat$date), na.rm = TRUE) == max_date,
+                                  paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d, %Y")), 
+                                  paste0(format(x = min(as.Date(dat_plot$date)+ifelse(show_planned_stations, 1, 0), na.rm = TRUE), "%b %d"), 
+                                         " \u2013\n", 
+                                         format(x = as.Date(max_date)+ifelse(show_planned_stations, 1, 0), format = "%b %d, %Y")))), 
+            color = "black", size = 5, fontface=2) 
       }
     }
     
@@ -1072,12 +1073,18 @@ make_figure <- function(
     
     gg <- ggdraw(gg) +
       draw_image(image = paste0(dir_wd, "www/noaa-fish-wide.png"), # "www/noaa-50th-logo.png"
-                 x = ifelse(srvy %in% c("BS") , .31, .37), # & file_end == "grid"
+                 x = dplyr::case_when(
+                   srvy %in% c("BS", "EBS", "NBS") & file_end == "grid" ~ .31, 
+                   srvy %in% c("BS", "EBS", "NBS") ~ .42, 
+                   srvy %in% c("GOA", "AI") ~ .37), # & file_end == "grid"
                  # y = ifelse(srvy %in% c("AI", "GOA") & file_end == "grid", .25, .32), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  y = dplyr::case_when(
+                   srvy %in% "AI"  & file_end == "grid" ~ .39, 
                    srvy %in% "AI"  ~ .35, 
                    srvy %in% "GOA" & file_end == "grid" ~ .33, 
                    srvy %in% "GOA" ~ .40, 
+                   srvy %in% "EBS" & file_end == "grid" ~ .46,
+                   srvy %in% "EBS" ~ .46,
                    srvy %in% c("BS") ~ .35, 
                    TRUE ~ .37), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  scale = .15 )
@@ -1315,13 +1322,13 @@ make_figure_gif<-function(file_end,
   temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
   temp <- temp[!grepl(pattern = "current", x = temp)]
   
-    temp_all <- as.Date(sort(sapply(temp,"[[",1)))
+  temp_all <- as.Date(sort(sapply(temp,"[[",1)))
   if (length(temp) != 0 & max_date != min(temp_all)) {
-      temp <- max(temp_all[as.Date(temp_all) < as.Date(max_date)])
-      img_gif <- c(list.files(path = dir_out, 
-                              pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
-                              full.names = TRUE), 
-                   imgs)
+    temp <- max(temp_all[as.Date(temp_all) < as.Date(max_date)])
+    img_gif <- c(list.files(path = dir_out, 
+                            pattern = paste0(as.character(temp), "_", file_end, ".gif"), 
+                            full.names = TRUE), 
+                 imgs)
     # }
   } else {
     img_gif <- c(imgs)

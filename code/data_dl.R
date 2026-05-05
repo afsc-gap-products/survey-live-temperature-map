@@ -74,7 +74,7 @@ if (file.exists("Z:/Projects/ConnectToOracle.R")) {
   channel <- channel
 } else { # For those without a ConnectToOracle file
   # # library(devtools)
-  # # devtools::install_github("afsc-gap-products/gapindex")
+  # # pak::pak("afsc-gap-products/gapindex")
   # library(gapindex)
   # channel <- gapindex::get_connected()
   
