@@ -219,19 +219,20 @@ dat_oracle <- read.csv(file = paste0(dir_wd, "/data/racebase_haul.csv")) |>
   ) |> 
   dplyr::select(-REGION) 
 
-if (istest & nrow(dat_race_data) == 0 & nrow(dat_googledrive) == 0){
+if (istest & nrow(dat_race_data) == 0 & nrow(dat_googledrive) == 0) {
   dat_oracle <- dat_oracle |> 
     dplyr::filter(year == maxyr-2) |> # typically true
     dplyr::mutate(year = maxyr, 
       cruise = as.numeric(paste0(maxyr, substr(start = 5, stop = 6, cruise))), 
-      date = as.Date(paste0(maxyr, "-", format(as.Date(date), format = "%m-%d"))) ) 
+      date = as.Date(paste0(maxyr, "-", format(as.Date(date), format = "%m-%d"))) ) |> 
+  dplyr::bind_rows(dat_oracle)
 }
 
-dat_oracle <- dat_oracle |> 
-  dplyr::filter(year == date_max) |> 
-  dplyr::left_join(gap_products_akfin_cruise0 |> 
-                     dplyr::select(vessel_id, vessel_name)  |> 
-                     dplyr::distinct())
+# dat_oracle <- dat_oracle |> 
+#   dplyr::filter(year == date_max) |> 
+#   dplyr::left_join(gap_products_akfin_cruise0 |> 
+#                      dplyr::select(vessel_id, vessel_name)  |> 
+#                      dplyr::distinct())
 
 dat_survey <- 
   # bind race_data and google drive data
@@ -246,8 +247,8 @@ if (nrow(dat_oracle)>0) {
 }
 
 dat_survey <- dat_survey |> 
-  dplyr::bind_rows(dat_oracle) |> 
-  dplyr::select(-srvy, -stratum) 
+  dplyr::bind_rows(dat_oracle) #|> 
+  # dplyr::select(-srvy, -stratum) 
 
 
 # make dummy stations
@@ -313,6 +314,48 @@ dat_survey <- race_data_cruises_mod0 |>
     " - ", 
     format(x = as.Date(date_end), "%b %d"))) |> 
   dplyr::ungroup() |>
-  dplyr::right_join(dat_survey) %>% 
+  dplyr::right_join(dat_survey) |> 
   dplyr::select(-stratum, -vessel_id) 
+
+library(purrr)
+
+dat_survey <- dat_survey |>
+  dplyr::group_by(station) |>
+  dplyr::mutate(
+    # Calculate historical mean for ST
+    mean_st = map_dbl(year, ~ {
+      prev_st_values <- st[year < .x]
+      if (length(na.omit(prev_st_values)) > 0) {
+        mean(prev_st_values, na.rm = TRUE)
+      } else {
+        NA_real_
+      }
+    }),
+    # Calculate historical mean for BT
+    mean_bt = map_dbl(year, ~ {
+      prev_bt_values <- bt[year < .x]
+      if (length(na.omit(prev_bt_values)) > 0) {
+        mean(prev_bt_values, na.rm = TRUE)
+      } else {
+        NA_real_
+      }
+    })
+  ) |>
+  # NEW STEP: If the mean is NA (first year), use the current year's value
+  dplyr::mutate(
+    mean_st = dplyr::coalesce(mean_st, st),
+    mean_bt = dplyr::coalesce(mean_bt, bt)
+  ) |>
+  dplyr::ungroup()
+
+
+# dat_survey |>
+#   select(station, year, bt, mean_bt) |>
+#   arrange(desc(year)) |>
+#   filter(station == "312-70") # Or any station you know has multi-year data
+
+# dat_survey |>
+#   select(station, year, bt, mean_bt) |>
+#   arrange(desc(year)) |>
+#   filter(station == "ZZ-22") # Or any station you know has multi-year data
 

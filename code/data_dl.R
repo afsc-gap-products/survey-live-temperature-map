@@ -146,7 +146,7 @@ race_data_cruises0 <-
     RODBC::sqlQuery(channel, "SELECT SURVEY_ID, SURVEY_DEFINITION_ID FROM RACE_DATA.SURVEYS;") )  |> 
   dplyr::left_join(
     RODBC::sqlQuery(channel, "SELECT VESSEL_ID, NAME AS VESSEL_NAME FROM RACE_DATA.VESSELS;") )  |> 
-  rename_all(tolower) %>% 
+  rename_all(tolower) |> 
   dplyr::mutate(survey_definition_id = ifelse(survey_definition_id == 39 & cruise == 202501, 47, survey_definition_id)) # TOLEDO
 
 write.csv(x = race_data_cruises0, file = paste0(dir_wd, "data/race_data_cruises_mod.csv"))

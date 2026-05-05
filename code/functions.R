@@ -157,7 +157,7 @@ make_varplot_wrapper <- function(
   anom_years <- dat_survey |>
     dplyr::select(
       srvy, year, station, date, survey, survey, survey_dates, # stratum, 
-      vessel_shape, vessel_name, vessel_ital, st, bt) |>
+      vessel_shape, vessel_name, vessel_ital, st, bt, mean_st, mean_bt) |>
     dplyr::distinct() |> 
     dplyr::filter(!(is.na(station)) &
                     year < maxyr &
@@ -176,8 +176,8 @@ make_varplot_wrapper <- function(
                     srvy %in% srvy1) |>
     dplyr::rename("var" = dplyr::all_of(var)) |>
     dplyr::group_by(srvy, station) |> # stratum, 
-    dplyr::summarise(mean = mean(var, na.rm = TRUE), 
-                     sd = sd(var, na.rm = TRUE)) # |> 
+    dplyr::summarise(#mean = mean(var, na.rm = TRUE), 
+      sd = sd(var, na.rm = TRUE)) # |> 
   # dplyr::full_join(
   #     dat_survey |> 
   #       dplyr::filter(srvy %in% srvy1) |>
@@ -812,7 +812,7 @@ make_figure <- function(
           #   labs <- sort(unique(dat_planned$lab))
           #   vess <- unique(dat_plot$vessel_name); vess <- vess[!is.na(vess)]
           # if (length(vess) == length(labs)) {
-          #   missing <- dat_plot %>% 
+          #   missing <- dat_plot |> 
           #     dplyr::filter(!is.na(station)) |>
           #     dplyr::filter(!(vessel_shape %in% valbreak)) |>
           #     head(1)
