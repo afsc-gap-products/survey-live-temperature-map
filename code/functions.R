@@ -515,7 +515,9 @@ make_figure <- function(
     date_entered <- sort(unique(dat$date))
     date_entered <- date_entered[!is.na(date_entered)]
     date_entered <- date_entered[which(date_entered <= max(dat$date[!is.na(dat$var)]))+1] # remove any date 2 days after the last temperature, such that only the next planned date shows. 
-    # date_entered <- c(min(date_entered),#-1, date_entered)
+    if (srvy %in% c("EBS", "NBS", "BS")){
+    date_entered <- c(min(date_entered)-1, date_entered)
+    }
     date_entered <- date_entered[!is.na(date_entered)]
     
     if (show_planned_stations & # TOLEDO
@@ -1213,11 +1215,11 @@ make_figure <- function(
     }
     
     ### GIF -------------------------------------------------------------------------
-    if (make_gifs) {
+    if (make_gifs) { # & length(iterate)>1 & i != iterate[1]
       message("Make GIF")
       filename1 <- c(filename1, 
-                     paste0(dir_out, filename0,'.gif'), 
-                     paste0(dir_out, filename0,'.mp4') )
+                     # paste0(dir_out, filename0,'.mp4'), 
+                     paste0(dir_out, filename0,'.gif') )
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
                       dir_out = dir_out, 
@@ -1322,8 +1324,11 @@ make_figure_gif<-function(file_end,
   
   temp <- strsplit(x = list.files(path = dir_out, pattern = paste0("_", file_end, ".gif")), split = "_")
   temp <- temp[!grepl(pattern = "current", x = temp)]
-  
-  temp_all <- as.Date(sort(sapply(temp,"[[",1)))
+  if(length(temp)>0){
+    temp_all <- as.Date(sort(sapply(temp,"[[",1)))
+  } else{
+    temp_all <- max_date
+  }
   if (length(temp) != 0 & max_date != min(temp_all)) {
     temp <- max(temp_all[as.Date(temp_all) < as.Date(max_date)])
     img_gif <- c(list.files(path = dir_out, 
@@ -1367,10 +1372,10 @@ make_figure_gif<-function(file_end,
   # !!! must install https://www.ffmpeg.org/download.html#build-windows
   
   # ## save to disk
-  magick::image_write(
-    image = img_animated,
-    path = paste0(dir_out, filename0, ".mp4"), 
-    format = "mp4")
+  # magick::image_write(
+  #   image = img_animated,
+  #   path = paste0(dir_out, filename0, ".mp4"), 
+  #   format = "mp4")
   
   # if (FALSE) { # backup
   # library("av") # doesn't work with task scheduler for some reason

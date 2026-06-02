@@ -174,7 +174,7 @@ dat_googledrive <- dat_googledrive  |>
 # prioritize data already in RACE_DATA
 if (nrow(dat_race_data) == 0) {
   dat_googledrive <- dat_googledrive |> 
-    dplyr::filter(date > as.Date(paste0(maxyr, "-12-31"))) |> 
+    dplyr::filter(date > as.Date(paste0(maxyr-1, "-12-31"))) |> 
     dplyr::mutate(vessel_name = as.character(vessel_name))
 } else {
   dat_googledrive <- 
@@ -240,11 +240,11 @@ dat_survey <-
     dat_race_data, 
     dat_googledrive)
 
-if (nrow(dat_oracle)>0) {
-  dat_survey <- dat_survey |> 
-    dplyr::filter(!(cruise %in% unique(dat_oracle$cruise)) & 
-                    !(survey_definition_id %in% unique(dat_oracle$survey_definition_id)))
-}
+# if (nrow(dat_oracle)>0) {
+#   dat_survey <- dat_survey |> 
+#     dplyr::filter(!(cruise %in% unique(dat_oracle$cruise)) & 
+#                     !(survey_definition_id %in% unique(dat_oracle$survey_definition_id)))
+# }
 
 dat_survey <- dat_survey |> 
   dplyr::bind_rows(dat_oracle) #|> 
