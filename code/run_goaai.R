@@ -37,7 +37,7 @@ dir_googledrive_upload_bs =
   ifelse(istest, 
          "https://drive.google.com/drive/folders/1iRGCznVxp-svhduUzXiNVMTUoMI6x45N",
          "https://drive.google.com/drive/folders/1xfrr8hTgk97KZUBlMOGjrMiCQuHu-m0y")
-dir_googledrive_upload_ai = 
+dir_googledrive_upload_goaai = 
   ifelse(istest, 
          "https://drive.google.com/drive/folders/1UmS2wGJvL02cmcWSb4YXO4qM3YHvC3FB", 
          "https://drive.google.com/drive/folders/11f61U0oAkGUAxb8f9DaNItHUkLYUsqo8")
@@ -68,7 +68,7 @@ source(file = paste0(dir_wd, "code/data.R"))
   
   srvy <- "AI"
   plot_subtitle <- "NOAA Fisheries Aleutian Islands Bottom Trawl Survey"
-  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_ai") & googledrive_dl, googledrive::as_id(dir_googledrive_upload_goaai), NULL)
+  dir_googledrive_upload <- ifelse(exists("dir_googledrive_upload_goaai") & googledrive_dl, googledrive::as_id(dir_googledrive_upload_goaai), NULL)
   show_planned_stations <- FALSE
   
   make_varplot_wrapper(maxyr = maxyr,
