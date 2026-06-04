@@ -21,10 +21,10 @@ dir_wd <- "Z:/Projects/survey-live-temperature-map_general/survey-live-temperatu
 istest <- FALSE
 maxyr <- 2026
 data_source <- c("gd", "race_data") # "gd" = google dirve, "oracle" 
-dates0 <-  "all" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
+dates0 <-  "latest" # "latest" # "all" # latest # "all", #"2021-06-05",# Sys.Date(), # as.character(seq(as.Date("2022-07-30"), as.Date("2022-08-14"), by="days"))
 
 # Full rerun schedule:
-if (format(Sys.Date(), format = "%A") %in% c("Sunday", "Tuesday", "Thursday") & 
+if (#format(Sys.Date(), format = "%A") %in% c("Sunday", "Tuesday", "Thursday") & 
     format(Sys.time(), format = "%H") %in% 2) { # maintenance cycle - make another task scheduler for this 
   dates0 <- "all"
 }

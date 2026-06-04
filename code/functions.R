@@ -1218,7 +1218,7 @@ make_figure <- function(
     if (make_gifs) { # & length(iterate)>1 & i != iterate[1]
       message("Make GIF")
       filename1 <- c(filename1, 
-                     # paste0(dir_out, filename0,'.mp4'), 
+                     paste0(dir_out, filename0,'.mp4'),
                      paste0(dir_out, filename0,'.gif') )
       make_figure_gif(file_end = file_end, 
                       max_date = max_date,
@@ -1371,11 +1371,11 @@ make_figure_gif<-function(file_end,
   # mp4 -----------------------------------------------------------------------
   # !!! must install https://www.ffmpeg.org/download.html#build-windows
   
-  # ## save to disk
-  # magick::image_write(
-  #   image = img_animated,
-  #   path = paste0(dir_out, filename0, ".mp4"), 
-  #   format = "mp4")
+  ## save to disk
+  magick::image_write(
+    image = img_animated,
+    path = paste0(dir_out, filename0, ".mp4"),
+    format = "mp4")
   
   # if (FALSE) { # backup
   # library("av") # doesn't work with task scheduler for some reason
