@@ -38,6 +38,8 @@ PKG <- c(
   "quarto",
   "tinytex", # tinytex::install_tinytex(); https://yihui.org/tinytex/
   
+  "pandoc",
+  
   "RODBC", 
   "RCurl" # for ftp connection
 )
@@ -51,6 +53,10 @@ for (p in PKG) {
     }
     require(p,character.only = TRUE)}
 }
+
+# pandoc::pandoc_install("latest")
+# pandoc::pandoc_activate("latest")
+
 
 # Functions --------------------------------------------------------------------
 
