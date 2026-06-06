@@ -1013,6 +1013,17 @@ make_figure <- function(
           grid_stations_plot_visited$geometry[[1]][1] <- 
             grid_stations_plot_visited$geometry[[1]][2] <- 1e12 # somewhere off the map
         }
+        names(var_color) <- var_labels
+        
+        # 1. Define a custom drawing function that maps the data fill to the key background
+        draw_key_custom <- function(data, params, size) {
+          grid::rectGrob(
+            gp = grid::gpar(
+              fill = data$fill,          # dynamically assigns point fill to key background
+              col = NA                   # removes any boundary outline lines
+            )
+          )
+        }
         
         gg <- gg +
           # allocated station grid
@@ -1026,34 +1037,38 @@ make_figure <- function(
           ggplot2::geom_sf(
             data = grid_stations_plot_visited,
             mapping = aes(geometry = geometry,
-                          fill = var_bin,
-                          color = var_bin), #na.rm = TRUE, 
-            # show.legend = legend_title, 
-            size = 3)  + 
-          ggplot2::scale_color_manual(
-            name = gsub(pattern = "\n", replacement = " ", x = legend_title), # "",
-            values = var_color,
-            labels = var_labels,
-            na.value = "grey70",
-            drop = FALSE
-          ) +
+                          fill = var_bin),  
+            shape = 21,
+            color = "transparent",
+            size = 3, 
+            key_glyph = draw_key_custom, 
+            show.legend = TRUE)  + 
           ggplot2::scale_fill_manual(
             name = gsub(pattern = "\n", replacement = " ", x = legend_title),
             values = var_color,
-            labels = var_labels,
+            labels = names(var_color),
             drop = FALSE, 
             na.value = "grey70" ) + #,
-          ggplot2::guides(colour = guide_legend(nrow = 1), 
-                          fill = guide_legend(nrow = 1)) +
-          # legend management
           ggplot2::theme(
+            legend.key = element_blank(),
+            # legend.key = element_rect(fill = NA, color = NA), # This forces the legend background keys to inherit the fill color of your data
             legend.direction = "horizontal", 
             legend.box = "horizontal", 
             legend.position = "bottom", 
             legend.text.position = "bottom", 
             legend.spacing.x = unit(.5, 'cm')) +
+          ggplot2::guides(#colour = guide_legend(nrow = 1), 
+                          fill = guide_legend(nrow = 1),
+              # draw_geom = "rect" forces ggplot to treat the legend key as a solid rectangle 
+              # rather than drawing a point glyph inside a box.
+              geom = "rect", 
+              override.aes = list(
+                fill = var_color, # Explicitly map the full color vector to the boxes
+                color = NA)        # Strips out any outline borders
+            ) +
           # fix extent
           ggplot2::coord_sf() 
+        
         
         # if (file_end %in% c("daily", "anom")) {
         gg <- gg +
@@ -1084,7 +1099,7 @@ make_figure <- function(
                  # y = ifelse(srvy %in% c("AI", "GOA") & file_end == "grid", .25, .32), # .38 # .43 # x = 0, y = 0, hjust = -4.12, vjust = -.45, width0 = .19
                  y = dplyr::case_when(
                    srvy %in% "AI"  & file_end == "grid" ~ .39, 
-                   srvy %in% "AI"  ~ .35, 
+                   srvy %in% "AI"  ~ .43, 
                    srvy %in% "GOA" & file_end == "grid" ~ .33, 
                    srvy %in% "GOA" ~ .40, 
                    srvy %in% "EBS" & file_end == "grid" ~ .46,
